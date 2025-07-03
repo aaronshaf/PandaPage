@@ -1,0 +1,6 @@
+{
+  "is-main": true,
+  "import": [
+    "ashafovaloff/pdf-parser/lib"
+  ]
+}

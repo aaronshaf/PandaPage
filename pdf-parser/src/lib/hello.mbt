@@ -114,16 +114,80 @@ fn extract_string_before_position(data: Array[Int], end_pos: Int) -> String {
   }
   
   if start_pos >= 0 && data[start_pos] == 40 {
-    // Extract characters between parentheses
+    // Extract string between parentheses
+    let mut hex_string = ""
     for j = start_pos + 1; j < end_pos; j = j + 1 {
       let char_code = data[j]
       if char_code >= 32 && char_code <= 126 { // Printable ASCII
-        result = result + Int::unsafe_to_char(char_code).to_string()
+        hex_string = hex_string + Int::unsafe_to_char(char_code).to_string()
       }
+    }
+    
+    // Check if it's a Unicode hex string (starts with FEFF)
+    if hex_string.has_prefix("FEFF") || hex_string.has_prefix("feff") {
+      result = decode_unicode_hex(hex_string)
+    } else {
+      result = hex_string
     }
   }
   
   result
+}
+
+// Decode Unicode hex string (FEFF0044 = 'D')
+fn decode_unicode_hex(hex_string: String) -> String {
+  let mut clean_hex = hex_string
+  
+  // Remove BOM if present
+  if clean_hex.has_prefix("FEFF") || clean_hex.has_prefix("feff") {
+    clean_hex = clean_hex.substring(start=4)
+  }
+  
+  let mut result = ""
+  let mut i = 0
+  
+  // Process each 4-character chunk as a UTF-16 code unit
+  while i + 3 < clean_hex.length() {
+    let hex_chunk = clean_hex.substring(start=i, end=i+4)
+    
+    // Convert hex to integer
+    match parse_hex(hex_chunk) {
+      Some(code_unit) => {
+        if code_unit > 0 && code_unit < 65536 {
+          result = result + Int::unsafe_to_char(code_unit).to_string()
+        }
+      }
+      None => ()
+    }
+    
+    i = i + 4
+  }
+  
+  result
+}
+
+// Parse hex string to integer using MoonBit's strconv
+fn parse_hex(hex: String) -> Option[Int] {
+  // MoonBit should have hex parsing in strconv
+  // For now, implement manually
+  let mut value = 0
+  
+  for i = 0; i < hex.length(); i = i + 1 {
+    let c = hex[i]
+    let digit = if c >= '0' && c <= '9' {
+      c.to_int() - '0'.to_int()
+    } else if c >= 'A' && c <= 'F' {
+      c.to_int() - 'A'.to_int() + 10
+    } else if c >= 'a' && c <= 'f' {
+      c.to_int() - 'a'.to_int() + 10
+    } else {
+      return None
+    }
+    
+    value = value * 16 + digit
+  }
+  
+  Some(value)
 }
 
 // Fallback text extraction - look for readable ASCII sequences

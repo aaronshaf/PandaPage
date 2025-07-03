@@ -44,7 +44,23 @@ function extractTextFromPDFJS(bytes) {
                 for (const match of textMatches) {
                     const text = match.match(/\\((.*?)\\)/);
                     if (text && text[1]) {
-                        extractedText += text[1] + ' ';
+                        // Check if it's Unicode hex string (starts with FEFF)
+                        if (text[1].match(/^(FEFF|feff)[0-9A-Fa-f]+$/)) {
+                            extractedText += decodeUnicodeHex(text[1]) + ' ';
+                        } else {
+                            extractedText += text[1] + ' ';
+                        }
+                    }
+                }
+            }
+            
+            // Also look for hex strings <FEFF...>
+            const hexMatches = block.match(/<([0-9A-Fa-f]+)>\\s*Tj/g);
+            if (hexMatches) {
+                for (const match of hexMatches) {
+                    const hex = match.match(/<([0-9A-Fa-f]+)>/);
+                    if (hex && hex[1]) {
+                        extractedText += decodeUnicodeHex(hex[1]) + ' ';
                     }
                 }
             }
@@ -60,7 +76,11 @@ function extractTextFromPDFJS(bytes) {
                         if (strings) {
                             for (const str of strings) {
                                 const cleanStr = str.replace(/[()]/g, '');
-                                extractedText += cleanStr + ' ';
+                                if (cleanStr.match(/^(FEFF|feff)[0-9A-Fa-f]+$/)) {
+                                    extractedText += decodeUnicodeHex(cleanStr) + ' ';
+                                } else {
+                                    extractedText += cleanStr + ' ';
+                                }
                             }
                         }
                     }
@@ -71,10 +91,20 @@ function extractTextFromPDFJS(bytes) {
     
     // Fallback: look for any readable text patterns
     if (!extractedText.trim()) {
-        // Find sequences of printable ASCII characters
-        const readableText = pdfString.match(/[a-zA-Z0-9\\s.,!?;:'"()-]{10,}/g);
-        if (readableText) {
-            extractedText = readableText.slice(0, 10).join('\\n');
+        // Look for Unicode hex strings in the PDF
+        const unicodeHexMatches = pdfString.match(/FEFF[0-9A-Fa-f]+/g);
+        if (unicodeHexMatches) {
+            for (const hex of unicodeHexMatches) {
+                extractedText += decodeUnicodeHex(hex) + ' ';
+            }
+        }
+        
+        // If still nothing, find sequences of printable ASCII characters
+        if (!extractedText.trim()) {
+            const readableText = pdfString.match(/[a-zA-Z0-9\\s.,!?;:'"()-]{10,}/g);
+            if (readableText) {
+                extractedText = readableText.slice(0, 10).join('\\n');
+            }
         }
     }
     
@@ -84,35 +114,51 @@ function extractTextFromPDFJS(bytes) {
         .trim();
 }
 
-async function parsePDF(pdfPath) {
+// Decode Unicode hex string (FEFF0044 = 'D')
+function decodeUnicodeHex(hexString) {
+    // Remove BOM if present
+    if (hexString.startsWith('FEFF') || hexString.startsWith('feff')) {
+        hexString = hexString.substring(4);
+    }
+    
+    let result = '';
+    // Process each 4-character chunk as a UTF-16 code unit
+    for (let i = 0; i < hexString.length; i += 4) {
+        const codeUnit = parseInt(hexString.substring(i, i + 4), 16);
+        if (!isNaN(codeUnit)) {
+            result += String.fromCharCode(codeUnit);
+        }
+    }
+    
+    return result;
+}
+
+async function parsePDF(pdfPath, debugMode = false) {
     try {
         // Read PDF file
         const pdfBytes = readFileSync(pdfPath);
         const byteArray = Array.from(pdfBytes);
-        
-        console.log(`📄 Processing: ${pdfPath} (${pdfBytes.length} bytes)`);
         
         // Load WASM module
         const wasmInstance = await loadWasmModule();
         
         let extractedText = '';
         let engine = '';
+        let wasmError = null;
         
         if (wasmInstance && wasmInstance.exports.extract_text_from_pdf) {
             try {
                 // Try WASM extraction
                 extractedText = wasmInstance.exports.extract_text_from_pdf(byteArray);
-                engine = '🦀 MoonBit WASM';
-                console.log('✅ WASM extraction successful');
-            } catch (wasmError) {
-                console.warn('⚠️ WASM extraction failed, falling back to JS:', wasmError.message);
+                engine = 'MoonBit WASM';
+            } catch (error) {
+                wasmError = error.message;
                 extractedText = extractTextFromPDFJS(pdfBytes);
-                engine = '📄 JavaScript Fallback';
+                engine = 'JavaScript Fallback';
             }
         } else {
-            console.warn('⚠️ WASM module not available, using JS fallback');
             extractedText = extractTextFromPDFJS(pdfBytes);
-            engine = '📄 JavaScript Fallback';
+            engine = 'JavaScript Fallback';
         }
         
         // Validate PDF
@@ -121,35 +167,113 @@ async function parsePDF(pdfPath) {
         const version = isValidPDF ? 
             `${String.fromCharCode(pdfBytes[5])}.${String.fromCharCode(pdfBytes[7])}` : 'Unknown';
         
-        console.log(`🔧 Engine: ${engine}`);
-        console.log(`📋 PDF Valid: ${isValidPDF ? '✅' : '❌'} | Version: ${version}`);
-        console.log(`📝 Extracted ${extractedText.length} characters`);
-        console.log('\\n' + '='.repeat(60));
-        console.log('MARKDOWN OUTPUT:');
-        console.log('='.repeat(60));
-        
-        if (extractedText.trim()) {
-            console.log(extractedText);
+        if (debugMode) {
+            // YAML debug output
+            console.log('---');
+            console.log('pdf_info:');
+            console.log(`  file: ${pdfPath}`);
+            console.log(`  size: ${pdfBytes.length}`);
+            console.log(`  valid: ${isValidPDF}`);
+            console.log(`  version: "${version}"`);
+            console.log('');
+            console.log('extraction:');
+            console.log(`  engine: "${engine}"`);
+            console.log(`  characters: ${extractedText.length}`);
+            if (wasmError) {
+                console.log(`  wasm_error: "${wasmError}"`);
+            }
+            console.log('');
+            console.log('objects:');
+            console.log(`  count: ${countPDFObjects(pdfBytes)}`);
+            console.log(`  streams: ${countPDFStreams(pdfBytes)}`);
+            console.log('');
+            console.log('header_bytes:');
+            console.log(`  - [${Array.from(pdfBytes.slice(0, 20)).join(', ')}]`);
+            console.log('');
+            console.log('markdown: |');
+            if (extractedText.trim()) {
+                extractedText.split('\n').forEach(line => {
+                    console.log('  ' + line);
+                });
+            } else {
+                console.log('  (No readable text found)');
+            }
+            console.log('...');
         } else {
-            console.log('(No readable text found)');
+            // Normal mode - just output markdown
+            if (extractedText.trim()) {
+                console.log(extractedText);
+            } else {
+                console.log('(No readable text found)');
+            }
         }
         
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        if (debugMode) {
+            console.log('---');
+            console.log('error:');
+            console.log(`  message: "${error.message}"`);
+            console.log(`  stack: |`);
+            error.stack.split('\n').forEach(line => {
+                console.log('    ' + line);
+            });
+            console.log('...');
+        } else {
+            console.error(`Error: ${error.message}`);
+        }
         process.exit(1);
     }
 }
 
+// Helper to count PDF objects
+function countPDFObjects(bytes) {
+    let count = 0;
+    const objPattern = [111, 98, 106]; // "obj" in ASCII
+    
+    for (let i = 0; i < bytes.length - 3; i++) {
+        if (bytes[i] === objPattern[0] && 
+            bytes[i + 1] === objPattern[1] && 
+            bytes[i + 2] === objPattern[2]) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Helper to count PDF streams
+function countPDFStreams(bytes) {
+    let count = 0;
+    const streamPattern = [115, 116, 114, 101, 97, 109]; // "stream" in ASCII
+    
+    for (let i = 0; i < bytes.length - 6; i++) {
+        if (bytes[i] === streamPattern[0] && 
+            bytes[i + 1] === streamPattern[1] && 
+            bytes[i + 2] === streamPattern[2] &&
+            bytes[i + 3] === streamPattern[3] &&
+            bytes[i + 4] === streamPattern[4] &&
+            bytes[i + 5] === streamPattern[5]) {
+            count++;
+        }
+    }
+    return count;
+}
+
 // CLI usage
-const pdfPath = process.argv[2];
+const args = process.argv.slice(2);
+const debugMode = args.includes('--debug');
+const pdfPath = args.find(arg => !arg.startsWith('--'));
 
 if (!pdfPath) {
-    console.log('Usage: bun parse-pdf.js <pdf-file>');
+    console.log('Usage: bun parse-pdf.js <pdf-file> [--debug]');
     console.log('');
     console.log('Examples:');
     console.log('  bun parse-pdf.js examples/sample1.pdf');
     console.log('  bun parse-pdf.js examples/sample2.pdf');
+    console.log('  bun parse-pdf.js examples/sample1.pdf --debug');
+    console.log('');
+    console.log('Options:');
+    console.log('  --debug    Output detailed YAML debugging information');
     process.exit(1);
 }
 
-parsePDF(resolve(pdfPath));
+parsePDF(resolve(pdfPath), debugMode);
