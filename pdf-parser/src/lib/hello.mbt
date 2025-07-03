@@ -30,15 +30,45 @@ pub fn extract_text_from_pdf(data: Array[Int]) -> String {
   // First, extract metadata for front matter
   let metadata = extract_pdf_metadata(data)
   
-  // First pass: collect all text blocks with positioning info
-  while i < data.length() - 1 {
-    if data[i] == 66 && data[i + 1] == 84 { // "BT" in ASCII
-      let text_block = extract_text_block_with_info(data, i)
-      if text_block.text != "" {
-        text_blocks.push(text_block)
+  // Look for content streams and decompress them
+  let content_streams = find_content_streams(data)
+  
+  // Process each content stream
+  for stream_info in content_streams {
+    match stream_info {
+      (stream_data, filter) => {
+        // Try to decompress the stream
+        let processed_data = match decompress_stream(stream_data, filter) {
+          Ok(decompressed) => decompressed
+          Err(_) => stream_data  // Use raw data if decompression fails
+        }
+        
+        // Extract text from the processed stream
+        let mut j = 0
+        while j < processed_data.length() - 1 {
+          if processed_data[j] == 66 && processed_data[j + 1] == 84 { // "BT" in ASCII
+            let text_block = extract_text_block_with_info(processed_data, j)
+            if text_block.text != "" {
+              text_blocks.push(text_block)
+            }
+          }
+          j = j + 1
+        }
       }
     }
-    i = i + 1
+  }
+  
+  // If no streams found, try direct extraction (for simple PDFs)
+  if content_streams.length() == 0 {
+    while i < data.length() - 1 {
+      if data[i] == 66 && data[i + 1] == 84 { // "BT" in ASCII
+        let text_block = extract_text_block_with_info(data, i)
+        if text_block.text != "" {
+          text_blocks.push(text_block)
+        }
+      }
+      i = i + 1
+    }
   }
   
   // Second pass: format as markdown
@@ -482,4 +512,26 @@ fn format_front_matter(metadata: PDFMetadata) -> String {
   front_matter = front_matter + "---\n"
   
   front_matter
+}
+
+// Find all content streams in the PDF
+fn find_content_streams(data: Array[Int]) -> Array[(Array[Int], StreamFilter)] {
+  let streams : Array[(Array[Int], StreamFilter)] = []
+  let mut i = 0
+  
+  while i < data.length() {
+    // Look for stream objects
+    match extract_stream_content(data, i) {
+      Ok((stream_data, filter)) => {
+        streams.push((stream_data, filter))
+        // Skip past this stream
+        i = i + stream_data.length() + 20  // Rough estimate
+      }
+      Err(_) => {
+        i = i + 1
+      }
+    }
+  }
+  
+  streams
 }
