@@ -70,8 +70,11 @@
     <div class="container">
         <div class="upload-section" id="upload-area">
             <h3>Test PDF Parsing</h3>
-            <button id="test-sample-btn" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px;">
+            <button id="test-sample1-btn" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
                 🔍 Parse Sample PDF (sample1.pdf)
+            </button>
+            <button id="test-sample2-btn" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px;">
+                📄 Parse Sample PDF (sample2.pdf)
             </button>
             <div style="margin: 20px 0; border-top: 1px solid #ccc; padding-top: 20px;">
                 <h4>Or Upload Your Own PDF</h4>
@@ -81,18 +84,27 @@
         </div>
         
         <div class="results">
-            <h3>Parsing Results</h3>
-            <div id="results">Ready to parse PDF files...</div>
+            <h3>PDF-to-Markdown Results</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; height: calc(100vh - 200px);">
+                <div style="display: flex; flex-direction: column;">
+                    <h4 style="margin: 0 0 10px 0; color: #6c757d;">📝 Raw Markdown</h4>
+                    <div id="results" style="flex: 1; white-space: pre-wrap; font-family: 'SF Mono', Monaco, monospace; font-size: 12px; line-height: 1.4; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; overflow-y: auto;">Ready to parse PDF files...</div>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <h4 style="margin: 0 0 10px 0; color: #28a745;">📖 Rendered Preview</h4>
+                    <div id="markdown-rendered" style="flex: 1; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; overflow-y: auto;">Ready to see rendered markdown...</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         let wasmModule = null;
         
-        // Load the WebAssembly module
+        // Load the WebAssembly module with exported functions
         async function loadWasm() {
             try {
-                console.log('Loading WASM module...');
+                console.log('Loading WASM module with exported functions...');
                 document.getElementById('results').textContent = 'Loading WebAssembly module...';
                 
                 const wasmResponse = await fetch('pdf-parser.wasm');
@@ -119,30 +131,33 @@
                 console.log('WASM module loaded successfully');
                 console.log('Available exports:', Object.keys(wasmModule.instance.exports));
                 
-                document.getElementById('results').textContent = 'Real WASM module loaded successfully!\nClick "Parse Sample PDF" to test with actual MoonBit parsing.\n\nAvailable functions: ' + Object.keys(wasmModule.instance.exports).join(', ');
+                document.getElementById('results').textContent = 'WASM module with exports loaded!\nClick "Parse Sample PDF" to test MoonBit functions.\n\nExported functions: ' + Object.keys(wasmModule.instance.exports).join(', ');
                 
                 return wasmModule;
             } catch (error) {
                 console.error('Failed to load WASM module:', error);
-                document.getElementById('results').innerHTML = `<span class="error">Failed to load WASM module: ${error.message}\nFalling back to JavaScript simulation.</span>`;
+                document.getElementById('results').innerHTML = `<span class="error">Failed to load WASM module: ${error.message}</span>`;
                 return null;
             }
         }
         
         // Load and parse the sample PDF
-        async function loadSamplePDF() {
+        async function loadSamplePDF(filename = 'sample1.pdf') {
             try {
-                document.getElementById('results').innerHTML = 'Loading sample PDF...';
-                const response = await fetch('examples/sample1.pdf');
+                document.getElementById('results').textContent = `Loading ${filename}...`;
+                document.getElementById('markdown-rendered').innerHTML = '<p><em>Loading...</em></p>';
+                
+                const response = await fetch(`examples/${filename}`);
                 if (!response.ok) {
-                    throw new Error(`Failed to load sample PDF: ${response.status}`);
+                    throw new Error(`Failed to load ${filename}: ${response.status}`);
                 }
                 const arrayBuffer = await response.arrayBuffer();
-                const file = new File([arrayBuffer], 'sample1.pdf', { type: 'application/pdf' });
+                const file = new File([arrayBuffer], filename, { type: 'application/pdf' });
                 await parsePDF(file);
             } catch (error) {
-                console.error('Error loading sample PDF:', error);
-                document.getElementById('results').innerHTML = `<span class="error">Error loading sample PDF: ${error.message}</span>`;
+                console.error(`Error loading ${filename}:`, error);
+                document.getElementById('results').textContent = `Error loading ${filename}: ${error.message}`;
+                document.getElementById('markdown-rendered').innerHTML = `<p class="error">Error: ${error.message}</p>`;
             }
         }
         
@@ -152,43 +167,35 @@
                 const arrayBuffer = await file.arrayBuffer();
                 const bytes = new Uint8Array(arrayBuffer);
                 
-                // Try to use WASM module if available
-                if (window.wasmInstance && window.wasmInstance.exports.test_wasm) {
+                let extractedText = '';
+                let wasmExtracted = false;
+                
+                // Try WASM extraction first if available
+                if (window.wasmInstance && window.wasmInstance.exports.js_extract_text_from_pdf) {
                     try {
-                        // Test simple WASM functions first
-                        const wasmTest = window.wasmInstance.exports.test_wasm();
-                        const parserInfo = window.wasmInstance.exports.get_parser_info();
-                        const addResult = window.wasmInstance.exports.test_numbers(10, 25);
-                        
-                        const results = `PDF File Analysis (via MoonBit WASM):
-Name: ${file.name}
-Size: ${file.size} bytes
-Type: ${file.type}
-
-✅ WASM Module Status:
-- ${wasmTest}
-- ${parserInfo}
-- Math test (10 + 25): ${addResult}
-
-Basic PDF Analysis:
-- File signature: ${bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 ? 'Valid PDF' : 'Invalid PDF'}
-- Version: ${String.fromCharCode(bytes[5])}.${String.fromCharCode(bytes[7])}
-- Objects found: ${findPDFObjects(bytes)}
-- Streams detected: ${findStreams(bytes)}
-
-🎯 Next: Implement PDF parsing in WASM`;
-                        
-                        document.getElementById('results').innerHTML = `<span class="success">${results}</span>`;
-                        return;
+                        // Convert Uint8Array to Array[Int] for WASM
+                        const byteArray = Array.from(bytes);
+                        extractedText = window.wasmInstance.exports.js_extract_text_from_pdf(byteArray);
+                        wasmExtracted = true;
+                        console.log('WASM text extraction successful');
                     } catch (wasmError) {
-                        console.error('WASM functions failed:', wasmError);
-                        document.getElementById('results').innerHTML = `<span class="error">WASM Error: ${wasmError.message}</span>`;
-                        return;
+                        console.warn('WASM extraction failed, falling back to JS:', wasmError);
+                        extractedText = extractTextFromPDF(bytes);
                     }
+                } else {
+                    // Fallback to JavaScript extraction
+                    extractedText = extractTextFromPDF(bytes);
                 }
                 
-                // WASM module not available - show error
-                document.getElementById('results').innerHTML = '<span class="error">❌ WebAssembly module not loaded. PDF parsing requires WASM.</span>';
+                const debugInfo = `📄 ${file.name} (${file.size} bytes) | ${wasmExtracted ? '🦀 WASM' : '📄 JS'} | PDF ${bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 ? '✅' : '❌'} v${String.fromCharCode(bytes[5])}.${String.fromCharCode(bytes[7])} | ${findPDFObjects(bytes)} objects | ${findStreams(bytes)} streams
+
+${extractedText || '(No readable text found)'}`;
+                
+                // Show markdown in raw output area
+                document.getElementById('results').textContent = debugInfo;
+                
+                // Render markdown in the preview area
+                renderMarkdownPreview(extractedText);
             } catch (error) {
                 console.error('Error parsing PDF:', error);
                 document.getElementById('results').innerHTML = `<span class="error">Error parsing PDF: ${error.message}</span>`;
@@ -228,8 +235,68 @@ Basic PDF Analysis:
             return count;
         }
         
+        // Simple text extraction from PDF bytes
+        function extractTextFromPDF(bytes) {
+            let extractedText = '';
+            
+            // Convert bytes to string to search for text patterns
+            const pdfString = new TextDecoder('latin1', { fatal: false }).decode(bytes);
+            
+            // Look for text between BT (begin text) and ET (end text) operators
+            const textBlocks = pdfString.match(/BT\s+.*?ET/gs);
+            
+            if (textBlocks) {
+                for (const block of textBlocks) {
+                    // Extract text from Tj and TJ operators (simplified)
+                    const textMatches = block.match(/\((.*?)\)\s*Tj/g);
+                    if (textMatches) {
+                        for (const match of textMatches) {
+                            const text = match.match(/\((.*?)\)/);
+                            if (text && text[1]) {
+                                extractedText += text[1] + ' ';
+                            }
+                        }
+                    }
+                    
+                    // Also look for array-based text positioning
+                    const arrayTextMatches = block.match(/\[(.*?)\]\s*TJ/g);
+                    if (arrayTextMatches) {
+                        for (const match of arrayTextMatches) {
+                            const content = match.match(/\[(.*?)\]/);
+                            if (content && content[1]) {
+                                // Extract strings from array (very basic)
+                                const strings = content[1].match(/\((.*?)\)/g);
+                                if (strings) {
+                                    for (const str of strings) {
+                                        const cleanStr = str.replace(/[()]/g, '');
+                                        extractedText += cleanStr + ' ';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Fallback: look for any readable text patterns
+            if (!extractedText.trim()) {
+                // Find sequences of printable ASCII characters
+                const readableText = pdfString.match(/[a-zA-Z0-9\s.,!?;:'"()-]{10,}/g);
+                if (readableText) {
+                    extractedText = readableText.slice(0, 10).join('\n');
+                }
+            }
+            
+            // Clean up the extracted text
+            return extractedText
+                .replace(/\s+/g, ' ')
+                .trim()
+                .substring(0, 2000); // Limit to first 2000 chars for display
+        }
+        
         // Sample PDF button handling
-        document.getElementById('test-sample-btn').addEventListener('click', loadSamplePDF);
+        document.getElementById('test-sample1-btn').addEventListener('click', () => loadSamplePDF('sample1.pdf'));
+        document.getElementById('test-sample2-btn').addEventListener('click', () => loadSamplePDF('sample2.pdf'));
         
         // File input handling
         document.getElementById('file-input').addEventListener('change', (event) => {
@@ -265,6 +332,33 @@ Basic PDF Analysis:
                 }
             }
         });
+        
+        // Render markdown as HTML
+        function renderMarkdownPreview(markdownText) {
+            if (!markdownText || markdownText.trim() === '') {
+                document.getElementById('markdown-rendered').innerHTML = '<p><em>No markdown content to render</em></p>';
+                return;
+            }
+            
+            // Simple markdown to HTML conversion
+            let html = markdownText
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                .replace(/\n\n/gim, '</p><p>')
+                .replace(/\n/gim, '<br>');
+            
+            // Wrap in paragraphs
+            if (!html.startsWith('<h') && !html.startsWith('<p>')) {
+                html = '<p>' + html + '</p>';
+            }
+            
+            document.getElementById('markdown-rendered').innerHTML = html;
+        }
+        
+        // No toggle needed - both views are always visible
         
         // Initialize
         loadWasm();

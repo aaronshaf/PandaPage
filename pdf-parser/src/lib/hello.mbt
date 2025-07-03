@@ -1,4 +1,5 @@
-// Simple WASM exports - will be called through main
+// PDF text extraction functions for WASM
+
 pub fn test_wasm() -> String {
   "WASM is working! 🎉"
 }
@@ -9,6 +10,219 @@ pub fn test_numbers(a: Int, b: Int) -> Int {
 
 pub fn get_parser_info() -> String {
   "PDFWasm Parser v0.1.0 - MoonBit + WebAssembly"
+}
+
+// Extract text from PDF byte array and format as Markdown
+pub fn extract_text_from_pdf(data: Array[Int]) -> String {
+  let mut markdown_text = ""
+  let mut i = 0
+  let text_blocks : Array[TextBlock] = []
+  
+  // First pass: collect all text blocks with positioning info
+  while i < data.length() - 1 {
+    if data[i] == 66 && data[i + 1] == 84 { // "BT" in ASCII
+      let text_block = extract_text_block_with_info(data, i)
+      if text_block.text != "" {
+        text_blocks.push(text_block)
+      }
+    }
+    i = i + 1
+  }
+  
+  // Second pass: format as markdown
+  markdown_text = format_as_markdown(text_blocks)
+  
+  if markdown_text == "" {
+    markdown_text = extract_fallback_text(data)
+  }
+  
+  if markdown_text.length() > 3000 {
+    markdown_text.substring(start=0, end=3000)
+  } else {
+    markdown_text
+  }
+}
+
+// Text block with positioning and font info
+struct TextBlock {
+  text: String
+  font_size: Double
+  x_pos: Double
+  y_pos: Double
+  is_bold: Bool
+}
+
+// Extract text block with positioning and font information
+fn extract_text_block_with_info(data: Array[Int], start: Int) -> TextBlock {
+  let mut text = ""
+  let font_size = 12.0
+  let x_pos = 0.0
+  let y_pos = 0.0
+  let is_bold = false
+  let mut i = start
+  
+  // Look for font size commands (e.g., "/F1 24 Tf")
+  while i < data.length() - 10 {
+    // Look for "ET" (End Text) to stop
+    if data[i] == 69 && data[i + 1] == 84 {
+      break
+    }
+    
+    // Look for font size pattern: number followed by "Tf"
+    if i + 2 < data.length() && data[i + 1] == 84 && data[i + 2] == 102 { // "Tf"
+      // font_size = extract_font_size_before(data, i) // Skip for now
+    }
+    
+    // Look for text positioning "Td" command
+    if i + 1 < data.length() && data[i] == 84 && data[i + 1] == 100 { // "Td"
+      // let pos = extract_position_before(data, i) // Skip for now
+      // x_pos = pos.0
+      // y_pos = pos.1
+    }
+    
+    // Look for ")" followed by "Tj" pattern
+    if data[i] == 41 && i + 2 < data.length() && 
+       data[i + 1] == 84 && data[i + 2] == 106 { // ")Tj"
+      
+      // Extract text before this point
+      let extracted = extract_string_before_position(data, i)
+      if extracted != "" {
+        text = text + extracted + " "
+      }
+    }
+    
+    i = i + 1
+  }
+  
+  { text, font_size, x_pos, y_pos, is_bold }
+}
+
+// Extract text from a BT...ET block (legacy function)
+fn extract_text_block(data: Array[Int], start: Int) -> String {
+  let block = extract_text_block_with_info(data, start)
+  block.text
+}
+
+// Extract string content before a given position (look backwards for opening parenthesis)
+fn extract_string_before_position(data: Array[Int], end_pos: Int) -> String {
+  let mut start_pos = end_pos - 1
+  let mut result = ""
+  
+  // Find opening parenthesis
+  while start_pos >= 0 && data[start_pos] != 40 { // "(" in ASCII
+    start_pos = start_pos - 1
+  }
+  
+  if start_pos >= 0 && data[start_pos] == 40 {
+    // Extract characters between parentheses
+    for j = start_pos + 1; j < end_pos; j = j + 1 {
+      let char_code = data[j]
+      if char_code >= 32 && char_code <= 126 { // Printable ASCII
+        result = result + Int::unsafe_to_char(char_code).to_string()
+      }
+    }
+  }
+  
+  result
+}
+
+// Fallback text extraction - look for readable ASCII sequences
+fn extract_fallback_text(data: Array[Int]) -> String {
+  let mut text = ""
+  let mut current_word = ""
+  
+  for i = 0; i < data.length(); i = i + 1 {
+    let byte = data[i]
+    
+    if byte >= 32 && byte <= 126 { // Printable ASCII
+      current_word = current_word + Int::unsafe_to_char(byte).to_string()
+    } else {
+      if current_word.length() >= 3 { // Only keep words with 3+ chars
+        text = text + current_word + " "
+      }
+      current_word = ""
+    }
+    
+    if text.length() > 1500 { // Limit fallback extraction
+      break
+    }
+  }
+  
+  text
+}
+
+// Format text blocks as markdown
+fn format_as_markdown(blocks: Array[TextBlock]) -> String {
+  let mut markdown = ""
+  let mut current_paragraph = ""
+  
+  for i = 0; i < blocks.length(); i = i + 1 {
+    let block = blocks[i]
+    let text = block.text
+    
+    if text != "" {
+      // For now, treat all text as paragraphs
+      // TODO: Add heading detection based on font size
+      if current_paragraph == "" {
+        current_paragraph = text + " "
+      } else {
+        current_paragraph = current_paragraph + text + " "
+      }
+      
+      // Add paragraph breaks every few text blocks for readability
+      if i % 5 == 4 && current_paragraph != "" {
+        markdown = markdown + current_paragraph + "\n\n"
+        current_paragraph = ""
+      }
+    }
+  }
+  
+  // Flush final paragraph
+  if current_paragraph != "" {
+    markdown = markdown + current_paragraph + "\n\n"
+  }
+  
+  markdown
+}
+
+// Extract font size from bytes before a position
+fn extract_font_size_before(data: Array[Int], pos: Int) -> Double {
+  let mut i = pos - 1
+  let mut size_str = ""
+  
+  // Look backwards for space, then collect digits
+  while i >= 0 && data[i] != 32 { // space
+    i = i - 1
+  }
+  
+  if i >= 0 {
+    i = i + 1
+    while i < pos && data[i] >= 48 && data[i] <= 57 { // digits 0-9
+      size_str = size_str + Int::unsafe_to_char(data[i]).to_string()
+      i = i + 1
+    }
+  }
+  
+  if size_str != "" {
+    // Simple string to double conversion for basic sizes
+    match size_str {
+      "24" => 24.0
+      "18" => 18.0
+      "16" => 16.0
+      "14" => 14.0
+      "12" => 12.0
+      "10" => 10.0
+      _ => 12.0
+    }
+  } else {
+    12.0
+  }
+}
+
+// Extract position coordinates before a Td command
+fn extract_position_before(data: Array[Int], pos: Int) -> (Double, Double) {
+  // Simplified - just return default positions for now
+  (0.0, 0.0)
 }
 
 // Helper function to find streams
