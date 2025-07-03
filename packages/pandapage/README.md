@@ -1,4 +1,4 @@
-# pandapage
+# pdf-to-markdown
 
 To install dependencies:
 

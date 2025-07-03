@@ -1,0 +1,21 @@
+{
+  "name": "@pandapage/pandapage",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "bun run index.ts",
+    "build": "bun build ./index.ts --outdir ./dist --target node",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@effect/schema": "^0.75.5",
+    "effect": "^3.16.12"
+  }
+}
