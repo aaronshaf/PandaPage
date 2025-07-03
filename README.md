@@ -1,5 +1,8 @@
 # PDF.js WASM Rewrite
 
+[![CI](https://github.com/ashafovaloff/PDFWasm/actions/workflows/ci.yml/badge.svg)](https://github.com/ashafovaloff/PDFWasm/actions/workflows/ci.yml)
+[![Pre-merge Checks](https://github.com/ashafovaloff/PDFWasm/actions/workflows/pre-merge.yml/badge.svg)](https://github.com/ashafovaloff/PDFWasm/actions/workflows/pre-merge.yml)
+
 **⚠️ ALPHA / WORK IN PROGRESS ⚠️**
 
 An experimental PDF parser and renderer built with MoonBit and WebAssembly. This project is in early development and demonstrates the feasibility of a PDF.js alternative using modern web technologies.

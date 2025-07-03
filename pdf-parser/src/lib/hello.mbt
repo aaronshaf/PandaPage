@@ -12,11 +12,23 @@ pub fn get_parser_info() -> String {
   "PDFWasm Parser v0.1.0 - MoonBit + WebAssembly"
 }
 
+// PDF metadata structure
+struct PDFMetadata {
+  title: String
+  author: String
+  creation_date: String
+  producer: String
+  creator: String
+}
+
 // Extract text from PDF byte array and format as Markdown
 pub fn extract_text_from_pdf(data: Array[Int]) -> String {
   let mut markdown_text = ""
   let mut i = 0
   let text_blocks : Array[TextBlock] = []
+  
+  // First, extract metadata for front matter
+  let metadata = extract_pdf_metadata(data)
   
   // First pass: collect all text blocks with positioning info
   while i < data.length() - 1 {
@@ -34,6 +46,12 @@ pub fn extract_text_from_pdf(data: Array[Int]) -> String {
   
   if markdown_text == "" {
     markdown_text = extract_fallback_text(data)
+  }
+  
+  // Add front matter if we have metadata
+  if metadata.title != "" || metadata.author != "" || metadata.creation_date != "" {
+    let front_matter = format_front_matter(metadata)
+    markdown_text = front_matter + "\n" + markdown_text
   }
   
   if markdown_text.length() > 3000 {
@@ -59,10 +77,10 @@ fn extract_text_block_with_info(data: Array[Int], start: Int) -> TextBlock {
   let x_pos = 0.0
   let y_pos = 0.0
   let is_bold = false
-  let mut i = start
+  let mut i = start + 2  // Skip past "BT"
   
   // Look for font size commands (e.g., "/F1 24 Tf")
-  while i < data.length() - 10 {
+  while i < data.length() - 2 {
     // Look for "ET" (End Text) to stop
     if data[i] == 69 && data[i + 1] == 84 {
       break
@@ -135,7 +153,7 @@ fn extract_string_before_position(data: Array[Int], end_pos: Int) -> String {
 }
 
 // Decode Unicode hex string (FEFF0044 = 'D')
-fn decode_unicode_hex(hex_string: String) -> String {
+pub fn decode_unicode_hex(hex_string: String) -> String {
   let mut clean_hex = hex_string
   
   // Remove BOM if present
@@ -173,7 +191,8 @@ fn parse_hex(hex: String) -> Option[Int] {
   let mut value = 0
   
   for i = 0; i < hex.length(); i = i + 1 {
-    let c = hex[i]
+    let c_code = hex.charcode_at(i)
+    let c = Int::unsafe_to_char(c_code)
     let digit = if c >= '0' && c <= '9' {
       c.to_int() - '0'.to_int()
     } else if c >= 'A' && c <= 'F' {
@@ -306,4 +325,161 @@ fn find_pdf_streams(data: Array[Int]) -> Int {
   }
   
   count
+}
+
+// Extract PDF metadata from Info dictionary
+fn extract_pdf_metadata(data: Array[Int]) -> PDFMetadata {
+  let mut title = ""
+  let mut author = ""
+  let mut creation_date = ""
+  let mut producer = ""
+  let mut creator = ""
+  
+  // Look for common metadata patterns
+  // /Title<FEFF...>, /Author<FEFF...>, etc.
+  let mut i = 0
+  while i < data.length() - 10 {
+    // Check for /Title
+    if data[i] == 47 && data[i + 1] == 84 && data[i + 2] == 105 && 
+       data[i + 3] == 116 && data[i + 4] == 108 && data[i + 5] == 101 { // "/Title"
+      title = extract_metadata_value(data, i + 6)
+    }
+    
+    // Check for /Author  
+    if data[i] == 47 && data[i + 1] == 65 && data[i + 2] == 117 && 
+       data[i + 3] == 116 && data[i + 4] == 104 && data[i + 5] == 111 && 
+       data[i + 6] == 114 { // "/Author"
+      author = extract_metadata_value(data, i + 7)
+    }
+    
+    // Check for /Creator
+    if data[i] == 47 && data[i + 1] == 67 && data[i + 2] == 114 && 
+       data[i + 3] == 101 && data[i + 4] == 97 && data[i + 5] == 116 && 
+       data[i + 6] == 111 && data[i + 7] == 114 { // "/Creator"
+      creator = extract_metadata_value(data, i + 8)
+    }
+    
+    // Check for /Producer
+    if data[i] == 47 && data[i + 1] == 80 && data[i + 2] == 114 && 
+       data[i + 3] == 111 && data[i + 4] == 100 && data[i + 5] == 117 && 
+       data[i + 6] == 99 && data[i + 7] == 101 && data[i + 8] == 114 { // "/Producer"
+      producer = extract_metadata_value(data, i + 9)
+    }
+    
+    // Check for /CreationDate
+    if data[i] == 47 && data[i + 1] == 67 && data[i + 2] == 114 && 
+       data[i + 3] == 101 && data[i + 4] == 97 && data[i + 5] == 116 && 
+       data[i + 6] == 105 && data[i + 7] == 111 && data[i + 8] == 110 { // "/Creation"
+      creation_date = extract_metadata_date(data, i + 13)
+    }
+    
+    i = i + 1
+  }
+  
+  { title, author, creation_date, producer, creator }
+}
+
+// Extract metadata value after a field name
+fn extract_metadata_value(data: Array[Int], start: Int) -> String {
+  let mut i = start
+  
+  // Skip whitespace
+  while i < data.length() && data[i] == 32 {
+    i = i + 1
+  }
+  
+  if i < data.length() && data[i] == 60 { // '<' for hex string
+    i = i + 1
+    let mut hex_str = ""
+    
+    // Collect hex characters until '>'
+    while i < data.length() && data[i] != 62 { // '>'
+      hex_str = hex_str + Int::unsafe_to_char(data[i]).to_string()
+      i = i + 1
+    }
+    
+    // Check if it's Unicode hex
+    if hex_str.has_prefix("FEFF") || hex_str.has_prefix("feff") {
+      decode_unicode_hex(hex_str)
+    } else {
+      hex_str
+    }
+  } else if i < data.length() && data[i] == 40 { // '(' for literal string
+    i = i + 1
+    let mut str_val = ""
+    
+    // Collect characters until ')'
+    while i < data.length() && data[i] != 41 { // ')'
+      str_val = str_val + Int::unsafe_to_char(data[i]).to_string()
+      i = i + 1
+    }
+    
+    str_val
+  } else {
+    ""
+  }
+}
+
+// Extract date value
+fn extract_metadata_date(data: Array[Int], start: Int) -> String {
+  let mut i = start
+  
+  // Skip whitespace
+  while i < data.length() && data[i] == 32 {
+    i = i + 1
+  }
+  
+  if i < data.length() && data[i] == 40 { // '(' for date string
+    i = i + 1
+    let mut date_str = ""
+    
+    // Collect characters until ')'
+    while i < data.length() && data[i] != 41 { // ')'
+      if data[i] >= 32 && data[i] <= 126 {
+        date_str = date_str + Int::unsafe_to_char(data[i]).to_string()
+      }
+      i = i + 1
+    }
+    
+    // Format PDF date (D:YYYYMMDDHHmmSSOHH'mm') to readable format
+    if date_str.has_prefix("D:") && date_str.length() >= 10 {
+      let year = date_str.substring(start=2, end=6)
+      let month = date_str.substring(start=6, end=8)
+      let day = date_str.substring(start=8, end=10)
+      year + "-" + month + "-" + day
+    } else {
+      date_str
+    }
+  } else {
+    ""
+  }
+}
+
+// Format metadata as YAML front matter
+fn format_front_matter(metadata: PDFMetadata) -> String {
+  let mut front_matter = "---\n"
+  
+  if metadata.title != "" {
+    front_matter = front_matter + "title: \"" + metadata.title + "\"\n"
+  }
+  
+  if metadata.author != "" {
+    front_matter = front_matter + "author: \"" + metadata.author + "\"\n"
+  }
+  
+  if metadata.creation_date != "" {
+    front_matter = front_matter + "date: \"" + metadata.creation_date + "\"\n"
+  }
+  
+  if metadata.creator != "" {
+    front_matter = front_matter + "generator: \"" + metadata.creator + "\"\n"
+  }
+  
+  if metadata.producer != "" {
+    front_matter = front_matter + "pdf_producer: \"" + metadata.producer + "\"\n"
+  }
+  
+  front_matter = front_matter + "---\n"
+  
+  front_matter
 }

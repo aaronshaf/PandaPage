@@ -103,3 +103,30 @@ The PDF parsing is built around a type-safe representation:
 - Error handling with `Result[T, E]` types
 - Array/Map collections with functional methods
 - WASM exports must be properly typed for JavaScript interop
+- Language reference available at: https://www.moonbitlang.com/llms.txt
+
+### Common MoonBit Syntax Updates
+- `starts_with()` deprecated → use `has_prefix()`
+- `Char::from_int()` deprecated → use `Int::unsafe_to_char()`
+- `substring(0, 2000)` → use `substring(start=0, end=2000)`
+- `string[i]` deprecated → use `string.charcode_at(i)` then `Int::unsafe_to_char()`
+- `None => {}` → use `None => ()` (empty tuple for unit type)
+- `!condition` → use `condition == false` or `condition.not()`
+
+## Testing Notes
+
+### Running Tests
+- `moon test` - Run all tests in the project
+- Test files must end with `_test.mbt`
+- Use `@lib.function_name` to call functions from the library module
+- Tests use `test "name" { ... }` syntax
+- Use `fail("message")` to fail a test with a message
+
+### PDF Structure Reality
+- Real PDFs often use glyph IDs in content streams, not direct Unicode
+- Unicode text is typically found in:
+  - ToUnicode CMaps for font mappings
+  - Document metadata (Title, Author, etc.)
+  - Outline/bookmark entries
+- Our text extraction handles both direct text and Unicode hex strings
+- Unicode hex strings start with BOM (FEFF) followed by UTF-16 BE hex pairs

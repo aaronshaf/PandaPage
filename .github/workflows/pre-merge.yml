@@ -1,0 +1,49 @@
+name: Pre-merge Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'pdf-parser/**'
+      - '.github/workflows/pre-merge.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install MoonBit
+      run: |
+        curl -fsSL https://www.moonbitlang.com/install/unix.sh | bash
+        echo "$HOME/.moon/bin" >> $GITHUB_PATH
+    
+    - name: Verify MoonBit installation
+      run: moon version
+    
+    - name: Build PDF parser
+      working-directory: ./pdf-parser
+      run: |
+        moon build --target wasm-gc
+        moon build --target js
+    
+    - name: Run tests
+      working-directory: ./pdf-parser
+      run: moon test
+    
+    - name: Check formatting
+      working-directory: ./pdf-parser
+      run: moon fmt --check
+    
+    - name: Type check
+      working-directory: ./pdf-parser
+      run: moon check
+    
+    - name: Build artifacts exist
+      run: |
+        test -f pdf-parser/target/wasm-gc/release/build/main/main.wasm || exit 1
+        echo "✓ WASM build successful"
+        test -f pdf-parser/target/js/release/build/main/main.js || exit 1
+        echo "✓ JS build successful"

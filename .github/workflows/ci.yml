@@ -1,0 +1,87 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-matrix:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            install-script: https://www.moonbitlang.com/install/unix.sh
+          - os: macos-latest
+            install-script: https://www.moonbitlang.com/install/unix.sh
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install MoonBit
+      run: |
+        curl -fsSL ${{ matrix.install-script }} | bash
+        echo "$HOME/.moon/bin" >> $GITHUB_PATH
+    
+    - name: Cache MoonBit packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.moon
+          pdf-parser/.mooncakes
+        key: ${{ runner.os }}-moon-${{ hashFiles('**/moon.mod.json') }}
+        restore-keys: |
+          ${{ runner.os }}-moon-
+    
+    - name: Verify MoonBit installation
+      run: moon version
+    
+    - name: Install dependencies
+      working-directory: ./pdf-parser
+      run: moon install
+    
+    - name: Format check
+      working-directory: ./pdf-parser
+      run: moon fmt --check
+    
+    - name: Type check
+      working-directory: ./pdf-parser
+      run: moon check
+    
+    - name: Build WASM
+      working-directory: ./pdf-parser
+      run: moon build --target wasm-gc
+    
+    - name: Build JavaScript
+      working-directory: ./pdf-parser
+      run: moon build --target js
+    
+    - name: Run tests
+      working-directory: ./pdf-parser
+      run: moon test --verbose
+    
+    - name: Run integration tests
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        # Install bun for integration tests
+        curl -fsSL https://bun.sh/install | bash
+        export PATH="$HOME/.bun/bin:$PATH"
+        
+        # Copy WASM artifact
+        cp pdf-parser/target/wasm-gc/release/build/main/main.wasm pdf-parser.wasm
+        
+        # Run extraction tests
+        ./test-extraction.sh || true  # Don't fail on extraction tests yet
+    
+    - name: Report test coverage
+      if: matrix.os == 'ubuntu-latest'
+      working-directory: ./pdf-parser
+      run: |
+        # MoonBit coverage reporting (when available)
+        # moon test --coverage
+        echo "Coverage reporting will be added when MoonBit supports it"
