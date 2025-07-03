@@ -57,13 +57,30 @@ The PDF parsing is built around a type-safe representation:
 - Library package: `ashafovaloff/pdf-parser/lib` (contains core logic)
 - Main package: `ashafovaloff/pdf-parser/main` (imports lib, provides executable)
 
+## Technology Stack & Architecture Goals
+
+### Core Technologies
+- **WebAssembly (WASM-GC)**: Primary execution target for PDF parsing
+- **Web Workers**: Background processing to avoid UI blocking
+- **SharedArrayBuffer**: Zero-copy data sharing between threads for large PDFs
+- **OffscreenCanvas**: GPU-accelerated rendering for smooth performance
+- **Streaming & Progressive Loading**: Handle large PDF files incrementally
+
+### Planned Viewing Modes
+- **Canvas Mode**: Traditional paginated PDF rendering (desktop-optimized)
+- **PDF-to-Markdown Mode**: Text-based view for mobile devices and accessibility
+- **Hybrid Mode**: Adaptive rendering based on device capabilities
+
 ## Current Implementation Status
 
 - ✅ PDF header parsing and validation
 - ✅ Basic object detection in PDF streams  
 - ✅ WebAssembly compilation pipeline
-- ✅ Browser demo interface
-- 🚧 Full PDF object parsing, content streams, rendering (roadmap items)
+- ✅ Browser demo interface with WASM loading
+- 🚧 WASM data passing (debugging needed)
+- 🚧 Web Worker integration
+- 🚧 OffscreenCanvas rendering
+- 🚧 Streaming parser architecture
 
 ## MoonBit Language Notes
 
@@ -72,3 +89,4 @@ The PDF parsing is built around a type-safe representation:
 - Pattern matching with `match` expressions
 - Error handling with `Result[T, E]` types
 - Array/Map collections with functional methods
+- WASM exports must be properly typed for JavaScript interop

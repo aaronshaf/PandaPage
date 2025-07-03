@@ -117,7 +117,9 @@
                 window.wasmInstance = wasmModule.instance;
                 
                 console.log('WASM module loaded successfully');
-                document.getElementById('results').textContent = 'Real WASM module loaded successfully!\nClick "Parse Sample PDF" to test with actual MoonBit parsing.';
+                console.log('Available exports:', Object.keys(wasmModule.instance.exports));
+                
+                document.getElementById('results').textContent = 'Real WASM module loaded successfully!\nClick "Parse Sample PDF" to test with actual MoonBit parsing.\n\nAvailable functions: ' + Object.keys(wasmModule.instance.exports).join(', ');
                 
                 return wasmModule;
             } catch (error) {
@@ -151,54 +153,42 @@
                 const bytes = new Uint8Array(arrayBuffer);
                 
                 // Try to use WASM module if available
-                if (window.wasmInstance && window.wasmInstance.exports.analyze_pdf) {
+                if (window.wasmInstance && window.wasmInstance.exports.test_wasm) {
                     try {
-                        // Convert bytes to Int32Array for MoonBit
-                        const intArray = Array.from(bytes);
-                        
-                        // Call the WASM function (note: this is simplified, real implementation would need proper memory management)
-                        const wasmResult = window.wasmInstance.exports.analyze_pdf(intArray);
-                        
-                        const analysis = JSON.parse(wasmResult);
+                        // Test simple WASM functions first
+                        const wasmTest = window.wasmInstance.exports.test_wasm();
+                        const parserInfo = window.wasmInstance.exports.get_parser_info();
+                        const addResult = window.wasmInstance.exports.test_numbers(10, 25);
                         
                         const results = `PDF File Analysis (via MoonBit WASM):
 Name: ${file.name}
 Size: ${file.size} bytes
 Type: ${file.type}
 
-WASM Analysis Results:
-- Valid PDF: ${analysis.valid}
-- Version: ${analysis.version || 'N/A'}
-- Objects found: ${analysis.objects || 0}
-- Streams detected: ${analysis.streams || 0}
-- Data size processed: ${analysis.size || 0} bytes
+✅ WASM Module Status:
+- ${wasmTest}
+- ${parserInfo}
+- Math test (10 + 25): ${addResult}
 
-✅ Powered by MoonBit WebAssembly!`;
+Basic PDF Analysis:
+- File signature: ${bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 ? 'Valid PDF' : 'Invalid PDF'}
+- Version: ${String.fromCharCode(bytes[5])}.${String.fromCharCode(bytes[7])}
+- Objects found: ${findPDFObjects(bytes)}
+- Streams detected: ${findStreams(bytes)}
+
+🎯 Next: Implement PDF parsing in WASM`;
                         
                         document.getElementById('results').innerHTML = `<span class="success">${results}</span>`;
                         return;
                     } catch (wasmError) {
-                        console.warn('WASM parsing failed, falling back to JS:', wasmError);
+                        console.error('WASM functions failed:', wasmError);
+                        document.getElementById('results').innerHTML = `<span class="error">WASM Error: ${wasmError.message}</span>`;
+                        return;
                     }
                 }
                 
-                // Fallback to JavaScript simulation
-                const results = `PDF File Analysis (JavaScript Fallback):
-Name: ${file.name}
-Size: ${file.size} bytes
-Type: ${file.type}
-
-Header Analysis:
-- File signature: ${bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 ? 'Valid PDF' : 'Invalid PDF'}
-- Version: ${String.fromCharCode(bytes[5])}.${String.fromCharCode(bytes[7])} (detected from header)
-
-Object Analysis:
-- Objects found: ${findPDFObjects(bytes)}
-- Streams detected: ${findStreams(bytes)}
-
-⚠️ Using JavaScript simulation (WASM not available)`;
-                
-                document.getElementById('results').innerHTML = `<span class="success">${results}</span>`;
+                // WASM module not available - show error
+                document.getElementById('results').innerHTML = '<span class="error">❌ WebAssembly module not loaded. PDF parsing requires WASM.</span>';
             } catch (error) {
                 console.error('Error parsing PDF:', error);
                 document.getElementById('results').innerHTML = `<span class="error">Error parsing PDF: ${error.message}</span>`;

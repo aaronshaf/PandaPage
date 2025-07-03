@@ -1,14 +1,16 @@
 # PDF.js WASM Rewrite
 
-A modern PDF parser and renderer built with MoonBit and WebAssembly, designed as a high-performance alternative to PDF.js using cutting-edge technologies.
+**⚠️ ALPHA / WORK IN PROGRESS ⚠️**
 
-## 🚀 Features
+An experimental PDF parser and renderer built with MoonBit and WebAssembly. This project is in early development and demonstrates the feasibility of a PDF.js alternative using modern web technologies.
 
-- **WebAssembly-First**: Built from the ground up for WebAssembly performance
-- **MoonBit Language**: Leverages MoonBit's modern language features and excellent WASM compilation
-- **Modular Architecture**: Clean separation between PDF parsing, rendering, and browser integration
-- **Type Safety**: Full type safety with MoonBit's advanced type system
-- **Browser Integration**: Simple JavaScript API for easy integration
+## 🚀 Planned Features (In Development)
+
+- **WebAssembly-First**: Targeting WebAssembly for high-performance parsing
+- **MoonBit Language**: Exploring MoonBit's modern language features for PDF processing
+- **Modular Architecture**: Designing clean separation between parsing, rendering, and browser integration
+- **Type Safety**: Planning full type safety with MoonBit's advanced type system
+- **Multiple Viewing Modes**: Canvas rendering, PDF-to-Markdown, and hybrid approaches
 
 ## 🏗️ Architecture
 
@@ -117,11 +119,27 @@ Current implementation supports:
 
 ## 🛠️ Technology Stack
 
+### Core Technologies
 - **Language**: [MoonBit](https://moonbitlang.com) - Modern functional language
-- **Compilation**: WebAssembly (WASM-GC target)
+- **Compilation**: WebAssembly (WASM-GC target) for high-performance parsing
 - **Build System**: Moon Build System
 - **Frontend**: Vanilla HTML5/JavaScript
-- **Testing**: MoonBit test framework
+
+### Performance & Architecture
+- **Web Workers**: Background PDF processing without blocking UI
+- **SharedArrayBuffer**: Zero-copy data sharing between main thread and workers
+- **OffscreenCanvas**: GPU-accelerated rendering for smooth scrolling
+- **Streaming & Progressive Loading**: Handle large PDFs incrementally
+- **Memory Management**: Efficient WASM memory allocation and cleanup
+
+### Viewing Modes
+- **Canvas Mode**: Traditional paginated PDF rendering (desktop-optimized)
+- **PDF-to-Markdown Mode**: Text-based view for mobile devices and accessibility
+- **Hybrid Mode**: Adaptive rendering based on device capabilities
+
+### Development & Testing
+- **Testing Framework**: MoonBit test framework + browser automation
+- **Performance Monitoring**: Real-time metrics for parsing and rendering
 
 ## 📚 Learning Resources
 
@@ -142,39 +160,56 @@ Current implementation supports:
 
 ### Phase 1: Foundation (Current)
 - [x] MoonBit toolchain setup
-- [x] Basic PDF parsing
-- [x] WebAssembly compilation
+- [x] Basic PDF parsing with WASM
+- [x] WebAssembly compilation pipeline
 - [x] Browser integration demo
 
-### Phase 2: Core Features
-- [ ] Complete PDF object parsing
-- [ ] Content stream decoding
-- [ ] Font handling
-- [ ] Image extraction
+### Phase 2: Core Architecture
+- [ ] Web Worker integration for background processing
+- [ ] Streaming PDF parser for large files
+- [ ] Complete PDF object parsing (xref tables, trailers)
+- [ ] Content stream decoding and decompression
+- [ ] Font and image extraction
 
-### Phase 3: Rendering
-- [ ] Canvas-based rendering
-- [ ] Text extraction
-- [ ] Interactive features
-- [ ] Form handling
+### Phase 3: Rendering Modes
+- [ ] **Canvas Mode**: Traditional paginated rendering with OffscreenCanvas
+- [ ] **PDF-to-Markdown Mode**: Text extraction for mobile/accessibility
+- [ ] **Hybrid Mode**: Adaptive rendering based on device
+- [ ] Progressive loading and viewport-based rendering
+- [ ] Interactive features and form handling
 
-### Phase 4: Optimization
-- [ ] Memory optimization
-- [ ] Streaming parsing
-- [ ] Worker thread support
-- [ ] Caching strategies
+### Phase 4: Performance & Production
+- [ ] Memory optimization and WASM heap management
+- [ ] Caching strategies for parsed content
+- [ ] Real-time performance monitoring
+- [ ] Cross-browser compatibility testing
+- [ ] Mobile optimization and touch interactions
+
+## 🔍 Current Status
+
+**Alpha Development - Not Ready for Production**
+
+This is an experimental proof-of-concept demonstrating the potential for a PDF.js alternative. Current progress:
+
+**✅ Working:**
+- MoonBit toolchain setup and WebAssembly compilation
+- Basic PDF header validation (JavaScript implementation)
+- Browser demo interface with file upload
+- Modern responsive layout
+
+**🚧 In Development:**
+- MoonBit-JavaScript interface bridge for WASM function calls
+- Actual PDF parsing in MoonBit (currently simulated in JavaScript)
+- Cross-reference table parsing and object extraction
+
+**📋 Planned:**
+- Web Worker integration for background processing
+- Canvas and PDF-to-Markdown viewing modes
+- SharedArrayBuffer for zero-copy data sharing
+- OffscreenCanvas for GPU-accelerated rendering
+
+**⚠️ Important**: This is experimental software. Use the original PDF.js for production applications.
 
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🔍 Project Status
-
-This is a proof-of-concept implementation demonstrating the feasibility of building a high-performance PDF parser with MoonBit and WebAssembly. The project successfully:
-
-- Parses basic PDF headers
-- Compiles to WebAssembly
-- Integrates with browser environments
-- Provides a foundation for full PDF.js replacement
-
-**Note**: This is an early-stage project. For production use, consider the original PDF.js until this implementation reaches feature parity.
