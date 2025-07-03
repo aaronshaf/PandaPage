@@ -90,10 +90,20 @@ The PDF parsing is built around a type-safe representation:
 - ✅ Basic object detection in PDF streams  
 - ✅ WebAssembly compilation pipeline
 - ✅ Browser demo interface with WASM loading
-- 🚧 WASM data passing (debugging needed)
+- ✅ CLI and web demo parity for text extraction
+- 🚧 FlateDecode decompression (planned for MoonBit implementation)
 - 🚧 Web Worker integration
 - 🚧 OffscreenCanvas rendering
 - 🚧 Streaming parser architecture
+
+## CLI and Web Demo Parity
+
+**Important**: The CLI (`parse-pdf.js`) and web demo (`index.html`) should maintain functional parity for text extraction. Both currently use simple text extraction without decompressing FlateDecode streams.
+
+- **Current approach**: Extract Unicode hex strings and uncompressed text from BT/ET blocks
+- **Limitation**: Compressed streams (like sample2.pdf "Hello, world.") show metadata instead of content
+- **Future enhancement**: Implement FlateDecode decompression in MoonBit, not JavaScript libraries
+- **Avoid**: Adding decompression to web demo that CLI doesn't have - maintain consistency
 
 ## MoonBit Language Notes
 

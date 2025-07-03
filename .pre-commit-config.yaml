@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: moonbit-check
+        name: MoonBit Check
+        entry: bash -c 'cd pdf-parser && export PATH="$HOME/.moon/bin:$PATH" && moon check'
+        language: system
+        files: '\.mbt$'
+        pass_filenames: false
+      - id: moonbit-test
+        name: MoonBit Test
+        entry: bash -c 'cd pdf-parser && export PATH="$HOME/.moon/bin:$PATH" && moon test'
+        language: system
+        files: '\.mbt$'
+        pass_filenames: false

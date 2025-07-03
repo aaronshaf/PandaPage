@@ -4,6 +4,11 @@ pub fn test_wasm() -> String {
   "WASM is working! 🎉"
 }
 
+// Simple test function that returns markdown with front matter
+pub fn test_markdown() -> String {
+  "---\ntitle: \"Test PDF\"\nauthor: \"MoonBit\"\ndate: \"2024-01-01\"\n---\n\n# Test Document\n\nThis is a test from WebAssembly with YAML front matter!"
+}
+
 pub fn test_numbers(a: Int, b: Int) -> Int {
   a + b
 }
@@ -19,6 +24,22 @@ struct PDFMetadata {
   creation_date: String
   producer: String
   creator: String
+}
+
+// Simple wrapper for JavaScript - accepts Int array one element at a time
+pub fn js_init_pdf_array(size: Int) -> Int {
+  // For now, just return a simple value to test
+  size
+}
+
+pub fn js_add_pdf_byte(index: Int, byte: Int) -> Int {
+  // For now, just return a simple value to test
+  index + byte
+}
+
+pub fn js_extract_text() -> String {
+  // For now, return a test string with front matter
+  "---\ntitle: \"Test PDF\"\nauthor: \"Test Author\"\n---\n\nThis is a test from WASM with front matter!"
 }
 
 // Extract text from PDF byte array and format as Markdown
@@ -71,8 +92,14 @@ pub fn extract_text_from_pdf(data: Array[Int]) -> String {
     }
   }
   
+  // Sort text blocks by reading order (top-to-bottom, left-to-right)
+  let sorted_blocks = sort_text_blocks_by_reading_order(text_blocks)
+  
+  // Detect page breaks based on Y-position analysis
+  let page_detected_blocks = detect_page_breaks(sorted_blocks)
+  
   // Second pass: format as markdown
-  markdown_text = format_as_markdown(text_blocks)
+  markdown_text = format_as_markdown(page_detected_blocks)
   
   if markdown_text == "" {
     markdown_text = extract_fallback_text(data)
@@ -98,34 +125,42 @@ struct TextBlock {
   x_pos: Double
   y_pos: Double
   is_bold: Bool
+  page_number: Int
 }
 
 // Extract text block with positioning and font information
 fn extract_text_block_with_info(data: Array[Int], start: Int) -> TextBlock {
   let mut text = ""
-  let font_size = 12.0
-  let x_pos = 0.0
-  let y_pos = 0.0
+  let mut font_size = 12.0  // Default font size
+  let mut x_pos = 0.0
+  let mut y_pos = 0.0
   let is_bold = false
   let mut i = start + 2  // Skip past "BT"
   
-  // Look for font size commands (e.g., "/F1 24 Tf")
+  // Look for font size commands and text within the BT...ET block
   while i < data.length() - 2 {
     // Look for "ET" (End Text) to stop
     if data[i] == 69 && data[i + 1] == 84 {
       break
     }
     
-    // Look for font size pattern: number followed by "Tf"
+    // Look for font command pattern: "Tf" preceded by font size
     if i + 2 < data.length() && data[i + 1] == 84 && data[i + 2] == 102 { // "Tf"
-      // font_size = extract_font_size_before(data, i) // Skip for now
+      font_size = extract_font_size_before(data, i)
     }
     
     // Look for text positioning "Td" command
     if i + 1 < data.length() && data[i] == 84 && data[i + 1] == 100 { // "Td"
-      // let pos = extract_position_before(data, i) // Skip for now
-      // x_pos = pos.0
-      // y_pos = pos.1
+      let pos = extract_position_before(data, i)
+      x_pos = x_pos + pos.0
+      y_pos = y_pos + pos.1
+    }
+    
+    // Look for absolute positioning "Tm" command (text matrix)
+    if i + 1 < data.length() && data[i] == 84 && data[i + 1] == 109 { // "Tm"
+      let matrix = extract_text_matrix_before(data, i)
+      x_pos = matrix.0
+      y_pos = matrix.1
     }
     
     // Look for ")" followed by "Tj" pattern
@@ -142,7 +177,7 @@ fn extract_text_block_with_info(data: Array[Int], start: Int) -> TextBlock {
     i = i + 1
   }
   
-  { text, font_size, x_pos, y_pos, is_bold }
+  { text, font_size, x_pos, y_pos, is_bold, page_number: 1 }
 }
 
 // Extract text from a BT...ET block (legacy function)
@@ -264,78 +299,461 @@ fn extract_fallback_text(data: Array[Int]) -> String {
   text
 }
 
-// Format text blocks as markdown
+// Format text blocks as markdown with font size-based headings and page breaks
 fn format_as_markdown(blocks: Array[TextBlock]) -> String {
   let mut markdown = ""
   let mut current_paragraph = ""
+  let base_font_size = calculate_base_font_size(blocks)
+  let mut current_page = 1
   
   for i = 0; i < blocks.length(); i = i + 1 {
     let block = blocks[i]
-    let text = block.text
+    let text = block.text.trim(" \t\n\r").to_string()
     
-    if text != "" {
-      // For now, treat all text as paragraphs
-      // TODO: Add heading detection based on font size
-      if current_paragraph == "" {
-        current_paragraph = text + " "
-      } else {
-        current_paragraph = current_paragraph + text + " "
+    // Check for page break
+    if block.page_number > current_page {
+      // Flush current paragraph before page break
+      if current_paragraph != "" {
+        markdown = markdown + current_paragraph.trim(" \t\n\r").to_string() + "\n\n"
+        current_paragraph = ""
       }
       
-      // Add paragraph breaks every few text blocks for readability
-      if i % 5 == 4 && current_paragraph != "" {
-        markdown = markdown + current_paragraph + "\n\n"
+      // Add page break marker
+      markdown = markdown + "---\n\n**Page " + block.page_number.to_string() + "**\n\n"
+      current_page = block.page_number
+    }
+    
+    if text != "" {
+      let heading_level = determine_heading_level(block.font_size, base_font_size)
+      
+      // Flush current paragraph before adding heading
+      if heading_level > 0 && current_paragraph != "" {
+        markdown = markdown + current_paragraph.trim(" \t\n\r").to_string() + "\n\n"
         current_paragraph = ""
+      }
+      
+      if heading_level > 0 {
+        // Format as heading
+        let heading_prefix = generate_heading_prefix(heading_level)
+        markdown = markdown + heading_prefix + " " + text + "\n\n"
+      } else {
+        // Accumulate as paragraph text
+        if current_paragraph == "" {
+          current_paragraph = text + " "
+        } else {
+          current_paragraph = current_paragraph + text + " "
+        }
+        
+        // Add paragraph breaks for readability - more frequent for better structure
+        if current_paragraph.length() > 200 {
+          markdown = markdown + current_paragraph.trim(" \t\n\r").to_string() + "\n\n"
+          current_paragraph = ""
+        }
       }
     }
   }
   
   // Flush final paragraph
   if current_paragraph != "" {
-    markdown = markdown + current_paragraph + "\n\n"
+    markdown = markdown + current_paragraph.trim(" \t\n\r").to_string() + "\n\n"
   }
   
   markdown
 }
 
-// Extract font size from bytes before a position
+// Calculate the most common (base) font size in the document
+fn calculate_base_font_size(blocks: Array[TextBlock]) -> Double {
+  if blocks.length() == 0 {
+    return 12.0
+  }
+  
+  // Count frequency of font sizes
+  let mut size_12_count = 0
+  let mut size_14_count = 0
+  let mut size_16_count = 0
+  let mut size_18_count = 0
+  let mut size_24_count = 0
+  let mut other_count = 0
+  
+  for block in blocks {
+    let size = block.font_size
+    if size >= 11.5 && size <= 12.5 {
+      size_12_count = size_12_count + 1
+    } else if size >= 13.5 && size <= 14.5 {
+      size_14_count = size_14_count + 1
+    } else if size >= 15.5 && size <= 16.5 {
+      size_16_count = size_16_count + 1
+    } else if size >= 17.5 && size <= 18.5 {
+      size_18_count = size_18_count + 1
+    } else if size >= 23.0 && size <= 25.0 {
+      size_24_count = size_24_count + 1
+    } else {
+      other_count = other_count + 1
+    }
+  }
+  
+  // Return the most common size, defaulting to 12.0
+  let max_count = size_12_count
+  let mut base_size = 12.0
+  
+  if size_14_count > max_count {
+    base_size = 14.0
+  }
+  if size_16_count > max_count {
+    base_size = 16.0
+  }
+  if size_18_count > max_count {
+    base_size = 18.0
+  }
+  
+  base_size
+}
+
+// Determine heading level based on font size relative to base size
+fn determine_heading_level(font_size: Double, base_size: Double) -> Int {
+  let size_ratio = font_size / base_size
+  
+  if size_ratio >= 2.0 {
+    1  // # Main heading (24pt vs 12pt base)
+  } else if size_ratio >= 1.5 {
+    2  // ## Secondary heading (18pt vs 12pt base)
+  } else if size_ratio >= 1.3 {
+    3  // ### Tertiary heading (16pt vs 12pt base)
+  } else if size_ratio >= 1.1 {
+    4  // #### Minor heading (14pt vs 12pt base)
+  } else {
+    0  // Regular paragraph text
+  }
+}
+
+// Generate markdown heading prefix (# ## ### ####)
+fn generate_heading_prefix(level: Int) -> String {
+  match level {
+    1 => "#"
+    2 => "##"
+    3 => "###"
+    4 => "####"
+    5 => "#####"
+    6 => "######"
+    _ => "#"
+  }
+}
+
+// Sort text blocks by reading order (top-to-bottom, left-to-right within lines)
+fn sort_text_blocks_by_reading_order(blocks: Array[TextBlock]) -> Array[TextBlock] {
+  if blocks.length() == 0 {
+    return blocks
+  }
+  
+  // Create a copy of the blocks array for sorting
+  let sorted_blocks : Array[TextBlock] = []
+  for block in blocks {
+    sorted_blocks.push(block)
+  }
+  
+  // Simple bubble sort implementation for reading order
+  // Primary sort: Y-position (descending - higher Y values first)
+  // Secondary sort: X-position (ascending - left to right)
+  let mut i = 0
+  while i < sorted_blocks.length() - 1 {
+    let mut j = 0
+    while j < sorted_blocks.length() - i - 1 {
+      let current = sorted_blocks[j]
+      let next = sorted_blocks[j + 1]
+      
+      let should_swap = 
+        // If Y positions differ significantly (more than 5 units), sort by Y (descending)
+        if (current.y_pos - next.y_pos).abs() > 5.0 {
+          current.y_pos < next.y_pos
+        } else {
+          // If on same line (similar Y), sort by X (ascending)
+          current.x_pos > next.x_pos
+        }
+      
+      if should_swap {
+        // Swap elements
+        sorted_blocks[j] = next
+        sorted_blocks[j + 1] = current
+      }
+      
+      j = j + 1
+    }
+    i = i + 1
+  }
+  
+  sorted_blocks
+}
+
+// Detect page breaks based on Y-position analysis
+fn detect_page_breaks(blocks: Array[TextBlock]) -> Array[TextBlock] {
+  if blocks.length() == 0 {
+    return blocks
+  }
+  
+  let result_blocks : Array[TextBlock] = []
+  let mut current_page = 1
+  let mut previous_y = blocks[0].y_pos
+  
+  for i = 0; i < blocks.length(); i = i + 1 {
+    let block = blocks[i]
+    let mut updated_block = block
+    
+    // Check for significant Y-position jump (likely page break)
+    // A jump of more than 100 units upward suggests a new page
+    if i > 0 && block.y_pos > previous_y + 100.0 {
+      current_page = current_page + 1
+    }
+    
+    // Update block with detected page number
+    updated_block = { 
+      text: block.text, 
+      font_size: block.font_size, 
+      x_pos: block.x_pos, 
+      y_pos: block.y_pos, 
+      is_bold: block.is_bold, 
+      page_number: current_page 
+    }
+    
+    result_blocks.push(updated_block)
+    previous_y = block.y_pos
+  }
+  
+  result_blocks
+}
+
+// Extract font size from bytes before a position (e.g., "/F1 24 Tf")
 fn extract_font_size_before(data: Array[Int], pos: Int) -> Double {
   let mut i = pos - 1
   let mut size_str = ""
+  let mut decimal_str = ""
+  let mut has_decimal = false
   
-  // Look backwards for space, then collect digits
+  // Look backwards for space or start of number
   while i >= 0 && data[i] != 32 { // space
     i = i - 1
   }
   
   if i >= 0 {
     i = i + 1
-    while i < pos && data[i] >= 48 && data[i] <= 57 { // digits 0-9
-      size_str = size_str + Int::unsafe_to_char(data[i]).to_string()
+    // Collect digits and decimal point
+    while i < pos {
+      let byte_val = data[i]
+      if byte_val >= 48 && byte_val <= 57 { // digits 0-9
+        if has_decimal {
+          decimal_str = decimal_str + Int::unsafe_to_char(byte_val).to_string()
+        } else {
+          size_str = size_str + Int::unsafe_to_char(byte_val).to_string()
+        }
+      } else if byte_val == 46 && has_decimal == false { // decimal point '.'
+        has_decimal = true
+      } else {
+        break // Stop at non-numeric character
+      }
       i = i + 1
     }
   }
   
+  // Convert size string to double
   if size_str != "" {
-    // Simple string to double conversion for basic sizes
-    match size_str {
-      "24" => 24.0
-      "18" => 18.0
-      "16" => 16.0
-      "14" => 14.0
-      "12" => 12.0
+    let base_size = match size_str {
+      "6" => 6.0
+      "8" => 8.0
+      "9" => 9.0
       "10" => 10.0
-      _ => 12.0
+      "11" => 11.0
+      "12" => 12.0
+      "14" => 14.0
+      "16" => 16.0
+      "18" => 18.0
+      "20" => 20.0
+      "22" => 22.0
+      "24" => 24.0
+      "28" => 28.0
+      "32" => 32.0
+      "36" => 36.0
+      "48" => 48.0
+      "72" => 72.0
+      _ => parse_size_fallback(size_str)
+    }
+    
+    // Add decimal part if present
+    if has_decimal && decimal_str != "" {
+      let decimal_value = match decimal_str {
+        "25" => 0.25
+        "5" => 0.5
+        "75" => 0.75
+        _ => 0.0
+      }
+      base_size + decimal_value
+    } else {
+      base_size
+    }
+  } else {
+    12.0 // Default font size
+  }
+}
+
+// Fallback parser for less common font sizes
+fn parse_size_fallback(size_str: String) -> Double {
+  // Handle two-digit and three-digit sizes
+  if size_str.length() == 2 {
+    let first = size_str.charcode_at(0) - 48
+    let second = size_str.charcode_at(1) - 48
+    if first >= 0 && first <= 9 && second >= 0 && second <= 9 {
+      (first * 10 + second).to_double()
+    } else {
+      12.0
+    }
+  } else if size_str.length() == 3 {
+    let first = size_str.charcode_at(0) - 48
+    let second = size_str.charcode_at(1) - 48
+    let third = size_str.charcode_at(2) - 48
+    if first >= 0 && first <= 9 && second >= 0 && second <= 9 && third >= 0 && third <= 9 {
+      (first * 100 + second * 10 + third).to_double()
+    } else {
+      12.0
     }
   } else {
     12.0
   }
 }
 
-// Extract position coordinates before a Td command
+// Extract position coordinates before a Td command (x y Td)
 fn extract_position_before(data: Array[Int], pos: Int) -> (Double, Double) {
-  // Simplified - just return default positions for now
-  (0.0, 0.0)
+  let mut i = pos - 1
+  let numbers : Array[Double] = []
+  let mut current_num = ""
+  let mut has_decimal = false
+  
+  // Look backwards for up to 20 characters to find two numbers
+  let start_search = if pos >= 20 { pos - 20 } else { 0 }
+  
+  i = start_search
+  while i < pos && numbers.length() < 2 {
+    let byte_val = data[i]
+    
+    if byte_val >= 48 && byte_val <= 57 { // digits 0-9
+      current_num = current_num + Int::unsafe_to_char(byte_val).to_string()
+    } else if byte_val == 46 && has_decimal == false { // decimal point '.'
+      current_num = current_num + "."
+      has_decimal = true
+    } else if byte_val == 45 && current_num == "" { // minus sign at start
+      current_num = current_num + "-"
+    } else {
+      // End of number - parse and store it
+      if current_num != "" && current_num != "-" && current_num != "." {
+        let parsed = parse_position_number(current_num)
+        numbers.push(parsed)
+        current_num = ""
+        has_decimal = false
+      }
+    }
+    i = i + 1
+  }
+  
+  // Parse final number if any
+  if current_num != "" && current_num != "-" && current_num != "." {
+    let parsed = parse_position_number(current_num)
+    numbers.push(parsed)
+  }
+  
+  if numbers.length() >= 2 {
+    (numbers[numbers.length() - 2], numbers[numbers.length() - 1])
+  } else {
+    (0.0, 0.0)
+  }
+}
+
+// Extract text matrix coordinates before a Tm command (a b c d e f Tm)
+fn extract_text_matrix_before(data: Array[Int], pos: Int) -> (Double, Double) {
+  let mut i = pos - 1
+  let numbers : Array[Double] = []
+  let mut current_num = ""
+  let mut has_decimal = false
+  
+  // Look backwards for up to 40 characters to find 6 numbers (we want e and f)
+  let start_search = if pos >= 40 { pos - 40 } else { 0 }
+  
+  i = start_search
+  while i < pos && numbers.length() < 6 {
+    let byte_val = data[i]
+    
+    if byte_val >= 48 && byte_val <= 57 { // digits 0-9
+      current_num = current_num + Int::unsafe_to_char(byte_val).to_string()
+    } else if byte_val == 46 && has_decimal == false { // decimal point '.'
+      current_num = current_num + "."
+      has_decimal = true
+    } else if byte_val == 45 && current_num == "" { // minus sign at start
+      current_num = current_num + "-"
+    } else {
+      // End of number - parse and store it
+      if current_num != "" && current_num != "-" && current_num != "." {
+        let parsed = parse_position_number(current_num)
+        numbers.push(parsed)
+        current_num = ""
+        has_decimal = false
+      }
+    }
+    i = i + 1
+  }
+  
+  // Parse final number if any
+  if current_num != "" && current_num != "-" && current_num != "." {
+    let parsed = parse_position_number(current_num)
+    numbers.push(parsed)
+  }
+  
+  // Return the last two numbers (e, f) which represent x, y translation
+  if numbers.length() >= 2 {
+    (numbers[numbers.length() - 2], numbers[numbers.length() - 1])
+  } else {
+    (0.0, 0.0)
+  }
+}
+
+// Parse a number string to Double for positioning
+fn parse_position_number(num_str: String) -> Double {
+  // Simple parser for common position values
+  match num_str {
+    "0" => 0.0
+    "1" => 1.0
+    "2" => 2.0
+    "3" => 3.0
+    "4" => 4.0
+    "5" => 5.0
+    "10" => 10.0
+    "12" => 12.0
+    "15" => 15.0
+    "20" => 20.0
+    "24" => 24.0
+    "25" => 25.0
+    "30" => 30.0
+    "36" => 36.0
+    "50" => 50.0
+    "72" => 72.0
+    "100" => 100.0
+    "200" => 200.0
+    "300" => 300.0
+    "400" => 400.0
+    "500" => 500.0
+    "600" => 600.0
+    "700" => 700.0
+    "800" => 800.0
+    _ => {
+      // Try to parse manually for other values
+      if num_str.has_prefix("-") {
+        -parse_position_number(num_str.substring(start=1))
+      } else {
+        // For now, return a reasonable default based on string length
+        match num_str.length() {
+          1 => 0.0
+          2 => 10.0
+          3 => 100.0
+          _ => 0.0
+        }
+      }
+    }
+  }
 }
 
 // Helper function to find streams
@@ -514,24 +932,4 @@ fn format_front_matter(metadata: PDFMetadata) -> String {
   front_matter
 }
 
-// Find all content streams in the PDF
-fn find_content_streams(data: Array[Int]) -> Array[(Array[Int], StreamFilter)] {
-  let streams : Array[(Array[Int], StreamFilter)] = []
-  let mut i = 0
-  
-  while i < data.length() {
-    // Look for stream objects
-    match extract_stream_content(data, i) {
-      Ok((stream_data, filter)) => {
-        streams.push((stream_data, filter))
-        // Skip past this stream
-        i = i + stream_data.length() + 20  // Rough estimate
-      }
-      Err(_) => {
-        i = i + 1
-      }
-    }
-  }
-  
-  streams
-}
+

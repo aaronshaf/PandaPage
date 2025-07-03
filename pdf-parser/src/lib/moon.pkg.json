@@ -1,7 +1,7 @@
 {
     "link": {
         "wasm-gc": {
-            "exports": ["test_wasm", "test_numbers", "get_parser_info", "extract_text_from_pdf"]
+            "exports": ["test_wasm", "test_markdown", "test_numbers", "get_parser_info", "extract_text_from_pdf", "decode_unicode_hex", "js_init_pdf_array", "js_add_pdf_byte", "js_extract_text"]
         }
     }
 }

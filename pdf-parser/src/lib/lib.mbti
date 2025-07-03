@@ -1,0 +1,83 @@
+package "ashafovaloff/pdf-parser/lib"
+
+// Values
+fn decode_unicode_hex(String) -> String
+
+fn decompress_stream(Array[Int], StreamFilter) -> Result[Array[Int], String]
+
+fn extract_stream_content(Array[Int], Int) -> Result[(Array[Int], StreamFilter), String]
+
+fn extract_text_from_pdf(Array[Int]) -> String
+
+fn find_pdf_objects(Array[Int]) -> Array[Int]
+
+fn get_parser_info() -> String
+
+fn parse_pdf_header(Array[Int]) -> Result[String, String]
+
+fn test_numbers(Int, Int) -> Int
+
+fn test_wasm() -> String
+
+// Types and methods
+pub struct PDFDocument {
+  header : PDFHeader
+  objects : Map[Int, PDFObject]
+  xref : PDFXRef
+  trailer : PDFTrailer
+}
+
+pub struct PDFHeader {
+  version : String
+}
+
+type PDFMetadata
+
+pub enum PDFObject {
+  PDFName(String)
+  PDFString(String)
+  PDFNumber(Int)
+  PDFReal(Double)
+  PDFBoolean(Bool)
+  PDFNull
+  PDFArray(Array[PDFObject])
+  PDFDictionary(Map[String, PDFObject])
+  PDFStream(Map[String, PDFObject], Array[Int])
+  PDFReference(Int, Int)
+}
+
+pub struct PDFTrailer {
+  size : Int
+  root : PDFObject
+  info : PDFObject?
+  prev : Int?
+}
+
+pub struct PDFXRef {
+  entries : Array[PDFXRefEntry]
+}
+
+pub struct PDFXRefEntry {
+  offset : Int
+  generation : Int
+  in_use : Bool
+}
+
+pub enum StreamFilter {
+  FlateDecode
+  ASCIIHexDecode
+  ASCII85Decode
+  LZWDecode
+  RunLengthDecode
+  CCITTFaxDecode
+  JBIG2Decode
+  DCTDecode
+  JPXDecode
+}
+
+type TextBlock
+
+// Type aliases
+
+// Traits
+
