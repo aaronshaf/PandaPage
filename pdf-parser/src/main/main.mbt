@@ -1,4 +1,5 @@
 fn main {
-  let sample_data: Array[Int] = [37, 80, 68, 70, 45, 49, 46, 51, 10] // %PDF-1.3\n
-  println(@lib.parse_pdf_basic(sample_data))
+  println(@lib.test_wasm())
+  println(@lib.get_parser_info())
+  println("Test addition: " + @lib.test_numbers(5, 3).to_string())
 }

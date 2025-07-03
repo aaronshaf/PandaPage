@@ -1,26 +1,14 @@
-// WASM-exported functions for JavaScript interface
-
-pub fn parse_pdf_basic(data: Array[Int]) -> String {
-  match parse_pdf_header(data) {
-    Ok(version) => "PDF Version: " + version
-    Err(error) => "Error: " + error
-  }
+// Simple WASM exports - will be called through main
+pub fn test_wasm() -> String {
+  "WASM is working! 🎉"
 }
 
-// Export for WASM: Parse PDF and return detailed analysis
-pub fn analyze_pdf(data: Array[Int]) -> String {
-  let header_result = parse_pdf_header(data)
-  let object_count = find_pdf_objects(data).length()
-  let stream_count = find_pdf_streams(data)
-  
-  match header_result {
-    Ok(version) => {
-      "{\n  \"valid\": true,\n  \"version\": \"" + version + "\",\n  \"size\": " + data.length().to_string() + ",\n  \"objects\": " + object_count.to_string() + ",\n  \"streams\": " + stream_count.to_string() + "\n}"
-    }
-    Err(error) => {
-      "{\n  \"valid\": false,\n  \"error\": \"" + error + "\"\n}"
-    }
-  }
+pub fn test_numbers(a: Int, b: Int) -> Int {
+  a + b
+}
+
+pub fn get_parser_info() -> String {
+  "PDFWasm Parser v0.1.0 - MoonBit + WebAssembly"
 }
 
 // Helper function to find streams
