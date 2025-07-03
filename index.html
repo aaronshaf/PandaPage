@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF.js WASM Rewrite</title>
+    <title>PDFWasm</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,14 +49,20 @@
     </style>
 </head>
 <body>
-    <h1>PDF.js WASM Rewrite</h1>
+    <h1>PDFWasm</h1>
     <p>A modern PDF parser built with MoonBit and WebAssembly</p>
     
     <div class="container">
         <div class="upload-section" id="upload-area">
-            <h3>Upload PDF File</h3>
-            <input type="file" id="file-input" accept=".pdf" />
-            <p>Or drag and drop a PDF file here</p>
+            <h3>Test PDF Parsing</h3>
+            <button id="test-sample-btn" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px;">
+                🔍 Parse Sample PDF (sample1.pdf)
+            </button>
+            <div style="margin: 20px 0; border-top: 1px solid #ccc; padding-top: 20px;">
+                <h4>Or Upload Your Own PDF</h4>
+                <input type="file" id="file-input" accept=".pdf" />
+                <p>Or drag and drop a PDF file here</p>
+            </div>
         </div>
         
         <div class="results">
@@ -74,10 +80,27 @@
                 // For now, we'll simulate the WASM loading
                 // In a real implementation, this would load the .wasm file
                 console.log('WASM module ready (simulated)');
-                document.getElementById('results').textContent = 'WASM module loaded successfully!\nReady to parse PDF files...';
+                document.getElementById('results').textContent = 'WASM module loaded successfully!\nClick "Parse Sample PDF" to test with the included sample file, or upload your own PDF.';
             } catch (error) {
                 console.error('Failed to load WASM module:', error);
                 document.getElementById('results').innerHTML = '<span class="error">Failed to load WASM module</span>';
+            }
+        }
+        
+        // Load and parse the sample PDF
+        async function loadSamplePDF() {
+            try {
+                document.getElementById('results').innerHTML = 'Loading sample PDF...';
+                const response = await fetch('examples/sample1.pdf');
+                if (!response.ok) {
+                    throw new Error(`Failed to load sample PDF: ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const file = new File([arrayBuffer], 'sample1.pdf', { type: 'application/pdf' });
+                await parsePDF(file);
+            } catch (error) {
+                console.error('Error loading sample PDF:', error);
+                document.getElementById('results').innerHTML = `<span class="error">Error loading sample PDF: ${error.message}</span>`;
             }
         }
         
@@ -143,6 +166,9 @@ Full WASM integration coming soon!`;
             }
             return count;
         }
+        
+        // Sample PDF button handling
+        document.getElementById('test-sample-btn').addEventListener('click', loadSamplePDF);
         
         // File input handling
         document.getElementById('file-input').addEventListener('change', (event) => {
