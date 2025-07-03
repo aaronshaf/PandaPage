@@ -1,0 +1,10 @@
+{
+  "name": "ashafovaloff/pdf-parser",
+  "version": "0.1.0",
+  "readme": "README.md",
+  "repository": "https://github.com/ashafovaloff/PDFWasm",
+  "license": "MIT",
+  "keywords": ["pdf", "parser", "wasm"],
+  "description": "PDF parser and renderer built with MoonBit and WebAssembly",
+  "source": "src"
+}

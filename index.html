@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF.js WASM Rewrite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .upload-section {
+            flex: 1;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        .upload-section.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        .results {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        #file-input {
+            margin: 10px 0;
+        }
+        #results {
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF.js WASM Rewrite</h1>
+    <p>A modern PDF parser built with MoonBit and WebAssembly</p>
+    
+    <div class="container">
+        <div class="upload-section" id="upload-area">
+            <h3>Upload PDF File</h3>
+            <input type="file" id="file-input" accept=".pdf" />
+            <p>Or drag and drop a PDF file here</p>
+        </div>
+        
+        <div class="results">
+            <h3>Parsing Results</h3>
+            <div id="results">Ready to parse PDF files...</div>
+        </div>
+    </div>
+
+    <script>
+        let wasmModule = null;
+        
+        // Load the WebAssembly module
+        async function loadWasm() {
+            try {
+                // For now, we'll simulate the WASM loading
+                // In a real implementation, this would load the .wasm file
+                console.log('WASM module ready (simulated)');
+                document.getElementById('results').textContent = 'WASM module loaded successfully!\nReady to parse PDF files...';
+            } catch (error) {
+                console.error('Failed to load WASM module:', error);
+                document.getElementById('results').innerHTML = '<span class="error">Failed to load WASM module</span>';
+            }
+        }
+        
+        // Parse PDF file
+        async function parsePDF(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuffer);
+                
+                // Simulate PDF parsing (in real implementation, this would call the WASM function)
+                const results = `PDF File Analysis:
+Name: ${file.name}
+Size: ${file.size} bytes
+Type: ${file.type}
+
+Header Analysis:
+- File signature: ${bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 ? 'Valid PDF' : 'Invalid PDF'}
+- Version: ${bytes[5]}.${bytes[7]} (detected from header)
+
+Object Analysis:
+- Objects found: ${findPDFObjects(bytes)}
+- Streams detected: ${findStreams(bytes)}
+
+Note: This is a proof-of-concept implementation.
+Full WASM integration coming soon!`;
+                
+                document.getElementById('results').innerHTML = `<span class="success">${results}</span>`;
+            } catch (error) {
+                console.error('Error parsing PDF:', error);
+                document.getElementById('results').innerHTML = `<span class="error">Error parsing PDF: ${error.message}</span>`;
+            }
+        }
+        
+        // Helper function to find PDF objects
+        function findPDFObjects(bytes) {
+            let count = 0;
+            const objPattern = [111, 98, 106]; // "obj" in ASCII
+            
+            for (let i = 0; i < bytes.length - 3; i++) {
+                if (bytes[i] === objPattern[0] && 
+                    bytes[i + 1] === objPattern[1] && 
+                    bytes[i + 2] === objPattern[2]) {
+                    count++;
+                }
+            }
+            return count;
+        }
+        
+        // Helper function to find streams
+        function findStreams(bytes) {
+            let count = 0;
+            const streamPattern = [115, 116, 114, 101, 97, 109]; // "stream" in ASCII
+            
+            for (let i = 0; i < bytes.length - 6; i++) {
+                if (bytes[i] === streamPattern[0] && 
+                    bytes[i + 1] === streamPattern[1] && 
+                    bytes[i + 2] === streamPattern[2] &&
+                    bytes[i + 3] === streamPattern[3] &&
+                    bytes[i + 4] === streamPattern[4] &&
+                    bytes[i + 5] === streamPattern[5]) {
+                    count++;
+                }
+            }
+            return count;
+        }
+        
+        // File input handling
+        document.getElementById('file-input').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                parsePDF(file);
+            }
+        });
+        
+        // Drag and drop handling
+        const uploadArea = document.getElementById('upload-area');
+        
+        uploadArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type === 'application/pdf') {
+                    parsePDF(file);
+                } else {
+                    document.getElementById('results').innerHTML = '<span class="error">Please upload a PDF file</span>';
+                }
+            }
+        });
+        
+        // Initialize
+        loadWasm();
+    </script>
+</body>
+</html>
