@@ -1,5 +1,6 @@
 import { Effect, Schema } from "effect";
-import { Ollama } from "ollama";
+import { generateText } from "ai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import * as dotenv from "dotenv";
 import { debug } from './debug';
 import * as yaml from "js-yaml";
@@ -9,10 +10,9 @@ dotenv.config();
 
 // Configuration schema
 const AiConfig = Schema.Struct({
-  provider: Schema.Literal("ollama", "openrouter"),
-  host: Schema.String,
+  baseUrl: Schema.String,
+  apiKey: Schema.String,
   model: Schema.String,
-  apiKey: Schema.optional(Schema.String),
   minExactMatchScore: Schema.Number.pipe(
     Schema.between(0, 1)
   ),
@@ -32,20 +32,10 @@ type EvaluationResult = Schema.Schema.Type<typeof EvaluationResult>;
 
 // Load configuration from environment
 const loadConfig = () => Effect.gen(function* () {
-  // Determine provider based on environment variables
-  const provider = process.env.AI_PROVIDER || 
-    (process.env.OPENROUTER_API_KEY ? "openrouter" : "ollama");
-  
   const config = {
-    provider: provider as "ollama" | "openrouter",
-    host: provider === "openrouter" 
-      ? "https://openrouter.ai/api/v1"
-      : (process.env.OLLAMA_HOST || "http://localhost:11434"),
-    model: process.env.AI_MODEL || 
-      process.env.OLLAMA_MODEL || 
-      process.env.OPENROUTER_MODEL || 
-      "llama2",
-    apiKey: process.env.OPENROUTER_API_KEY || process.env.OLLAMA_API_KEY,
+    baseUrl: process.env.AI_BASE_URL || "http://localhost:11434/v1",
+    apiKey: process.env.AI_API_KEY || "ollama", // Ollama doesn't need a real key
+    model: process.env.AI_MODEL || "gemma3n:latest",
     minExactMatchScore: parseFloat(process.env.TEST_MIN_EXACT_MATCH_SCORE || "0.95"),
     aiEvaluationEnabled: process.env.TEST_AI_EVALUATION_ENABLED !== "false"
   };
@@ -111,68 +101,45 @@ description: |
    extra, or different between the expected and actual text.>`;
 
     try {
-      let response: any;
-      
-      if (config.provider === "openrouter") {
-        // Use OpenRouter API
-        const apiResponse = yield* Effect.tryPromise({
-          try: () => fetch(`${config.host}/chat/completions`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${config.apiKey}`,
-              "Content-Type": "application/json",
-              "HTTP-Referer": "https://github.com/aaronshaf/PandaPage",
-              "X-Title": "PandaPage PDF Test Evaluator"
-            },
-            body: JSON.stringify({
-              model: config.model,
-              messages: [{
-                role: "user",
-                content: prompt
-              }],
-              temperature: 0.1,
-              max_tokens: 400
-            })
-          }),
-          catch: (error) => new Error(`OpenRouter API error: ${error}`)
-        });
-        
-        const jsonResponse = yield* Effect.tryPromise({
-          try: () => apiResponse.json(),
-          catch: () => new Error("Failed to parse OpenRouter response")
-        });
-        
-        response = { response: jsonResponse.choices[0].message.content };
-      } else {
-        // Use Ollama API
-        const ollama = new Ollama({ host: config.host });
-        response = yield* Effect.tryPromise({
-          try: () => ollama.generate({
-            model: config.model,
-            prompt,
-            stream: false,
-            options: {
-              temperature: 0.1,
-              top_p: 0.9,
-              num_predict: 400
-            }
-          }),
-          catch: (error) => new Error(`Ollama API error: ${error}`)
-        });
-      }
+      // Create OpenAI-compatible provider
+      const provider = createOpenAICompatible({
+        baseURL: config.baseUrl,
+        headers: {
+          "Authorization": `Bearer ${config.apiKey}`,
+        }
+      });
+
+      // Generate text using AI SDK
+      const { text: responseText } = yield* Effect.tryPromise({
+        try: () => generateText({
+          model: provider(config.model),
+          prompt,
+          temperature: 0.1,
+          maxTokens: 800,
+        }),
+        catch: (error) => new Error(`AI generation error: ${error}`)
+      });
       
       // Parse the YAML response
-      let responseText = response.response.trim();
+      let yamlText = responseText.trim();
+      
+      if (process.env.AI_DEBUG === "true") {
+        debug.log("Raw AI response:", responseText);
+      }
       
       // Remove markdown code blocks if present
-      responseText = responseText.replace(/^```(?:yaml|yml)?\n?/i, '').replace(/\n?```$/i, '');
+      yamlText = yamlText.replace(/^```(?:yaml|yml)?\n?/i, '').replace(/\n?```$/i, '');
       
       // Remove --- delimiters if present
-      responseText = responseText.replace(/^---\n?/m, '').replace(/\n?---$/m, '');
+      yamlText = yamlText.replace(/^---\n?/m, '').replace(/\n?---$/m, '');
+      
+      if (process.env.AI_DEBUG === "true") {
+        debug.log("Cleaned YAML text:", yamlText);
+      }
       
       try {
         // Parse YAML response
-        const parsedYaml = yaml.load(responseText) as any;
+        const parsedYaml = yaml.load(yamlText) as any;
         
         if (typeof parsedYaml.score !== 'number' || !parsedYaml.description) {
           throw new Error("Invalid YAML structure");
@@ -184,7 +151,7 @@ description: |
           passed: parsedYaml.score >= (config.minExactMatchScore * 100)
         };
       } catch (parseError) {
-        debug.error("Failed to parse YAML response:", responseText);
+        debug.error("Failed to parse YAML response:", yamlText);
         debug.error("Parse error:", parseError);
         throw new Error(`Failed to parse YAML response: ${parseError}`);
       }

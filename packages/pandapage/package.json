@@ -19,13 +19,14 @@
   "devDependencies": {
     "@types/bun": "latest",
     "dotenv": "^17.0.1",
-    "ollama": "^0.5.16",
     "typescript": "^5"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^0.2.14",
     "@effect/schema": "^0.75.5",
     "@types/js-yaml": "^4.0.9",
     "@types/pako": "^2.0.3",
+    "ai": "^4.3.16",
     "effect": "^3.16.12",
     "js-yaml": "^4.1.0",
     "pako": "^2.1.0"
