@@ -8,7 +8,7 @@ import * as path from "path";
 // Test with custom thresholds - useful for known problematic extractions
 
 test("PDF extraction - sample3.pdf with 70% threshold", async () => {
-  const pdfPath = path.join(__dirname, "../../../../assets/examples/sample3.pdf");
+  const pdfPath = path.join(__dirname, "../../../demo/public/sample3.pdf");
   const buffer = fs.readFileSync(pdfPath);
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   
@@ -17,7 +17,7 @@ test("PDF extraction - sample3.pdf with 70% threshold", async () => {
   
   // Load expected markdown
   const expectedMarkdown = fs.readFileSync(
-    path.join(__dirname, "../../../../assets/examples/sample3.md"), 
+    path.join(__dirname, "../../../demo/public/sample3.md"), 
     "utf-8"
   ).trim();
   
@@ -69,7 +69,7 @@ test("Demonstrate threshold usage", async () => {
 
 test("PDF extraction with progressive thresholds", async () => {
   // This test demonstrates how to set different thresholds for different quality levels
-  const pdfPath = path.join(__dirname, "../../../../assets/examples/sample1.pdf");
+  const pdfPath = path.join(__dirname, "../../../demo/public/sample1.pdf");
   const buffer = fs.readFileSync(pdfPath);
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   

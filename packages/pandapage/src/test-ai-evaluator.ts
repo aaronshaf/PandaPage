@@ -117,12 +117,28 @@ Respond in the following JSON format:
         catch: (error) => new Error(`Ollama API error: ${error}`)
       });
       
-      const result = JSON.parse(response.response);
+      // Parse the YAML response
+      const responseText = response.response.trim();
+      
+      // Extract YAML content (handle both with and without --- delimiters)
+      const yamlMatch = responseText.match(/^(?:---\n)?([\s\S]+?)(?:\n---)?$/m);
+      const yamlContent = yamlMatch ? yamlMatch[1] : responseText;
+      
+      // Simple YAML parser for our specific format
+      const scoreMatch = yamlContent.match(/score:\s*(\d+)/i);
+      const summaryMatch = yamlContent.match(/summary:\s*\|\s*\n([\s\S]+?)(?=\n\w+:|$)/i);
+      
+      if (!scoreMatch || !summaryMatch) {
+        throw new Error("Failed to parse YAML response. Expected 'score' and 'summary' fields.");
+      }
+      
+      const score = parseInt(scoreMatch[1], 10);
+      const description = summaryMatch[1].trim().replace(/\n\s+/g, ' ');
       
       return {
-        score: Math.max(0, Math.min(100, result.score)),
-        description: result.description || "No description provided",
-        passed: result.score >= (config.minExactMatchScore * 100)
+        score: Math.max(0, Math.min(100, score)),
+        description,
+        passed: score >= (config.minExactMatchScore * 100)
       };
     } catch (error) {
       // Fallback to basic similarity if AI fails
@@ -188,15 +204,11 @@ export const expectTextMatch = async (
   const passed = result.score >= threshold;
   
   if (!passed) {
-    const message = `${options?.testName ? `${options.testName}: ` : ""}Text extraction mismatch
-Score: ${result.score}% (threshold: ${threshold}%)
-${result.description}`;
-    
-    throw new Error(message);
+    throw new Error(`Score: ${result.score}% (need ${threshold}%) - ${result.description}`);
   }
   
   // Log successful matches with scores below 100%
   if (result.score < 100 && result.score >= threshold) {
-    debug.log(`${options?.testName || "Test"} passed with score: ${result.score}% (threshold: ${threshold}%)`);
+    // Silent on pass - tests will show their own output
   }
 };
