@@ -7,6 +7,7 @@
     "copy-assets": "node scripts/copy-assets.js",
     "prebuild": "npm run copy-assets",
     "build": "rsbuild build",
+    "build:production": "NODE_ENV=production rsbuild build",
     "predev": "npm run copy-assets",
     "dev": "rsbuild dev --open",
     "preview": "rsbuild preview",

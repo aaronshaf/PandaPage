@@ -2,6 +2,10 @@
 
 A high-performance PDF text extraction library built with Effect and TypeScript.
 
+## 🚀 [Try the Demo](https://aaronshaf.github.io/PandaPage/)
+
+See PandaPage in action with our interactive demo where you can upload and process PDF files.
+
 ## Features
 
 - 🚀 Fast PDF text extraction with positioning information
