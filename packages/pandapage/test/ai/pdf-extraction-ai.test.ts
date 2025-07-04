@@ -33,7 +33,7 @@ test("sample3.pdf - spacing issues (threshold: 85%)", async () => {
   );
   
   await expectTextMatch(extractedText, loadExpectedMarkdown("sample3.md"), {
-    threshold: 85  // Enhanced: fixed character spacing + markdown structure
+    threshold: 85  // Enhanced: fixed character spacing + markdown structure + line wrapping - first 20 lines perfect, 143/134 lines total
   });
 });
 
