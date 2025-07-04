@@ -99,26 +99,41 @@ const App = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="h-10 w-10 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
-                  <svg className="h-8 w-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div className="h-14 w-14 bg-white rounded-xl border border-gray-200 flex items-center justify-center shadow-sm">
+                  <svg className="h-12 w-12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                     {/* Panda ears */}
-                    <circle cx="9" cy="9" r="4" fill="#1a1a1a"/>
-                    <circle cx="23" cy="9" r="4" fill="#1a1a1a"/>
-                    {/* Panda face */}
-                    <circle cx="16" cy="17" r="8" fill="#1a1a1a"/>
-                    <circle cx="16" cy="17" r="7" fill="white"/>
-                    {/* Eye patches */}
-                    <ellipse cx="12.5" cy="16" rx="2.5" ry="3" fill="#1a1a1a"/>
-                    <ellipse cx="19.5" cy="16" rx="2.5" ry="3" fill="#1a1a1a"/>
-                    {/* Friendly eyes */}
-                    <circle cx="12.5" cy="15.5" r="1" fill="white"/>
-                    <circle cx="19.5" cy="15.5" r="1" fill="white"/>
-                    <circle cx="12.5" cy="15.5" r="0.5" fill="#1a1a1a"/>
-                    <circle cx="19.5" cy="15.5" r="0.5" fill="#1a1a1a"/>
-                    {/* Nose */}
-                    <ellipse cx="16" cy="19" rx="1.5" ry="1" fill="#1a1a1a"/>
-                    {/* Friendly smile */}
-                    <path d="M16 20 Q13 22 11 20 M16 20 Q19 22 21 20" stroke="#1a1a1a" strokeWidth="1" strokeLinecap="round" fill="none"/>
+                    <circle cx="14" cy="12" r="6" fill="#2d3748"/>
+                    <circle cx="34" cy="12" r="6" fill="#2d3748"/>
+                    <circle cx="14" cy="12" r="3.5" fill="#f7fafc"/>
+                    <circle cx="34" cy="12" r="3.5" fill="#f7fafc"/>
+                    
+                    {/* Main head */}
+                    <circle cx="24" cy="26" r="14" fill="#f7fafc"/>
+                    <circle cx="24" cy="26" r="13" fill="white"/>
+                    
+                    {/* Eye patches - softer and rounder */}
+                    <ellipse cx="19" cy="23" rx="3.5" ry="4.5" fill="#2d3748" transform="rotate(-10 19 23)"/>
+                    <ellipse cx="29" cy="23" rx="3.5" ry="4.5" fill="#2d3748" transform="rotate(10 29 23)"/>
+                    
+                    {/* Large friendly eyes */}
+                    <circle cx="19" cy="22" r="2" fill="white"/>
+                    <circle cx="29" cy="22" r="2" fill="white"/>
+                    <circle cx="19.5" cy="21.5" r="1.2" fill="#2d3748"/>
+                    <circle cx="28.5" cy="21.5" r="1.2" fill="#2d3748"/>
+                    
+                    {/* Eye shine for extra friendliness */}
+                    <circle cx="19.8" cy="21" r="0.4" fill="white"/>
+                    <circle cx="28.8" cy="21" r="0.4" fill="white"/>
+                    
+                    {/* Cute nose */}
+                    <ellipse cx="24" cy="28" rx="2" ry="1.5" fill="#2d3748"/>
+                    
+                    {/* Happy smile */}
+                    <path d="M18 32 Q24 36 30 32" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" fill="none"/>
+                    
+                    {/* Cute cheek blush */}
+                    <circle cx="13" cy="28" r="2" fill="#fed7d7" opacity="0.6"/>
+                    <circle cx="35" cy="28" r="2" fill="#fed7d7" opacity="0.6"/>
                   </svg>
                 </div>
               </div>

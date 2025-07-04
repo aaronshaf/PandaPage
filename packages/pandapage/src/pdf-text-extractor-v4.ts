@@ -50,7 +50,7 @@ const decodePdfText = (text: string): string => {
 // Enhanced text extraction with graphics state tracking
 export const extractTextContentV4 = (buffer: ArrayBuffer): Effect.Effect<string, PdfParseError> =>
   Effect.gen(function* () {
-    yield* Effect.log("Extracting text content from PDF with V4 extractor...");
+    debug.log("Extracting text content from PDF with V4 extractor...");
     
     const bytes = new Uint8Array(buffer);
     const text = new TextDecoder('latin1').decode(bytes);

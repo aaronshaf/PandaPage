@@ -1,20 +1,19 @@
 import { test, expect } from "bun:test";
 import { Effect } from "effect";
 import { evaluateTextExtraction } from "../../src/test-ai-evaluator";
+import { debug } from "../../src/debug";
 
-test("Simple AI evaluation test", async () => {
+test("Simple AI evaluation test (threshold: 80-100%)", async () => {
   const expected = "Hello, world!";
   const actual = "Hello world";  // Missing comma
   
   try {
     const result = await Effect.runPromise(evaluateTextExtraction(expected, actual));
     
-    // Only log in debug mode
-    if (process.env.LOG_LEVEL?.toLowerCase() === 'debug') {
-      console.log("AI Evaluation result:");
-      console.log(`Score: ${result.score}%`);
-      console.log(`Description: ${result.description}`);
-    }
+    // Log AI evaluation results
+    debug.ai("AI Evaluation result:");
+    debug.ai(`Score: ${result.score}%`);
+    debug.ai(`Description: ${result.description}`);
     
     // Basic assertions
     expect(result.score).toBeGreaterThan(80);  // Should be high similarity

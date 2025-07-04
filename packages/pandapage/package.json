@@ -10,15 +10,17 @@
     "build": "bun build ./index.ts --outdir ./dist --target node",
     "test": "bun test",
     "test:deterministic": "LOG_LEVEL=None bun test test/deterministic",
-    "test:ai": "LOG_LEVEL=None DOTENV_CONFIG_SILENT=true bun test test/ai --timeout 30000",
+    "test:ai": "LOG_LEVEL=None bun test test/ai --timeout 30000",
+    "test:ai-verbose": "LOG_LEVEL=AI bun test test/ai --timeout 30000",
+    "test:ai-debug": "LOG_LEVEL=Debug bun test test/ai --timeout 30000",
     "test:ci": "LOG_LEVEL=None bun test test/deterministic",
+    "ci:ai": "LOG_LEVEL=None bun test test/ai --timeout 30000",
     "test:all": "bun test",
     "test:debug": "LOG_LEVEL=Debug bun test",
     "test:verbose": "LOG_LEVEL=All bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "dotenv": "^17.0.1",
     "typescript": "^5"
   },
   "dependencies": {

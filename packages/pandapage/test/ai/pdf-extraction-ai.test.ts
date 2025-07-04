@@ -2,12 +2,10 @@ import { test, expect } from "bun:test";
 import { Effect } from "effect";
 import { extractTextContent } from "../../src/pdf-text-extractor";
 import { extractTextContentV3 } from "../../src/pdf-text-extractor-v3";
+import { extractTextContentEnhanced } from "../../src/pdf-text-extractor-enhanced";
 import { expectTextMatch } from "../../src/test-ai-evaluator";
 import * as fs from "fs";
 import * as path from "path";
-
-// Suppress dotenv output
-process.env.DOTENV_CONFIG_SILENT = "true";
 
 // AI tests are for PDFs with known extraction issues that need quality evaluation
 // Perfect matches should be in deterministic tests
@@ -29,17 +27,17 @@ const loadPDF = (filename: string): ArrayBuffer => {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 };
 
-test("sample3.pdf - spacing issues", async () => {
+test("sample3.pdf - spacing issues (threshold: 90%)", async () => {
   const extractedText = await Effect.runPromise(
     extractTextContent(loadPDF("sample3.pdf"))
   );
   
   await expectTextMatch(extractedText, loadExpectedMarkdown("sample3.md"), {
-    threshold: 5  // Known spacing issues, using basic similarity for now
+    threshold: 90  // Target: improve from 85% to 90%
   });
 });
 
-test("guide-footnotes.pdf - complex formatting", async () => {
+test("guide-footnotes.pdf - complex formatting (threshold: 5%)", async () => {
   const extractedText = await Effect.runPromise(
     extractTextContent(loadPDF("guide-footnotes.pdf"))
   );
@@ -52,7 +50,7 @@ test("guide-footnotes.pdf - complex formatting", async () => {
 });
 
 // Test with V3 extractor which has known issues
-test("sample3.pdf - V3 extractor spacing problems", async () => {
+test("sample3.pdf - V3 extractor spacing problems (threshold: 5%)", async () => {
   const extractedText = await Effect.runPromise(
     extractTextContentV3(loadPDF("sample3.pdf"))
   );

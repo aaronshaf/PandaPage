@@ -11,6 +11,7 @@ import {
 import { createMarkdownOutput, formatPdfContent, formatFrontMatter } from "./markdown-formatter";
 import { extractTextContent } from "./pdf-text-extractor";
 import { extractTextContentV3 } from "./pdf-text-extractor-v3";
+import { debug } from "./debug";
 
 // Main PDF processing pipeline
 export const processPdf = (
@@ -19,19 +20,19 @@ export const processPdf = (
 ): Effect.Effect<MarkdownOutput, PdfReadError | PdfParseError> =>
   Effect.gen(function* () {
     // 1. Convert input to ArrayBuffer
-    yield* Effect.log("Converting input to ArrayBuffer...");
+    debug.log("Converting input to ArrayBuffer...");
     const buffer = yield* toArrayBuffer(input);
     
     // 2. Validate PDF header
-    yield* Effect.log("Validating PDF header...");
+    debug.log("Validating PDF header...");
     yield* validatePdfHeader(buffer);
     
     // 3. Extract metadata
-    yield* Effect.log("Extracting metadata...");
+    debug.log("Extracting metadata...");
     const metadata = yield* extractMetadata(buffer);
     
     // 4. Extract text content
-    yield* Effect.log("Extracting text content...");
+    debug.log("Extracting text content...");
     const extractedText = yield* extractTextContentV3(buffer);
     
     // Build content with extracted text

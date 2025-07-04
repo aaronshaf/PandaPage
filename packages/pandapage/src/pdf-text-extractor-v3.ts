@@ -23,7 +23,7 @@ interface TextBlock {
 // Enhanced text extraction with better line break detection
 export const extractTextContentV3 = (buffer: ArrayBuffer): Effect.Effect<string, PdfParseError> =>
   Effect.gen(function* () {
-    yield* Effect.log("Extracting text content from PDF...");
+    debug.log("Extracting text content from PDF...");
     
     const bytes = new Uint8Array(buffer);
     const text = new TextDecoder('latin1').decode(bytes);

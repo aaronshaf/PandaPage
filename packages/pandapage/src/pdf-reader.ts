@@ -1,5 +1,6 @@
 import { Effect, Stream, Chunk } from "effect";
 import { PdfInput, PdfMetadata } from "./types";
+import { debug } from "./debug";
 
 // Error types
 export class PdfReadError {
@@ -152,7 +153,7 @@ export const parsePdfStructure = (buffer: ArrayBuffer): Effect.Effect<{
 // Extract metadata from PDF Info dictionary
 export const extractMetadata = (buffer: ArrayBuffer): Effect.Effect<PdfMetadata, PdfParseError> =>
   Effect.gen(function* () {
-    yield* Effect.log("Extracting PDF metadata...");
+    debug.log("Extracting PDF metadata...");
     
     const structure = yield* parsePdfStructure(buffer);
     const text = new TextDecoder('latin1').decode(new Uint8Array(buffer));
@@ -166,7 +167,7 @@ export const extractMetadata = (buffer: ArrayBuffer): Effect.Effect<PdfMetadata,
     
     // Try to extract Info dictionary
     if (structure.trailer.infoRef) {
-      yield* Effect.log(`Looking for Info object ${structure.trailer.infoRef}`);
+      debug.log(`Looking for Info object ${structure.trailer.infoRef}`);
       
       // Try different patterns to match the Info object
       const patterns = [
@@ -179,7 +180,7 @@ export const extractMetadata = (buffer: ArrayBuffer): Effect.Effect<PdfMetadata,
       for (const pattern of patterns) {
         infoMatch = text.match(pattern);
         if (infoMatch) {
-          yield* Effect.log(`Found Info object with pattern`);
+          debug.log(`Found Info object with pattern`);
           break;
         }
       }

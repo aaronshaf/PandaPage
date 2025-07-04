@@ -1,12 +1,8 @@
 import { Effect, Schema } from "effect";
 import { generateText } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import * as dotenv from "dotenv";
 import { debug } from './debug';
 // Using JSON instead of YAML for better reliability
-
-// Load environment variables
-dotenv.config();
 
 // Configuration schema
 const AiConfig = Schema.Struct({
