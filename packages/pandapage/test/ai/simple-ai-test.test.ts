@@ -3,18 +3,18 @@ import { Effect } from "effect";
 import { evaluateTextExtraction } from "../../src/test-ai-evaluator";
 
 test("Simple AI evaluation test", async () => {
-  console.log("Starting simple AI evaluation test...");
-  
   const expected = "Hello, world!";
   const actual = "Hello world";  // Missing comma
   
   try {
     const result = await Effect.runPromise(evaluateTextExtraction(expected, actual));
     
-    console.log("Evaluation result:");
-    console.log(`Score: ${result.score}%`);
-    console.log(`Description: ${result.description}`);
-    console.log(`Passed: ${result.passed}`);
+    // Only log in debug mode
+    if (process.env.LOG_LEVEL?.toLowerCase() === 'debug') {
+      console.log("AI Evaluation result:");
+      console.log(`Score: ${result.score}%`);
+      console.log(`Description: ${result.description}`);
+    }
     
     // Basic assertions
     expect(result.score).toBeGreaterThan(80);  // Should be high similarity

@@ -26,9 +26,6 @@ test("PDF extraction - sample3.pdf with 70% threshold", async () => {
     evaluateTextExtraction(expectedMarkdown, extractedText)
   );
   
-  console.log(`\nActual score for sample3.pdf: ${result.score}%`);
-  console.log(`Description: ${result.description}`);
-  
   // Set threshold based on current performance
   // This ensures the test passes now but prevents regression
   const threshold = Math.max(70, Math.floor(result.score - 5)); // 5% buffer
@@ -39,7 +36,12 @@ test("PDF extraction - sample3.pdf with 70% threshold", async () => {
     threshold: threshold
   });
   
-  console.log(`Test passed with threshold set to ${threshold}%`);
+  // Only log details in debug mode
+  if (process.env.LOG_LEVEL?.toLowerCase() === 'debug' || process.env.AI_DEBUG === 'true') {
+    console.log(`\nActual score for sample3.pdf: ${result.score}%`);
+    console.log(`Description: ${result.description}`);
+    console.log(`Test passed with threshold set to ${threshold}%`);
+  }
 });
 
 test("Demonstrate threshold usage", async () => {
@@ -60,8 +62,11 @@ test("Demonstrate threshold usage", async () => {
         threshold: variation.score - 10  // Set threshold below expected score
       });
       
-      console.log(`✓ Passed with estimated score around ${variation.score}%`);
+      if (process.env.LOG_LEVEL?.toLowerCase() === 'debug') {
+        console.log(`✓ Passed with estimated score around ${variation.score}%`);
+      }
     } catch (error) {
+      // Always show failures
       console.log(`✗ Failed: ${error.message}`);
     }
   }
@@ -90,9 +95,12 @@ test("PDF extraction with progressive thresholds", async () => {
         testName: `${level} threshold test`,
         threshold
       });
-      console.log(`✓ ${level} (${threshold}%) - PASSED`);
+      if (process.env.LOG_LEVEL?.toLowerCase() === 'debug') {
+        console.log(`✓ ${level} (${threshold}%) - PASSED`);
+      }
       break; // Stop at first passing threshold
     } catch (error) {
+      // Always show failures
       console.log(`✗ ${level} (${threshold}%) - FAILED`);
     }
   }
