@@ -2,13 +2,18 @@ import { useState, useEffect } from 'react';
 import { renderPdf, renderPdfStream } from '@pandapage/pandapage';
 import { Stream, Effect } from 'effect';
 
+// Get base path for GitHub Pages deployment
+const getBasePath = () => {
+  return process.env.NODE_ENV === 'production' ? '/PandaPage' : '';
+};
+
 const App = () => {
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [mode, setMode] = useState<'promise' | 'stream' | null>(null);
-  const [selectedPdf, setSelectedPdf] = useState<string>('/sample1.pdf');
+  const [selectedPdf, setSelectedPdf] = useState<string>(`${getBasePath()}/sample1.pdf`);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   // Show spinner only after 500ms delay
@@ -216,10 +221,10 @@ const App = () => {
                     disabled={!!uploadedFile}
                     className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 pr-8 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 transition-colors"
                   >
-                    <option value="/sample1.pdf">Sample 1 - Dummy PDF file</option>
-                    <option value="/sample2.pdf">Sample 2 - Hello World</option>
-                    <option value="/sample3.pdf">Sample 3 - Multi-page Lorem Ipsum</option>
-                    <option value="/guide-footnotes.pdf">Guide - Footnotes</option>
+                    <option value={`${getBasePath()}/sample1.pdf`}>Sample 1 - Dummy PDF file</option>
+                    <option value={`${getBasePath()}/sample2.pdf`}>Sample 2 - Hello World</option>
+                    <option value={`${getBasePath()}/sample3.pdf`}>Sample 3 - Multi-page Lorem Ipsum</option>
+                    <option value={`${getBasePath()}/guide-footnotes.pdf`}>Guide - Footnotes</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

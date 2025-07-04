@@ -61,7 +61,9 @@ jobs:
       - name: Build demo
         run: |
           cd packages/demo
-          NODE_ENV=production bun run build
+          NODE_ENV=production DOTENV_CONFIG_SILENT=true bun run build
+        env:
+          DOTENV_CONFIG_SILENT: true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
