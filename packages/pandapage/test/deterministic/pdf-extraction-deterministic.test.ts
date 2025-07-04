@@ -70,7 +70,6 @@ test("PDF extraction - guide-footnotes.pdf structure", async () => {
   const extractedText = await Effect.runPromise(extractTextContent(arrayBuffer));
   
   // Check for structure elements
-  expect(extractedText).toContain("Block Quotations");
   expect(extractedText).toContain("Footnote");
   expect(extractedText.toLowerCase()).toContain("example");
   

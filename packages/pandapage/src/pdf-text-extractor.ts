@@ -2,8 +2,7 @@ import { Effect } from "effect";
 import { PdfParseError } from "./pdf-reader";
 import * as pako from "pako";
 import { enhancePdfFormatting } from "./enhanced-formatter";
-import { formatSample3Text } from "./sample3-formatter";
-import { applySample3LineWrapping } from "./line-wrapper";
+import { applyGeneralLineWrapping } from "./line-wrapper";
 import { debug } from "./debug";
 
 // Extract text content from PDF
@@ -329,15 +328,9 @@ export const extractTextContent = (buffer: ArrayBuffer): Effect.Effect<string, P
     // Apply enhanced formatting to make the output closer to the expected markdown
     let enhancedText = enhancePdfFormatting(extractedText || "No text content found in PDF");
     
-    // Apply specific formatting for sample3.pdf to reach 90% score
-    if (enhancedText.includes("Sample PDF") && enhancedText.includes("Created for testing PDFObject")) {
-      enhancedText = formatSample3Text(enhancedText);
-      debug.log("Applied sample3-specific formatting");
-      
-      // Apply line wrapping to match expected format
-      enhancedText = applySample3LineWrapping(enhancedText);
-      debug.log("Applied sample3 line wrapping");
-    }
+    // Apply general line wrapping for better formatting
+    enhancedText = applyGeneralLineWrapping(enhancedText);
+    debug.log("Applied general line wrapping");
     
     debug.log("Enhanced formatted text:", enhancedText);
     

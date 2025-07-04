@@ -27,13 +27,13 @@ const loadPDF = (filename: string): ArrayBuffer => {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 };
 
-test("sample3.pdf - spacing issues (threshold: 85%)", async () => {
+test("sample3.pdf - spacing issues (threshold: 87%)", async () => {
   const extractedText = await Effect.runPromise(
     extractTextContent(loadPDF("sample3.pdf"))
   );
   
   await expectTextMatch(extractedText, loadExpectedMarkdown("sample3.md"), {
-    threshold: 85  // Enhanced: fixed character spacing + markdown structure + line wrapping - first 20 lines perfect, 143/134 lines total
+    threshold: 87  // Testing incremental improvement toward 90%
   });
 });
 
