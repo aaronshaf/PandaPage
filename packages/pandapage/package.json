@@ -9,9 +9,9 @@
     "dev": "bun run index.ts",
     "build": "bun build ./index.ts --outdir ./dist --target node",
     "test": "bun test",
-    "test:deterministic": "bun test test/deterministic",
+    "test:deterministic": "LOG_LEVEL=None bun test test/deterministic",
     "test:ai": "bun test test/ai",
-    "test:ci": "bun test test/deterministic",
+    "test:ci": "LOG_LEVEL=None bun test test/deterministic",
     "test:all": "bun test",
     "test:debug": "LOG_LEVEL=Debug bun test",
     "test:verbose": "LOG_LEVEL=All bun test"

@@ -1,6 +1,7 @@
 import { Effect } from 'effect';
 import * as pako from 'pako';
 import { extractAndDecodeStream, extractPageContentStreams as extractStreams } from './pdf-stream-decoder';
+import { debug } from './debug';
 
 interface TextState {
   x: number;
@@ -53,7 +54,7 @@ export const extractTextFromPdfV2 = (
     
     // Extract all pages
     const pages = yield* extractPages(text);
-    if (options.logging) console.log(`Found ${pages.length} pages`);
+    if (options.logging) debug.log(`Found ${pages.length} pages`);
     
     // Process each page
     const allTextItems: TextItem[] = [];
@@ -63,7 +64,7 @@ export const extractTextFromPdfV2 = (
       
       // Get page content streams using improved decoder
       const contentStreams = yield* extractStreams(page, bytes, options.logging);
-      if (options.logging) console.log(`Page ${pageNum + 1} has ${contentStreams.length} content streams`);
+      if (options.logging) debug.log(`Page ${pageNum + 1} has ${contentStreams.length} content streams`);
       
       // Get page resources (fonts, etc.)
       const resources = yield* getPageResources(page, text);

@@ -1,6 +1,7 @@
 import { Effect, Schema } from "effect";
 import { Ollama } from "ollama";
 import * as dotenv from "dotenv";
+import { debug } from './debug';
 
 // Load environment variables
 dotenv.config();
@@ -196,6 +197,6 @@ ${result.description}`;
   
   // Log successful matches with scores below 100%
   if (result.score < 100 && result.score >= threshold) {
-    console.log(`${options?.testName || "Test"} passed with score: ${result.score}% (threshold: ${threshold}%)`);
+    debug.log(`${options?.testName || "Test"} passed with score: ${result.score}% (threshold: ${threshold}%)`);
   }
 };

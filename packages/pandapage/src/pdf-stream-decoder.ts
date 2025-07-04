@@ -1,5 +1,6 @@
 import * as pako from 'pako';
 import { Effect } from 'effect';
+import { debug } from './debug';
 
 // Extract and decode a PDF stream object
 export function extractAndDecodeStream(
@@ -7,31 +8,31 @@ export function extractAndDecodeStream(
   pdfBytes: Uint8Array,
   logging = false
 ): string | null {
-  if (logging) console.log(`=== Starting extractAndDecodeStream for object ${objNum} ===`);
+  if (logging) debug.log(`=== Starting extractAndDecodeStream for object ${objNum} ===`);
   const text = new TextDecoder('latin1').decode(pdfBytes);
   
   // Find the object start
   const objStart = text.indexOf(`${objNum} 0 obj`);
-  if (logging) console.log(`Object ${objNum} search result: ${objStart}`);
+  if (logging) debug.log(`Object ${objNum} search result: ${objStart}`);
   if (objStart === -1) {
-    if (logging) console.log(`Object ${objNum} not found`);
+    if (logging) debug.log(`Object ${objNum} not found`);
     return null;
   }
   
   // Find the stream keyword
   const streamKeyword = text.indexOf('stream', objStart);
-  if (logging) console.log(`Stream keyword search result: ${streamKeyword}`);
+  if (logging) debug.log(`Stream keyword search result: ${streamKeyword}`);
   if (streamKeyword === -1) {
-    if (logging) console.log(`Stream not found in object ${objNum}`);
+    if (logging) debug.log(`Stream not found in object ${objNum}`);
     return null;
   }
   
   // Extract the dictionary between << and >>
   const dictStart = text.indexOf('<<', objStart);
   const dictEnd = text.indexOf('>>', dictStart);
-  if (logging) console.log(`Dictionary bounds: start=${dictStart}, end=${dictEnd}`);
+  if (logging) debug.log(`Dictionary bounds: start=${dictStart}, end=${dictEnd}`);
   if (dictStart === -1 || dictEnd === -1) {
-    if (logging) console.log(`Dictionary not found in object ${objNum}`);
+    if (logging) debug.log(`Dictionary not found in object ${objNum}`);
     return null;
   }
   
@@ -39,9 +40,9 @@ export function extractAndDecodeStream(
   
   // Find stream end
   const endstreamIndex = text.indexOf('endstream', streamKeyword);
-  if (logging) console.log(`Endstream index: ${endstreamIndex}`);
+  if (logging) debug.log(`Endstream index: ${endstreamIndex}`);
   if (endstreamIndex === -1) {
-    if (logging) console.log(`endstream not found for object ${objNum}`);
+    if (logging) debug.log(`endstream not found for object ${objNum}`);
     return null;
   }
   
@@ -50,7 +51,7 @@ export function extractAndDecodeStream(
   // Use the text-based endstream position we already found
   const streamEndBytes = endstreamIndex;
   
-  if (logging) console.log(`Binary stream bounds: start=${streamStartBytes}, end=${streamEndBytes}`);
+  if (logging) debug.log(`Binary stream bounds: start=${streamStartBytes}, end=${streamEndBytes}`);
   
   // Skip the newline after stream
   let streamStart = streamStartBytes;
@@ -76,20 +77,20 @@ export function extractAndDecodeStream(
       const lengthObjMatch = text.match(lengthObjPattern);
       if (lengthObjMatch) {
         declaredLength = parseInt(lengthObjMatch[1]);
-        if (logging) console.log(`Resolved length reference: ${declaredLength}`);
+        if (logging) debug.log(`Resolved length reference: ${declaredLength}`);
       } else {
         declaredLength = streamData.length; // Fallback
-        if (logging) console.log(`Failed to resolve length reference, using ${declaredLength}`);
+        if (logging) debug.log(`Failed to resolve length reference, using ${declaredLength}`);
       }
     } else {
       // Direct length
       declaredLength = parseInt(lengthMatch[1]);
-      if (logging) console.log(`Direct length: ${declaredLength}`);
+      if (logging) debug.log(`Direct length: ${declaredLength}`);
     }
     
     if (declaredLength < streamData.length) {
       streamData = streamData.slice(0, declaredLength);
-      if (logging) console.log(`Trimmed stream data to declared length: ${declaredLength}`);
+      if (logging) debug.log(`Trimmed stream data to declared length: ${declaredLength}`);
     }
   }
   
@@ -97,10 +98,10 @@ export function extractAndDecodeStream(
   if (/\/Filter\s*\/FlateDecode/.test(dictStr)) {
     try {
       const decompressed = pako.inflate(streamData);
-      if (logging) console.log(`Successfully decompressed stream, length: ${decompressed.length}`);
+      if (logging) debug.log(`Successfully decompressed stream, length: ${decompressed.length}`);
       return new TextDecoder('latin1').decode(decompressed);
     } catch (err) {
-      if (logging) console.warn(`Failed to decompress stream ${objNum}:`, err);
+      if (logging) debug.log(`Failed to decompress stream ${objNum}:`, err);
       return null;
     }
   }
