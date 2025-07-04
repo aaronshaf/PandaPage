@@ -24,8 +24,10 @@
   },
   "dependencies": {
     "@effect/schema": "^0.75.5",
+    "@types/js-yaml": "^4.0.9",
     "@types/pako": "^2.0.3",
     "effect": "^3.16.12",
+    "js-yaml": "^4.1.0",
     "pako": "^2.1.0"
   }
 }

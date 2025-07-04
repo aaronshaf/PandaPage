@@ -2,12 +2,14 @@ import { Effect, Schema } from "effect";
 import { Ollama } from "ollama";
 import * as dotenv from "dotenv";
 import { debug } from './debug';
+import * as yaml from "js-yaml";
 
 // Load environment variables
 dotenv.config();
 
 // Configuration schema
 const AiConfig = Schema.Struct({
+  provider: Schema.Literal("ollama", "openrouter"),
   host: Schema.String,
   model: Schema.String,
   apiKey: Schema.optional(Schema.String),
@@ -30,10 +32,20 @@ type EvaluationResult = Schema.Schema.Type<typeof EvaluationResult>;
 
 // Load configuration from environment
 const loadConfig = () => Effect.gen(function* () {
+  // Determine provider based on environment variables
+  const provider = process.env.AI_PROVIDER || 
+    (process.env.OPENROUTER_API_KEY ? "openrouter" : "ollama");
+  
   const config = {
-    host: process.env.OLLAMA_HOST || "http://localhost:11434",
-    model: process.env.OLLAMA_MODEL || "llama2",
-    apiKey: process.env.OLLAMA_API_KEY,
+    provider: provider as "ollama" | "openrouter",
+    host: provider === "openrouter" 
+      ? "https://openrouter.ai/api/v1"
+      : (process.env.OLLAMA_HOST || "http://localhost:11434"),
+    model: process.env.AI_MODEL || 
+      process.env.OLLAMA_MODEL || 
+      process.env.OPENROUTER_MODEL || 
+      "llama2",
+    apiKey: process.env.OPENROUTER_API_KEY || process.env.OLLAMA_API_KEY,
     minExactMatchScore: parseFloat(process.env.TEST_MIN_EXACT_MATCH_SCORE || "0.95"),
     aiEvaluationEnabled: process.env.TEST_AI_EVALUATION_ENABLED !== "false"
   };
@@ -67,16 +79,10 @@ const calculateBasicSimilarity = (expected: string, actual: string): number => {
   return matches / maxLength;
 };
 
-// AI-powered evaluation
-const evaluateWithAi = (
-  expected: string,
-  actual: string,
-  config: Schema.Schema.Type<typeof AiConfig>
-): Effect.Effect<EvaluationResult, Error> =>
+// Evaluate text extraction using AI
+const evaluateWithAi = (expected: string, actual: string, config: Schema.Schema.Type<typeof AiConfig>) =>
   Effect.gen(function* () {
-    const ollama = new Ollama({ host: config.host });
-    
-    const prompt = `You are a test evaluator comparing extracted text from documents.
+    const prompt = `Compare these two text extractions from a PDF document.
 
 Expected text:
 """
@@ -95,52 +101,99 @@ Please evaluate how well the actual text matches the expected text on a scale of
 - 50-69% = Fair match (significant content present but with issues)
 - Below 50% = Poor match (missing significant content or major errors)
 
-Respond in the following JSON format:
-{
-  "score": <number between 0 and 100>,
-  "description": "<A brief 1-2 sentence description of the main differences>"
-}`;
+Respond ONLY with valid YAML in the following format:
+---
+score: <number between 0 and 100>
+description: |
+  <A detailed paragraph explaining the differences between the texts,
+   including content differences, formatting issues, structural differences,
+   and any character encoding problems. Be specific about what is missing,
+   extra, or different between the expected and actual text.>`;
 
     try {
-      const response = yield* Effect.tryPromise({
-        try: () => ollama.generate({
-          model: config.model,
-          prompt,
-          format: "json",
-          stream: false,
-          options: {
-            temperature: 0.1,  // Lower temperature for more consistent results
-            top_p: 0.9,
-            num_predict: 200   // Limit response length
-          }
-        }),
-        catch: (error) => new Error(`Ollama API error: ${error}`)
-      });
+      let response: any;
       
-      // Parse the YAML response
-      const responseText = response.response.trim();
-      
-      // Extract YAML content (handle both with and without --- delimiters)
-      const yamlMatch = responseText.match(/^(?:---\n)?([\s\S]+?)(?:\n---)?$/m);
-      const yamlContent = yamlMatch ? yamlMatch[1] : responseText;
-      
-      // Simple YAML parser for our specific format
-      const scoreMatch = yamlContent.match(/score:\s*(\d+)/i);
-      const summaryMatch = yamlContent.match(/summary:\s*\|\s*\n([\s\S]+?)(?=\n\w+:|$)/i);
-      
-      if (!scoreMatch || !summaryMatch) {
-        throw new Error("Failed to parse YAML response. Expected 'score' and 'summary' fields.");
+      if (config.provider === "openrouter") {
+        // Use OpenRouter API
+        const apiResponse = yield* Effect.tryPromise({
+          try: () => fetch(`${config.host}/chat/completions`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${config.apiKey}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://github.com/aaronshaf/PandaPage",
+              "X-Title": "PandaPage PDF Test Evaluator"
+            },
+            body: JSON.stringify({
+              model: config.model,
+              messages: [{
+                role: "user",
+                content: prompt
+              }],
+              temperature: 0.1,
+              max_tokens: 400
+            })
+          }),
+          catch: (error) => new Error(`OpenRouter API error: ${error}`)
+        });
+        
+        const jsonResponse = yield* Effect.tryPromise({
+          try: () => apiResponse.json(),
+          catch: () => new Error("Failed to parse OpenRouter response")
+        });
+        
+        response = { response: jsonResponse.choices[0].message.content };
+      } else {
+        // Use Ollama API
+        const ollama = new Ollama({ host: config.host });
+        response = yield* Effect.tryPromise({
+          try: () => ollama.generate({
+            model: config.model,
+            prompt,
+            stream: false,
+            options: {
+              temperature: 0.1,
+              top_p: 0.9,
+              num_predict: 400
+            }
+          }),
+          catch: (error) => new Error(`Ollama API error: ${error}`)
+        });
       }
       
-      const score = parseInt(scoreMatch[1], 10);
-      const description = summaryMatch[1].trim().replace(/\n\s+/g, ' ');
+      // Parse the YAML response
+      let responseText = response.response.trim();
       
-      return {
-        score: Math.max(0, Math.min(100, score)),
-        description,
-        passed: score >= (config.minExactMatchScore * 100)
-      };
+      // Remove markdown code blocks if present
+      responseText = responseText.replace(/^```(?:yaml|yml)?\n?/i, '').replace(/\n?```$/i, '');
+      
+      // Remove --- delimiters if present
+      responseText = responseText.replace(/^---\n?/m, '').replace(/\n?---$/m, '');
+      
+      try {
+        // Parse YAML response
+        const parsedYaml = yaml.load(responseText) as any;
+        
+        if (typeof parsedYaml.score !== 'number' || !parsedYaml.description) {
+          throw new Error("Invalid YAML structure");
+        }
+        
+        return {
+          score: Math.max(0, Math.min(100, parsedYaml.score)),
+          description: parsedYaml.description.trim(),
+          passed: parsedYaml.score >= (config.minExactMatchScore * 100)
+        };
+      } catch (parseError) {
+        debug.error("Failed to parse YAML response:", responseText);
+        debug.error("Parse error:", parseError);
+        throw new Error(`Failed to parse YAML response: ${parseError}`);
+      }
     } catch (error) {
+      // Log error in debug mode
+      if (process.env.AI_DEBUG === "true") {
+        debug.error("AI evaluation error:", error);
+      }
+      
       // Fallback to basic similarity if AI fails
       const basicScore = calculateBasicSimilarity(expected, actual) * 100;
       return {
@@ -159,7 +212,7 @@ export const evaluateTextExtraction = (
   Effect.gen(function* () {
     const config = yield* loadConfig();
     
-    // Check for exact match first
+    // First check for exact match
     if (expected === actual) {
       return {
         score: 100,
@@ -168,17 +221,13 @@ export const evaluateTextExtraction = (
       };
     }
     
-    // Check basic similarity
-    const basicSimilarity = calculateBasicSimilarity(expected, actual);
-    
-    // If very close match or AI evaluation disabled, use basic similarity
-    if (basicSimilarity >= config.minExactMatchScore || !config.aiEvaluationEnabled) {
+    // Check if AI evaluation is enabled
+    if (!config.aiEvaluationEnabled) {
+      const basicScore = calculateBasicSimilarity(expected, actual) * 100;
       return {
-        score: Math.round(basicSimilarity * 100),
-        description: basicSimilarity >= config.minExactMatchScore 
-          ? "Near perfect match with minor whitespace differences"
-          : "Basic similarity check failed",
-        passed: basicSimilarity >= config.minExactMatchScore
+        score: basicScore,
+        description: "AI evaluation disabled, using basic similarity",
+        passed: basicScore >= (config.minExactMatchScore * 100)
       };
     }
     
@@ -207,8 +256,5 @@ export const expectTextMatch = async (
     throw new Error(`Score: ${result.score}% (need ${threshold}%) - ${result.description}`);
   }
   
-  // Log successful matches with scores below 100%
-  if (result.score < 100 && result.score >= threshold) {
-    // Silent on pass - tests will show their own output
-  }
+  // Silent on pass - tests will show their own output
 };
