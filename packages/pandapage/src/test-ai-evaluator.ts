@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import * as dotenv from "dotenv";
 import { debug } from './debug';
-import * as yaml from "js-yaml";
+// Using JSON instead of YAML for better reliability
 
 // Load environment variables
 dotenv.config();
@@ -72,7 +72,10 @@ const calculateBasicSimilarity = (expected: string, actual: string): number => {
 // Evaluate text extraction using AI
 const evaluateWithAi = (expected: string, actual: string, config: Schema.Schema.Type<typeof AiConfig>) =>
   Effect.gen(function* () {
-    const prompt = `Compare these two text extractions from a PDF document.
+    // Try JSON format instead of YAML for better reliability
+    const systemPrompt = `You are a text comparison expert. You analyze two texts and provide a similarity score from 0-100 and a detailed description of differences. Always respond in valid JSON format.`;
+    
+    const userPrompt = `Compare these two text extractions from a PDF document.
 
 Expected text:
 """
@@ -84,21 +87,20 @@ Actual extracted text:
 ${actual}
 """
 
-Please evaluate how well the actual text matches the expected text on a scale of 0-100%, where:
-- 100% = Perfect match (identical or only trivial whitespace differences)
-- 90-99% = Excellent match (minor formatting differences, same content)
-- 70-89% = Good match (most content present, some formatting issues)
-- 50-69% = Fair match (significant content present but with issues)
-- Below 50% = Poor match (missing significant content or major errors)
+Evaluate how well the actual text matches the expected text:
+- 100 = Perfect match (identical or only trivial whitespace differences)
+- 90-99 = Excellent match (minor formatting differences, same content)
+- 70-89 = Good match (most content present, some formatting issues)
+- 50-69 = Fair match (significant content present but with issues)
+- 0-49 = Poor match (missing significant content or major errors)
 
-Respond ONLY with valid YAML in the following format:
----
-score: <number between 0 and 100>
-description: |
-  <A detailed paragraph explaining the differences between the texts,
-   including content differences, formatting issues, structural differences,
-   and any character encoding problems. Be specific about what is missing,
-   extra, or different between the expected and actual text.>`;
+Provide your response as a JSON object with exactly this structure:
+{
+  "score": 85,
+  "description": "The texts are mostly similar with some formatting differences..."
+}
+
+IMPORTANT: Return ONLY the JSON object, no other text.`;
 
     try {
       // Create OpenAI-compatible provider
@@ -113,47 +115,51 @@ description: |
       const { text: responseText } = yield* Effect.tryPromise({
         try: () => generateText({
           model: provider(config.model),
-          prompt,
+          system: systemPrompt,
+          prompt: userPrompt,
           temperature: 0.1,
           maxTokens: 800,
         }),
         catch: (error) => new Error(`AI generation error: ${error}`)
       });
       
-      // Parse the YAML response
-      let yamlText = responseText.trim();
+      // Parse the JSON response
+      let jsonText = responseText.trim();
       
       if (process.env.AI_DEBUG === "true") {
         debug.log("Raw AI response:", responseText);
       }
       
       // Remove markdown code blocks if present
-      yamlText = yamlText.replace(/^```(?:yaml|yml)?\n?/i, '').replace(/\n?```$/i, '');
+      jsonText = jsonText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '');
       
-      // Remove --- delimiters if present
-      yamlText = yamlText.replace(/^---\n?/m, '').replace(/\n?---$/m, '');
+      // Extract JSON object if wrapped in other text
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/m);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
       
       if (process.env.AI_DEBUG === "true") {
-        debug.log("Cleaned YAML text:", yamlText);
+        debug.log("Cleaned JSON text:", jsonText);
       }
       
       try {
-        // Parse YAML response
-        const parsedYaml = yaml.load(yamlText) as any;
+        // Parse JSON response
+        const parsed = JSON.parse(jsonText);
         
-        if (typeof parsedYaml.score !== 'number' || !parsedYaml.description) {
-          throw new Error("Invalid YAML structure");
+        if (typeof parsed.score !== 'number' || !parsed.description) {
+          throw new Error("Invalid JSON structure - missing score or description");
         }
         
         return {
-          score: Math.max(0, Math.min(100, parsedYaml.score)),
-          description: parsedYaml.description.trim(),
-          passed: parsedYaml.score >= (config.minExactMatchScore * 100)
+          score: Math.max(0, Math.min(100, parsed.score)),
+          description: parsed.description.trim(),
+          passed: parsed.score >= (config.minExactMatchScore * 100)
         };
       } catch (parseError) {
-        debug.error("Failed to parse YAML response:", yamlText);
+        debug.error("Failed to parse JSON response:", jsonText);
         debug.error("Parse error:", parseError);
-        throw new Error(`Failed to parse YAML response: ${parseError}`);
+        throw new Error(`Failed to parse JSON response: ${parseError}`);
       }
     } catch (error) {
       // Log error in debug mode
