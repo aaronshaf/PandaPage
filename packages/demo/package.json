@@ -4,9 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "copy-assets": "node scripts/copy-assets.js",
+    "prebuild": "npm run copy-assets",
     "build": "rsbuild build",
+    "predev": "npm run copy-assets",
     "dev": "rsbuild dev --open",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
     "@pandapage/pandapage": "workspace:*",
@@ -14,10 +20,12 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.2",
     "@rsbuild/core": "^1.4.2",
     "@rsbuild/plugin-react": "^1.3.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "playwright": "^1.53.2",
     "typescript": "^5.8.3"
   }
 }

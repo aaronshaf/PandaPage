@@ -9,10 +9,15 @@
   "scripts": {
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
-    "test": "bun run --filter '*' test"
+    "test": "bun run --filter '*' test",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "cd packages/pandapage && LOG_LEVEL=None bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "simple-git-hooks": "^2.13.0",
     "typescript": "^5"
   }
 }

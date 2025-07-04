@@ -1,15 +1,69 @@
-# pandapage
+# PandaPage
 
-To install dependencies:
+A high-performance PDF text extraction library built with Effect and TypeScript.
+
+## Features
+
+- 🚀 Fast PDF text extraction with positioning information
+- 📄 Markdown output with metadata support
+- 🌊 Stream-based processing for large files
+- 🎯 Accurate text positioning and layout preservation
+- 🧪 Comprehensive test coverage
+
+## Quick Start
 
 ```bash
+# Install dependencies
 bun install
+
+# Run tests
+bun test
+
+# Run demo
+cd packages/demo
+bun dev
 ```
 
-To run:
+## Project Structure
+
+This is a Bun monorepo with two packages:
+- `packages/pandapage` - Core PDF extraction library
+- `packages/demo` - Interactive demo application
+
+## Testing
+
+Tests run with minimal logging by default. Control logging with the `LOG_LEVEL` environment variable:
 
 ```bash
-bun run index.ts
+# Default - only errors
+bun test
+
+# Debug logging
+LOG_LEVEL=Debug bun test
+
+# All logs
+LOG_LEVEL=All bun test  
+
+# Silent mode
+LOG_LEVEL=None bun test
 ```
 
-This project was created using `bun init` in bun v1.2.17. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+See [`packages/pandapage/LOGGING.md`](packages/pandapage/LOGGING.md) for detailed logging documentation.
+
+## Development
+
+### Pre-commit Hooks
+
+Fast Bun tests run automatically before commits. Playwright E2E tests run in CI only.
+
+### Running Specific Tests
+
+```bash
+# Run only pandapage tests
+cd packages/pandapage && bun test
+
+# Run E2E tests
+cd packages/demo && bun test:e2e
+```
+
+This project uses [Bun](https://bun.sh) - a fast all-in-one JavaScript runtime.

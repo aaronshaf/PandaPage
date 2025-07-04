@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "bun run index.ts",
     "build": "bun build ./index.ts --outdir ./dist --target node",
-    "test": "bun test"
+    "test": "bun test",
+    "test:debug": "LOG_LEVEL=Debug bun test",
+    "test:verbose": "LOG_LEVEL=All bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,6 +18,8 @@
   },
   "dependencies": {
     "@effect/schema": "^0.75.5",
-    "effect": "^3.16.12"
+    "@types/pako": "^2.0.3",
+    "effect": "^3.16.12",
+    "pako": "^2.1.0"
   }
 }

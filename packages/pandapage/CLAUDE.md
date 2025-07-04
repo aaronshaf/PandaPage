@@ -109,3 +109,7 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+
+## Code Organization
+
+- If files get above 500 lines, make an effort to split them out to multiple files.

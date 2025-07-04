@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { renderPdf } from "../index";
+import { renderPdf } from "./test-utils";
 import * as fs from "fs";
 import * as path from "path";
 
