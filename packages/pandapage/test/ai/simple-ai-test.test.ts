@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { Effect } from "effect";
-import { evaluateTextExtraction } from "../src/test-ai-evaluator";
+import { evaluateTextExtraction } from "../../src/test-ai-evaluator";
 
 test("Simple AI evaluation test", async () => {
   console.log("Starting simple AI evaluation test...");

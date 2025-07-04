@@ -169,19 +169,33 @@ export const evaluateTextExtraction = (
     return yield* evaluateWithAi(expected, actual, config);
   });
 
-// Test helper for Bun tests
+// Test helper for Bun tests with configurable threshold
 export const expectTextMatch = async (
   actual: string,
   expected: string,
-  testName?: string
+  options?: {
+    testName?: string;
+    threshold?: number; // Custom threshold (0-100), defaults to config
+  }
 ): Promise<void> => {
   const result = await Effect.runPromise(evaluateTextExtraction(expected, actual));
   
-  if (!result.passed) {
-    const message = `${testName ? `${testName}: ` : ""}Text extraction mismatch
-Score: ${result.score}%
+  // Use custom threshold if provided, otherwise use the configured minimum
+  const threshold = options?.threshold ?? 
+    (await Effect.runPromise(loadConfig()).then(c => c.minExactMatchScore * 100));
+  
+  const passed = result.score >= threshold;
+  
+  if (!passed) {
+    const message = `${options?.testName ? `${options.testName}: ` : ""}Text extraction mismatch
+Score: ${result.score}% (threshold: ${threshold}%)
 ${result.description}`;
     
     throw new Error(message);
+  }
+  
+  // Log successful matches with scores below 100%
+  if (result.score < 100 && result.score >= threshold) {
+    console.log(`${options?.testName || "Test"} passed with score: ${result.score}% (threshold: ${threshold}%)`);
   }
 };

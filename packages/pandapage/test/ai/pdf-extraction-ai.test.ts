@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { Effect } from "effect";
-import { extractTextContent } from "../src/pdf-text-extractor";
-import { expectTextMatch, evaluateTextExtraction } from "../src/test-ai-evaluator";
+import { extractTextContent } from "../../src/pdf-text-extractor";
+import { expectTextMatch, evaluateTextExtraction } from "../../src/test-ai-evaluator";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -12,7 +12,7 @@ const loadExpectedMarkdown = (filename: string): string => {
 };
 
 test("PDF extraction - sample1.pdf with AI evaluation", async () => {
-  const pdfPath = path.join(__dirname, "../../../assets/examples/sample1.pdf");
+  const pdfPath = path.join(__dirname, "../../../../assets/examples/sample1.pdf");
   const buffer = fs.readFileSync(pdfPath);
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   
@@ -22,12 +22,14 @@ test("PDF extraction - sample1.pdf with AI evaluation", async () => {
   // Load expected markdown
   const expectedMarkdown = loadExpectedMarkdown("sample1.md");
   
-  // Use AI evaluation
-  await expectTextMatch(extractedText, expectedMarkdown, "sample1.pdf extraction");
+  // Use AI evaluation with default threshold (95%)
+  await expectTextMatch(extractedText, expectedMarkdown, { 
+    testName: "sample1.pdf extraction" 
+  });
 });
 
 test("PDF extraction - sample2.pdf with AI evaluation", async () => {
-  const pdfPath = path.join(__dirname, "../../../assets/examples/sample2.pdf");
+  const pdfPath = path.join(__dirname, "../../../../assets/examples/sample2.pdf");
   const buffer = fs.readFileSync(pdfPath);
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   
@@ -37,8 +39,10 @@ test("PDF extraction - sample2.pdf with AI evaluation", async () => {
   // Load expected markdown
   const expectedMarkdown = loadExpectedMarkdown("sample2.md");
   
-  // Use AI evaluation
-  await expectTextMatch(extractedText, expectedMarkdown, "sample2.pdf extraction");
+  // Use AI evaluation with default threshold (95%)
+  await expectTextMatch(extractedText, expectedMarkdown, { 
+    testName: "sample2.pdf extraction" 
+  });
 });
 
 test("AI evaluation - demonstrate scoring", async () => {
@@ -79,12 +83,12 @@ test("AI evaluation - demonstrate scoring", async () => {
 });
 
 test("PDF extraction - sample3.pdf with detailed AI feedback", async () => {
-  const pdfPath = path.join(__dirname, "../../../assets/examples/sample3.pdf");
+  const pdfPath = path.join(__dirname, "../../../../assets/examples/sample3.pdf");
   const buffer = fs.readFileSync(pdfPath);
   const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   
   // Extract text with V3 extractor (which has spacing issues)
-  const { extractTextContentV3 } = await import("../src/pdf-text-extractor-v3");
+  const { extractTextContentV3 } = await import("../../src/pdf-text-extractor-v3");
   const extractedText = await Effect.runPromise(extractTextContentV3(arrayBuffer));
   
   // Load expected markdown
