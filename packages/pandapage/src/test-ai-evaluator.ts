@@ -87,13 +87,15 @@ Evaluate how well the actual text matches the expected text:
 - 100 = Perfect match (identical or only trivial whitespace differences)
 - 90-99 = Excellent match (minor formatting differences, same content)
 - 70-89 = Good match (most content present, some formatting issues)
-- 50-69 = Fair match (significant content present but with issues)
+- 50-69 = Fair match (significant content present but with issues)  
 - 0-49 = Poor match (missing significant content or major errors)
+
+Be specific about what would need to be fixed to reach 90%+ score.
 
 Provide your response as a JSON object with exactly this structure:
 {
   "score": 85,
-  "description": "The texts are mostly similar with some formatting differences..."
+  "description": "The texts are mostly similar. To reach 90%: fix header spacing in line 2, add missing paragraph breaks after 'libero.', improve markdown structure consistency."
 }
 
 IMPORTANT: Return ONLY the JSON object, no other text.`;
