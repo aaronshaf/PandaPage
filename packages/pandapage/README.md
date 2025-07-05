@@ -125,17 +125,41 @@ await Effect.runPromise(
 );
 ```
 
+## Testing
+
+PandaPage uses two testing strategies:
+
+### Unit Tests (Bun)
+For pure functions that don't require browser APIs:
+```bash
+bun test test/unit        # Run unit tests
+bun test:ci              # Run CI tests (deterministic only)
+```
+
+### Browser Tests (Playwright)
+For Web Workers, DOM manipulation, and browser APIs:
+```bash
+bun test:browser         # Run browser tests
+bun test:browser:ui      # Run with Playwright UI
+bun test:server          # Start test server manually
+```
+
+### Run All Tests
+```bash
+bun test:all            # Runs both unit and browser tests
+```
+
 ## Development
 
 ```bash
 # Install dependencies
 bun install
 
-# Run tests
-bun test
+# Install Playwright browsers (first time)
+bunx playwright install
 
-# Run CI tests
-bun test:ci
+# Start development
+bun dev
 ```
 
 ## Roadmap

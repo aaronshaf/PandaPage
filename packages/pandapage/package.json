@@ -15,12 +15,17 @@
     "test:ai-debug": "LOG_LEVEL=Debug bun test test/ai --timeout 30000",
     "test:ci": "LOG_LEVEL=None bun test test/deterministic",
     "ci:ai": "LOG_LEVEL=None bun test test/ai --timeout 30000",
-    "test:all": "bun test",
+    "test:all": "bun test && bun test:browser",
     "test:debug": "LOG_LEVEL=Debug bun test",
-    "test:verbose": "LOG_LEVEL=All bun test"
+    "test:verbose": "LOG_LEVEL=All bun test",
+    "test:browser": "playwright test",
+    "test:browser:ui": "playwright test --ui",
+    "test:server": "bun run test-server/server.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.2",
     "@types/bun": "latest",
+    "playwright": "^1.53.2",
     "typescript": "^5"
   },
   "dependencies": {
