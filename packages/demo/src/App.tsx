@@ -171,7 +171,7 @@ const splitIntoPages = (html: string): string[] => {
 
 const App = () => {
   const [result, setResult] = useState<string>('');
-  const [loading, setLoading] = useState(true); // Start with loading true
+  const [loading, setLoading] = useState(false); // Start with loading false
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<string>(`${getBasePath()}/001.docx`);
@@ -213,8 +213,12 @@ const App = () => {
     const widthScale = containerWidth / pageWidth;
     const heightScale = containerHeight / pageHeight;
     
-    // Use the smaller scale to ensure full page is visible
-    return Math.min(1, widthScale, heightScale);
+    // Use width scale primarily, but cap it at a reasonable max
+    // This gives a better default zoom that uses more screen space
+    const targetScale = Math.min(1.2, widthScale * 0.9); // 90% of width, max 120%
+    
+    // But ensure we don't cut off the page vertically
+    return Math.min(targetScale, heightScale);
   }, []);
 
   // Update print scale on window resize
@@ -368,65 +372,29 @@ const App = () => {
         <div className="px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="h-10 w-10 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
-                  <svg className="h-8 w-8" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Panda ears */}
-                    <circle cx="14" cy="12" r="6" fill="#2d3748"/>
-                    <circle cx="34" cy="12" r="6" fill="#2d3748"/>
-                    <circle cx="14" cy="12" r="3.5" fill="#f7fafc"/>
-                    <circle cx="34" cy="12" r="3.5" fill="#f7fafc"/>
-                    
-                    {/* Main head */}
-                    <circle cx="24" cy="26" r="14" fill="#f7fafc"/>
-                    <circle cx="24" cy="26" r="13" fill="white"/>
-                    
-                    {/* Eye patches - softer and rounder */}
-                    <ellipse cx="19" cy="23" rx="3.5" ry="4.5" fill="#2d3748" transform="rotate(-10 19 23)"/>
-                    <ellipse cx="29" cy="23" rx="3.5" ry="4.5" fill="#2d3748" transform="rotate(10 29 23)"/>
-                    
-                    {/* Large friendly eyes */}
-                    <circle cx="19" cy="22" r="2" fill="white"/>
-                    <circle cx="29" cy="22" r="2" fill="white"/>
-                    <circle cx="19.5" cy="21.5" r="1.2" fill="#2d3748"/>
-                    <circle cx="28.5" cy="21.5" r="1.2" fill="#2d3748"/>
-                    
-                    {/* Eye shine for extra friendliness */}
-                    <circle cx="19.8" cy="21" r="0.4" fill="white"/>
-                    <circle cx="28.8" cy="21" r="0.4" fill="white"/>
-                    
-                    {/* Cute nose */}
-                    <ellipse cx="24" cy="28" rx="2" ry="1.5" fill="#2d3748"/>
-                    
-                    {/* Happy smile */}
-                    <path d="M18 32 Q24 36 30 32" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                    
-                    {/* Cute cheek blush */}
-                    <circle cx="13" cy="28" r="2" fill="#fed7d7" opacity="0.6"/>
-                    <circle cx="35" cy="28" r="2" fill="#fed7d7" opacity="0.6"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-3">
-                <h1 className="text-lg font-semibold text-gray-900">PandaPage</h1>
-              </div>
+              <h1 className="text-xl font-semibold text-gray-900">PandaPage</h1>
             </div>
             
             {/* Document controls */}
             <div className="flex items-center gap-3">
               {/* Document dropdown */}
-              <select
-                value={uploadedFile ? 'uploaded' : selectedDocument}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value !== 'uploaded') {
-                    setUploadedFile(null);
-                    setSelectedDocument(value);
-                    handleDocumentLoad(value);
-                  }
-                }}
-                className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-              >
+              <div className="flex items-center gap-2">
+                <label htmlFor="document-select" className="text-sm font-medium text-gray-700">
+                  Document:
+                </label>
+                <select
+                  id="document-select"
+                  value={uploadedFile ? 'uploaded' : selectedDocument}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value !== 'uploaded') {
+                      setUploadedFile(null);
+                      setSelectedDocument(value);
+                      handleDocumentLoad(value);
+                    }
+                  }}
+                  className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-3 py-1.5 pr-8 bg-white shadow-sm"
+                >
                 {uploadedFile && (
                   <option value="uploaded">{uploadedFile.name}</option>
                 )}
@@ -438,7 +406,8 @@ const App = () => {
                     </option>
                   );
                 })}
-              </select>
+                </select>
+              </div>
               
               {/* Upload button */}
               <label className="relative cursor-pointer">
@@ -520,20 +489,39 @@ const App = () => {
                   </div>
                 </button>
               </div>
+              
+              {/* Zoom controls - only show in print layout */}
+              {viewMode === 'print' && result && (
+                <div className="flex items-center gap-2 ml-4">
+                  <button
+                    onClick={() => setPrintScale(Math.max(0.5, printScale - 0.1))}
+                    className="p-1.5 text-gray-700 hover:bg-gray-200 rounded transition-colors"
+                    title="Zoom out"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                    </svg>
+                  </button>
+                  <span className="text-sm text-gray-600 min-w-[3rem] text-center">
+                    {Math.round(printScale * 100)}%
+                  </span>
+                  <button
+                    onClick={() => setPrintScale(Math.min(2, printScale + 0.1))}
+                    className="p-1.5 text-gray-700 hover:bg-gray-200 rounded transition-colors"
+                    title="Zoom in"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Document info */}
             <div className="flex items-center gap-3 text-sm text-gray-600">
               {!loading && result && (
-                <>
-                  <span>{countWords(result)} words</span>
-                  {processingTime && (
-                    <>
-                      <span className="text-gray-400">•</span>
-                      <span>{processingTime.toFixed(0)}ms</span>
-                    </>
-                  )}
-                </>
+                <span>{countWords(result)} words</span>
               )}
             </div>
           </div>
@@ -617,11 +605,13 @@ const App = () => {
           {result ? (
             <div className={viewMode === 'print' ? '' : 'p-6'}>
               {viewMode === 'read' ? (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div 
-                    className="rendered-markdown prose prose-gray prose-lg max-w-none"
-                    dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
-                  />
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div 
+                      className="rendered-markdown prose prose-gray prose-lg max-w-none"
+                      dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
+                    />
+                  </div>
                 </div>
               ) : (
                 // Print view
