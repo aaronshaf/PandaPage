@@ -146,10 +146,11 @@ export const Navigation: React.FC<NavigationProps> = ({
         <div className="px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
-            {/* Outline toggle - always show but disable if document has 1 or fewer headings */}
+            {/* Outline toggle - start enabled, disable only when document has 1 or fewer headings */}
             {(() => {
-              const headingCount = result ? extractHeadings(removeFrontmatter(result)).length : 0;
-              const hasMultipleHeadings = headingCount > 1;
+              // Start optimistic (enabled) and only disable when we know there aren't enough headings
+              const headingCount = result ? extractHeadings(removeFrontmatter(result)).length : -1; // -1 = loading
+              const hasMultipleHeadings = headingCount === -1 || headingCount > 1; // Enabled during loading or when >1 heading
               
               return (
                 <button
