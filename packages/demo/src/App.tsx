@@ -489,8 +489,9 @@ const App = () => {
       {/* Sticky Navigation Container */}
       <div className="sticky top-0 z-40">
         {/* Primary Header */}
-        {showPrimaryNav && (
-          <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className={`bg-white shadow-sm border-b border-gray-200 overflow-hidden transition-all duration-300 ease-in-out ${
+          showPrimaryNav ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
           <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center flex-shrink-0">
