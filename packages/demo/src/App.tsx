@@ -189,7 +189,7 @@ const sampleDocuments = [
 
 const App = () => {
   const [result, setResult] = useState<string>('');
-  const [loading, setLoading] = useState(false); // Start with loading false
+  const [loading, setLoading] = useState(true); // Start with loading true since we always load a document
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   // Get initial document from URL hash or default
@@ -353,7 +353,7 @@ const App = () => {
 
   // Load default document on initial render
   useEffect(() => {
-    if (!result && !uploadedFile) {
+    if (!uploadedFile) {
       handleDocumentLoad();
     }
   }, []);
@@ -594,20 +594,22 @@ const App = () => {
           <div className="px-3 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
-              {/* Outline toggle */}
-              <button
-                onClick={() => setShowOutline(!showOutline)}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
-                  showOutline 
-                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-                <span className="hidden sm:inline">Outline</span>
-              </button>
+              {/* Outline toggle - only show if document has more than 1 heading */}
+              {result && extractHeadings(removeFrontmatter(result)).length > 1 && (
+                <button
+                  onClick={() => setShowOutline(!showOutline)}
+                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                    showOutline 
+                      ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+                  <span className="hidden sm:inline">Outline</span>
+                </button>
+              )}
               
               {/* View mode buttons */}
               <div className="flex items-center bg-white rounded-md shadow-sm">
@@ -643,46 +645,52 @@ const App = () => {
                 </button>
               </div>
               
-              {/* Zoom controls - only show in print layout */}
+              
+            </div>
+            
+            {/* Right side controls */}
+            <div className="flex items-center gap-3">
+              {/* Document info */}
+              <div className="hidden lg:flex items-center gap-3">
+                {!loading && result && (
+                  <span className="whitespace-nowrap text-xs text-gray-500 font-sans">{countWords(result)} words</span>
+                )}
+              </div>
+              
+              {/* Zoom controls - show for print layout */}
               {viewMode === 'print' && result && (
-                <div className="hidden sm:flex items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
+                <div className="flex items-center bg-white rounded-md shadow-sm border border-gray-200">
                   <button
                     onClick={() => setPrintScale(Math.max(0.5, printScale - 0.1))}
-                    className="p-1 sm:p-1.5 text-gray-700 hover:bg-gray-200 rounded transition-colors"
+                    className="px-2 py-1 text-gray-600 hover:bg-gray-50 rounded-l-md border-r border-gray-200 transition-colors"
                     title="Zoom out"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                     </svg>
                   </button>
-                  <span className="text-xs sm:text-sm text-gray-600 min-w-[2.5rem] sm:min-w-[3rem] text-center">
+                  <span className="px-3 text-sm text-gray-700 font-medium min-w-[4rem] text-center">
                     {Math.round(printScale * 100)}%
                   </span>
                   <button
                     onClick={() => setPrintScale(Math.min(2, printScale + 0.1))}
-                    className="p-1 sm:p-1.5 text-gray-700 hover:bg-gray-200 rounded transition-colors"
+                    className="px-2 py-1 text-gray-600 hover:bg-gray-50 rounded-r-md border-l border-gray-200 transition-colors"
                     title="Zoom in"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                   </button>
                 </div>
               )}
-            </div>
-            
-            {/* Document info and Nav toggle */}
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-3 text-xs sm:text-sm text-gray-600">
-                {!loading && result && (
-                  <span className="whitespace-nowrap">{countWords(result)} words</span>
-                )}
-              </div>
+              
+              {/* Separator line */}
+              <div className="w-px h-6 bg-gray-300"></div>
               
               {/* Primary nav toggle button */}
               <button
                 onClick={() => setShowPrimaryNav(!showPrimaryNav)}
-                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
                 title={showPrimaryNav ? "Collapse header" : "Expand header"}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -701,8 +709,8 @@ const App = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Collapsible Outline Sidebar */}
-        {showOutline && result && (
+        {/* Collapsible Outline Sidebar - only show if there are headings */}
+        {showOutline && result && extractHeadings(removeFrontmatter(result)).length > 1 && (
           <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto sticky top-0 h-[calc(100vh-var(--nav-height))]" style={{ 
             '--nav-height': showPrimaryNav ? '7rem' : '3rem'
           } as React.CSSProperties}>
@@ -724,7 +732,15 @@ const App = () => {
                             const headings = printContent.querySelectorAll(`h${heading.level}`);
                             for (const h of headings) {
                               if (h.textContent?.includes(heading.text)) {
-                                h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                // Calculate offset for sticky nav bars
+                                const navHeight = showPrimaryNav ? 112 : 56; // Approximate heights
+                                const elementPosition = h.getBoundingClientRect().top + window.pageYOffset;
+                                const offsetPosition = elementPosition - navHeight - 20; // Extra padding
+                                
+                                window.scrollTo({
+                                  top: offsetPosition,
+                                  behavior: 'smooth'
+                                });
                                 break;
                               }
                             }
@@ -736,7 +752,15 @@ const App = () => {
                             const headings = markdownContent.querySelectorAll(`h${heading.level}`);
                             for (const h of headings) {
                               if (h.textContent?.includes(heading.text)) {
-                                h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                // Calculate offset for sticky nav bars
+                                const navHeight = showPrimaryNav ? 112 : 56; // Approximate heights
+                                const elementPosition = h.getBoundingClientRect().top + window.pageYOffset;
+                                const offsetPosition = elementPosition - navHeight - 20; // Extra padding
+                                
+                                window.scrollTo({
+                                  top: offsetPosition,
+                                  behavior: 'smooth'
+                                });
                                 break;
                               }
                             }
@@ -840,17 +864,8 @@ const App = () => {
               </div>
             </div>
           ) : (
-            !result ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No document loaded</h3>
-                  <p className="text-gray-500">Upload a document file or select a sample to convert to Markdown</p>
-                </div>
-              </div>
-            ) : null
+            // Show nothing instead of "No document loaded" since we always have a default document
+            null
           )}
         </div>
       </div>
