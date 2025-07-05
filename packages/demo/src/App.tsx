@@ -50,6 +50,69 @@ const extractHeadings = (markdown: string): Array<{level: number, text: string, 
   return headings;
 };
 
+// Split HTML content into pages for print view
+const splitIntoPages = (html: string): string[] => {
+  // Create a temporary DOM to work with the HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  
+  const pages: string[] = [];
+  let currentPageContent = '';
+  let currentPageLength = 0;
+  
+  // Rough estimate: 60 lines per page (11" page with 1" margins, ~12pt font)
+  const linesPerPage = 60;
+  
+  const processNode = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || '';
+      const lines = text.split('\n').length;
+      
+      if (currentPageLength + lines > linesPerPage && currentPageContent.trim()) {
+        pages.push(currentPageContent);
+        currentPageContent = '';
+        currentPageLength = 0;
+      }
+      
+      currentPageContent += text;
+      currentPageLength += lines;
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as Element;
+      
+      // Force page break before major headings (except if it's the first content)
+      if ((element.tagName === 'H1' || element.tagName === 'H2') && currentPageContent.trim()) {
+        if (currentPageLength > linesPerPage * 0.7) { // If we're more than 70% down the page
+          pages.push(currentPageContent);
+          currentPageContent = '';
+          currentPageLength = 0;
+        }
+      }
+      
+      currentPageContent += `<${element.tagName.toLowerCase()}`;
+      Array.from(element.attributes).forEach(attr => {
+        currentPageContent += ` ${attr.name}="${attr.value}"`;
+      });
+      currentPageContent += '>';
+      
+      element.childNodes.forEach(processNode);
+      currentPageContent += `</${element.tagName.toLowerCase()}>`;
+      
+      // Estimate lines for block elements
+      if (['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI'].includes(element.tagName)) {
+        currentPageLength += 2; // Rough estimate
+      }
+    }
+  };
+  
+  tempDiv.childNodes.forEach(processNode);
+  
+  if (currentPageContent.trim()) {
+    pages.push(currentPageContent);
+  }
+  
+  return pages.length > 0 ? pages : [html];
+};
+
 const App = () => {
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -75,7 +138,7 @@ const App = () => {
     { id: '007.pages', title: 'Additional tests', description: 'Edge cases and variants', format: 'Pages' },
   ];
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [viewMode, setViewMode] = useState<'read' | 'outline'>('read');
+  const [viewMode, setViewMode] = useState<'read' | 'outline' | 'print'>('read');
 
   // Show spinner only after 1 second delay to prevent flickering
   useEffect(() => {
@@ -402,7 +465,7 @@ const App = () => {
                         <div className="flex items-center bg-gray-100 rounded-lg p-1">
                           <button
                             onClick={() => setViewMode('read')}
-                            className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                            className={`px-2 py-1 text-sm font-medium rounded-md transition-colors ${
                               viewMode === 'read'
                                 ? 'bg-white text-gray-900 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
@@ -412,7 +475,7 @@ const App = () => {
                           </button>
                           <button
                             onClick={() => setViewMode('outline')}
-                            className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                            className={`px-2 py-1 text-sm font-medium rounded-md transition-colors ${
                               viewMode === 'outline'
                                 ? 'bg-white text-gray-900 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
@@ -420,17 +483,27 @@ const App = () => {
                           >
                             Outline
                           </button>
+                          <button
+                            onClick={() => setViewMode('print')}
+                            className={`px-2 py-1 text-sm font-medium rounded-md transition-colors ${
+                              viewMode === 'print'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            Print
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="p-6">
+                  <div className={viewMode === 'print' ? '' : 'p-6'}>
                     {viewMode === 'read' ? (
                       <div 
                         className="rendered-markdown prose prose-gray prose-lg max-w-none"
                         dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
                       />
-                    ) : (
+                    ) : viewMode === 'outline' ? (
                       <div className="outline-view">
                         <div className="mb-4">
                           <h4 className="text-sm font-medium text-gray-700 mb-3">Document Outline</h4>
@@ -474,6 +547,27 @@ const App = () => {
                             dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
                           />
                         </div>
+                      </div>
+                    ) : (
+                      // Print view
+                      <div className="print-view">
+                        {(() => {
+                          const htmlContent = marked(removeFrontmatter(result));
+                          const pages = splitIntoPages(htmlContent);
+                          
+                          return pages.map((pageContent, index) => (
+                            <div key={index} className="print-page">
+                              <div 
+                                className="print-content"
+                                dangerouslySetInnerHTML={{ __html: pageContent }}
+                              />
+                              {/* Page number */}
+                              <div className="absolute bottom-4 right-4 text-xs text-gray-500">
+                                Page {index + 1} of {pages.length}
+                              </div>
+                            </div>
+                          ));
+                        })()}
                       </div>
                     )}
                   </div>
