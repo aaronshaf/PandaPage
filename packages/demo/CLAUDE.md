@@ -109,3 +109,18 @@ bun --hot ./index.ts
 ```
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.
+
+## Code Organization
+
+### File Size Policy (Enforced by Pre-commit Hook)
+- **TypeScript/TSX files**: max 500 lines
+- **JavaScript/JSX files**: max 500 lines  
+- **Markdown files**: max 1000 lines
+- **Other text files**: max 300 lines
+
+### Best Practices for Large Files
+- Break files into smaller, focused modules with single responsibilities
+- Extract utility functions to separate files
+- Use barrel exports (index.ts) for clean imports
+- Consider component/function extraction
+- Group related functionality into cohesive modules
