@@ -157,10 +157,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           )}
           
           <div className="print-page-container" style={{
-            transform: `scale(${printScale})`,
-            transformOrigin: 'top center',
-            marginBottom: `${(1 - printScale) * 11 * 96}px` // Adjust margin for scaled height
-          }}>
+            '--print-scale': printScale,
+          } as React.CSSProperties & { '--print-scale': number }}>
             {(() => {
               const htmlContent = marked(removeFrontmatter(result));
               const pages = splitIntoPages(htmlContent);

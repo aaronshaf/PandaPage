@@ -28,21 +28,29 @@ export const Outline: React.FC<OutlineProps> = ({
   const headings = extractHeadings(removeFrontmatter(result));
 
   const handleHeadingClick = (heading: Heading) => {
+    // Find the scrollable document container
+    const scrollContainer = document.querySelector('.document-scroll-container') as HTMLElement;
+    if (!scrollContainer) return;
+
     // Navigate to heading in current view
     if (viewMode === 'print') {
       // Find the heading in print view
-      const printContent = document.querySelector('.print-content');
+      const printContent = scrollContainer.querySelector('.print-view');
       if (printContent) {
         const headingElements = printContent.querySelectorAll(`h${heading.level}`);
         for (const h of headingElements) {
           if (h.textContent?.includes(heading.text)) {
-            // Calculate offset for sticky nav bars
-            const navHeight = showPrimaryNav ? 112 : 56; // Approximate heights
-            const elementPosition = h.getBoundingClientRect().top + window.pageYOffset;
-            const offsetPosition = elementPosition - navHeight - 20; // Extra padding
+            // Calculate position relative to scroll container
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const elementRect = h.getBoundingClientRect();
+            const navHeight = showPrimaryNav ? 112 : 56;
             
-            window.scrollTo({
-              top: offsetPosition,
+            // Calculate scroll position
+            const relativeTop = elementRect.top - containerRect.top;
+            const targetScrollTop = scrollContainer.scrollTop + relativeTop - navHeight - 20;
+            
+            scrollContainer.scrollTo({
+              top: targetScrollTop,
               behavior: 'smooth'
             });
             break;
@@ -51,18 +59,22 @@ export const Outline: React.FC<OutlineProps> = ({
       }
     } else {
       // Find the heading in read view
-      const readContent = document.querySelector('.rendered-markdown');
+      const readContent = scrollContainer.querySelector('.rendered-markdown');
       if (readContent) {
         const headingElements = readContent.querySelectorAll(`h${heading.level}`);
         for (const h of headingElements) {
           if (h.textContent?.includes(heading.text)) {
-            // Calculate offset for sticky nav bars
+            // Calculate position relative to scroll container
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const elementRect = h.getBoundingClientRect();
             const navHeight = showPrimaryNav ? 112 : 56;
-            const elementPosition = h.getBoundingClientRect().top + window.pageYOffset;
-            const offsetPosition = elementPosition - navHeight - 20;
             
-            window.scrollTo({
-              top: offsetPosition,
+            // Calculate scroll position
+            const relativeTop = elementRect.top - containerRect.top;
+            const targetScrollTop = scrollContainer.scrollTop + relativeTop - navHeight - 20;
+            
+            scrollContainer.scrollTo({
+              top: targetScrollTop,
               behavior: 'smooth'
             });
             break;
@@ -74,10 +86,10 @@ export const Outline: React.FC<OutlineProps> = ({
 
   return (
     <div 
-      className="w-64 bg-white border-r border-gray-200 overflow-y-auto sticky top-0 h-[calc(100vh-var(--nav-height))]" 
+      className="w-64 bg-white border-r border-gray-200 sticky top-0 overflow-y-auto" 
       style={{ 
-        '--nav-height': showPrimaryNav ? '7rem' : '3rem'
-      } as React.CSSProperties}
+        height: `calc(100vh - ${showPrimaryNav ? '7rem' : '3.5rem'})` 
+      }}
     >
       <div className="p-4">
         <h3 className="text-sm font-medium text-gray-900 mb-3">Document Outline</h3>

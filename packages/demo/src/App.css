@@ -170,12 +170,12 @@
   background: #f5f5f5;
   padding: 2rem 0 4rem 0; /* Added more bottom padding */
   font-family: 'Times New Roman', serif;
-  overflow-x: auto;
 }
 
 .print-page-container {
   width: fit-content;
   margin: 0 auto;
+  transform: scale(var(--print-scale, 1));
   transform-origin: top center;
 }
 
