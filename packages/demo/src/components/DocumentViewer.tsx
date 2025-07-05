@@ -25,6 +25,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [showPageIndicator, setShowPageIndicator] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Calculate print scale
   const calculatePrintScale = () => {
@@ -79,6 +80,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       
       setCurrentPage(currentVisiblePage);
       
+      // Update scroll progress for page indicator positioning
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+      setScrollProgress(progress);
+      
       // Show page indicator temporarily when scrolling
       setShowPageIndicator(true);
       clearTimeout(window.pageIndicatorTimeout);
@@ -126,7 +133,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         <div className="print-view relative">
           {/* Page Indicator */}
           {showPageIndicator && totalPages > 0 && (
-            <div className="fixed top-1/2 right-8 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30">
+            <div 
+              className="fixed right-8 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
+              style={{
+                top: `${20 + (scrollProgress * ((typeof window !== 'undefined' ? window.innerHeight : 800) - 120))}px`,
+                transform: 'translateY(-50%)'
+              }}
+            >
               <div className="text-sm font-medium font-sans">
                 Page {currentPage} of {totalPages}
               </div>
