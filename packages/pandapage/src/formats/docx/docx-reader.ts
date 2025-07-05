@@ -139,16 +139,16 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
         // Parse the run content to extract text and special elements in order
         let runText = "";
         
-        // Find all text and special elements in document order
-        const elementRegex = /<w:(t[^>]*>([^<]*)<\/w:t|tab\s*\/|br\s*\/)>/g;
+        // More comprehensive regex to match elements in order they appear
+        const allElementsRegex = /<w:(?:t[^>]*>([^<]*)<\/w:t|tab\s*\/|br\s*\/)>/g;
         let elementMatch;
         
-        while ((elementMatch = elementRegex.exec(runContent)) !== null) {
+        while ((elementMatch = allElementsRegex.exec(runContent)) !== null) {
           const fullMatch = elementMatch[0];
           
           if (fullMatch.includes('<w:t')) {
-            // Extract text content
-            const textContent = elementMatch[2] || "";
+            // Extract text content - the captured group is at index 1
+            const textContent = elementMatch[1] || "";
             runText += textContent;
           } else if (fullMatch.includes('<w:tab')) {
             // Add tab character
