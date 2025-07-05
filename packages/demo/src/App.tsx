@@ -171,7 +171,7 @@ const splitIntoPages = (html: string): string[] => {
 
 const App = () => {
   const [result, setResult] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<string>(`${getBasePath()}/001.docx`);
@@ -196,18 +196,24 @@ const App = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [viewMode, setViewMode] = useState<'read' | 'outline' | 'print'>('read');
 
-  // Show spinner only after 1 second delay to prevent flickering
+  // Show spinner - immediately on first load, with delay on subsequent loads
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (loading) {
-      timer = setTimeout(() => {
+      if (!result) {
+        // First load - show spinner immediately
         setShowSpinner(true);
-      }, 1000);
+      } else {
+        // Subsequent loads - delay to prevent flickering
+        timer = setTimeout(() => {
+          setShowSpinner(true);
+        }, 1000);
+      }
     } else {
       setShowSpinner(false);
     }
     return () => clearTimeout(timer);
-  }, [loading]);
+  }, [loading, result]);
 
   // Load default document on initial render
   useEffect(() => {
@@ -657,10 +663,10 @@ const App = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p className="text-gray-500">Converting document to Markdown...</p>
+                    <p className="text-gray-500">{result ? 'Converting document to Markdown...' : 'Loading document...'}</p>
                   </div>
                 </div>
-              ) : (
+              ) : !result ? (
                 <div className="p-12 text-center">
                   <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
