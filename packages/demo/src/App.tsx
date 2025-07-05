@@ -38,6 +38,30 @@ const sampleDocuments = [
   { id: '010.docx', title: 'Change Management Process' },
 ];
 
+// Parse URL hash for document and view mode (moved outside component)
+const parseUrlHash = () => {
+  if (typeof window === 'undefined') return { docId: '', mode: 'read' as const };
+  
+  const hash = window.location.hash.slice(1); // Remove #
+  const parts = hash.split('&');
+  
+  let docId = '';
+  let mode: 'read' | 'print' = 'read';
+  
+  for (const part of parts) {
+    if (part.includes('=')) {
+      const [key, value] = part.split('=');
+      if (key === 'view' && (value === 'read' || value === 'print')) {
+        mode = value;
+      }
+    } else if (part.endsWith('.docx') || part.endsWith('.pages')) {
+      docId = part;
+    }
+  }
+  
+  return { docId, mode };
+};
+
 const App: React.FC = () => {
   // Document state
   const [selectedDocument, setSelectedDocument] = useState<string>('');
@@ -48,7 +72,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // UI state
-  const [viewMode, setViewMode] = useState<'read' | 'print'>(getInitialViewMode());
+  const [viewMode, setViewMode] = useState<'read' | 'print'>(() => parseUrlHash().mode);
   const [showOutline, setShowOutline] = useState(false);
   const [showPrimaryNav, setShowPrimaryNav] = useState(true);
   const [printScale, setPrintScale] = useState(1);
@@ -58,28 +82,6 @@ const App: React.FC = () => {
   // Computed values
   const wordCount = result ? countWords(removeFrontmatter(result)) : 0;
 
-  // Parse URL hash for document and view mode
-  const parseUrlHash = () => {
-    const hash = window.location.hash.slice(1); // Remove #
-    const parts = hash.split('&');
-    
-    let docId = '';
-    let mode: 'read' | 'print' = 'read';
-    
-    for (const part of parts) {
-      if (part.includes('=')) {
-        const [key, value] = part.split('=');
-        if (key === 'view' && (value === 'read' || value === 'print')) {
-          mode = value;
-        }
-      } else if (part.endsWith('.docx') || part.endsWith('.pages')) {
-        docId = part;
-      }
-    }
-    
-    return { docId, mode };
-  };
-
   // Get initial document from URL hash or default
   const getInitialDocument = () => {
     const { docId } = parseUrlHash();
@@ -87,12 +89,6 @@ const App: React.FC = () => {
       return `${getBasePath()}/${docId}`;
     }
     return `${getBasePath()}/001.docx`;
-  };
-
-  // Get initial view mode from URL hash or default
-  const getInitialViewMode = (): 'read' | 'print' => {
-    const { mode } = parseUrlHash();
-    return mode;
   };
 
   // Update URL hash with current document and view mode
