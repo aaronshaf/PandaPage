@@ -8,6 +8,15 @@ import {
   type DocxRun,
   readDocx,
 } from "./docx-reader";
+import {
+  type EnhancedDocxDocument,
+  type DocxMetadata,
+  type DocxElement,
+  type DocxTable,
+  type DocxTableRow,
+  type DocxTableCell,
+  readEnhancedDocx,
+} from "./docx-reader-enhanced";
 
 // Convert DOCX document to Markdown
 export const convertDocxToMarkdown = (document: DocxDocument): string => {
@@ -40,6 +49,236 @@ export const convertDocxToMarkdown = (document: DocxDocument): string => {
   return lines.join("\n");
 };
 
+// Convert enhanced DOCX document to Markdown with frontmatter
+export const convertEnhancedDocxToMarkdown = (document: EnhancedDocxDocument): string => {
+  const lines: string[] = [];
+  
+  // Generate YAML frontmatter
+  const frontmatter = generateFrontmatter(document.metadata);
+  if (frontmatter.trim()) {  // Only add frontmatter if there's actual content
+    lines.push("---");
+    lines.push(frontmatter);
+    lines.push("---");
+    lines.push("");
+  }
+  
+  // Convert elements (paragraphs and tables)
+  const content = convertDocxElementsToMarkdown(document.elements, document.numbering);
+  lines.push(content);
+  
+  return lines.join("\n");
+};
+
+// Convert DocxElement array to Markdown
+const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: DocxNumbering): string => {
+  const lines: string[] = [];
+  const listCounters = new Map<string, number>(); // Track counters for numbered lists
+  let previousWasListItem = false;
+
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i];
+    if (!element) continue;
+    
+    const nextElement = elements[i + 1];
+
+    if (element.type === "paragraph") {
+      const text = convertParagraphToMarkdown(element, numbering, listCounters);
+      if (text) {
+        lines.push(text);
+
+        const isListItem = !!element.numId;
+        const isHeading = element.style?.startsWith("Heading");
+        const nextIsListItem = nextElement?.type === "paragraph" && !!nextElement.numId;
+        const nextIsHeading = nextElement?.type === "paragraph" && nextElement.style?.startsWith("Heading");
+
+        // Add spacing logic:
+        // 1. Always add space after headings
+        // 2. Add space between non-list paragraphs
+        // 3. Add space when transitioning out of lists
+        // 4. Add space before headings (unless we're already adding one)
+        if (isHeading || 
+            (!isListItem && !nextIsListItem && nextElement) ||
+            (isListItem && !nextIsListItem && nextElement) ||
+            (!isHeading && nextIsHeading)) {
+          lines.push("");
+        }
+
+        // Reset list counters when exiting a list
+        if (!isListItem && previousWasListItem) {
+          listCounters.clear();
+        }
+        
+        previousWasListItem = isListItem;
+      }
+    } else if (element.type === "table") {
+      const tableMarkdown = convertTableToMarkdown(element, numbering);
+      if (tableMarkdown) {
+        lines.push(tableMarkdown);
+        
+        // Add spacing after table if there's a next element
+        if (nextElement) {
+          lines.push("");
+        }
+        
+        listCounters.clear();
+        previousWasListItem = false;
+      }
+    }
+  }
+
+  // Remove trailing empty lines
+  while (lines.length > 0 && lines[lines.length - 1] === "") {
+    lines.pop();
+  }
+
+  return lines.join("\n");
+};
+
+// Convert a table to Markdown
+const convertTableToMarkdown = (table: DocxTable, numbering?: DocxNumbering): string => {
+  if (table.rows.length === 0) return "";
+  
+  const lines: string[] = [];
+  const listCounters = new Map<string, number>();
+  
+  // Process each row
+  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+    const row = table.rows[rowIndex];
+    if (!row) continue;
+    
+    const isHeaderRow = row.properties?.isHeader || rowIndex === 0; // First row is header by default
+    
+    // Convert cell contents to text
+    const cellTexts = row.cells.map(cell => convertTableCellToText(cell, numbering, listCounters));
+    
+    // Create the markdown table row
+    const rowText = `| ${cellTexts.join(" | ")} |`;
+    lines.push(rowText);
+    
+    // Add header separator after first row
+    if (isHeaderRow) {
+      const separator = `| ${cellTexts.map(() => "---").join(" | ")} |`;
+      lines.push(separator);
+    }
+  }
+  
+  return lines.join("\n");
+};
+
+// Convert table cell content to plain text
+const convertTableCellToText = (cell: DocxTableCell, numbering?: DocxNumbering, listCounters?: Map<string, number>): string => {
+  const texts: string[] = [];
+  
+  for (const paragraph of cell.content) {
+    const text = convertParagraphToMarkdown(paragraph, numbering, listCounters);
+    if (text) {
+      // Remove markdown formatting from cell content to keep table clean
+      const cleanText = text
+        .replace(/^#+\s+/, "") // Remove heading markers
+        .replace(/^\s*[-*+]\s+/, "") // Remove bullet points
+        .replace(/^\s*\d+\.\s+/, "") // Remove numbered list markers
+        .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold formatting
+        .replace(/\*(.*?)\*/g, "$1") // Remove italic formatting
+        .replace(/_(.*)_/g, "$1") // Remove italic formatting
+        .replace(/<u>(.*?)<\/u>/g, "$1") // Remove underline formatting
+        .trim();
+      
+      if (cleanText) {
+        texts.push(cleanText);
+      }
+    }
+  }
+  
+  // Join multiple paragraphs with space, escape pipe characters
+  return texts.join(" ").replace(/\|/g, "\\|");
+};
+
+// Generate YAML frontmatter from metadata
+const generateFrontmatter = (metadata: DocxMetadata): string => {
+  const frontmatterLines: string[] = [];
+  
+  // Only include actual document properties, not processing metadata
+  
+  // Core document properties from docProps/core.xml
+  if (metadata.title) {
+    frontmatterLines.push(`title: "${escapeYamlString(metadata.title)}"`);
+  }
+  if (metadata.subject) {
+    frontmatterLines.push(`subject: "${escapeYamlString(metadata.subject)}"`);
+  }
+  if (metadata.description) {
+    frontmatterLines.push(`description: "${escapeYamlString(metadata.description)}"`);
+  }
+  if (metadata.creator) {
+    frontmatterLines.push(`author: "${escapeYamlString(metadata.creator)}"`);
+  }
+  if (metadata.keywords && metadata.keywords.length > 0) {
+    frontmatterLines.push(`keywords: [${metadata.keywords.map((k: string) => `"${escapeYamlString(k)}"`).join(", ")}]`);
+  }
+  if (metadata.language) {
+    frontmatterLines.push(`language: "${metadata.language}"`);
+  }
+  
+  // Document creation and modification dates from the document
+  if (metadata.created) {
+    frontmatterLines.push(`created: ${metadata.created.toISOString()}`);
+  }
+  if (metadata.modified) {
+    frontmatterLines.push(`modified: ${metadata.modified.toISOString()}`);
+  }
+  
+  // Document statistics from docProps/app.xml
+  if (metadata.pages) {
+    frontmatterLines.push(`pages: ${metadata.pages}`);
+  }
+  if (metadata.words) {
+    frontmatterLines.push(`words: ${metadata.words}`);
+  }
+  if (metadata.characters) {
+    frontmatterLines.push(`characters: ${metadata.characters}`);
+  }
+  if (metadata.paragraphs) {
+    frontmatterLines.push(`paragraphs: ${metadata.paragraphs}`);
+  }
+  
+  // Application info from docProps/app.xml
+  if (metadata.application) {
+    frontmatterLines.push(`application: "${escapeYamlString(metadata.application)}"`);
+  }
+  if (metadata.appVersion) {
+    frontmatterLines.push(`app_version: "${escapeYamlString(metadata.appVersion)}"`);
+  }
+  if (metadata.company) {
+    frontmatterLines.push(`company: "${escapeYamlString(metadata.company)}"`);
+  }
+  if (metadata.manager) {
+    frontmatterLines.push(`manager: "${escapeYamlString(metadata.manager)}"`);
+  }
+  if (metadata.template) {
+    frontmatterLines.push(`template: "${escapeYamlString(metadata.template)}"`);
+  }
+  
+  // Document outline/TOC extracted from document structure
+  if (metadata.outline && metadata.outline.length > 0) {
+    frontmatterLines.push(`outline:`);
+    for (const item of metadata.outline) {
+      const indent = "  ".repeat(item.level);
+      frontmatterLines.push(`${indent}- title: "${escapeYamlString(item.title)}"`);
+      frontmatterLines.push(`${indent}  level: ${item.level}`);
+      if (item.style) {
+        frontmatterLines.push(`${indent}  style: "${escapeYamlString(item.style)}"`);
+      }
+    }
+  }
+  
+  return frontmatterLines.join("\n");
+};
+
+// Helper to escape YAML strings
+const escapeYamlString = (str: string): string => {
+  return str.replace(/"/g, '\\"').replace(/\n/g, "\\n");
+};
+
 // Convert a single paragraph to Markdown
 const convertParagraphToMarkdown = (
   paragraph: DocxParagraph,
@@ -56,6 +295,15 @@ const convertParagraphToMarkdown = (
 
   // Apply paragraph-level formatting based on style
   switch (paragraph.style) {
+    case "Title":
+      return `# ${combinedText}`;
+
+    case "Subtitle":
+      return `## ${combinedText}`;
+
+    case "Author":
+      return `**${combinedText}**`;
+
     case "Heading":
     case "Heading 1":
       return `# ${combinedText}`;
@@ -64,7 +312,7 @@ const convertParagraphToMarkdown = (
       return `## ${combinedText}`;
 
     case "Heading 3":
-      return `## ${combinedText}`;
+      return `### ${combinedText}`;
 
     case "Heading 4":
       return `#### ${combinedText}`;
@@ -176,6 +424,25 @@ export const docxToMarkdown = (
     const markdown = convertDocxToMarkdown(document);
 
     debug.log("Markdown length:", markdown.length);
+
+    return markdown;
+  });
+
+// Enhanced function to convert DOCX buffer to Markdown with frontmatter
+export const docxToMarkdownWithMetadata = (
+  buffer: ArrayBuffer,
+): Effect.Effect<string, import("./docx-reader-enhanced").DocxParseError> =>
+  Effect.gen(function* () {
+    debug.log("Converting DOCX to Markdown with metadata...");
+
+    // Read and parse the DOCX file with enhanced reader
+    const document = yield* readEnhancedDocx(buffer);
+
+    // Convert to Markdown with frontmatter
+    const markdown = convertEnhancedDocxToMarkdown(document);
+
+    debug.log("Enhanced Markdown length:", markdown.length);
+    debug.log("Processing time:", document.processingTime, "ms");
 
     return markdown;
   });

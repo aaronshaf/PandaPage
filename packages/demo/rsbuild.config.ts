@@ -9,5 +9,13 @@ export default defineConfig({
   // Configure for GitHub Pages deployment
   output: {
     assetPrefix: process.env.NODE_ENV === 'production' ? '/PandaPage/' : '/'
-  }
+  },
+  tools: {
+    postcss: {
+      plugins: [
+        '@tailwindcss/postcss',
+        'autoprefixer',
+      ],
+    },
+  },
 });

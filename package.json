@@ -10,7 +10,8 @@
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
     "test": "bun run --filter '*' test",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "sync-docs": "bun scripts/sync-documents.js"
   },
   "simple-git-hooks": {
     "pre-commit": "cd packages/pandapage && bun run precommit"

@@ -1,9 +1,35 @@
 import { useState, useEffect } from 'react';
-import { renderDocx } from '@pandapage/pandapage';
+import { marked } from 'marked';
+import { renderDocxWithMetadata, renderPages } from '@pandapage/pandapage';
+
+// Configure marked for better rendering
+marked.setOptions({
+  gfm: true, // GitHub Flavored Markdown
+  headerIds: false, // Don't add IDs to headers
+  mangle: false, // Don't mangle email addresses
+});
 
 // Get base path for GitHub Pages deployment
 const getBasePath = () => {
   return process.env.NODE_ENV === 'production' ? '/PandaPage' : '';
+};
+
+// Remove YAML frontmatter from markdown for rendering
+const removeFrontmatter = (markdown: string): string => {
+  // Check if markdown starts with frontmatter (---)
+  if (markdown.startsWith('---\n')) {
+    const endIndex = markdown.indexOf('\n---\n', 4);
+    if (endIndex !== -1) {
+      // Return content after the closing ---
+      return markdown.substring(endIndex + 5).trim();
+    }
+  }
+  return markdown;
+};
+
+// Count words in text
+const countWords = (text: string): number => {
+  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 };
 
 const App = () => {
@@ -11,48 +37,93 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
-  const [selectedDocx, setSelectedDocx] = useState<string>(`${getBasePath()}/basic-formatting.docx`);
+  const [selectedDocument, setSelectedDocument] = useState<string>(`${getBasePath()}/001.docx`);
+  
+  // Document samples data
+  const sampleDocuments = [
+    { id: '001.docx', title: 'Basic formatting', description: 'Headings, text styles, and simple lists', format: 'DOCX' },
+    { id: '001.pages', title: 'Basic formatting', description: 'Headings, text styles, and simple lists', format: 'Pages' },
+    { id: '002.docx', title: 'Find and replace', description: 'Template with placeholder content', format: 'DOCX' },
+    { id: '002.pages', title: 'Find and replace', description: 'Template with placeholder content', format: 'Pages' },
+    { id: '003.docx', title: 'Open source policy', description: 'Multi-level numbered lists', format: 'DOCX' },
+    { id: '003.pages', title: 'Open source policy', description: 'Multi-level numbered lists', format: 'Pages' },
+    { id: '004.docx', title: 'Collaboration guide', description: 'Complex tables and TOC', format: 'DOCX' },
+    { id: '004.pages', title: 'Collaboration guide', description: 'Complex tables and TOC', format: 'Pages' },
+    { id: '005.docx', title: 'DOCX demo', description: 'Tables, images, and footnotes', format: 'DOCX' },
+    { id: '005.pages', title: 'DOCX demo', description: 'Tables, images, and footnotes', format: 'Pages' },
+    { id: '006.docx', title: 'Academic paper', description: 'Professional formatting', format: 'DOCX' },
+    { id: '006.pages', title: 'Academic paper', description: 'Professional formatting', format: 'Pages' },
+    { id: '007.docx', title: 'Additional tests', description: 'Edge cases and variants', format: 'DOCX' },
+    { id: '007.pages', title: 'Additional tests', description: 'Edge cases and variants', format: 'Pages' },
+  ];
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [viewMode, setViewMode] = useState<'raw' | 'rendered'>('rendered');
 
-  // Show spinner only after 500ms delay
+  // Show spinner only after 1 second delay to prevent flickering
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (loading) {
       timer = setTimeout(() => {
         setShowSpinner(true);
-      }, 500);
+      }, 1000);
     } else {
       setShowSpinner(false);
     }
     return () => clearTimeout(timer);
   }, [loading]);
 
-  const handleDocxLoad = async () => {
+  // Load default document on initial render
+  useEffect(() => {
+    if (!result && !uploadedFile) {
+      handleDocumentLoad();
+    }
+  }, []);
+
+  const handleDocumentLoad = async (docPath?: string) => {
     const startTime = performance.now();
     setLoading(true);
-    // Don't clear result immediately - keep showing previous content
+    // Keep showing previous content while loading
     setProcessingTime(null);
     try {
-      let docxSource: string | File;
+      let documentSource: string | File;
       if (uploadedFile) {
-        docxSource = uploadedFile;
+        documentSource = uploadedFile;
       } else {
-        docxSource = selectedDocx;
+        documentSource = docPath || selectedDocument;
       }
       
       let arrayBuffer: ArrayBuffer;
-      if (typeof docxSource === 'string') {
+      if (typeof documentSource === 'string') {
         // Fetch from URL
-        const response = await fetch(docxSource);
+        const response = await fetch(documentSource);
         arrayBuffer = await response.arrayBuffer();
       } else {
         // Read from File
-        arrayBuffer = await docxSource.arrayBuffer();
+        arrayBuffer = await documentSource.arrayBuffer();
       }
       
-      const markdown = await renderDocx(arrayBuffer);
+      // Determine file type and use appropriate renderer
+      let markdown: string;
+      const fileName = typeof documentSource === 'string' ? documentSource : documentSource.name;
+      
+      if (fileName.endsWith('.docx')) {
+        markdown = await renderDocxWithMetadata(arrayBuffer);
+      } else if (fileName.endsWith('.pages')) {
+        markdown = await renderPages(arrayBuffer);
+      } else {
+        throw new Error('Unsupported file format. Please use .docx or .pages files.');
+      }
+      
       setResult(markdown);  // Only update when new content is ready
       setProcessingTime(performance.now() - startTime);
+      
+      // Scroll to top of the results container
+      setTimeout(() => {
+        const resultsContainer = document.querySelector('.rendered-markdown, pre');
+        if (resultsContainer) {
+          resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     } catch (error) {
       setResult(`Error: ${error}`);
     } finally {
@@ -62,7 +133,11 @@ const App = () => {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.docx'))) {
+    if (file && (
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+      file.name.endsWith('.docx') || 
+      file.name.endsWith('.pages')
+    )) {
       setUploadedFile(file);
       setResult('');
     }
@@ -116,7 +191,7 @@ const App = () => {
               </div>
               <div className="ml-4">
                 <h1 className="text-xl font-semibold text-gray-900">PandaPage</h1>
-                <p className="text-sm text-gray-500">DOCX to Markdown Converter</p>
+                <p className="text-sm text-gray-500">Document to Markdown Converter</p>
               </div>
             </div>
             <a
@@ -142,14 +217,14 @@ const App = () => {
               <h2 className="text-lg font-medium text-gray-900 mb-4">Document Source</h2>
               
               {/* File Upload */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload DOCX Document
+                  Upload Document
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
-                  <div className="space-y-1 text-center">
+                <div className="mt-1 flex justify-center px-4 py-4 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+                  <div className="text-center">
                     <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
+                      className="mx-auto h-8 w-8 text-gray-400"
                       stroke="currentColor"
                       fill="none"
                       viewBox="0 0 48 48"
@@ -162,7 +237,7 @@ const App = () => {
                         strokeLinejoin="round"
                       />
                     </svg>
-                    <div className="flex text-sm text-gray-600">
+                    <div className="mt-1 flex text-sm text-gray-600">
                       <label
                         htmlFor="file-upload"
                         className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
@@ -172,14 +247,14 @@ const App = () => {
                           id="file-upload"
                           name="file-upload"
                           type="file"
-                          accept=".docx"
+                          accept=".docx,.pages"
                           className="sr-only"
                           onChange={handleFileUpload}
                         />
                       </label>
                       <p className="pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs text-gray-500">DOCX files up to 10MB</p>
+                    <p className="text-xs text-gray-500 mt-1">DOCX and Pages files up to 10MB</p>
                   </div>
                 </div>
                 {uploadedFile && (
@@ -200,42 +275,80 @@ const App = () => {
                 )}
               </div>
 
-              {/* Sample DOCX Files */}
-              <div className="mb-6">
-                <label htmlFor="sample-docx" className="block text-sm font-medium text-gray-700 mb-2">
-                  Or select a sample
+              {/* Sample Document Cards */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Or select a sample document
                 </label>
-                <div className="relative">
-                  <select
-                    id="sample-docx"
-                    value={selectedDocx}
-                    onChange={(e) => setSelectedDocx(e.target.value)}
-                    disabled={!!uploadedFile}
-                    className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 pr-8 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 transition-colors"
-                  >
-                    <option value={`${getBasePath()}/basic-formatting.docx`}>Basic Formatting - Headings & Text Styles</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                    </svg>
-                  </div>
+                <div className="grid grid-cols-1 gap-1.5 max-h-96 overflow-y-auto pr-1">
+                  {sampleDocuments.map((doc) => {
+                    const docPath = `${getBasePath()}/${doc.id}`;
+                    const isSelected = selectedDocument === docPath;
+                    return (
+                      <button
+                        key={doc.id}
+                        onClick={() => {
+                          setSelectedDocument(docPath);
+                          // Trigger conversion immediately
+                          handleDocumentLoad(docPath);
+                        }}
+                        disabled={!!uploadedFile}
+                        className={`text-left px-3 py-2 rounded border transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-50 shadow-sm'
+                            : 'border-gray-200 bg-white hover:border-indigo-200 hover:bg-indigo-25 hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <h4 className="text-xs font-medium text-gray-900">
+                                {doc.title}
+                              </h4>
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0 ${
+                                doc.format === 'DOCX' 
+                                  ? 'bg-blue-100 text-blue-800' 
+                                  : 'bg-purple-100 text-purple-800'
+                              }`}>
+                                {doc.format}
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 leading-tight mb-0.5">
+                              {doc.description}
+                            </p>
+                            <p className="text-xs text-gray-400 font-mono">
+                              {doc.id}
+                            </p>
+                          </div>
+                          {isSelected && (
+                            <div className="ml-2 flex-shrink-0">
+                              <svg className="h-3.5 w-3.5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Action Button */}
-              <div className="space-y-3">
-                <button
-                  onClick={handleDocxLoad}
-                  disabled={loading}
-                  className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  Convert to Markdown
-                </button>
-              </div>
+              {/* Action Button - Only show for uploaded files */}
+              {uploadedFile && (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleDocumentLoad()}
+                    disabled={loading}
+                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Convert to Markdown
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -255,23 +368,54 @@ const App = () => {
                         </h3>
                       </div>
                       <div className="flex items-center gap-3">
+                        {/* Stats */}
                         <span className="text-sm text-gray-500">
-                          {result.length} characters
+                          {countWords(result)} words
                         </span>
                         {processingTime && (
                           <span className="text-sm text-gray-500">
                             {processingTime.toFixed(0)}ms
                           </span>
                         )}
+                        {/* View Mode Toggle */}
+                        <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                          <button
+                            onClick={() => setViewMode('rendered')}
+                            className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                              viewMode === 'rendered'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            Rendered
+                          </button>
+                          <button
+                            onClick={() => setViewMode('raw')}
+                            className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                              viewMode === 'raw'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            Raw
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="relative">
-                      <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 rounded-lg p-4 overflow-auto max-h-[600px]">
-                        {result}
-                      </pre>
-                    </div>
+                    {viewMode === 'raw' ? (
+                      <div className="relative">
+                        <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 rounded-lg p-4 overflow-auto max-h-[600px]">
+                          {result}
+                        </pre>
+                      </div>
+                    ) : (
+                      <div 
+                        className="rendered-markdown prose prose-gray prose-lg max-w-none"
+                        dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
+                      />
+                    )}
                   </div>
                 </>
               ) : loading && showSpinner ? (
@@ -281,7 +425,7 @@ const App = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p className="text-gray-500">Converting DOCX to Markdown...</p>
+                    <p className="text-gray-500">Converting document to Markdown...</p>
                   </div>
                 </div>
               ) : (
@@ -290,7 +434,7 @@ const App = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No document loaded</h3>
-                  <p className="text-gray-500">Upload a DOCX file or select a sample to convert to Markdown</p>
+                  <p className="text-gray-500">Upload a document file or select a sample to convert to Markdown</p>
                 </div>
               )}
             </div>

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 async function copyAssets() {
-  const assetsDir = join(__dirname, '../../../assets/examples');
+  const assetsDir = join(__dirname, '../../../documents');
   const publicDir = join(__dirname, '../public');
   
   try {

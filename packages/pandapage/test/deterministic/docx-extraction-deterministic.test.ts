@@ -7,13 +7,13 @@ import { docxToMarkdown } from "../../src/formats/docx/docx-to-markdown";
 
 // Helper to load DOCX file
 const loadDocx = (filename: string): ArrayBuffer => {
-  const docxPath = path.join(__dirname, "../..", filename);
+  const docxPath = path.join(__dirname, "../../../../documents", filename);
   const buffer = fs.readFileSync(docxPath);
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 };
 
 test("DOCX reader can extract text from basic-formatting.docx", async () => {
-  const buffer = loadDocx("basic-formatting.docx");
+  const buffer = loadDocx("001.docx");
 
   const document = await Effect.runPromise(readDocx(buffer));
 
@@ -33,7 +33,7 @@ test("DOCX reader can extract text from basic-formatting.docx", async () => {
 });
 
 test("DOCX reader correctly identifies paragraph styles", async () => {
-  const buffer = loadDocx("basic-formatting.docx");
+  const buffer = loadDocx("001.docx");
 
   const document = await Effect.runPromise(readDocx(buffer));
 
@@ -55,7 +55,7 @@ test("DOCX reader correctly identifies paragraph styles", async () => {
 });
 
 test("DOCX reader correctly identifies text formatting", async () => {
-  const buffer = loadDocx("basic-formatting.docx");
+  const buffer = loadDocx("001.docx");
 
   const document = await Effect.runPromise(readDocx(buffer));
 
@@ -82,7 +82,7 @@ test("DOCX reader correctly identifies text formatting", async () => {
 });
 
 test("DOCX to Markdown conversion produces correct output", async () => {
-  const buffer = loadDocx("basic-formatting.docx");
+  const buffer = loadDocx("001.docx");
 
   const markdown = await Effect.runPromise(docxToMarkdown(buffer));
 
@@ -92,7 +92,7 @@ test("DOCX to Markdown conversion produces correct output", async () => {
   // Should have headings with proper markdown syntax
   expect(lines).toContain("# Heading 1");
   expect(lines).toContain("## Heading 2");
-  expect(lines).toContain("## Heading 3");
+  expect(lines).toContain("### Heading 3");
 
   // Should have body text
   expect(markdown).toContain("Body text.");
@@ -108,7 +108,7 @@ test("DOCX to Markdown conversion produces correct output", async () => {
 });
 
 test("DOCX to Markdown conversion matches expected output", async () => {
-  const buffer = loadDocx("basic-formatting.docx");
+  const buffer = loadDocx("001.docx");
 
   const markdown = await Effect.runPromise(docxToMarkdown(buffer));
 
@@ -117,7 +117,7 @@ test("DOCX to Markdown conversion matches expected output", async () => {
 
 ## Heading 2
 
-## Heading 3
+### Heading 3
 
 Body text.
 _Italicized test._

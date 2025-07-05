@@ -62,6 +62,17 @@ export async function renderDocx(buffer: ArrayBuffer): Promise<string> {
   );
 }
 
+export async function renderDocxWithMetadata(buffer: ArrayBuffer): Promise<string> {
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const { docxToMarkdownWithMetadata } = yield* Effect.promise(
+        () => import("./src/formats/docx/docx-to-markdown"),
+      );
+      return yield* docxToMarkdownWithMetadata(buffer);
+    }),
+  );
+}
+
 export async function renderPages(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
