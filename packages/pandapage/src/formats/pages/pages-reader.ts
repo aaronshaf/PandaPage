@@ -3,12 +3,9 @@ import * as S from "@effect/schema/Schema";
 import { debug } from "../../common/debug";
 
 // Error types
-export class PagesParseError extends S.TaggedError<PagesParseError>()(
-  "PagesParseError",
-  {
-    message: S.String,
-  }
-) {}
+export class PagesParseError extends S.TaggedError<PagesParseError>()("PagesParseError") {
+  readonly message!: string;
+}
 
 // Basic Pages structure types (similar to DOCX but for Pages)
 export interface PagesParagraph {

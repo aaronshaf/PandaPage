@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-export default defineConfig({
+const config = defineConfig({
   testDir: './test/browser',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

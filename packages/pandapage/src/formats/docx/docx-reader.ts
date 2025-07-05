@@ -3,12 +3,9 @@ import * as S from "@effect/schema/Schema";
 import { debug } from "../../common/debug";
 
 // Error types
-export class DocxParseError extends S.TaggedError<DocxParseError>()(
-  "DocxParseError",
-  {
-    message: S.String,
-  }
-) {}
+export class DocxParseError extends S.TaggedError<DocxParseError>()("DocxParseError") {
+  readonly message!: string;
+}
 
 // Basic DOCX structure types
 export interface DocxParagraph {
@@ -60,9 +57,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       // We need to unzip and parse the document.xml
       const { unzipSync, strFromU8 } = yield* Effect.tryPromise({
         try: () => import('fflate'),
-        catch: (error) => new DocxParseError({
-          message: `Failed to load fflate library: ${error}`
-        })
+        catch: (error) => new DocxParseError({ message: `Failed to load fflate library: ${error}` })
       });
       
       // Convert ArrayBuffer to Uint8Array
@@ -74,9 +69,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       // Get the main document content
       const documentXml = unzipped['word/document.xml'];
       if (!documentXml) {
-        return yield* Effect.fail(new DocxParseError({
-          message: "No word/document.xml found in DOCX file"
-        }));
+        return yield* Effect.fail(new DocxParseError({ message: "No word/document.xml found in DOCX file" }));
       }
       
       // Convert to string

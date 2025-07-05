@@ -3,12 +3,9 @@ import * as S from "@effect/schema/Schema";
 import { debug } from "../../common/debug";
 
 // Error types
-export class KeyParseError extends S.TaggedError<KeyParseError>()(
-  "KeyParseError",
-  {
-    message: S.String,
-  }
-) {}
+export class KeyParseError extends S.TaggedError<KeyParseError>()("KeyParseError") {
+  readonly message!: string;
+}
 
 // Basic Keynote structure types
 export interface KeySlide {

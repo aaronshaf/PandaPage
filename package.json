@@ -13,7 +13,7 @@
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
-    "pre-commit": "cd packages/pandapage && LOG_LEVEL=None bun run test:deterministic"
+    "pre-commit": "cd packages/pandapage && bun run precommit"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -1,6 +1,7 @@
 import { Effect, Stream, Chunk } from "effect";
 import * as S from "@effect/schema/Schema";
-import { WorkerTask, WorkerResult, createTransferableTask, shouldUseWorker } from "./worker-pool";
+import { createTransferableTask, shouldUseWorker } from "./worker-pool";
+import type { WorkerTask, WorkerResult } from "./worker-pool";
 import { debug } from "../common/debug";
 
 // Progress callback type
@@ -23,13 +24,10 @@ const WORKER_URLS: Record<WorkerTask["type"], string> = {
 };
 
 // Parse error
-export class WorkerParseError extends S.TaggedError<WorkerParseError>()(
-  "WorkerParseError",
-  {
-    message: S.String,
-    taskId: S.String,
-  }
-) {}
+export class WorkerParseError extends S.TaggedError<WorkerParseError>()("WorkerParseError") {
+  readonly message!: string;
+  readonly taskId!: string;
+}
 
 // Create a worker for a specific document type
 const createWorker = (type: WorkerTask["type"]): Worker => {

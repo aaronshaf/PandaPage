@@ -3,12 +3,9 @@ import * as S from "@effect/schema/Schema";
 import { debug } from "../../common/debug";
 
 // Error types
-export class PptxParseError extends S.TaggedError<PptxParseError>()(
-  "PptxParseError",
-  {
-    message: S.String,
-  }
-) {}
+export class PptxParseError extends S.TaggedError<PptxParseError>()("PptxParseError") {
+  readonly message!: string;
+}
 
 // Basic PPTX structure types
 export interface PptxSlide {
