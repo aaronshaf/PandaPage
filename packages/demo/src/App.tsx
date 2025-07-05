@@ -197,12 +197,22 @@ const App = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [viewMode, setViewMode] = useState<'read' | 'outline' | 'print'>('read');
 
-  // Calculate print scale based on window width
+  // Calculate print scale to show full page
   const calculatePrintScale = useCallback(() => {
     if (typeof window === 'undefined') return 1;
+    
     const containerWidth = window.innerWidth - 420; // Account for sidebar
+    const containerHeight = window.innerHeight - 200; // Account for header and padding
+    
     const pageWidth = 8.5 * 96; // 8.5 inches at 96 DPI
-    return Math.min(1, (containerWidth - 64) / pageWidth); // 64px for padding
+    const pageHeight = 11 * 96; // 11 inches at 96 DPI
+    
+    // Calculate scale needed for width and height
+    const widthScale = (containerWidth - 64) / pageWidth; // 64px for padding
+    const heightScale = (containerHeight - 64) / pageHeight; // 64px for padding
+    
+    // Use the smaller scale to ensure full page is visible
+    return Math.min(1, widthScale, heightScale);
   }, []);
 
   // Update print scale on window resize
@@ -215,6 +225,13 @@ const App = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [calculatePrintScale]);
+
+  // Recalculate scale when switching to print view
+  useEffect(() => {
+    if (viewMode === 'print') {
+      setPrintScale(calculatePrintScale());
+    }
+  }, [viewMode, calculatePrintScale]);
 
   // Show spinner - immediately on first load, with delay on subsequent loads
   useEffect(() => {
