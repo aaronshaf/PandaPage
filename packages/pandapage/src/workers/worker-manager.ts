@@ -24,28 +24,28 @@ export interface ParseOptions {
 
 // Validate and apply defaults to parse options
 export const validateParseOptions = (options: unknown): Effect.Effect<ParseOptions, WorkerParseError> =>
-  Effect.gen(function* () {
-    try {
-      const validated = yield* S.decodeUnknown(ParseOptionsSchema)(options || {});
+  Effect.try({
+    try: () => {
+      // Simplified validation without schema for now
+      const opts = typeof options === 'object' && options !== null ? options as any : {};
       
       // Apply intelligent defaults
       return {
-        useWorker: validated.useWorker ?? true,
-        streaming: validated.streaming ?? false,
-        chunkSize: validated.chunkSize ?? 1024 * 1024, // 1MB chunks
-        onProgress: undefined, // Functions can't be validated by schema
+        useWorker: opts.useWorker ?? true,
+        streaming: opts.streaming ?? false,
+        chunkSize: opts.chunkSize ?? 1024 * 1024, // 1MB chunks
+        onProgress: opts.onProgress, // Functions can't be validated by schema
       };
-    } catch (error) {
-      return yield* Effect.fail(new WorkerParseError(`Invalid parse options: ${error}`, "validation"));
-    }
+    },
+    catch: (error) => new WorkerParseError(`Invalid parse options: ${error}`, "validation")
   });
 
 // Worker URLs by document type
 const WORKER_URLS: Record<WorkerTask["type"], string> = {
-  docx: new URL("./docx.worker.ts", import.meta.url).href,
-  pptx: new URL("./pptx.worker.ts", import.meta.url).href,
-  pages: new URL("./pages.worker.ts", import.meta.url).href,
-  key: new URL("./key.worker.ts", import.meta.url).href,
+  docx: "./docx.worker.ts",
+  pptx: "./pptx.worker.ts", 
+  pages: "./pages.worker.ts",
+  key: "./key.worker.ts",
 };
 
 // Parse error with categorization
@@ -73,84 +73,83 @@ export const parseDocumentInWorker = <T>(
   buffer: ArrayBuffer,
   options?: ParseOptions,
 ): Effect.Effect<T, WorkerParseError> =>
-  Effect.gen(function* () {
-    debug.log(`Starting worker parse for ${type}, size: ${buffer.byteLength}`);
+  Effect.tryPromise({
+    try: () => new Promise<T>((resolve, reject) => {
+      debug.log(`Starting worker parse for ${type}, size: ${buffer.byteLength}`);
 
-    // Create transferable task
-    const { task, transfer } = createTransferableTask(type, buffer, {
-      streaming: options?.streaming,
-      chunkSize: options?.chunkSize,
-    });
-
-    // Create worker
-    const worker = createWorker(type);
-
-    try {
-      // Create a promise for the result
-      const result = yield* Effect.async<T, WorkerParseError>((resume) => {
-        const chunks: any[] = [];
-
-        worker.onmessage = (event: MessageEvent<WorkerResult>) => {
-          const result = event.data;
-
-          switch (result.type) {
-            case "progress":
-              if (options?.onProgress && result.progress !== undefined) {
-                options.onProgress(result.progress);
-              }
-              break;
-
-            case "chunk":
-              chunks.push(result.data);
-              break;
-
-            case "complete":
-              if (chunks.length > 0) {
-                // Reassemble chunks
-                const assembled = chunks
-                  .sort((a, b) => a.index - b.index)
-                  .map((c) => c.chunk)
-                  .join("");
-                resume(Effect.succeed({ markdown: assembled } as T));
-              } else {
-                resume(Effect.succeed(result.data as T));
-              }
-              break;
-
-            case "error":
-              resume(
-                Effect.fail(
-                  new WorkerParseError(
-                    result.error || "Unknown worker error",
-                    "worker",
-                    task.id,
-                  ),
-                ),
-              );
-              break;
-          }
-        };
-
-        worker.onerror = (error) => {
-          resume(
-            Effect.fail(
-              new WorkerParseError(
-                error.message || "Worker error",
-                "worker",
-                task.id,
-              ),
-            ),
-          );
-        };
-
-        // Send task to worker with transferable objects
-        worker.postMessage({ task, transfer }, { transfer });
+      // Create transferable task
+      const { task, transfer } = createTransferableTask(type, buffer, {
+        streaming: options?.streaming,
+        chunkSize: options?.chunkSize,
       });
 
-      return result;
-    } finally {
-      // Clean up worker
-      worker.terminate();
+      // Create worker
+      const worker = createWorker(type);
+      const chunks: any[] = [];
+
+      worker.onmessage = (event: MessageEvent<WorkerResult>) => {
+        const result = event.data;
+
+        switch (result.type) {
+          case "progress":
+            if (options?.onProgress && result.progress !== undefined) {
+              options.onProgress(result.progress);
+            }
+            break;
+
+          case "chunk":
+            chunks.push(result.data);
+            break;
+
+          case "complete":
+            worker.terminate();
+            if (chunks.length > 0) {
+              // Reassemble chunks
+              const assembled = chunks
+                .sort((a, b) => a.index - b.index)
+                .map((c) => c.chunk)
+                .join("");
+              resolve({ markdown: assembled } as T);
+            } else {
+              resolve(result.data as T);
+            }
+            break;
+
+          case "error":
+            worker.terminate();
+            reject(
+              new WorkerParseError(
+                result.error || "Unknown worker error",
+                "worker",
+                task.id,
+              )
+            );
+            break;
+        }
+      };
+
+      worker.onerror = (error) => {
+        worker.terminate();
+        reject(
+          new WorkerParseError(
+            error.message || "Worker error",
+            "worker",
+            task.id,
+          )
+        );
+      };
+
+      // Send task to worker with transferable objects
+      worker.postMessage({ task, transfer }, { transfer });
+    }),
+    catch: (error) => {
+      if (error instanceof WorkerParseError) {
+        return error;
+      }
+      return new WorkerParseError(
+        error instanceof Error ? error.message : String(error),
+        "worker"
+      );
     }
   });
 
@@ -159,20 +158,18 @@ export const parseDocumentSmart = <T>(
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
   options?: ParseOptions,
-): Effect.Effect<T, WorkerParseError | Error> =>
-  Effect.gen(function* () {
-    const useWorker = options?.useWorker ?? shouldUseWorker(buffer.byteLength);
+): Effect.Effect<T, WorkerParseError | Error> => {
+  const useWorker = options?.useWorker ?? shouldUseWorker(buffer.byteLength);
 
-    if (useWorker) {
-      debug.log("Using worker for parsing");
-      return yield* parseDocumentInWorker<T>(type, buffer, options);
-    } else {
-      debug.log("Using main thread for parsing");
-      // Fall back to main thread parsing
-      // This would import the appropriate parser
-      throw new Error("Main thread parsing not implemented yet");
-    }
-  });
+  if (useWorker) {
+    debug.log("Using worker for parsing");
+    return parseDocumentInWorker<T>(type, buffer, options);
+  } else {
+    debug.log("Using main thread for parsing");
+    // Fall back to main thread parsing
+    return Effect.fail(new Error("Main thread parsing not implemented yet"));
+  }
+};
 
 // Stream document parsing results
 export const streamDocumentParse = (

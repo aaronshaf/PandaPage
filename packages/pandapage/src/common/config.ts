@@ -63,50 +63,48 @@ export class ConfigError {
  * Validate and merge configuration with defaults
  */
 export const validateConfig = (userConfig: unknown = {}): Effect.Effect<DocumentConfig, ConfigError> =>
-  Effect.gen(function* () {
-    try {
-      // Parse user config
-      const parsed = yield* S.decodeUnknown(S.partial(DocumentConfigSchema))(userConfig);
+  Effect.try({
+    try: () => {
+      // Parse user config - simplified approach
+      const userObj = typeof userConfig === 'object' && userConfig !== null ? userConfig as any : {};
       
       // Merge with defaults
       const config: DocumentConfig = {
         ...DEFAULT_CONFIG,
-        ...parsed,
+        ...userObj,
       };
       
       // Additional validation
       if (config.maxWorkers > 16) {
-        return yield* Effect.fail(new ConfigError("maxWorkers cannot exceed 16"));
+        throw new ConfigError("maxWorkers cannot exceed 16");
       }
       
       if (config.chunkSize > config.maxFileSize) {
-        return yield* Effect.fail(new ConfigError("chunkSize cannot exceed maxFileSize"));
+        throw new ConfigError("chunkSize cannot exceed maxFileSize");
       }
       
       return config;
-    } catch (error) {
-      return yield* Effect.fail(new ConfigError(`Invalid configuration: ${error}`));
-    }
+    },
+    catch: (error) => new ConfigError(`Invalid configuration: ${error}`)
   });
 
 /**
  * Environment-based configuration loader
  */
-export const loadConfigFromEnv = (): Effect.Effect<DocumentConfig, ConfigError> =>
-  Effect.gen(function* () {
-    const envConfig = {
-      workerThreshold: process.env.PANDAPAGE_WORKER_THRESHOLD 
-        ? parseInt(process.env.PANDAPAGE_WORKER_THRESHOLD, 10) 
-        : undefined,
-      maxWorkers: process.env.PANDAPAGE_MAX_WORKERS 
-        ? parseInt(process.env.PANDAPAGE_MAX_WORKERS, 10) 
-        : undefined,
-      enableStreaming: process.env.PANDAPAGE_STREAMING === 'true',
-      enableCaching: process.env.PANDAPAGE_CACHING !== 'false',
-      maxFileSize: process.env.PANDAPAGE_MAX_FILE_SIZE 
-        ? parseInt(process.env.PANDAPAGE_MAX_FILE_SIZE, 10) 
-        : undefined,
-    };
-    
-    return yield* validateConfig(envConfig);
-  });
+export const loadConfigFromEnv = (): Effect.Effect<DocumentConfig, ConfigError> => {
+  const envConfig = {
+    workerThreshold: process.env.PANDAPAGE_WORKER_THRESHOLD 
+      ? parseInt(process.env.PANDAPAGE_WORKER_THRESHOLD, 10) 
+      : undefined,
+    maxWorkers: process.env.PANDAPAGE_MAX_WORKERS 
+      ? parseInt(process.env.PANDAPAGE_MAX_WORKERS, 10) 
+      : undefined,
+    enableStreaming: process.env.PANDAPAGE_STREAMING === 'true',
+    enableCaching: process.env.PANDAPAGE_CACHING !== 'false',
+    maxFileSize: process.env.PANDAPAGE_MAX_FILE_SIZE 
+      ? parseInt(process.env.PANDAPAGE_MAX_FILE_SIZE, 10) 
+      : undefined,
+  };
+  
+  return validateConfig(envConfig);
+};
