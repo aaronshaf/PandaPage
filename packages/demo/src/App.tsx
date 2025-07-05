@@ -254,7 +254,7 @@ const App: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen bg-gray-50 flex flex-col"
+      className="h-screen bg-gray-50 flex flex-col"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -295,7 +295,7 @@ const App: React.FC = () => {
         />
         
         {/* Document Content */}
-        <div className="flex-1 overflow-auto bg-gray-50 relative">
+        <div className="flex-1 overflow-auto bg-gray-50 relative document-scroll-container">
           <DocumentUpload isDragging={isDragging} />
           
           {error ? (
