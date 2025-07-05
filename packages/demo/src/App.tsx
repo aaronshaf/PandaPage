@@ -82,6 +82,23 @@ const App: React.FC = () => {
   // Computed values
   const wordCount = result ? countWords(removeFrontmatter(result)) : 0;
 
+  // Helper to strip HTML and markdown from text
+  const cleanTextForTitle = (text: string): string => {
+    return text
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert markdown links to text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic
+      .replace(/`([^`]+)`/g, '$1') // Remove inline code
+      .trim();
+  };
+
   // Extract document title from metadata, first heading, or filename
   const getDocumentTitle = () => {
     if (!result) return 'pandapage';
@@ -92,14 +109,14 @@ const App: React.FC = () => {
       const frontmatter = frontmatterMatch[1];
       const titleMatch = frontmatter.match(/title:\s*["']?(.+?)["']?$/m);
       if (titleMatch) {
-        return titleMatch[1].trim();
+        return cleanTextForTitle(titleMatch[1]);
       }
     }
     
     // Try to get first heading
     const headings = extractHeadings(removeFrontmatter(result));
     if (headings.length > 0) {
-      return headings[0].text;
+      return cleanTextForTitle(headings[0].text);
     }
     
     // Try to infer from first line of content
@@ -118,6 +135,9 @@ const App: React.FC = () => {
           .replace(/\*/g, '') // Remove italic
           .replace(/`/g, '') // Remove code
           .trim();
+        
+        // Apply full cleaning
+        cleanLine = cleanTextForTitle(cleanLine);
         
         // Limit to reasonable title length (max 10 words or 60 chars)
         const words = cleanLine.split(/\s+/);
