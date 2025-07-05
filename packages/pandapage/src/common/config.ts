@@ -6,9 +6,9 @@ import { Effect } from "effect";
  */
 export const DocumentConfigSchema = S.Struct({
   // Performance settings
-  workerThreshold: S.pipe(S.Number, S.positive(), S.int()),
-  maxWorkers: S.pipe(S.Number, S.positive(), S.int()),
-  chunkSize: S.pipe(S.Number, S.positive(), S.int()),
+  workerThreshold: S.Number.pipe(S.positive(), S.int()),
+  maxWorkers: S.Number.pipe(S.positive(), S.int()),
+  chunkSize: S.Number.pipe(S.positive(), S.int()),
   
   // Feature flags
   enableStreaming: S.Boolean,
@@ -16,8 +16,8 @@ export const DocumentConfigSchema = S.Struct({
   enableCompression: S.Boolean,
   
   // Limits
-  maxFileSize: S.pipe(S.Number, S.positive(), S.int()),
-  timeout: S.pipe(S.Number, S.positive(), S.int()),
+  maxFileSize: S.Number.pipe(S.positive(), S.int()),
+  timeout: S.Number.pipe(S.positive(), S.int()),
   
   // Output settings
   preserveFormatting: S.Boolean,
