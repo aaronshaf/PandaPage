@@ -96,12 +96,16 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
       setScrollProgress(progress);
       
-      // Show page indicator temporarily when scrolling
-      setShowPageIndicator(true);
-      clearTimeout(window.pageIndicatorTimeout);
-      window.pageIndicatorTimeout = window.setTimeout(() => {
-        setShowPageIndicator(false);
-      }, 2000);
+      // Show page indicator temporarily when scrolling (but not in top 100px)
+      const shouldShowIndicator = scrollTop > 100;
+      setShowPageIndicator(shouldShowIndicator);
+      
+      if (shouldShowIndicator) {
+        clearTimeout(window.pageIndicatorTimeout);
+        window.pageIndicatorTimeout = window.setTimeout(() => {
+          setShowPageIndicator(false);
+        }, 2000);
+      }
     };
 
     scrollContainer.addEventListener('scroll', handleScroll);
