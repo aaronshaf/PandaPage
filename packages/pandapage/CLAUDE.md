@@ -148,6 +148,22 @@ This project aims to parse and render modern document formats in the browser:
 ### Current Implementation Status
 - DOCX: Text, formatting, headings, lists ✓
 - DOCX: Tables, images, complex formatting ✗
-- PPTX: Not started
+- PPTX: Basic slide extraction ✓
 - Pages: File structure analyzed, parsing not implemented
 - Key: Not started
+- Web Workers: Basic infrastructure with Transferable objects ✓
+
+### Web Worker Architecture
+- Uses @effect/platform-browser for browser integration
+- Worker pool with automatic scaling based on hardware
+- Transferable objects for zero-copy ArrayBuffer transfers
+- Streaming support for progressive rendering
+- Files >1MB automatically use workers
+- Progress tracking for long operations
+
+### Performance Considerations
+- Use Effect for async operations and error handling
+- Avoid Effect for simple pure functions where performance matters
+- Transfer large ArrayBuffers (>100KB) instead of cloning
+- Stream results for documents >10MB
+- Reuse workers through pooling
