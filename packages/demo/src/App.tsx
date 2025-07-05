@@ -117,11 +117,14 @@ const App = () => {
       setResult(markdown);  // Only update when new content is ready
       setProcessingTime(performance.now() - startTime);
       
-      // Scroll to top of the results container
+      // Scroll to top of the results container only if not already near the top
       setTimeout(() => {
-        const resultsContainer = document.querySelector('.rendered-markdown, pre');
-        if (resultsContainer) {
-          resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+        if (currentScrollY > 100) {
+          const resultsContainer = document.querySelector('.rendered-markdown, pre');
+          if (resultsContainer) {
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
       }, 100);
     } catch (error) {
