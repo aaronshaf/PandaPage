@@ -11,7 +11,7 @@ export type ProgressCallback = (progress: number) => void;
 export const ParseOptionsSchema = S.Struct({
   useWorker: S.optional(S.Boolean),
   streaming: S.optional(S.Boolean),
-  chunkSize: S.optional(S.pipe(S.Number, S.positive(), S.int())),
+  chunkSize: S.optional(S.Number.pipe(S.positive(), S.int())),
 });
 
 // Parse options with worker support
