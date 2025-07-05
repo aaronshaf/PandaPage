@@ -231,6 +231,14 @@ const App: React.FC = () => {
     loadDocument(initialDoc);
   }, [loadDocument]);
 
+  // Prevent body scrolling
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   // Update print scale when view mode changes
   useEffect(() => {
     if (viewMode === 'print') {
