@@ -403,8 +403,13 @@ const formatRun = (run: DocxRun): string => {
   }
 
   if (run.underline) {
-    // Markdown doesn't have native underline, so we'll use HTML
-    text = `<u>${text}</u>`;
+    // Only apply underline to short text (likely headings or key terms)
+    // to avoid excessive underline formatting in documents
+    if (text.length <= 50) {
+      // Markdown doesn't have native underline, so we'll use HTML
+      text = `<u>${text}</u>`;
+    }
+    // For longer text, ignore underline as it's likely document-wide formatting
   }
 
   return text;
