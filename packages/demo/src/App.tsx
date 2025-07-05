@@ -50,65 +50,121 @@ const extractHeadings = (markdown: string): Array<{level: number, text: string, 
   return headings;
 };
 
-// Split HTML content into pages for print view
+// Split HTML content into pages for print view with better logic
 const splitIntoPages = (html: string): string[] => {
   // Create a temporary DOM to work with the HTML
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
   
   const pages: string[] = [];
-  let currentPageContent = '';
-  let currentPageLength = 0;
+  let currentPageElements: Element[] = [];
+  let currentPageHeight = 0;
   
-  // Rough estimate: 60 lines per page (11" page with 1" margins, ~12pt font)
-  const linesPerPage = 60;
+  // Rough estimates based on 8.5x11" page with 1" margins (6.5x9" content area)
+  // At 12pt font, approximately 54 lines per page
+  const maxPageHeight = 54;
   
-  const processNode = (node: Node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent || '';
-      const lines = text.split('\n').length;
-      
-      if (currentPageLength + lines > linesPerPage && currentPageContent.trim()) {
-        pages.push(currentPageContent);
-        currentPageContent = '';
-        currentPageLength = 0;
+  const getElementHeight = (element: Element): number => {
+    const tagName = element.tagName;
+    const textContent = element.textContent || '';
+    const textLines = Math.ceil(textContent.length / 80) || 1; // ~80 chars per line
+    
+    switch (tagName) {
+      case 'H1': return Math.max(3, textLines + 1); // Heading + space
+      case 'H2': return Math.max(2.5, textLines + 0.5);
+      case 'H3': 
+      case 'H4': 
+      case 'H5': 
+      case 'H6': return Math.max(2, textLines + 0.5);
+      case 'P': return Math.max(1.5, textLines);
+      case 'UL':
+      case 'OL': return element.children.length * 1.2 + 0.5; // Space for list
+      case 'LI': return Math.max(1, textLines);
+      case 'TABLE': {
+        const rows = element.querySelectorAll('tr').length;
+        return rows * 1.5 + 1; // Table spacing
       }
-      
-      currentPageContent += text;
-      currentPageLength += lines;
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const element = node as Element;
-      
-      // Force page break before major headings (except if it's the first content)
-      if ((element.tagName === 'H1' || element.tagName === 'H2') && currentPageContent.trim()) {
-        if (currentPageLength > linesPerPage * 0.7) { // If we're more than 70% down the page
-          pages.push(currentPageContent);
-          currentPageContent = '';
-          currentPageLength = 0;
-        }
-      }
-      
-      currentPageContent += `<${element.tagName.toLowerCase()}`;
-      Array.from(element.attributes).forEach(attr => {
-        currentPageContent += ` ${attr.name}="${attr.value}"`;
-      });
-      currentPageContent += '>';
-      
-      element.childNodes.forEach(processNode);
-      currentPageContent += `</${element.tagName.toLowerCase()}>`;
-      
-      // Estimate lines for block elements
-      if (['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI'].includes(element.tagName)) {
-        currentPageLength += 2; // Rough estimate
-      }
+      case 'TR': return 1.5;
+      case 'BLOCKQUOTE': return Math.max(2, textLines + 1);
+      case 'PRE': return textContent.split('\n').length + 1;
+      case 'HR': return 1;
+      case 'DIV': return textLines > 0 ? Math.max(1, textLines) : 0;
+      default: return textLines > 0 ? Math.max(0.5, textLines) : 0;
     }
   };
   
-  tempDiv.childNodes.forEach(processNode);
+  const shouldPageBreakBefore = (element: Element, currentHeight: number): boolean => {
+    const tagName = element.tagName;
+    
+    // Always break before H1 if not at start of page
+    if (tagName === 'H1' && currentHeight > 2) {
+      return true;
+    }
+    
+    // Break before H2 if we're more than 75% down the page
+    if (tagName === 'H2' && currentHeight > maxPageHeight * 0.75) {
+      return true;
+    }
+    
+    // Avoid breaking tables and lists near page end
+    if ((tagName === 'TABLE' || tagName === 'UL' || tagName === 'OL') && 
+        currentHeight > maxPageHeight * 0.8) {
+      return true;
+    }
+    
+    return false;
+  };
   
-  if (currentPageContent.trim()) {
-    pages.push(currentPageContent);
-  }
+  const flushCurrentPage = () => {
+    if (currentPageElements.length > 0) {
+      const pageContent = currentPageElements.map(el => el.outerHTML).join('');
+      pages.push(pageContent);
+      currentPageElements = [];
+      currentPageHeight = 0;
+    }
+  };
+  
+  // Process all top-level elements
+  Array.from(tempDiv.children).forEach((element) => {
+    const elementHeight = getElementHeight(element);
+    
+    // Check if we need a page break
+    if (shouldPageBreakBefore(element, currentPageHeight) ||
+        (currentPageHeight + elementHeight > maxPageHeight && currentPageElements.length > 0)) {
+      flushCurrentPage();
+    }
+    
+    // If single element is larger than a page, split it
+    if (elementHeight > maxPageHeight && element.tagName === 'P') {
+      // Split long paragraphs
+      const text = element.textContent || '';
+      const words = text.split(' ');
+      const wordsPerPage = Math.floor(maxPageHeight * 80 / 10); // Rough estimate
+      
+      for (let i = 0; i < words.length; i += wordsPerPage) {
+        const chunk = words.slice(i, i + wordsPerPage).join(' ');
+        const p = document.createElement('p');
+        p.textContent = chunk;
+        // Copy attributes
+        Array.from(element.attributes).forEach(attr => {
+          p.setAttribute(attr.name, attr.value);
+        });
+        
+        if (currentPageHeight + 2 > maxPageHeight && currentPageElements.length > 0) {
+          flushCurrentPage();
+        }
+        
+        currentPageElements.push(p);
+        currentPageHeight += 2;
+      }
+    } else {
+      currentPageElements.push(element);
+      currentPageHeight += elementHeight;
+    }
+  });
+  
+  // Flush any remaining content
+  flushCurrentPage();
   
   return pages.length > 0 ? pages : [html];
 };
@@ -550,24 +606,46 @@ const App = () => {
                       </div>
                     ) : (
                       // Print view
-                      <div className="print-view">
-                        {(() => {
-                          const htmlContent = marked(removeFrontmatter(result));
-                          const pages = splitIntoPages(htmlContent);
-                          
-                          return pages.map((pageContent, index) => (
-                            <div key={index} className="print-page">
-                              <div 
-                                className="print-content"
-                                dangerouslySetInnerHTML={{ __html: pageContent }}
-                              />
-                              {/* Page number */}
-                              <div className="absolute bottom-4 right-4 text-xs text-gray-500">
-                                Page {index + 1} of {pages.length}
+                      <div>
+                        {/* Print controls */}
+                        <div className="flex justify-between items-center p-4 bg-gray-50 border-b">
+                          <div className="text-sm text-gray-600">
+                            Print Preview - {(() => {
+                              const htmlContent = marked(removeFrontmatter(result));
+                              const pages = splitIntoPages(htmlContent);
+                              return `${pages.length} page${pages.length !== 1 ? 's' : ''}`;
+                            })()}
+                          </div>
+                          <button
+                            onClick={() => window.print()}
+                            className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                          >
+                            <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            Print Document
+                          </button>
+                        </div>
+                        
+                        <div className="print-view">
+                          {(() => {
+                            const htmlContent = marked(removeFrontmatter(result));
+                            const pages = splitIntoPages(htmlContent);
+                            
+                            return pages.map((pageContent, index) => (
+                              <div key={index} className="print-page">
+                                <div 
+                                  className="print-content"
+                                  dangerouslySetInnerHTML={{ __html: pageContent }}
+                                />
+                                {/* Page number - only show in screen view */}
+                                <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden">
+                                  Page {index + 1} of {pages.length}
+                                </div>
                               </div>
-                            </div>
-                          ));
-                        })()}
+                            ));
+                          })()}
+                        </div>
                       </div>
                     )}
                   </div>
