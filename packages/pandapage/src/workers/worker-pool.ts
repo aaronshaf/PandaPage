@@ -94,7 +94,7 @@ export const createWorkerPool = (config: WorkerPoolConfig = defaultConfig) =>
       executeTask,
       getOptimalWorkerCount,
       // Pool cleanup - in Effect 3.x, pools are managed differently
-      shutdown: () => Effect.unit
+      shutdown: () => Effect.void
     };
   });
 
