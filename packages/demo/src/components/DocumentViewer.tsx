@@ -237,7 +237,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {showPageIndicator && totalPages > 1 && (
             <div 
               data-testid="page-indicator"
-              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
+              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-sm transition-opacity duration-300 z-30"
               style={{
                 // Position relative to viewport
                 right: '24px', // Account for scrollbar width + padding
@@ -259,8 +259,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 transform: 'translateY(-50%)'
               }}
             >
-              <div className="text-sm font-medium font-sans">
-                Page {currentPage} of {totalPages}
+              <div 
+                className="text-sm font-medium font-sans"
+                aria-label={`Page ${currentPage} of ${totalPages}`}
+                role="status"
+                aria-live="polite"
+              >
+                {currentPage} of {totalPages}
               </div>
             </div>
           )}
@@ -284,8 +289,11 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     dangerouslySetInnerHTML={{ __html: pageContent }}
                   />
                   {/* Page number - only show in screen view */}
-                  <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans">
-                    Page {index + 1} of {pages.length}
+                  <div 
+                    className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans"
+                    aria-label={`Page ${index + 1} of ${pages.length}`}
+                  >
+                    {index + 1} of {pages.length}
                   </div>
                 </div>
               ));
