@@ -58,22 +58,30 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   useEffect(() => {
     if (viewMode !== 'print') return;
 
-    const handleScroll = () => {
-      const pages = document.querySelectorAll('.print-page');
+    // Find the scrollable container (the document content area)
+    const scrollContainer = document.querySelector('.document-scroll-container');
+    if (!scrollContainer) return;
+
+    const handleScroll = (event: Event) => {
+      const container = event.target as HTMLElement;
+      const pages = container.querySelectorAll('.print-page');
       let currentVisiblePage = 1;
+      
+      const containerRect = container.getBoundingClientRect();
+      const containerMiddle = containerRect.top + containerRect.height / 2;
       
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         const rect = page.getBoundingClientRect();
         
-        // Consider a page "current" if its top is within viewport or if it's the closest to center
-        if (rect.top <= window.innerHeight / 2 && rect.bottom > window.innerHeight / 2) {
+        // Consider a page "current" if its center is closest to container center
+        if (rect.top <= containerMiddle && rect.bottom > containerMiddle) {
           currentVisiblePage = i + 1;
           break;
         }
         
-        // If we're past halfway through viewport, this is probably the current page
-        if (rect.top <= window.innerHeight / 2) {
+        // If we're past the container middle, this is probably the current page
+        if (rect.top <= containerMiddle) {
           currentVisiblePage = i + 1;
         }
       }
@@ -81,8 +89,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       setCurrentPage(currentVisiblePage);
       
       // Update scroll progress for page indicator positioning
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight - container.clientHeight;
       const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
       setScrollProgress(progress);
       
@@ -94,11 +102,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       }, 2000);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial call
+    scrollContainer.addEventListener('scroll', handleScroll);
+    
+    // Initial call with fake event
+    handleScroll({ target: scrollContainer } as any);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      scrollContainer.removeEventListener('scroll', handleScroll);
       clearTimeout(window.pageIndicatorTimeout);
     };
   }, [viewMode, result]);
