@@ -45,15 +45,17 @@ export const Navigation: React.FC<NavigationProps> = ({
   processingTime
 }) => {
   return (
-    <div className="sticky top-0 z-40">
+    <header className="sticky top-0 z-40" data-testid="app-header">
       {/* Primary Header */}
       <div className={`bg-white shadow-sm border-b border-gray-200 overflow-hidden transition-all duration-300 ease-in-out ${
         showPrimaryNav ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'
-      }`}>
-        <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+      }`}
+      data-testid="primary-nav-container"
+      role="banner">
+        <nav className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4" aria-label="Primary navigation">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center flex-shrink-0">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900">pandapage</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">pandapage</h1>
           </div>
           
           {/* Document controls */}
@@ -130,11 +132,11 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
           </div>
         </div>
-        </div>
-      </div>
+      </nav>
+    </div>
 
       {/* Secondary Ribbon Bar */}
-      <div className="bg-gray-100 border-b border-gray-200">
+      <nav className="bg-gray-100 border-b border-gray-200" data-testid="secondary-nav" aria-label="View controls">
         <div className="px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
@@ -229,7 +231,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           </div>
         </div>
         </div>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 };

@@ -368,7 +368,7 @@ const App: React.FC = () => {
         />
         
         {/* Document Content */}
-        <div className="flex-1 overflow-auto bg-gray-50 relative document-scroll-container">
+        <main className="flex-1 overflow-auto bg-gray-50 relative document-scroll-container">
           <DocumentUpload isDragging={isDragging} />
           
           {error ? (
@@ -404,7 +404,7 @@ const App: React.FC = () => {
           ) : loading && showSpinner ? (
             <LoadingSpinner result={result} />
           ) : null}
-        </div>
+        </main>
       </div>
     </div>
   );

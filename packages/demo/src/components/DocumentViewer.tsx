@@ -158,18 +158,21 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     ) : null;
   }
 
-  // Calculate if outline button should be enabled
-  const headingCount = result ? extractHeadings(removeFrontmatter(result)).length : -1;
-  const hasMultipleHeadings = headingCount === -1 || headingCount > 1;
+  // Calculate headings and top-level count
+  const headings = result ? extractHeadings(removeFrontmatter(result)) : [];
+  const headingCount = headings.length;
+  const hasMultipleHeadings = headingCount === 0 || headingCount > 1; // Loading state or multiple headings
+  const topLevelHeadingCount = headings.filter(h => h.level === 1).length || headingCount; // Fall back to total if no H1s
 
   return (
-    <div className={viewMode === 'print' ? '' : 'p-6'}>
+    <div className={`relative ${viewMode === 'print' ? '' : 'p-6'}`}>
       {/* Floating Outline Button */}
       <button
         data-testid="document-outline-button"
         onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
         disabled={!hasMultipleHeadings}
-        className={`fixed z-20 flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg shadow-md transition-all ${
+        aria-label={`Toggle document outline${!showOutline && headingCount > 0 ? ` (${topLevelHeadingCount} sections)` : ''}`}
+        className={`fixed z-50 flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm transition-all ${
           !hasMultipleHeadings
             ? 'text-gray-400 cursor-not-allowed bg-gray-50 border border-gray-200'
             : showOutline 
@@ -177,14 +180,27 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
         }`}
         style={{
-          top: `${showPrimaryNav ? 112 : 48 + 16}px`, // Below nav bars with padding
-          left: showOutline ? '16px' : '16px'
+          // More accurate positioning below both nav bars
+          top: (() => {
+            const primaryNavHeight = showPrimaryNav ? 64 : 0;
+            const secondaryNavHeight = 48;
+            const padding = 16;
+            return `${primaryNavHeight + secondaryNavHeight + padding}px`;
+          })(),
+          left: '16px'
         }}
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
         </svg>
-        <span>Outline</span>
+        {!showOutline && headingCount > 0 && (
+          <span className="ml-1 text-xs font-semibold bg-gray-200 text-gray-700 rounded-full w-5 h-5 flex items-center justify-center">
+            {topLevelHeadingCount}
+          </span>
+        )}
+        <span className="sr-only">
+          {showOutline ? 'Close outline' : `Open outline (${topLevelHeadingCount} sections)`}
+        </span>
       </button>
 
       {viewMode === 'read' ? (
@@ -203,28 +219,24 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {showPageIndicator && totalPages > 1 && (
             <div 
               data-testid="page-indicator"
-              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
+              className="absolute bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
               style={{
-                // Position relative to the document container's scrollable area
-                right: '24px', // Account for scrollbar width (typically ~16px) + padding
+                // Position relative to the document container
+                right: '40px', // Account for scrollbar width + padding
                 top: (() => {
                   if (typeof window === 'undefined') return '20px';
                   
-                  // More precise navigation height calculation
-                  // Primary nav: ~64px, Secondary nav: ~48px  
-                  const primaryNavHeight = showPrimaryNav ? 64 : 0;
-                  const secondaryNavHeight = 48;
-                  const totalNavHeight = primaryNavHeight + secondaryNavHeight;
+                  // Get the scrollable container's height
+                  const container = document.querySelector('.document-scroll-container');
+                  if (!container) return '20px';
                   
-                  // Available vertical space for the indicator movement
-                  const viewportHeight = window.innerHeight;
-                  const availableHeight = viewportHeight - totalNavHeight;
-                  const indicatorReservedSpace = 40; // Top and bottom padding
-                  const travelSpace = Math.max(0, availableHeight - indicatorReservedSpace);
+                  const containerHeight = container.clientHeight;
+                  const indicatorHeight = 60; // Approximate height of the indicator
+                  const padding = 20;
+                  const travelSpace = Math.max(0, containerHeight - indicatorHeight - (padding * 2));
                   
-                  // Calculate position: start just below nav, travel based on scroll
-                  const startTop = totalNavHeight + 20;
-                  const calculatedTop = startTop + (scrollProgress * travelSpace);
+                  // Calculate position based on scroll progress
+                  const calculatedTop = padding + (scrollProgress * travelSpace);
                   
                   return `${calculatedTop}px`;
                 })(),

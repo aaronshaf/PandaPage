@@ -90,21 +90,25 @@ export const Outline: React.FC<OutlineProps> = ({
   };
 
   return (
-    <div 
+    <aside 
+      data-testid="document-outline"
+      aria-label="Document outline"
       className="w-64 bg-white border-r border-gray-200 sticky top-0 overflow-y-auto" 
       style={{ 
         height: `calc(100vh - ${showPrimaryNav ? '7rem' : '3.5rem'})` 
       }}
     >
-      <div className="p-4">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Document Outline</h3>
+      <nav className="p-4" aria-label="Document sections">
+        <h3 className="text-sm font-medium text-gray-900 mb-3" data-testid="outline-heading">Document Outline</h3>
         {headings.length === 0 ? (
           <p className="text-sm text-gray-500 italic">No headings found</p>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-1" role="list" data-testid="outline-list">
             {headings.map((heading, index) => (
               <button
                 key={index}
+                data-testid={`outline-item-${index}`}
+                data-heading-level={heading.level}
                 onClick={() => handleHeadingClick(heading)}
                 className={`w-full text-left px-2 py-1 text-sm rounded transition-colors hover:bg-gray-100 ${
                   heading.level === 1 ? 'font-medium text-gray-900' :
@@ -120,7 +124,7 @@ export const Outline: React.FC<OutlineProps> = ({
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </nav>
+    </aside>
   );
 };
