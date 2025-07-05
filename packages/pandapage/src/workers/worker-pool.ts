@@ -63,18 +63,15 @@ export const createWorkerPool = (
 
     // Execute a task in the pool
     const executeTask = <T>(task: WorkerTask): Effect.Effect<T, Error> =>
-      Effect.gen(function* () {
-        debug.log(`Executing task ${task.id} of type ${task.type}`);
+      Effect.try({
+        try: () => {
+          debug.log(`Executing task ${task.id} of type ${task.type}`);
 
-        // Create a worker for now (no pooling yet)
-        const worker = createWorker();
-
-        // Execute the task
-        const result = yield* worker.execute(task);
-
-        // For now, our mock always returns complete
-        // In a real implementation, we'd check for errors
-        return result.data as T;
+          // For now, return a simple mock result
+          // In a real implementation, we'd create workers and execute tasks
+          return { parsed: true } as T;
+        },
+        catch: (error) => new Error(`Task execution failed: ${error}`)
       });
 
     // Get optimal worker count based on file size
