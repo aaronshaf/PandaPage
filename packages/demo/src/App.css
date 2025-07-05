@@ -169,7 +169,6 @@
 .print-view {
   background: #f5f5f5;
   padding: 2rem 0 4rem 0; /* Added more bottom padding */
-  min-height: 100vh;
   font-family: 'Times New Roman', serif;
   overflow-x: auto;
 }
