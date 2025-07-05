@@ -181,13 +181,14 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   // Calculate headings and top-level count
   const headings = result ? extractHeadings(removeFrontmatter(result)) : [];
   const headingCount = headings.length;
-  const hasMultipleHeadings = headingCount === 0 || headingCount > 1; // Loading state or multiple headings
+  const hasMultipleHeadings = headingCount > 1; // Only show button if more than 1 heading
   const topLevelHeadingCount = headings.filter(h => h.level === 1).length || headingCount; // Fall back to total if no H1s
 
   return (
     <div className={`relative ${viewMode === 'print' ? '' : 'p-6'}`}>
-      {/* Floating Outline Button */}
-      <button
+      {/* Floating Outline Button - only show if multiple headings */}
+      {hasMultipleHeadings && (
+        <button
         data-testid="document-outline-button"
         onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
         disabled={!hasMultipleHeadings}
@@ -218,6 +219,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {showOutline ? 'Close outline' : `Open outline (${topLevelHeadingCount} sections)`}
         </span>
       </button>
+      )}
 
       {viewMode === 'read' ? (
         <div className="max-w-4xl mx-auto">

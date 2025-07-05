@@ -56,7 +56,18 @@ export const Navigation: React.FC<NavigationProps> = ({
       role="banner">
         <nav className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4" aria-label="Primary navigation">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Document type icon */}
+            {(selectedDocument.endsWith('.docx') || uploadedFile?.name.endsWith('.docx')) && (
+              <svg className="h-5 w-5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M17,11H7V13H17V11M17,14H7V16H17V14M17,17H7V19H17V17Z" />
+              </svg>
+            )}
+            {(selectedDocument.endsWith('.pages') || uploadedFile?.name.endsWith('.pages')) && (
+              <svg className="h-5 w-5 text-orange-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19M17,17H7V15H17V17M17,13H7V11H17V13M17,9H7V7H17V9Z" />
+              </svg>
+            )}
             <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">{documentTitle}</h1>
           </div>
           
