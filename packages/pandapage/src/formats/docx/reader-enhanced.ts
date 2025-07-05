@@ -1,6 +1,8 @@
 import { Effect } from "effect";
 import { parseXmlString } from "../../common/xml-parser";
 import { debug } from "../../common/debug";
+import { validateConfig, DEFAULT_CONFIG, type DocumentConfig } from "../../common/config";
+import { safeExecute, retryWithBackoff } from "../../common/error-handling";
 import { extractCompleteMetadata } from "./docx-metadata";
 import { parseDocumentXmlEnhanced, parseNumberingXml, extractFileContent, calculateDocumentStats } from "./document-parser";
 import type { EnhancedDocxDocument, DocxParseError } from "./types";
@@ -18,20 +20,33 @@ export type {
 /**
  * Enhanced DOCX reader with proper XML parsing and metadata extraction
  */
-export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDocxDocument, DocxParseError> =>
+export const readEnhancedDocx = (buffer: ArrayBuffer, userConfig?: unknown): Effect.Effect<EnhancedDocxDocument, DocxParseError> =>
   Effect.gen(function* () {
     const startTime = Date.now();
     debug.log("Reading enhanced DOCX file...");
+    
+    // Validate configuration
+    const config = yield* Effect.either(validateConfig(userConfig));
+    const documentConfig = config._tag === "Right" ? config.right : DEFAULT_CONFIG;
+    
+    // Check file size limits
+    if (buffer.byteLength > documentConfig.maxFileSize) {
+      return yield* Effect.fail(new DocxParseError(`File size (${buffer.byteLength} bytes) exceeds limit (${documentConfig.maxFileSize} bytes)`));
+    }
 
-    try {
-      // Load fflate for ZIP handling
-      const { unzipSync, strFromU8 } = yield* Effect.tryPromise({
+    // Load fflate for ZIP handling with retry on failure
+    const { unzipSync, strFromU8 } = yield* retryWithBackoff(
+      Effect.tryPromise({
         try: () => import("fflate"),
         catch: (error) => new DocxParseError(`Failed to load fflate library: ${error}`),
-      });
+      }),
+      3 // Max 3 attempts
+    );
 
       const uint8Array = new Uint8Array(buffer);
-      const unzipped = unzipSync(uint8Array);
+      const unzipped = yield* safeExecute(
+        Effect.sync(() => unzipSync(uint8Array))
+      );
 
       // Extract all relevant parts
       const parts = {
@@ -62,16 +77,21 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
         })
       );
 
-      // Parse document XML
-      const documentDoc = yield* parseXmlString(parts.documentXml);
-      const documentRoot = documentDoc.documentElement;
+      // Parse document XML with timeout if configured
+      const parseDocumentEffect = Effect.gen(function* () {
+        const documentDoc = yield* parseXmlString(parts.documentXml);
+        const documentRoot = documentDoc.documentElement;
 
-      if (documentRoot.tagName !== "document") {
-        return yield* Effect.fail(new DocxParseError("Invalid document XML structure"));
-      }
+        if (documentRoot.tagName !== "document") {
+          return yield* Effect.fail(new DocxParseError("Invalid document XML structure"));
+        }
 
-      // Parse document elements
-      const elements = yield* parseDocumentXmlEnhanced(documentRoot);
+        return yield* parseDocumentXmlEnhanced(documentRoot);
+      });
+      
+      const elements = documentConfig.timeout > 0 
+        ? yield* Effect.timeout(parseDocumentEffect, documentConfig.timeout)
+        : yield* parseDocumentEffect;
 
       // Parse numbering if present
       const numbering = yield* parseNumberingXml(parts.numberingXml);
@@ -94,8 +114,4 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
         originalFormat: "docx" as const,
         ...stats,
       };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return yield* Effect.fail(new DocxParseError(`Failed to parse DOCX: ${message}`));
-    }
   });
