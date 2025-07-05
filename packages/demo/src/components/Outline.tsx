@@ -6,6 +6,7 @@ interface Heading {
 
 interface OutlineProps {
   showOutline: boolean;
+  setShowOutline: (show: boolean) => void;
   result: string | null;
   extractHeadings: (markdown: string) => Heading[];
   removeFrontmatter: (markdown: string) => string;
@@ -15,6 +16,7 @@ interface OutlineProps {
 
 export const Outline: React.FC<OutlineProps> = ({
   showOutline,
+  setShowOutline,
   result,
   extractHeadings,
   removeFrontmatter,
@@ -93,13 +95,25 @@ export const Outline: React.FC<OutlineProps> = ({
     <aside 
       data-testid="document-outline"
       aria-label="Document outline"
-      className="w-64 bg-white border-r border-gray-200 sticky top-0 overflow-y-auto" 
+      className="w-80 bg-white border-r border-gray-200 sticky top-0 overflow-y-auto" 
       style={{ 
         height: `calc(100vh - ${showPrimaryNav ? '7rem' : '3.5rem'})` 
       }}
     >
       <nav className="p-4" aria-label="Document sections">
-        <h3 className="text-sm font-medium text-gray-900 mb-3" data-testid="outline-heading">Document Outline</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-900" data-testid="outline-heading">Document Outline</h3>
+          <button
+            data-testid="outline-close-button"
+            onClick={() => setShowOutline(false)}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+            aria-label="Close outline"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
         {headings.length === 0 ? (
           <p className="text-sm text-gray-500 italic">No headings found</p>
         ) : (

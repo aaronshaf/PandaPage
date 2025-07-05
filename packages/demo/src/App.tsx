@@ -82,6 +82,65 @@ const App: React.FC = () => {
   // Computed values
   const wordCount = result ? countWords(removeFrontmatter(result)) : 0;
 
+  // Extract document title from metadata, first heading, or filename
+  const getDocumentTitle = () => {
+    if (!result) return 'pandapage';
+    
+    // Try to extract from frontmatter metadata
+    const frontmatterMatch = result.match(/^---\n([\s\S]*?)\n---/);
+    if (frontmatterMatch) {
+      const frontmatter = frontmatterMatch[1];
+      const titleMatch = frontmatter.match(/title:\s*["']?(.+?)["']?$/m);
+      if (titleMatch) {
+        return titleMatch[1].trim();
+      }
+    }
+    
+    // Try to get first heading
+    const headings = extractHeadings(removeFrontmatter(result));
+    if (headings.length > 0) {
+      return headings[0].text;
+    }
+    
+    // Try to infer from first line of content
+    const content = removeFrontmatter(result).trim();
+    if (content) {
+      // Get first non-empty line
+      const firstLine = content.split('\n').find(line => line.trim().length > 0);
+      if (firstLine) {
+        // Remove markdown formatting
+        let cleanLine = firstLine
+          .replace(/^#+\s*/, '') // Remove heading markers
+          .replace(/^\*+\s*/, '') // Remove bullet points
+          .replace(/^\d+\.\s*/, '') // Remove numbered lists
+          .replace(/^[-+]\s*/, '') // Remove list markers
+          .replace(/\*\*/g, '') // Remove bold
+          .replace(/\*/g, '') // Remove italic
+          .replace(/`/g, '') // Remove code
+          .trim();
+        
+        // Limit to reasonable title length (max 10 words or 60 chars)
+        const words = cleanLine.split(/\s+/);
+        if (words.length > 10) {
+          cleanLine = words.slice(0, 10).join(' ') + '...';
+        } else if (cleanLine.length > 60) {
+          cleanLine = cleanLine.substring(0, 57) + '...';
+        }
+        
+        return cleanLine;
+      }
+    }
+    
+    // Fall back to filename
+    if (uploadedFile) {
+      return uploadedFile.name.replace(/\.(docx|pages)$/i, '');
+    }
+    
+    const docId = selectedDocument.split('/').pop()?.replace(/\.(docx|pages)$/i, '');
+    const sampleDoc = sampleDocuments.find(doc => doc.id === docId?.split('.')[0]);
+    return sampleDoc ? sampleDoc.title : docId || 'pandapage';
+  };
+
   // Get initial document from URL hash or default
   const getInitialDocument = () => {
     const { docId } = parseUrlHash();
@@ -354,12 +413,14 @@ const App: React.FC = () => {
         result={result}
         wordCount={wordCount}
         processingTime={processingTime}
+        documentTitle={getDocumentTitle()}
       />
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         <Outline
           showOutline={showOutline}
+          setShowOutline={setShowOutline}
           result={result}
           extractHeadings={extractHeadings}
           removeFrontmatter={removeFrontmatter}

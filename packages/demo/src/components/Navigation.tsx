@@ -23,6 +23,7 @@ interface NavigationProps {
   result: string | null;
   wordCount: number;
   processingTime: number | null;
+  documentTitle: string;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -42,7 +43,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   setPrintScale,
   result,
   wordCount,
-  processingTime
+  processingTime,
+  documentTitle
 }) => {
   return (
     <header className="sticky top-0 z-40" data-testid="app-header">
@@ -55,7 +57,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         <nav className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4" aria-label="Primary navigation">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center flex-shrink-0">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">pandapage</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">{documentTitle}</h1>
           </div>
           
           {/* Document controls */}

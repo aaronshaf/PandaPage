@@ -115,8 +115,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
       setScrollProgress(progress);
       
-      // Show page indicator temporarily when manually scrolling (but not in top 100px or programmatic scroll)
-      const shouldShowIndicator = scrollTop > 100 && !isProgrammaticScroll;
+      // Show page indicator temporarily when manually scrolling (but not programmatic scroll)
+      const shouldShowIndicator = !isProgrammaticScroll;
       setShowPageIndicator(shouldShowIndicator);
       
       if (shouldShowIndicator) {
@@ -192,12 +192,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
         disabled={!hasMultipleHeadings}
         aria-label={`Toggle document outline${!showOutline && headingCount > 0 ? ` (${topLevelHeadingCount} sections)` : ''}`}
-        className={`fixed z-50 flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm transition-all ${
+        className={`fixed z-50 flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm ${
           !hasMultipleHeadings
             ? 'text-gray-400 cursor-not-allowed bg-gray-50 border border-gray-200'
-            : showOutline 
-              ? 'bg-blue-600 text-white hover:bg-blue-700' 
-              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
         }`}
         style={{
           top: `${navHeight}px`,
@@ -205,7 +203,11 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         }}
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          {showOutline ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+          )}
         </svg>
         {!showOutline && headingCount > 0 && (
           <span className="ml-1 text-xs font-semibold bg-gray-200 text-gray-700 rounded-full w-5 h-5 flex items-center justify-center">
@@ -233,24 +235,22 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {showPageIndicator && totalPages > 1 && (
             <div 
               data-testid="page-indicator"
-              className="absolute bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
+              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
               style={{
-                // Position relative to the document container
-                right: '40px', // Account for scrollbar width + padding
+                // Position relative to viewport
+                right: '24px', // Account for scrollbar width + padding
                 top: (() => {
-                  if (typeof window === 'undefined') return '20px';
+                  if (typeof window === 'undefined') return `${navHeight + 20}px`;
                   
-                  // Get the scrollable container's height
-                  const container = document.querySelector('.document-scroll-container');
-                  if (!container) return '20px';
-                  
-                  const containerHeight = container.clientHeight;
+                  // Calculate available space from nav to bottom of viewport
+                  const viewportHeight = window.innerHeight;
                   const indicatorHeight = 60; // Approximate height of the indicator
                   const padding = 20;
-                  const travelSpace = Math.max(0, containerHeight - indicatorHeight - (padding * 2));
+                  const availableSpace = viewportHeight - navHeight - indicatorHeight - (padding * 2);
+                  const travelSpace = Math.max(0, availableSpace);
                   
                   // Calculate position based on scroll progress
-                  const calculatedTop = padding + (scrollProgress * travelSpace);
+                  const calculatedTop = navHeight + padding + (scrollProgress * travelSpace);
                   
                   return `${calculatedTop}px`;
                 })(),
