@@ -214,7 +214,6 @@ const App = () => {
                     className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 pr-8 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 transition-colors"
                   >
                     <option value={`${getBasePath()}/basic-formatting.docx`}>Basic Formatting - Headings & Text Styles</option>
-                    <option value={`${getBasePath()}/wonders-of-docx.docx`}>Wonders of DOCX - Complex Document</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
