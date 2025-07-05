@@ -85,20 +85,26 @@ export const splitIntoPages = (html: string): string[] => {
   const shouldPageBreakBefore = (element: Element, currentHeight: number): boolean => {
     const tagName = element.tagName;
     
-    // Always break before H1 if not at start of page
-    if (tagName === 'H1' && currentHeight > 2) {
+    // Only break before H1 if we have substantial content (more conservative)
+    if (tagName === 'H1' && currentHeight > maxPageHeight * 0.6) {
       return true;
     }
     
-    // Break before H2 if we're getting close to page end
-    if (tagName === 'H2' && currentHeight > maxPageHeight * 0.8) {
-      return true;
-    }
+    // Remove automatic H2 page breaks - let them flow naturally with content
+    // H2 and lower headings should stay with their content unless forced by space
     
     // Break before tables if they won't fit
     if (tagName === 'TABLE') {
       const tableHeight = getElementHeight(element);
       if (currentHeight + tableHeight > maxPageHeight) {
+        return true;
+      }
+    }
+    
+    // Break before very large blocks if they won't fit
+    if (['BLOCKQUOTE', 'PRE'].includes(tagName)) {
+      const elementHeight = getElementHeight(element);
+      if (currentHeight + elementHeight > maxPageHeight && currentHeight > maxPageHeight * 0.3) {
         return true;
       }
     }
