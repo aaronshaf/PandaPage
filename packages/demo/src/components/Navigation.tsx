@@ -146,22 +146,30 @@ export const Navigation: React.FC<NavigationProps> = ({
         <div className="px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
-            {/* Outline toggle - only show if document has more than 1 heading */}
-            {result && extractHeadings(removeFrontmatter(result)).length > 1 && (
-              <button
-                onClick={() => setShowOutline(!showOutline)}
-                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
-                  showOutline 
-                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-                <span className="hidden sm:inline">Outline</span>
-              </button>
-            )}
+            {/* Outline toggle - always show but disable if document has 1 or fewer headings */}
+            {(() => {
+              const headingCount = result ? extractHeadings(removeFrontmatter(result)).length : 0;
+              const hasMultipleHeadings = headingCount > 1;
+              
+              return (
+                <button
+                  onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
+                  disabled={!hasMultipleHeadings}
+                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                    !hasMultipleHeadings
+                      ? 'text-gray-400 cursor-not-allowed bg-gray-50'
+                      : showOutline 
+                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                        : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+                  <span className="hidden sm:inline">Outline</span>
+                </button>
+              );
+            })()}
             
             {/* View mode buttons */}
             <div className="flex items-center bg-white rounded-md shadow-sm">
