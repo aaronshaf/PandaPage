@@ -1,17 +1,17 @@
 # PandaPage
 
-A high-performance PDF text extraction library built with Effect and TypeScript.
+A high-performance document converter for the browser, built with Effect and TypeScript.
 
 ## 🚀 [Try the Demo](https://aaronshaf.github.io/PandaPage/)
 
-See PandaPage in action with our interactive demo where you can upload and process PDF files.
+See PandaPage in action with our interactive demo where you can upload and convert documents.
 
 ## Features
 
-- 🚀 Fast PDF text extraction with positioning information
-- 📄 Markdown output with metadata support
-- 🌊 Stream-based processing for large files
-- 🎯 Accurate text positioning and layout preservation
+- 📄 Convert DOCX, PPTX, Pages, and Keynote files to Markdown
+- 🚀 Fast processing with Web Workers for large documents
+- 📊 Preserves document structure, lists, and formatting
+- 🌊 Stream-based processing for files over 10MB
 - 🧪 Comprehensive test coverage
 
 ## Quick Start

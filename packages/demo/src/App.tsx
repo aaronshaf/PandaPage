@@ -169,35 +169,47 @@ const splitIntoPages = (html: string): string[] => {
   return pages.length > 0 ? pages : [html];
 };
 
+// Document samples data
+const sampleDocuments = [
+  { id: '001.docx', title: 'Basic formatting', description: 'Headings, text styles, and simple lists', format: 'DOCX' },
+  { id: '001.pages', title: 'Basic formatting', description: 'Headings, text styles, and simple lists', format: 'Pages' },
+  { id: '002.docx', title: 'Find and replace', description: 'Template with placeholder content', format: 'DOCX' },
+  { id: '002.pages', title: 'Find and replace', description: 'Template with placeholder content', format: 'Pages' },
+  { id: '003.docx', title: 'Open source policy', description: 'Multi-level numbered lists', format: 'DOCX' },
+  { id: '003.pages', title: 'Open source policy', description: 'Multi-level numbered lists', format: 'Pages' },
+  { id: '004.docx', title: 'Collaboration guide', description: 'Complex tables and TOC', format: 'DOCX' },
+  { id: '004.pages', title: 'Collaboration guide', description: 'Complex tables and TOC', format: 'Pages' },
+  { id: '005.docx', title: 'DOCX demo', description: 'Tables, images, and footnotes', format: 'DOCX' },
+  { id: '005.pages', title: 'DOCX demo', description: 'Tables, images, and footnotes', format: 'Pages' },
+  { id: '006.docx', title: 'Academic paper', description: 'Professional formatting', format: 'DOCX' },
+  { id: '006.pages', title: 'Academic paper', description: 'Professional formatting', format: 'Pages' },
+  { id: '007.docx', title: 'Additional tests', description: 'Edge cases and variants', format: 'DOCX' },
+  { id: '007.pages', title: 'Additional tests', description: 'Edge cases and variants', format: 'Pages' },
+];
+
 const App = () => {
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false); // Start with loading false
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<string>(`${getBasePath()}/001.docx`);
+  // Get initial document from URL hash or default
+  const getInitialDocument = () => {
+    const hash = window.location.hash.slice(1); // Remove #
+    if (hash && sampleDocuments.some(doc => doc.id === hash)) {
+      return `${getBasePath()}/${hash}`;
+    }
+    return `${getBasePath()}/001.docx`;
+  };
+  
+  const [selectedDocument, setSelectedDocument] = useState<string>(getInitialDocument());
   const [printScale, setPrintScale] = useState(1);
   const [showOutline, setShowOutline] = useState(false);
-  
-  // Document samples data
-  const sampleDocuments = [
-    { id: '001.docx', title: 'Basic formatting', description: 'Headings, text styles, and simple lists', format: 'DOCX' },
-    { id: '001.pages', title: 'Basic formatting', description: 'Headings, text styles, and simple lists', format: 'Pages' },
-    { id: '002.docx', title: 'Find and replace', description: 'Template with placeholder content', format: 'DOCX' },
-    { id: '002.pages', title: 'Find and replace', description: 'Template with placeholder content', format: 'Pages' },
-    { id: '003.docx', title: 'Open source policy', description: 'Multi-level numbered lists', format: 'DOCX' },
-    { id: '003.pages', title: 'Open source policy', description: 'Multi-level numbered lists', format: 'Pages' },
-    { id: '004.docx', title: 'Collaboration guide', description: 'Complex tables and TOC', format: 'DOCX' },
-    { id: '004.pages', title: 'Collaboration guide', description: 'Complex tables and TOC', format: 'Pages' },
-    { id: '005.docx', title: 'DOCX demo', description: 'Tables, images, and footnotes', format: 'DOCX' },
-    { id: '005.pages', title: 'DOCX demo', description: 'Tables, images, and footnotes', format: 'Pages' },
-    { id: '006.docx', title: 'Academic paper', description: 'Professional formatting', format: 'DOCX' },
-    { id: '006.pages', title: 'Academic paper', description: 'Professional formatting', format: 'Pages' },
-    { id: '007.docx', title: 'Additional tests', description: 'Edge cases and variants', format: 'DOCX' },
-    { id: '007.pages', title: 'Additional tests', description: 'Edge cases and variants', format: 'Pages' },
-  ];
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [viewMode, setViewMode] = useState<'read' | 'print'>('read');
   const [isDragging, setIsDragging] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [showPageIndicator, setShowPageIndicator] = useState(false);
 
   // Calculate print scale to show full page
   const calculatePrintScale = useCallback(() => {
@@ -267,6 +279,55 @@ const App = () => {
       };
     }
   }, [viewMode, result]);
+  
+  // Track current page on scroll in print view
+  useEffect(() => {
+    if (viewMode !== 'print' || !result) return;
+    
+    let scrollTimer: NodeJS.Timeout;
+    let hideTimer: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      // Show page indicator
+      setShowPageIndicator(true);
+      
+      // Clear existing timers
+      clearTimeout(scrollTimer);
+      clearTimeout(hideTimer);
+      
+      // Debounce page calculation
+      scrollTimer = setTimeout(() => {
+        const printView = document.querySelector('.print-view');
+        if (!printView) return;
+        
+        const pages = printView.querySelectorAll('.print-page');
+        const viewportMiddle = window.innerHeight / 2;
+        
+        // Find which page is in the middle of viewport
+        for (let i = 0; i < pages.length; i++) {
+          const page = pages[i] as HTMLElement;
+          const rect = page.getBoundingClientRect();
+          
+          if (rect.top <= viewportMiddle && rect.bottom >= viewportMiddle) {
+            setCurrentPage(i + 1);
+            break;
+          }
+        }
+      }, 50);
+      
+      // Hide indicator after 2 seconds
+      hideTimer = setTimeout(() => {
+        setShowPageIndicator(false);
+      }, 2000);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [viewMode, result]);
 
   // Show spinner - immediately on first load, with delay on subsequent loads
   useEffect(() => {
@@ -295,6 +356,34 @@ const App = () => {
       handleDocumentLoad();
     }
   }, []);
+  
+  // Update URL hash when document changes
+  useEffect(() => {
+    if (!uploadedFile && selectedDocument) {
+      const docId = selectedDocument.split('/').pop();
+      if (docId) {
+        window.location.hash = docId;
+      }
+    }
+  }, [selectedDocument, uploadedFile]);
+  
+  // Listen for hash changes (browser back/forward)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && sampleDocuments.some(doc => doc.id === hash)) {
+        const newPath = `${getBasePath()}/${hash}`;
+        if (newPath !== selectedDocument) {
+          setSelectedDocument(newPath);
+          setUploadedFile(null);
+          handleDocumentLoad(newPath);
+        }
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [selectedDocument]);
 
   const handleDocumentLoad = async (docPath?: string) => {
     const startTime = performance.now();
@@ -396,18 +485,20 @@ const App = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Primary Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8 py-3">
+      {/* Sticky Navigation Container */}
+      <div className="sticky top-0 z-40">
+        {/* Primary Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">PandaPage</h1>
+              <h1 className="text-xl font-semibold text-gray-900">pandapage</h1>
             </div>
             
             {/* Document controls */}
             <div className="flex items-center gap-3">
               {/* Document dropdown */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 shadow-sm border border-gray-200">
                 <label htmlFor="document-select" className="text-sm font-medium text-gray-700">
                   Document:
                 </label>
@@ -422,7 +513,7 @@ const App = () => {
                       handleDocumentLoad(value);
                     }
                   }}
-                  className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-3 py-1.5 pr-8 bg-white shadow-sm"
+                  className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 pr-10 bg-white shadow-sm font-medium min-w-[200px]"
                 >
                 {uploadedFile && (
                   <option value="uploaded">{uploadedFile.name}</option>
@@ -467,17 +558,21 @@ const App = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
-      {/* Secondary Ribbon Bar */}
-      <div className="bg-gray-100 border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8 py-2">
+        {/* Secondary Ribbon Bar */}
+        <div className="bg-gray-100 border-b border-gray-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Outline toggle */}
               <button
                 onClick={() => setShowOutline(!showOutline)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded transition-colors"
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                  showOutline 
+                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                    : 'text-gray-700 hover:bg-gray-200'
+                }`}
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
@@ -552,6 +647,7 @@ const App = () => {
               {!loading && result && (
                 <span>{countWords(result)} words</span>
               )}
+            </div>
             </div>
           </div>
         </div>
@@ -644,7 +740,16 @@ const App = () => {
                 </div>
               ) : (
                 // Print view
-                <div className="print-view">
+                <div className="print-view relative">
+                  {/* Page Indicator */}
+                  {showPageIndicator && totalPages > 0 && (
+                    <div className="fixed top-1/2 right-8 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30">
+                      <div className="text-sm font-medium">
+                        Page {currentPage} of {totalPages}
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="print-page-container" style={{
                     transform: `scale(${printScale})`,
                     transformOrigin: 'top center',
@@ -654,8 +759,13 @@ const App = () => {
                       const htmlContent = marked(removeFrontmatter(result));
                       const pages = splitIntoPages(htmlContent);
                       
+                      // Update total pages when pages change
+                      if (pages.length !== totalPages) {
+                        setTimeout(() => setTotalPages(pages.length), 0);
+                      }
+                      
                       return pages.map((pageContent, index) => (
-                        <div key={index} className="print-page">
+                        <div key={index} className="print-page" data-page={index + 1}>
                           <div 
                             className="print-content"
                             dangerouslySetInnerHTML={{ __html: pageContent }}
