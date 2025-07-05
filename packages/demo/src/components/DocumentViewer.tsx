@@ -127,7 +127,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {/* Page Indicator */}
           {showPageIndicator && totalPages > 0 && (
             <div className="fixed top-1/2 right-8 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30">
-              <div className="text-sm font-medium">
+              <div className="text-sm font-medium font-sans">
                 Page {currentPage} of {totalPages}
               </div>
             </div>
@@ -154,7 +154,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     dangerouslySetInnerHTML={{ __html: pageContent }}
                   />
                   {/* Page number - only show in screen view */}
-                  <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden">
+                  <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans">
                     Page {index + 1} of {pages.length}
                   </div>
                 </div>

@@ -79,23 +79,51 @@ const App: React.FC = () => {
 
   // Parse error message for better user display
   const parseErrorMessage = (error: any): string => {
-    // Handle specific error types
+    // Handle different error formats from Effect.js
     if (error && typeof error === 'object') {
+      // Check for Effect errors with _tag
       if (error._tag === 'PagesParseError') {
         return 'Apple Pages support is currently in development. Please try a DOCX file instead.';
       }
       if (error._tag === 'DocxParseError') {
         return `Document parsing error: ${error.message || 'Unable to parse this DOCX file.'}`;
       }
+      
+      // Check for constructor names  
+      if (error.constructor?.name === 'DocxParseError') {
+        return `Document parsing error: ${error.message || 'Unable to parse this DOCX file.'}`;
+      }
+      if (error.constructor?.name === 'PagesParseError') {
+        return 'Apple Pages support is currently in development. Please try a DOCX file instead.';
+      }
+      
+      // Check error message content
       if (error.message) {
-        return error.message;
+        const message = error.message;
+        if (message.includes('Pages support is not yet implemented') || 
+            message.includes('PagesParseError')) {
+          return 'Apple Pages support is currently in development. Please try a DOCX file instead.';
+        }
+        if (message.includes('DocxParseError')) {
+          return `Document parsing error: Unable to parse this DOCX file.`;
+        }
+        return message;
+      }
+      
+      // Check for nested errors in Effect format
+      if (error.error && error.error.message) {
+        return parseErrorMessage(error.error);
       }
     }
     
     // Handle string errors
     if (typeof error === 'string') {
-      if (error.includes('Pages support is not yet implemented')) {
+      if (error.includes('Pages support is not yet implemented') || 
+          error.includes('PagesParseError')) {
         return 'Apple Pages support is currently in development. Please try a DOCX file instead.';
+      }
+      if (error.includes('DocxParseError')) {
+        return 'Document parsing error: Unable to parse this DOCX file.';
       }
       return error;
     }
