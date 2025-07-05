@@ -32,6 +32,24 @@ const countWords = (text: string): number => {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 };
 
+// Extract headings from markdown for outline view
+const extractHeadings = (markdown: string): Array<{level: number, text: string, id: string}> => {
+  const lines = markdown.split('\n');
+  const headings: Array<{level: number, text: string, id: string}> = [];
+  
+  for (const line of lines) {
+    const match = line.match(/^(#{1,6})\s+(.+)$/);
+    if (match) {
+      const level = match[1].length;
+      const text = match[2].trim();
+      const id = text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+      headings.push({ level, text, id });
+    }
+  }
+  
+  return headings;
+};
+
 const App = () => {
   const [result, setResult] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -57,7 +75,7 @@ const App = () => {
     { id: '007.pages', title: 'Additional tests', description: 'Edge cases and variants', format: 'Pages' },
   ];
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [viewMode, setViewMode] = useState<'raw' | 'rendered'>('rendered');
+  const [viewMode, setViewMode] = useState<'read' | 'outline'>('read');
 
   // Show spinner only after 1 second delay to prevent flickering
   useEffect(() => {
@@ -367,7 +385,7 @@ const App = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <h3 className="text-lg font-medium text-gray-900">
-                          Markdown Output
+                          {uploadedFile ? uploadedFile.name : selectedDocument.split('/').pop() || 'Document'}
                         </h3>
                       </div>
                       <div className="flex items-center gap-3">
@@ -383,41 +401,80 @@ const App = () => {
                         {/* View Mode Toggle */}
                         <div className="flex items-center bg-gray-100 rounded-lg p-1">
                           <button
-                            onClick={() => setViewMode('rendered')}
+                            onClick={() => setViewMode('read')}
                             className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                              viewMode === 'rendered'
+                              viewMode === 'read'
                                 ? 'bg-white text-gray-900 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                             }`}
                           >
-                            Rendered
+                            Read
                           </button>
                           <button
-                            onClick={() => setViewMode('raw')}
+                            onClick={() => setViewMode('outline')}
                             className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                              viewMode === 'raw'
+                              viewMode === 'outline'
                                 ? 'bg-white text-gray-900 shadow-sm'
                                 : 'text-gray-600 hover:text-gray-900'
                             }`}
                           >
-                            Raw
+                            Outline
                           </button>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div className="p-6">
-                    {viewMode === 'raw' ? (
-                      <div className="relative">
-                        <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 rounded-lg p-4 overflow-auto max-h-[600px]">
-                          {result}
-                        </pre>
-                      </div>
-                    ) : (
+                    {viewMode === 'read' ? (
                       <div 
                         className="rendered-markdown prose prose-gray prose-lg max-w-none"
                         dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
                       />
+                    ) : (
+                      <div className="outline-view">
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Document Outline</h4>
+                          {extractHeadings(removeFrontmatter(result)).length === 0 ? (
+                            <p className="text-sm text-gray-500 italic">No headings found in this document.</p>
+                          ) : (
+                            <div className="space-y-1">
+                              {extractHeadings(removeFrontmatter(result)).map((heading, index) => (
+                                <div
+                                  key={index}
+                                  className={`text-sm hover:bg-gray-50 rounded px-2 py-1 cursor-pointer transition-colors`}
+                                  style={{ paddingLeft: `${(heading.level - 1) * 16 + 8}px` }}
+                                  onClick={() => {
+                                    // Scroll to heading in read view
+                                    setViewMode('read');
+                                    setTimeout(() => {
+                                      const element = document.querySelector(`h${heading.level}`);
+                                      if (element && element.textContent?.includes(heading.text)) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                      }
+                                    }, 100);
+                                  }}
+                                >
+                                  <span className={`${
+                                    heading.level === 1 ? 'font-semibold text-gray-900' :
+                                    heading.level === 2 ? 'font-medium text-gray-800' :
+                                    'text-gray-700'
+                                  }`}>
+                                    {heading.text}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Show document content below outline */}
+                        <div className="border-t pt-6 mt-6">
+                          <div 
+                            className="rendered-markdown prose prose-gray prose-lg max-w-none"
+                            dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
+                          />
+                        </div>
+                      </div>
                     )}
                   </div>
                 </>
