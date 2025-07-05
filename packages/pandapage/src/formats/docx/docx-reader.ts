@@ -1,6 +1,7 @@
 import * as S from "@effect/schema/Schema";
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
+import { parseNumberingXml } from "./document-parser";
 
 // Error types
 export class DocxParseError {
