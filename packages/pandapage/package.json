@@ -24,13 +24,11 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^0.2.14",
     "@effect/schema": "^0.75.5",
-    "@types/js-yaml": "^4.0.9",
-    "@types/pako": "^2.0.3",
-    "ai": "^4.3.16",
+    "@types/xml2js": "^0.4.14",
     "effect": "^3.16.12",
-    "js-yaml": "^4.1.0",
-    "pako": "^2.1.0"
+    "fflate": "^0.8.2",
+    "jszip": "^3.10.1",
+    "xml2js": "^0.6.2"
   }
 }
