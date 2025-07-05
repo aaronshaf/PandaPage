@@ -1,6 +1,6 @@
-import { Effect, Queue, Pool, Scope } from "effect";
-import * as S from "@effect/schema/Schema";
 import { BrowserWorker } from "@effect/platform-browser";
+import * as S from "@effect/schema/Schema";
+import { Effect, Pool, Queue, Scope } from "effect";
 import { debug } from "../common/debug";
 
 // Worker task types
@@ -14,7 +14,7 @@ export interface WorkerTask {
   };
 }
 
-// Worker result types  
+// Worker result types
 export interface WorkerResult {
   id: string;
   type: "complete" | "chunk" | "progress" | "error";
@@ -33,42 +33,49 @@ export interface WorkerPoolConfig {
 const defaultConfig: WorkerPoolConfig = {
   minWorkers: 1,
   maxWorkers: navigator.hardwareConcurrency || 4,
-  workerIdleTimeout: 30000 // 30 seconds
+  workerIdleTimeout: 30000, // 30 seconds
 };
 
 // Create a worker pool for document parsing
-export const createWorkerPool = (config: WorkerPoolConfig = defaultConfig): Effect.Effect<{
-  executeTask: <T>(task: WorkerTask) => Effect.Effect<T, Error>;
-  getOptimalWorkerCount: (fileSize: number) => number;
-  shutdown: () => Effect.Effect<void>;
-}, never, never> =>
+export const createWorkerPool = (
+  config: WorkerPoolConfig = defaultConfig,
+): Effect.Effect<
+  {
+    executeTask: <T>(task: WorkerTask) => Effect.Effect<T, Error>;
+    getOptimalWorkerCount: (fileSize: number) => number;
+    shutdown: () => Effect.Effect<void>;
+  },
+  never,
+  never
+> =>
   Effect.gen(function* () {
     // For now, return a simple implementation without actual pooling
     // TODO: Implement proper worker pooling when Effect Pool API is available
     const createWorker = () => ({
       id: Math.random().toString(36),
-      execute: (task: WorkerTask) => Effect.succeed({
-        id: task.id,
-        type: "complete" as const,
-        data: { parsed: true }
-      })
+      execute: (task: WorkerTask) =>
+        Effect.succeed({
+          id: task.id,
+          type: "complete" as const,
+          data: { parsed: true },
+        }),
     });
 
     // Execute a task in the pool
     const executeTask = <T>(task: WorkerTask): Effect.Effect<T, Error> =>
       Effect.gen(function* () {
         debug.log(`Executing task ${task.id} of type ${task.type}`);
-        
+
         // Create a worker for now (no pooling yet)
         const worker = createWorker();
-        
+
         // Execute the task
         const result = yield* worker.execute(task);
-        
+
         if (result.type === "error") {
           return yield* Effect.fail(new Error(result.error || "Unknown error"));
         }
-        
+
         return result.data as T;
       });
 
@@ -84,7 +91,7 @@ export const createWorkerPool = (config: WorkerPoolConfig = defaultConfig): Effe
       executeTask,
       getOptimalWorkerCount,
       // Pool cleanup - in Effect 3.x, pools are managed differently
-      shutdown: () => Effect.void
+      shutdown: () => Effect.void,
     };
   });
 
@@ -98,18 +105,18 @@ export const shouldUseWorker = (fileSize: number): boolean => {
 export const createTransferableTask = (
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: WorkerTask["options"]
+  options?: WorkerTask["options"],
 ): { task: WorkerTask; transfer: ArrayBuffer[] } => {
   const task: WorkerTask = {
     id: Math.random().toString(36),
     type,
     buffer,
-    options
+    options,
   };
-  
+
   // Mark the buffer for transfer
   return {
     task,
-    transfer: [buffer]
+    transfer: [buffer],
   };
 };

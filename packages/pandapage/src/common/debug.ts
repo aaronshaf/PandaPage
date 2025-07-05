@@ -2,17 +2,17 @@
 // LOG_LEVEL can be: None, Fatal, Error, Warning, Info, AI, Debug, Trace, All
 const getLogLevel = (): string => {
   // Check if we're in a browser environment
-  if (typeof process === 'undefined' || !process.env) {
+  if (typeof process === "undefined" || !process.env) {
     // In browser, check for a global LOG_LEVEL variable
-    return (typeof window !== 'undefined' && (window as any).LOG_LEVEL?.toLowerCase()) || 'error';
+    return (typeof window !== "undefined" && (window as any).LOG_LEVEL?.toLowerCase()) || "error";
   }
   // In Node.js
-  return process.env.LOG_LEVEL?.toLowerCase() || 'error';
+  return process.env.LOG_LEVEL?.toLowerCase() || "error";
 };
 
 const logLevel = getLogLevel();
-const isDebugEnabled = ['debug', 'trace', 'all'].includes(logLevel);
-const isAiEnabled = ['ai', 'debug', 'trace', 'all'].includes(logLevel);
+const isDebugEnabled = ["debug", "trace", "all"].includes(logLevel);
+const isAiEnabled = ["ai", "debug", "trace", "all"].includes(logLevel);
 
 export const debug = {
   log: (...args: any[]): void => {
@@ -27,8 +27,8 @@ export const debug = {
   },
   error: (...args: any[]): void => {
     // Log errors unless LOG_LEVEL is None
-    if (logLevel !== 'none') {
+    if (logLevel !== "none") {
       console.error(...args);
     }
-  }
+  },
 };

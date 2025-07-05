@@ -1,8 +1,8 @@
 import { Effect, Stream } from "effect";
 import { 
   parseDocumentInWorker, 
-  streamDocumentParse,
-  shouldUseWorker 
+  shouldUseWorker, 
+  streamDocumentParse
 } from "../index";
 
 // Example 1: Parse a large DOCX with progress tracking

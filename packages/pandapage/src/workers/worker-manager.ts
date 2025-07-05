@@ -1,8 +1,8 @@
-import { Effect, Stream, Chunk } from "effect";
 import * as S from "@effect/schema/Schema";
-import { createTransferableTask, shouldUseWorker } from "./worker-pool";
-import type { WorkerTask, WorkerResult } from "./worker-pool";
+import { Chunk, Effect, Stream } from "effect";
 import { debug } from "../common/debug";
+import type { WorkerResult, WorkerTask } from "./worker-pool";
+import { createTransferableTask, shouldUseWorker } from "./worker-pool";
 
 // Progress callback type
 export type ProgressCallback = (progress: number) => void;
@@ -42,74 +42,81 @@ const createWorker = (type: WorkerTask["type"]): Worker => {
 export const parseDocumentInWorker = <T>(
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: ParseOptions
+  options?: ParseOptions,
 ): Effect.Effect<T, WorkerParseError> =>
   Effect.gen(function* () {
     debug.log(`Starting worker parse for ${type}, size: ${buffer.byteLength}`);
-    
+
     // Create transferable task
     const { task, transfer } = createTransferableTask(type, buffer, {
       streaming: options?.streaming,
-      chunkSize: options?.chunkSize
+      chunkSize: options?.chunkSize,
     });
-    
+
     // Create worker
     const worker = createWorker(type);
-    
+
     try {
       // Create a promise for the result
       const result = yield* Effect.async<T, WorkerParseError>((resume) => {
-        let chunks: any[] = [];
-        
+        const chunks: any[] = [];
+
         worker.onmessage = (event: MessageEvent<WorkerResult>) => {
           const result = event.data;
-          
+
           switch (result.type) {
             case "progress":
               if (options?.onProgress && result.progress !== undefined) {
                 options.onProgress(result.progress);
               }
               break;
-              
+
             case "chunk":
               chunks.push(result.data);
               break;
-              
+
             case "complete":
               if (chunks.length > 0) {
                 // Reassemble chunks
                 const assembled = chunks
                   .sort((a, b) => a.index - b.index)
-                  .map(c => c.chunk)
+                  .map((c) => c.chunk)
                   .join("");
                 resume(Effect.succeed({ markdown: assembled } as T));
               } else {
                 resume(Effect.succeed(result.data as T));
               }
               break;
-              
+
             case "error":
-              resume(Effect.fail(new WorkerParseError({
-                message: result.error || "Unknown worker error",
-                taskId: task.id
-              })));
+              resume(
+                Effect.fail(
+                  new WorkerParseError({
+                    message: result.error || "Unknown worker error",
+                    taskId: task.id,
+                  }),
+                ),
+              );
               break;
           }
         };
-        
+
         worker.onerror = (error) => {
-          resume(Effect.fail(new WorkerParseError({
-            message: error.message || "Worker error",
-            taskId: task.id
-          })));
+          resume(
+            Effect.fail(
+              new WorkerParseError({
+                message: error.message || "Worker error",
+                taskId: task.id,
+              }),
+            ),
+          );
         };
-        
+
         // Send task to worker with transferable objects
         worker.postMessage({ task, transfer }, { transfer });
       });
-      
+
       return result;
-      
     } finally {
       // Clean up worker
       worker.terminate();
@@ -120,11 +127,11 @@ export const parseDocumentInWorker = <T>(
 export const parseDocumentSmart = <T>(
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: ParseOptions
+  options?: ParseOptions,
 ): Effect.Effect<T, WorkerParseError | Error> =>
   Effect.gen(function* () {
     const useWorker = options?.useWorker ?? shouldUseWorker(buffer.byteLength);
-    
+
     if (useWorker) {
       debug.log("Using worker for parsing");
       return yield* parseDocumentInWorker<T>(type, buffer, options);
@@ -140,25 +147,25 @@ export const parseDocumentSmart = <T>(
 export const streamDocumentParse = (
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: Omit<ParseOptions, "streaming">
+  options?: Omit<ParseOptions, "streaming">,
 ): Stream.Stream<string, WorkerParseError> =>
   Stream.async<string, WorkerParseError>((emit) => {
     const worker = createWorker(type);
     const { task, transfer } = createTransferableTask(type, buffer, {
       streaming: true,
-      chunkSize: options?.chunkSize
+      chunkSize: options?.chunkSize,
     });
-    
+
     worker.onmessage = (event: MessageEvent<WorkerResult>) => {
       const result = event.data;
-      
+
       switch (result.type) {
         case "progress":
           if (options?.onProgress && result.progress !== undefined) {
             options.onProgress(result.progress);
           }
           break;
-          
+
         case "chunk":
           if (result.data?.chunk) {
             emit.single(result.data.chunk);
@@ -167,30 +174,34 @@ export const streamDocumentParse = (
             emit.end();
           }
           break;
-          
+
         case "complete":
           emit.end();
           break;
-          
+
         case "error":
-          emit.fail(new WorkerParseError({
-            message: result.error || "Unknown worker error",
-            taskId: task.id
-          }));
+          emit.fail(
+            new WorkerParseError({
+              message: result.error || "Unknown worker error",
+              taskId: task.id,
+            }),
+          );
           break;
       }
     };
-    
+
     worker.onerror = (error) => {
-      emit.fail(new WorkerParseError({
-        message: error.message || "Worker error",
-        taskId: task.id
-      }));
+      emit.fail(
+        new WorkerParseError({
+          message: error.message || "Worker error",
+          taskId: task.id,
+        }),
+      );
     };
-    
+
     // Send task to worker
     worker.postMessage({ task, transfer }, { transfer });
-    
+
     // Cleanup on stream end
     emit.onInterrupt(() => {
       worker.terminate();

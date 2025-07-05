@@ -6,7 +6,7 @@ const server = serve({
   port: 3000,
   async fetch(req) {
     const url = new URL(req.url);
-    
+
     // Serve test HTML page
     if (url.pathname === "/" || url.pathname === "/index.html") {
       return new Response(
@@ -67,10 +67,10 @@ const server = serve({
         </html>`,
         {
           headers: { "Content-Type": "text/html" },
-        }
+        },
       );
     }
-    
+
     // Serve PandaPage library
     if (url.pathname === "/pandapage.js") {
       const bundled = await Bun.build({
@@ -78,14 +78,14 @@ const server = serve({
         target: "browser",
         format: "esm",
       });
-      
+
       if (bundled.success && bundled.outputs.length > 0) {
         return new Response(bundled.outputs[0], {
           headers: { "Content-Type": "application/javascript" },
         });
       }
     }
-    
+
     // Serve test application
     if (url.pathname === "/test-app.js") {
       return new Response(
@@ -210,21 +210,21 @@ const server = serve({
         };`,
         {
           headers: { "Content-Type": "application/javascript" },
-        }
+        },
       );
     }
-    
+
     // Serve test files
     if (url.pathname.startsWith("/test-files/")) {
       const filename = url.pathname.replace("/test-files/", "");
       const filePath = join(import.meta.dir, "../", filename);
       const file = Bun.file(filePath);
-      
+
       if (await file.exists()) {
         return new Response(file);
       }
     }
-    
+
     return new Response("Not found", { status: 404 });
   },
 });

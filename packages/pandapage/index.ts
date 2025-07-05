@@ -1,95 +1,97 @@
 import { Effect } from "effect";
 
 // DOCX support
-export { 
-  readDocx, 
-  type DocxDocument, 
-  type DocxParagraph, 
-  type DocxRun, 
-  DocxParseError 
+export {
+  type DocxDocument,
+  type DocxParagraph,
+  DocxParseError,
+  type DocxRun,
+  readDocx,
 } from "./src/formats/docx/docx-reader";
 
-export { 
-  docxToMarkdown, 
-  convertDocxToMarkdown 
+export {
+  convertDocxToMarkdown,
+  docxToMarkdown,
 } from "./src/formats/docx/docx-to-markdown";
-
-// Apple Pages support
-export { 
-  readPages, 
-  type PagesDocument, 
-  type PagesParagraph, 
-  type PagesRun, 
-  PagesParseError 
-} from "./src/formats/pages/pages-reader";
-
-export { 
-  pagesToMarkdown, 
-  convertPagesToMarkdown 
-} from "./src/formats/pages/pages-to-markdown";
-
-// PPTX support
-export {
-  readPptx,
-  type PptxDocument,
-  type PptxSlide,
-  type PptxContent,
-  PptxParseError
-} from "./src/formats/pptx/pptx-reader";
-
-export {
-  pptxToMarkdown,
-  convertPptxToMarkdown
-} from "./src/formats/pptx/pptx-to-markdown";
-
 // Keynote support
 export {
-  readKey,
-  type KeyDocument,
-  type KeySlide,
   type KeyContent,
-  KeyParseError
+  type KeyDocument,
+  KeyParseError,
+  type KeySlide,
+  readKey,
 } from "./src/formats/key/key-reader";
-
 export {
+  convertKeyToMarkdown,
   keyToMarkdown,
-  convertKeyToMarkdown
 } from "./src/formats/key/key-to-markdown";
+// Apple Pages support
+export {
+  type PagesDocument,
+  type PagesParagraph,
+  PagesParseError,
+  type PagesRun,
+  readPages,
+} from "./src/formats/pages/pages-reader";
+export {
+  convertPagesToMarkdown,
+  pagesToMarkdown,
+} from "./src/formats/pages/pages-to-markdown";
+// PPTX support
+export {
+  type PptxContent,
+  type PptxDocument,
+  PptxParseError,
+  type PptxSlide,
+  readPptx,
+} from "./src/formats/pptx/pptx-reader";
+export {
+  convertPptxToMarkdown,
+  pptxToMarkdown,
+} from "./src/formats/pptx/pptx-to-markdown";
 
 // Helper functions to render documents to markdown directly
 export async function renderDocx(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
-      const { docxToMarkdown } = yield* Effect.promise(() => import("./src/formats/docx/docx-to-markdown"));
+      const { docxToMarkdown } = yield* Effect.promise(
+        () => import("./src/formats/docx/docx-to-markdown"),
+      );
       return yield* docxToMarkdown(buffer);
-    })
+    }),
   );
 }
 
 export async function renderPages(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
-      const { pagesToMarkdown } = yield* Effect.promise(() => import("./src/formats/pages/pages-to-markdown"));
+      const { pagesToMarkdown } = yield* Effect.promise(
+        () => import("./src/formats/pages/pages-to-markdown"),
+      );
       return yield* pagesToMarkdown(buffer);
-    })
+    }),
   );
 }
 
 export async function renderPptx(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
-      const { pptxToMarkdown } = yield* Effect.promise(() => import("./src/formats/pptx/pptx-to-markdown"));
+      const { pptxToMarkdown } = yield* Effect.promise(
+        () => import("./src/formats/pptx/pptx-to-markdown"),
+      );
       return yield* pptxToMarkdown(buffer);
-    })
+    }),
   );
 }
 
 export async function renderKey(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
-      const { keyToMarkdown } = yield* Effect.promise(() => import("./src/formats/key/key-to-markdown"));
+      const { keyToMarkdown } = yield* Effect.promise(
+        () => import("./src/formats/key/key-to-markdown"),
+      );
       return yield* keyToMarkdown(buffer);
-    })
+    }),
   );
 }
 
@@ -98,18 +100,18 @@ export { debug } from "./src/common/debug";
 
 // Worker support
 export {
+  type ParseOptions,
+  type ProgressCallback,
   parseDocumentInWorker,
   parseDocumentSmart,
   streamDocumentParse,
-  type ParseOptions,
-  type ProgressCallback,
-  WorkerParseError
+  WorkerParseError,
 } from "./src/workers/worker-manager";
 
 export {
-  shouldUseWorker,
   createTransferableTask,
-  type WorkerTask,
+  shouldUseWorker,
+  type WorkerPoolConfig,
   type WorkerResult,
-  type WorkerPoolConfig
+  type WorkerTask,
 } from "./src/workers/worker-pool";

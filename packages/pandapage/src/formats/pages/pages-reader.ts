@@ -1,5 +1,5 @@
-import { Effect } from "effect";
 import * as S from "@effect/schema/Schema";
+import { Effect } from "effect";
 import { debug } from "../../common/debug";
 
 // Error types
@@ -29,11 +29,13 @@ export interface PagesDocument {
 export const readPages = (buffer: ArrayBuffer): Effect.Effect<PagesDocument, PagesParseError> =>
   Effect.gen(function* () {
     debug.log("Reading Apple Pages file...");
-    
+
     // TODO: Implement Pages file parsing
     // Apple Pages files are also ZIP archives but with different structure
-    
-    return yield* Effect.fail(new PagesParseError({
-      message: "Apple Pages support is not yet implemented"
-    }));
+
+    return yield* Effect.fail(
+      new PagesParseError({
+        message: "Apple Pages support is not yet implemented",
+      }),
+    );
   });
