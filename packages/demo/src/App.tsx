@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { marked } from 'marked';
 import { renderDocxWithMetadata, renderPages } from '@pandapage/pandapage';
 
@@ -175,6 +175,7 @@ const App = () => {
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<string>(`${getBasePath()}/001.docx`);
+  const [printScale, setPrintScale] = useState(1);
   
   // Document samples data
   const sampleDocuments = [
@@ -195,6 +196,25 @@ const App = () => {
   ];
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [viewMode, setViewMode] = useState<'read' | 'outline' | 'print'>('read');
+
+  // Calculate print scale based on window width
+  const calculatePrintScale = useCallback(() => {
+    if (typeof window === 'undefined') return 1;
+    const containerWidth = window.innerWidth - 420; // Account for sidebar
+    const pageWidth = 8.5 * 96; // 8.5 inches at 96 DPI
+    return Math.min(1, (containerWidth - 64) / pageWidth); // 64px for padding
+  }, []);
+
+  // Update print scale on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setPrintScale(calculatePrintScale());
+    };
+    
+    handleResize(); // Initial calculation
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [calculatePrintScale]);
 
   // Show spinner - immediately on first load, with delay on subsequent loads
   useEffect(() => {
@@ -616,23 +636,29 @@ const App = () => {
                     ) : (
                       // Print view
                       <div className="print-view">
-                        {(() => {
-                          const htmlContent = marked(removeFrontmatter(result));
-                          const pages = splitIntoPages(htmlContent);
-                          
-                          return pages.map((pageContent, index) => (
-                            <div key={index} className="print-page">
-                              <div 
-                                className="print-content"
-                                dangerouslySetInnerHTML={{ __html: pageContent }}
-                              />
-                              {/* Page number - only show in screen view */}
-                              <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden">
-                                Page {index + 1} of {pages.length}
+                        <div className="print-page-container" style={{
+                          transform: `scale(${printScale})`,
+                          transformOrigin: 'top center',
+                          marginBottom: `${(1 - printScale) * 11 * 96}px` // Adjust margin for scaled height
+                        }}>
+                          {(() => {
+                            const htmlContent = marked(removeFrontmatter(result));
+                            const pages = splitIntoPages(htmlContent);
+                            
+                            return pages.map((pageContent, index) => (
+                              <div key={index} className="print-page">
+                                <div 
+                                  className="print-content"
+                                  dangerouslySetInnerHTML={{ __html: pageContent }}
+                                />
+                                {/* Page number - only show in screen view */}
+                                <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden">
+                                  Page {index + 1} of {pages.length}
+                                </div>
                               </div>
-                            </div>
-                          ));
-                        })()}
+                            ));
+                          })()}
+                        </div>
                       </div>
                     )}
                   </div>
