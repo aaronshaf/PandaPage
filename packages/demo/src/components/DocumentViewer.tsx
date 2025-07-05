@@ -167,8 +167,9 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         // Print view
         <div className="print-view relative">
           {/* Page Indicator */}
-          {showPageIndicator && totalPages > 0 && (
+          {showPageIndicator && totalPages > 1 && (
             <div 
+              data-testid="page-indicator"
               className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
               style={{
                 // Position relative to the document container's scrollable area
