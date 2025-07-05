@@ -239,6 +239,35 @@ const App = () => {
     }
   }, [viewMode, calculatePrintScale]);
 
+  // Handle pinch-to-zoom for print layout
+  useEffect(() => {
+    if (viewMode !== 'print' || !result) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Check if this is a pinch gesture (ctrlKey is set for pinch on trackpads)
+      if (e.ctrlKey) {
+        e.preventDefault();
+        
+        // Calculate zoom based on wheel delta
+        const scaleDelta = e.deltaY > 0 ? -0.05 : 0.05;
+        setPrintScale((prevScale) => {
+          const newScale = prevScale + scaleDelta;
+          // Clamp between 0.5 and 2
+          return Math.max(0.5, Math.min(2, newScale));
+        });
+      }
+    };
+
+    // Add event listener to the print view container
+    const printContainer = document.querySelector('.print-view');
+    if (printContainer) {
+      printContainer.addEventListener('wheel', handleWheel, { passive: false });
+      return () => {
+        printContainer.removeEventListener('wheel', handleWheel);
+      };
+    }
+  }, [viewMode, result]);
+
   // Show spinner - immediately on first load, with delay on subsequent loads
   useEffect(() => {
     let timer: NodeJS.Timeout;
