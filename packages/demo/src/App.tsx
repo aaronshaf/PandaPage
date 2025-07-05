@@ -615,46 +615,24 @@ const App = () => {
                       </div>
                     ) : (
                       // Print view
-                      <div>
-                        {/* Print controls */}
-                        <div className="flex justify-between items-center p-4 bg-gray-50 border-b">
-                          <div className="text-sm text-gray-600">
-                            Print Preview - {(() => {
-                              const htmlContent = marked(removeFrontmatter(result));
-                              const pages = splitIntoPages(htmlContent);
-                              return `${pages.length} page${pages.length !== 1 ? 's' : ''}`;
-                            })()}
-                          </div>
-                          <button
-                            onClick={() => window.print()}
-                            className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-                          >
-                            <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                            Print Document
-                          </button>
-                        </div>
-                        
-                        <div className="print-view">
-                          {(() => {
-                            const htmlContent = marked(removeFrontmatter(result));
-                            const pages = splitIntoPages(htmlContent);
-                            
-                            return pages.map((pageContent, index) => (
-                              <div key={index} className="print-page">
-                                <div 
-                                  className="print-content"
-                                  dangerouslySetInnerHTML={{ __html: pageContent }}
-                                />
-                                {/* Page number - only show in screen view */}
-                                <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden">
-                                  Page {index + 1} of {pages.length}
-                                </div>
+                      <div className="print-view">
+                        {(() => {
+                          const htmlContent = marked(removeFrontmatter(result));
+                          const pages = splitIntoPages(htmlContent);
+                          
+                          return pages.map((pageContent, index) => (
+                            <div key={index} className="print-page">
+                              <div 
+                                className="print-content"
+                                dangerouslySetInnerHTML={{ __html: pageContent }}
+                              />
+                              {/* Page number - only show in screen view */}
+                              <div className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden">
+                                Page {index + 1} of {pages.length}
                               </div>
-                            ));
-                          })()}
-                        </div>
+                            </div>
+                          ));
+                        })()}
                       </div>
                     )}
                   </div>
