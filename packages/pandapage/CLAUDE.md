@@ -113,3 +113,41 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 ## Code Organization
 
 - If files get above 500 lines, make an effort to split them out to multiple files.
+
+## Project Context: PandaPage Document Parser
+
+This project aims to parse and render modern document formats in the browser:
+
+### Supported Formats
+- **DOCX** (Microsoft Word) - XML-based, currently implemented with list support
+- **PPTX** (Microsoft PowerPoint) - XML-based, to be implemented
+- **Pages** (Apple Pages) - Binary IWA format (Protocol Buffers)
+- **Key** (Apple Keynote) - Binary IWA format (Protocol Buffers)
+
+### Key Technical Details
+
+#### DOCX/PPTX Structure
+- ZIP archives containing XML files
+- Main content in `word/document.xml` or `ppt/slides/slide*.xml`
+- Relationships in `_rels` folders
+- Media files in `media` folders
+- Numbering/lists in `numbering.xml`
+
+#### Apple iWork Structure
+- ZIP archives containing:
+  - `Index/*.iwa` - Binary Protocol Buffer files with document content
+  - `Data/*` - Media assets (images, etc.)
+  - `Metadata/*.plist` - Property lists with document metadata
+  - `preview*.jpg` - Preview images
+
+### Testing Approach
+- Deterministic tests comparing output to expected Markdown
+- Use Effect.js for error handling and async operations
+- Test files in packages/pandapage/ root for parser verification
+
+### Current Implementation Status
+- DOCX: Text, formatting, headings, lists ✓
+- DOCX: Tables, images, complex formatting ✗
+- PPTX: Not started
+- Pages: File structure analyzed, parsing not implemented
+- Key: Not started

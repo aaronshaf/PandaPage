@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { renderPdf, renderPdfStream } from '@pandapage/pandapage';
-import { Stream, Effect } from 'effect';
+import { renderDocx } from '@pandapage/pandapage';
 
 // Get base path for GitHub Pages deployment
 const getBasePath = () => {
@@ -12,8 +11,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
-  const [mode, setMode] = useState<'promise' | 'stream' | null>(null);
-  const [selectedPdf, setSelectedPdf] = useState<string>(`${getBasePath()}/sample1.pdf`);
+  const [selectedDocx, setSelectedDocx] = useState<string>(`${getBasePath()}/basic-formatting.docx`);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   // Show spinner only after 500ms delay
@@ -29,21 +27,31 @@ const App = () => {
     return () => clearTimeout(timer);
   }, [loading]);
 
-  const handlePromiseLoad = async () => {
+  const handleDocxLoad = async () => {
     const startTime = performance.now();
     setLoading(true);
     // Don't clear result immediately - keep showing previous content
     setProcessingTime(null);
-    setMode('promise');
     try {
-      let pdfSource: string | Blob;
+      let docxSource: string | File;
       if (uploadedFile) {
-        pdfSource = uploadedFile;
+        docxSource = uploadedFile;
       } else {
-        pdfSource = selectedPdf;
+        docxSource = selectedDocx;
       }
-      const newResult = await renderPdf(pdfSource);
-      setResult(newResult);  // Only update when new content is ready
+      
+      let arrayBuffer: ArrayBuffer;
+      if (typeof docxSource === 'string') {
+        // Fetch from URL
+        const response = await fetch(docxSource);
+        arrayBuffer = await response.arrayBuffer();
+      } else {
+        // Read from File
+        arrayBuffer = await docxSource.arrayBuffer();
+      }
+      
+      const markdown = await renderDocx(arrayBuffer);
+      setResult(markdown);  // Only update when new content is ready
       setProcessingTime(performance.now() - startTime);
     } catch (error) {
       setResult(`Error: ${error}`);
@@ -52,40 +60,9 @@ const App = () => {
     }
   };
 
-  const handleStreamLoad = () => {
-    const startTime = performance.now();
-    setLoading(true);
-    setResult('');
-    setProcessingTime(null);
-    setMode('stream');
-    const chunks: string[] = [];
-    
-    let pdfSource: string | Blob;
-    if (uploadedFile) {
-      pdfSource = uploadedFile;
-    } else {
-      pdfSource = selectedPdf;
-    }
-    
-    Effect.runPromise(
-      renderPdfStream(pdfSource).pipe(
-        Stream.runForEach((chunk) => Effect.sync(() => {
-          chunks.push(chunk);
-          setResult(chunks.join(''));
-        }))
-      )
-    ).then(() => {
-      setLoading(false);
-      setProcessingTime(performance.now() - startTime);
-    }).catch((error) => {
-      setResult(`Error: ${error}`);
-      setLoading(false);
-    });
-  };
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.docx'))) {
       setUploadedFile(file);
       setResult('');
     }
@@ -139,7 +116,7 @@ const App = () => {
               </div>
               <div className="ml-4">
                 <h1 className="text-xl font-semibold text-gray-900">PandaPage</h1>
-                <p className="text-sm text-gray-500">Document Text Extraction Demo</p>
+                <p className="text-sm text-gray-500">DOCX to Markdown Converter</p>
               </div>
             </div>
             <a
@@ -167,7 +144,7 @@ const App = () => {
               {/* File Upload */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Document
+                  Upload DOCX Document
                 </label>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
                   <div className="space-y-1 text-center">
@@ -195,20 +172,20 @@ const App = () => {
                           id="file-upload"
                           name="file-upload"
                           type="file"
-                          accept=".pdf"
+                          accept=".docx"
                           className="sr-only"
                           onChange={handleFileUpload}
                         />
                       </label>
                       <p className="pl-1">or drag and drop</p>
                     </div>
-                    <p className="text-xs text-gray-500">PDF, DOCX, or Pages up to 10MB</p>
+                    <p className="text-xs text-gray-500">DOCX files up to 10MB</p>
                   </div>
                 </div>
                 {uploadedFile && (
                   <div className="mt-3 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
                     <div className="flex items-center">
-                      <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <span className="text-sm text-gray-700 truncate">{uploadedFile.name}</span>
@@ -223,23 +200,21 @@ const App = () => {
                 )}
               </div>
 
-              {/* Sample PDFs */}
+              {/* Sample DOCX Files */}
               <div className="mb-6">
-                <label htmlFor="sample-pdf" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="sample-docx" className="block text-sm font-medium text-gray-700 mb-2">
                   Or select a sample
                 </label>
                 <div className="relative">
                   <select
-                    id="sample-pdf"
-                    value={selectedPdf}
-                    onChange={(e) => setSelectedPdf(e.target.value)}
+                    id="sample-docx"
+                    value={selectedDocx}
+                    onChange={(e) => setSelectedDocx(e.target.value)}
                     disabled={!!uploadedFile}
                     className="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-3 pr-8 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:border-gray-200 transition-colors"
                   >
-                    <option value={`${getBasePath()}/sample1.pdf`}>Sample 1 - Dummy PDF file</option>
-                    <option value={`${getBasePath()}/sample2.pdf`}>Sample 2 - Hello World</option>
-                    <option value={`${getBasePath()}/sample3.pdf`}>Sample 3 - Multi-page Lorem Ipsum</option>
-                    <option value={`${getBasePath()}/guide-footnotes.pdf`}>Guide - Footnotes</option>
+                    <option value={`${getBasePath()}/basic-formatting.docx`}>Basic Formatting - Headings & Text Styles</option>
+                    <option value={`${getBasePath()}/wonders-of-docx.docx`}>Wonders of DOCX - Complex Document</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -249,29 +224,17 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Button */}
               <div className="space-y-3">
                 <button
-                  onClick={handlePromiseLoad}
+                  onClick={handleDocxLoad}
                   disabled={loading}
                   className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
                   <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
-                  Load via Promise
-                </button>
-                
-                <button
-                  onClick={handleStreamLoad}
-                  disabled={loading}
-                  className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Load via Stream
+                  Convert to Markdown
                 </button>
               </div>
             </div>
@@ -280,67 +243,55 @@ const App = () => {
           {/* Right Column - Results */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              {mode ? (
+              {result ? (
                 <>
-                  <div className={`px-6 py-4 border-b ${mode === 'stream' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="px-6 py-4 border-b bg-gray-50 border-gray-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        {mode === 'stream' ? (
-                          <svg className="h-5 w-5 text-green-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        ) : (
-                          <svg className="h-5 w-5 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                          </svg>
-                        )}
-                        <h3 className={`text-lg font-medium ${mode === 'stream' ? 'text-green-900' : 'text-gray-900'}`}>
-                          {mode === 'stream' ? 'Stream-based Result' : 'Promise-based Result'}
+                        <svg className="h-5 w-5 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          Markdown Output
                         </h3>
                       </div>
-                      {result && (
-                        <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-500">
+                          {result.length} characters
+                        </span>
+                        {processingTime && (
                           <span className="text-sm text-gray-500">
-                            {result.length} characters
+                            {processingTime.toFixed(0)}ms
                           </span>
-                          {processingTime && (
-                            <span className="text-sm text-gray-500">
-                              {processingTime.toFixed(0)}ms
-                            </span>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="p-6">
-                    {result && (
-                      <div className="relative">
-                        <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 rounded-lg p-4 overflow-auto max-h-[600px]">
-                          {result}
-                        </pre>
-                      </div>
-                    )}
-                    {!result && showSpinner && (
-                      <div className="text-center py-12">
-                        <div className="flex flex-col items-center">
-                          <svg className="animate-spin h-8 w-8 text-gray-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <p className="text-gray-500">Processing document...</p>
-                        </div>
-                      </div>
-                    )}
+                    <div className="relative">
+                      <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 rounded-lg p-4 overflow-auto max-h-[600px]">
+                        {result}
+                      </pre>
+                    </div>
                   </div>
                 </>
+              ) : loading && showSpinner ? (
+                <div className="text-center py-12">
+                  <div className="flex flex-col items-center">
+                    <svg className="animate-spin h-8 w-8 text-gray-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p className="text-gray-500">Converting DOCX to Markdown...</p>
+                  </div>
+                </div>
               ) : (
                 <div className="p-12 text-center">
                   <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No document loaded</h3>
-                  <p className="text-gray-500">Select a document source and click one of the load buttons to extract text</p>
+                  <p className="text-gray-500">Upload a DOCX file or select a sample to convert to Markdown</p>
                 </div>
               )}
             </div>

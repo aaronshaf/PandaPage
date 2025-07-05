@@ -1,83 +1,97 @@
-import { Effect, Stream } from "effect";
-import * as Schema from "@effect/schema/Schema";
-import { processPdf, processPdfStream } from "./src/pdf-processor";
-import { PdfInput, ProcessingOptions } from "./src/types";
-import { fetchPdf, renderPdfFromPath } from "./src/browser-utils";
+import { Effect } from "effect";
 
-// Re-export types
-export * from "./src/types";
-export { PdfReadError, PdfParseError } from "./src/pdf-reader";
+// DOCX support
+export { 
+  readDocx, 
+  type DocxDocument, 
+  type DocxParagraph, 
+  type DocxRun, 
+  DocxParseError 
+} from "./src/formats/docx/docx-reader";
 
-// Schema for PDF rendering options
-export const RenderOptions = Schema.Struct({
-  pdfPath: Schema.String,
-  format: Schema.optionalWith(Schema.Literal("markdown", "html", "text"), {
-    default: () => "markdown" as const
-  }),
-  includeMetadata: Schema.optionalWith(Schema.Boolean, {
-    default: () => true
-  }),
-});
+export { 
+  docxToMarkdown, 
+  convertDocxToMarkdown 
+} from "./src/formats/docx/docx-to-markdown";
 
-export type RenderOptions = Schema.Schema.Type<typeof RenderOptions>;
+// Apple Pages support
+export { 
+  readPages, 
+  type PagesDocument, 
+  type PagesParagraph, 
+  type PagesRun, 
+  PagesParseError 
+} from "./src/formats/pages/pages-reader";
 
-// Synchronous version - returns markdown string directly
-// Note: This is not truly sync as PDF processing is inherently async
-export function renderPdfSync(pdfPath: string): string {
-  // For now, return placeholder - true sync would require blocking
-  return `# PDF Document\n\nSynchronous processing of: ${pdfPath}\n\nNote: Real PDF processing requires async operations.`;
-}
+export { 
+  pagesToMarkdown, 
+  convertPagesToMarkdown 
+} from "./src/formats/pages/pages-to-markdown";
 
-// Promise-based version - returns a promise that resolves to markdown
-export function renderPdf(input: PdfInput | string): Promise<string>;
-export function renderPdf(options: RenderOptions & { input?: PdfInput }): Promise<string>;
-export function renderPdf(inputOrOptions: PdfInput | string | (RenderOptions & { input?: PdfInput })): Promise<string> {
-  // Handle string path for backward compatibility
-  if (typeof inputOrOptions === "string") {
-    return renderPdfFromPath(inputOrOptions);
-  }
-  
-  const isOptions = inputOrOptions && typeof inputOrOptions === "object" && "pdfPath" in inputOrOptions;
-  const input = isOptions ? (inputOrOptions.input || inputOrOptions.pdfPath) : inputOrOptions;
-  const options: ProcessingOptions = isOptions ? {
-    includeMetadata: inputOrOptions.includeMetadata
-  } : {};
-  
-  // If input is still a string path from options, fetch it first
-  if (typeof input === "string") {
-    return renderPdfFromPath(input);
-  }
-  
+// PPTX support
+export {
+  readPptx,
+  type PptxDocument,
+  type PptxSlide,
+  type PptxContent,
+  PptxParseError
+} from "./src/formats/pptx/pptx-reader";
+
+export {
+  pptxToMarkdown,
+  convertPptxToMarkdown
+} from "./src/formats/pptx/pptx-to-markdown";
+
+// Keynote support
+export {
+  readKey,
+  type KeyDocument,
+  type KeySlide,
+  type KeyContent,
+  KeyParseError
+} from "./src/formats/key/key-reader";
+
+export {
+  keyToMarkdown,
+  convertKeyToMarkdown
+} from "./src/formats/key/key-to-markdown";
+
+// Helper functions to render documents to markdown directly
+export async function renderDocx(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
-      const result = yield* processPdf(input as PdfInput, options);
-      return result.raw;
+      const { docxToMarkdown } = yield* Effect.promise(() => import("./src/formats/docx/docx-to-markdown"));
+      return yield* docxToMarkdown(buffer);
     })
   );
 }
 
-// Stream-based version - returns a stream of markdown chunks
-export function renderPdfStream(input: PdfInput | string, options?: ProcessingOptions): Stream.Stream<string, Error> {
-  // Handle string path by fetching first
-  if (typeof input === "string") {
-    return Stream.unwrap(
-      Effect.gen(function* () {
-        const blob = yield* fetchPdf(input);
-        return processPdfStream(blob, options);
-      })
-    );
-  }
-  
-  return processPdfStream(input, options);
+export async function renderPages(buffer: ArrayBuffer): Promise<string> {
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const { pagesToMarkdown } = yield* Effect.promise(() => import("./src/formats/pages/pages-to-markdown"));
+      return yield* pagesToMarkdown(buffer);
+    })
+  );
 }
 
-// Effect-based version for more control
-export function renderPdfEffect(
-  input: PdfInput,
-  options?: ProcessingOptions
-): Effect.Effect<string, Error> {
-  return Effect.gen(function* () {
-    const result = yield* processPdf(input, options);
-    return result.raw;
-  });
+export async function renderPptx(buffer: ArrayBuffer): Promise<string> {
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const { pptxToMarkdown } = yield* Effect.promise(() => import("./src/formats/pptx/pptx-to-markdown"));
+      return yield* pptxToMarkdown(buffer);
+    })
+  );
 }
+
+export async function renderKey(buffer: ArrayBuffer): Promise<string> {
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const { keyToMarkdown } = yield* Effect.promise(() => import("./src/formats/key/key-to-markdown"));
+      return yield* keyToMarkdown(buffer);
+    })
+  );
+}
+
+// Re-export other utilities
+export { debug } from "./src/common/debug";

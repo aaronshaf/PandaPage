@@ -114,9 +114,31 @@ test("DOCX to Markdown conversion matches expected output", async () => {
   
   const markdown = await Effect.runPromise(docxToMarkdown(buffer));
   
-  // Load expected markdown
-  const expectedPath = path.join(__dirname, "../..", "basic-formatting-with-lists.md");
-  const expectedContent = fs.readFileSync(expectedPath, "utf-8").trim();
+  // Expected markdown content with lists
+  const expectedContent = `# Heading 1
+
+## Heading 2
+
+## Heading 3
+
+Body text.
+_Italicized test._
+Bold text.
+## Bulleted list
+
+- First list item
+- Sceond list item
+- Third list item
+## Lettered list
+
+1. List item A
+2. List item B
+3. List item C
+## Ordered list
+
+1. List item 1
+2. List item 2
+3. List item 3`;
   
   // The expected content might have YAML frontmatter, so let's strip it
   const frontmatterRegex = /^---\n[\s\S]*?\n---\n\n?/;
