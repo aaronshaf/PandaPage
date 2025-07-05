@@ -225,8 +225,7 @@ const App = () => {
   const handleDocumentLoad = async (docPath?: string) => {
     const startTime = performance.now();
     setLoading(true);
-    // Keep showing previous content while loading
-    setProcessingTime(null);
+    // Don't reset processingTime to avoid flicker
     try {
       let documentSource: string | File;
       if (uploadedFile) {
@@ -514,14 +513,18 @@ const App = () => {
                         </h3>
                       </div>
                       <div className="flex items-center gap-3">
-                        {/* Stats */}
-                        <span className="text-sm text-gray-500">
-                          {countWords(result)} words
-                        </span>
-                        {processingTime && (
-                          <span className="text-sm text-gray-500">
-                            {processingTime.toFixed(0)}ms
-                          </span>
+                        {/* Stats - hide while loading to prevent flicker */}
+                        {!loading && (
+                          <>
+                            <span className="text-sm text-gray-500">
+                              {countWords(result)} words
+                            </span>
+                            {processingTime && (
+                              <span className="text-sm text-gray-500">
+                                {processingTime.toFixed(0)}ms
+                              </span>
+                            )}
+                          </>
                         )}
                         {/* View Mode Toggle */}
                         <div className="flex items-center bg-gray-100 rounded-lg p-1">
