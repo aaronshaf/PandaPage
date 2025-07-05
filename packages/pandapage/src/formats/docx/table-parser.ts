@@ -15,10 +15,10 @@ import type {
   DocxTableProperties, 
   DocxTableRowProperties, 
   DocxTableCellProperties,
-  DocxParseError,
   DocxParagraph,
   DocxNumbering
 } from "./types";
+import { DocxParseError } from "./types";
 
 /**
  * Parse a table element from DOCX XML

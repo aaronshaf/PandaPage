@@ -6,11 +6,11 @@ import { parseParagraph, parseNumbering } from "./docx-reader";
 import { parseTableEnhanced } from "./table-parser";
 import type { 
   DocxElement, 
-  DocxParseError, 
   DocxParagraph, 
   DocxTable,
   DocxNumbering 
 } from "./types";
+import { DocxParseError } from "./types";
 
 /**
  * Parse the main document XML and extract elements

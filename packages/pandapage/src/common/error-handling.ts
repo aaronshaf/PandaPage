@@ -1,46 +1,35 @@
-import * as S from "@effect/schema/Schema";
 import { Effect, pipe } from "effect";
 
 /**
- * Base error schema for all PandaPage errors
+ * Base error interface for all PandaPage errors
  */
-export const BaseErrorSchema = S.Struct({
-  _tag: S.String,
-  message: S.String,
-  timestamp: S.optional(S.Date),
-  context: S.optional(S.Record(S.String, S.Unknown)),
-});
-
-export type BaseError = S.Schema.Type<typeof BaseErrorSchema>;
+export interface BaseError {
+  _tag: string;
+  message: string;
+  timestamp?: Date;
+  context?: Record<string, unknown>;
+}
 
 /**
  * Document parsing error categories
  */
-export const ErrorCategorySchema = S.Literal(
-  "parsing",
-  "validation", 
-  "network",
-  "timeout",
-  "memory",
-  "worker",
-  "unknown"
-);
-
-export type ErrorCategory = S.Schema.Type<typeof ErrorCategorySchema>;
+export type ErrorCategory = 
+  | "parsing"
+  | "validation" 
+  | "network"
+  | "timeout"
+  | "memory"
+  | "worker"
+  | "unknown";
 
 /**
  * Enhanced error with categorization
  */
-export const CategorizedErrorSchema = S.extend(
-  BaseErrorSchema,
-  S.Struct({
-    category: ErrorCategorySchema,
-    recoverable: S.Boolean,
-    retryAfter: S.optional(S.Number),
-  })
-);
-
-export type CategorizedError = S.Schema.Type<typeof CategorizedErrorSchema>;
+export interface CategorizedError extends BaseError {
+  category: ErrorCategory;
+  recoverable: boolean;
+  retryAfter?: number;
+}
 
 /**
  * Create a categorized error with proper schema validation
@@ -68,14 +57,11 @@ export const createCategorizedError = (
 /**
  * Error recovery strategies
  */
-export const RecoveryStrategySchema = S.Literal(
-  "retry",
-  "fallback", 
-  "ignore",
-  "abort"
-);
-
-export type RecoveryStrategy = S.Schema.Type<typeof RecoveryStrategySchema>;
+export type RecoveryStrategy = 
+  | "retry"
+  | "fallback" 
+  | "ignore"
+  | "abort";
 
 /**
  * Determine recovery strategy based on error type

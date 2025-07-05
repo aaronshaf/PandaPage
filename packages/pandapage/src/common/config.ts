@@ -1,31 +1,28 @@
-import * as S from "@effect/schema/Schema";
 import { Effect } from "effect";
 
 /**
- * Document processing configuration schema
+ * Document processing configuration interface
  */
-export const DocumentConfigSchema = S.Struct({
+export interface DocumentConfig {
   // Performance settings
-  workerThreshold: S.Number.pipe(S.positive(), S.int()),
-  maxWorkers: S.Number.pipe(S.positive(), S.int()),
-  chunkSize: S.Number.pipe(S.positive(), S.int()),
+  workerThreshold: number;
+  maxWorkers: number;
+  chunkSize: number;
   
   // Feature flags
-  enableStreaming: S.Boolean,
-  enableCaching: S.Boolean,
-  enableCompression: S.Boolean,
+  enableStreaming: boolean;
+  enableCaching: boolean;
+  enableCompression: boolean;
   
   // Limits
-  maxFileSize: S.Number.pipe(S.positive(), S.int()),
-  timeout: S.Number.pipe(S.positive(), S.int()),
+  maxFileSize: number;
+  timeout: number;
   
   // Output settings
-  preserveFormatting: S.Boolean,
-  includeMetadata: S.Boolean,
-  generateOutline: S.Boolean,
-});
-
-export type DocumentConfig = S.Schema.Type<typeof DocumentConfigSchema>;
+  preserveFormatting: boolean;
+  includeMetadata: boolean;
+  generateOutline: boolean;
+}
 
 /**
  * Default configuration
@@ -68,11 +65,28 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
       // Parse user config - simplified approach
       const userObj = typeof userConfig === 'object' && userConfig !== null ? userConfig as any : {};
       
-      // Merge with defaults
+      // Merge with defaults and validate types
       const config: DocumentConfig = {
         ...DEFAULT_CONFIG,
         ...userObj,
       };
+      
+      // Type validation
+      if (typeof config.workerThreshold !== 'number' || config.workerThreshold <= 0) {
+        config.workerThreshold = DEFAULT_CONFIG.workerThreshold;
+      }
+      if (typeof config.maxWorkers !== 'number' || config.maxWorkers <= 0) {
+        config.maxWorkers = DEFAULT_CONFIG.maxWorkers;
+      }
+      if (typeof config.chunkSize !== 'number' || config.chunkSize <= 0) {
+        config.chunkSize = DEFAULT_CONFIG.chunkSize;
+      }
+      if (typeof config.maxFileSize !== 'number' || config.maxFileSize <= 0) {
+        config.maxFileSize = DEFAULT_CONFIG.maxFileSize;
+      }
+      if (typeof config.timeout !== 'number' || config.timeout <= 0) {
+        config.timeout = DEFAULT_CONFIG.timeout;
+      }
       
       // Additional validation
       if (config.maxWorkers > 16) {
