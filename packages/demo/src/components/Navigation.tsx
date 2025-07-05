@@ -16,15 +16,11 @@ interface NavigationProps {
   handleFileUpload: (file: File) => void;
   sampleDocuments: SampleDocument[];
   getBasePath: () => string;
-  showOutline: boolean;
-  setShowOutline: (show: boolean) => void;
   viewMode: 'read' | 'print';
   setViewMode: (mode: 'read' | 'print') => void;
   printScale: number;
   setPrintScale: (scale: number) => void;
   result: string | null;
-  extractHeadings: (markdown: string) => Array<{level: number, text: string, id: string}>;
-  removeFrontmatter: (markdown: string) => string;
   wordCount: number;
   processingTime: number | null;
 }
@@ -40,15 +36,11 @@ export const Navigation: React.FC<NavigationProps> = ({
   handleFileUpload,
   sampleDocuments,
   getBasePath,
-  showOutline,
-  setShowOutline,
   viewMode,
   setViewMode,
   printScale,
   setPrintScale,
   result,
-  extractHeadings,
-  removeFrontmatter,
   wordCount,
   processingTime
 }) => {
@@ -146,32 +138,6 @@ export const Navigation: React.FC<NavigationProps> = ({
         <div className="px-3 sm:px-6 lg:px-8 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
-            {/* Outline toggle - start enabled, disable only when document has 1 or fewer headings */}
-            {(() => {
-              // Start optimistic (enabled) and only disable when we know there aren't enough headings
-              const headingCount = result ? extractHeadings(removeFrontmatter(result)).length : -1; // -1 = loading
-              const hasMultipleHeadings = headingCount === -1 || headingCount > 1; // Enabled during loading or when >1 heading
-              
-              return (
-                <button
-                  onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
-                  disabled={!hasMultipleHeadings}
-                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
-                    !hasMultipleHeadings
-                      ? 'text-gray-400 cursor-not-allowed bg-gray-50'
-                      : showOutline 
-                        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-                        : 'text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                  </svg>
-                  <span className="hidden sm:inline">Outline</span>
-                </button>
-              );
-            })()}
-            
             {/* View mode buttons */}
             <div className="flex items-center bg-white rounded-md shadow-sm">
               <button

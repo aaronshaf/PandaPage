@@ -347,15 +347,11 @@ const App: React.FC = () => {
         handleFileUpload={handleFileUpload}
         sampleDocuments={sampleDocuments}
         getBasePath={getBasePath}
-        showOutline={showOutline}
-        setShowOutline={setShowOutline}
         viewMode={viewMode}
         setViewMode={handleViewModeChange}
         printScale={printScale}
         setPrintScale={setPrintScale}
         result={result}
-        extractHeadings={extractHeadings}
-        removeFrontmatter={removeFrontmatter}
         wordCount={wordCount}
         processingTime={processingTime}
       />
@@ -401,6 +397,9 @@ const App: React.FC = () => {
               removeFrontmatter={removeFrontmatter}
               splitIntoPages={splitIntoPages}
               countWords={countWords}
+              showOutline={showOutline}
+              setShowOutline={setShowOutline}
+              extractHeadings={extractHeadings}
             />
           ) : loading && showSpinner ? (
             <LoadingSpinner result={result} />

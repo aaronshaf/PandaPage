@@ -11,6 +11,9 @@ interface DocumentViewerProps {
   removeFrontmatter: (markdown: string) => string;
   splitIntoPages: (html: string) => string[];
   countWords: (text: string) => number;
+  showOutline: boolean;
+  setShowOutline: (show: boolean) => void;
+  extractHeadings: (markdown: string) => Array<{level: number, text: string, id: string}>;
 }
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
@@ -22,7 +25,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   showPrimaryNav,
   removeFrontmatter,
   splitIntoPages,
-  countWords
+  countWords,
+  showOutline,
+  setShowOutline,
+  extractHeadings
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -152,8 +158,35 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     ) : null;
   }
 
+  // Calculate if outline button should be enabled
+  const headingCount = result ? extractHeadings(removeFrontmatter(result)).length : -1;
+  const hasMultipleHeadings = headingCount === -1 || headingCount > 1;
+
   return (
     <div className={viewMode === 'print' ? '' : 'p-6'}>
+      {/* Floating Outline Button */}
+      <button
+        data-testid="document-outline-button"
+        onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
+        disabled={!hasMultipleHeadings}
+        className={`fixed z-20 flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg shadow-md transition-all ${
+          !hasMultipleHeadings
+            ? 'text-gray-400 cursor-not-allowed bg-gray-50 border border-gray-200'
+            : showOutline 
+              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+        }`}
+        style={{
+          top: `${showPrimaryNav ? 112 : 48 + 16}px`, // Below nav bars with padding
+          left: showOutline ? '16px' : '16px'
+        }}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+        </svg>
+        <span>Outline</span>
+      </button>
+
       {viewMode === 'read' ? (
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
