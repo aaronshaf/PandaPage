@@ -136,11 +136,30 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
         const runContent = runMatch[1];
         if (!runContent) continue;
 
-        // Extract text
-        const textMatch = runContent.match(/<w:t[^>]*>([^<]*)<\/w:t>/);
-        if (textMatch?.[1]) {
-          const text = textMatch[1];
+        // Parse the run content to extract text and special elements in order
+        let runText = "";
+        
+        // Find all text and special elements in document order
+        const elementRegex = /<w:(t[^>]*>([^<]*)<\/w:t|tab\s*\/|br\s*\/)>/g;
+        let elementMatch;
+        
+        while ((elementMatch = elementRegex.exec(runContent)) !== null) {
+          const fullMatch = elementMatch[0];
+          
+          if (fullMatch.includes('<w:t')) {
+            // Extract text content
+            const textContent = elementMatch[2] || "";
+            runText += textContent;
+          } else if (fullMatch.includes('<w:tab')) {
+            // Add tab character
+            runText += "\t";
+          } else if (fullMatch.includes('<w:br')) {
+            // Add line break
+            runText += "\n";
+          }
+        }
 
+        if (runText) {
           // Check for formatting
           const bold = /<w:b\s+w:val="1"/.test(runContent);
           const italic = /<w:i\s+w:val="1"/.test(runContent);
@@ -158,7 +177,7 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
           }
 
           runs.push({
-            text,
+            text: runText,
             ...(bold && { bold }),
             ...(italic && { italic }),
             ...(underline && { underline }),
