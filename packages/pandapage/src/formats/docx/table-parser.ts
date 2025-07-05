@@ -2,6 +2,12 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import { parseXmlString } from "../../common/xml-parser";
 import { parseParagraph } from "./docx-reader";
+import { 
+  validateTableProperties,
+  validateTableRowProperties,
+  validateTableCellProperties,
+  parseWithDefaults
+} from "./validation";
 import type { 
   DocxTable, 
   DocxTableRow, 
@@ -31,7 +37,8 @@ export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable
     
     // Parse table properties if present
     const tblPr = tblElement.querySelector(":scope > tblPr");
-    const properties = tblPr ? yield* parseTableProperties(tblPr) : undefined;
+    const rawProperties = tblPr ? yield* parseTableProperties(tblPr) : undefined;
+    const properties = rawProperties ? yield* validateTableProperties(rawProperties) : undefined;
     
     return {
       type: "table" as const,
@@ -57,7 +64,8 @@ export const parseTableRowEnhanced = (trElement: Element): Effect.Effect<DocxTab
     
     // Parse row properties if present
     const trPr = trElement.querySelector(":scope > trPr");
-    const properties = trPr ? yield* parseTableRowProperties(trPr) : undefined;
+    const rawProperties = trPr ? yield* parseTableRowProperties(trPr) : undefined;
+    const properties = rawProperties ? yield* validateTableRowProperties(rawProperties) : undefined;
     
     return {
       cells,
@@ -87,7 +95,8 @@ export const parseTableCellEnhanced = (tcElement: Element): Effect.Effect<DocxTa
     
     // Parse cell properties if present
     const tcPr = tcElement.querySelector(":scope > tcPr");
-    const properties = tcPr ? yield* parseTableCellProperties(tcPr) : undefined;
+    const rawProperties = tcPr ? yield* parseTableCellProperties(tcPr) : undefined;
+    const properties = rawProperties ? yield* validateTableCellProperties(rawProperties) : undefined;
     
     return {
       content,
@@ -209,7 +218,7 @@ export const parseTableCellProperties = (tcPr: Element): Effect.Effect<DocxTable
   });
 
 /**
- * Parse table borders
+ * Parse table borders with validation
  */
 const parseTableBorders = (bordersElement: Element): Effect.Effect<Record<string, string>, DocxParseError> =>
   Effect.gen(function* () {

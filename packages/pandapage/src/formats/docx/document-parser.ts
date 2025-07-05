@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import { parseXmlString } from "../../common/xml-parser";
+import { safeExecute, createCategorizedError } from "../../common/error-handling";
 import { parseParagraph, parseNumbering } from "./docx-reader";
 import { parseTableEnhanced } from "./table-parser";
 import type { 
@@ -27,23 +28,30 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
     const children = Array.from(body.children);
     
     for (const child of children) {
-      try {
+      const parseElement = Effect.gen(function* () {
         if (child.tagName === "p") {
-          // Parse paragraph
-          const paragraph = parseParagraph(child);
-          elements.push(paragraph);
+          // Parse paragraph with safe execution
+          return yield* safeExecute(
+            Effect.sync(() => parseParagraph(child))
+          );
         } else if (child.tagName === "tbl") {
           // Parse table
-          const table = yield* parseTableEnhanced(child);
-          elements.push(table);
+          return yield* parseTableEnhanced(child);
         } else if (child.tagName === "sectPr") {
           // Section properties - skip for now but could be parsed later
           debug.log("Skipping section properties");
+          return null;
         } else {
           debug.log(`Unknown element type: ${child.tagName}`);
+          return null;
         }
-      } catch (error) {
-        debug.log(`Failed to parse element ${child.tagName}:`, error);
+      });
+      
+      const result = yield* Effect.either(parseElement);
+      if (result._tag === "Right" && result.right) {
+        elements.push(result.right);
+      } else if (result._tag === "Left") {
+        debug.log(`Failed to parse element ${child.tagName}:`, result.left);
         // Continue with other elements
       }
     }
@@ -62,19 +70,23 @@ export const parseNumberingXml = (numberingXml: string | null): Effect.Effect<Do
       return undefined;
     }
     
-    try {
-      debug.log("Parsing numbering XML");
+    debug.log("Parsing numbering XML");
+    const parseNumberingEffect = Effect.gen(function* () {
       const numberingDoc = yield* parseXmlString(numberingXml);
       const numberingRoot = numberingDoc.documentElement;
       
       if (numberingRoot.tagName !== "numbering") {
-        debug.log("Invalid numbering XML structure");
-        return undefined;
+        return yield* Effect.fail(new DocxParseError("Invalid numbering XML structure"));
       }
       
       return parseNumbering(numberingRoot);
-    } catch (error) {
-      debug.log("Failed to parse numbering XML:", error);
+    });
+    
+    const result = yield* Effect.either(parseNumberingEffect);
+    if (result._tag === "Right") {
+      return result.right;
+    } else {
+      debug.log("Failed to parse numbering XML:", result.left);
       return undefined;
     }
   });

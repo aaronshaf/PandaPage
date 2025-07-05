@@ -7,6 +7,13 @@ import { createTransferableTask, shouldUseWorker } from "./worker-pool";
 // Progress callback type
 export type ProgressCallback = (progress: number) => void;
 
+// Parse options schema for validation
+export const ParseOptionsSchema = S.Struct({
+  useWorker: S.optional(S.Boolean),
+  streaming: S.optional(S.Boolean),
+  chunkSize: S.optional(S.pipe(S.Number, S.positive(), S.int())),
+});
+
 // Parse options with worker support
 export interface ParseOptions {
   useWorker?: boolean;
@@ -14,6 +21,24 @@ export interface ParseOptions {
   onProgress?: ProgressCallback;
   chunkSize?: number;
 }
+
+// Validate and apply defaults to parse options
+export const validateParseOptions = (options: unknown): Effect.Effect<ParseOptions, WorkerParseError> =>
+  Effect.gen(function* () {
+    try {
+      const validated = yield* S.decodeUnknown(ParseOptionsSchema)(options || {});
+      
+      // Apply intelligent defaults
+      return {
+        useWorker: validated.useWorker ?? true,
+        streaming: validated.streaming ?? false,
+        chunkSize: validated.chunkSize ?? 1024 * 1024, // 1MB chunks
+        onProgress: undefined, // Functions can't be validated by schema
+      };
+    } catch (error) {
+      return yield* Effect.fail(new WorkerParseError(`Invalid parse options: ${error}`, "validation"));
+    }
+  });
 
 // Worker URLs by document type
 const WORKER_URLS: Record<WorkerTask["type"], string> = {
@@ -23,12 +48,13 @@ const WORKER_URLS: Record<WorkerTask["type"], string> = {
   key: new URL("./key.worker.ts", import.meta.url).href,
 };
 
-// Parse error
+// Parse error with categorization
 export class WorkerParseError {
   readonly _tag = "WorkerParseError";
   constructor(
     public readonly message: string,
-    public readonly taskId: string,
+    public readonly category: "validation" | "worker" | "timeout" | "memory" | "parsing",
+    public readonly taskId?: string,
   ) {}
 }
 
@@ -96,6 +122,7 @@ export const parseDocumentInWorker = <T>(
                 Effect.fail(
                   new WorkerParseError(
                     result.error || "Unknown worker error",
+                    "worker",
                     task.id,
                   ),
                 ),
@@ -109,6 +136,7 @@ export const parseDocumentInWorker = <T>(
             Effect.fail(
               new WorkerParseError(
                 error.message || "Worker error",
+                "worker",
                 task.id,
               ),
             ),
@@ -187,6 +215,7 @@ export const streamDocumentParse = (
           emit.fail(
             new WorkerParseError(
               result.error || "Unknown worker error",
+              "worker",
               task.id,
             ),
           );
@@ -198,6 +227,7 @@ export const streamDocumentParse = (
       emit.fail(
         new WorkerParseError(
           error.message || "Worker error",
+          "worker",
           task.id,
         ),
       );
