@@ -391,6 +391,9 @@ const formatListItemWithFormat = (
 const formatRun = (run: DocxRun): string => {
   let text = run.text;
 
+  // Convert tabs to spaces (4 spaces per tab for better markdown readability)
+  text = text.replace(/\t/g, '    ');
+
   // Apply inline formatting
   if (run.bold && run.italic) {
     text = `***${text}***`;
