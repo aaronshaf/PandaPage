@@ -35,6 +35,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [showPageIndicator, setShowPageIndicator] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false);
+  const [navHeight, setNavHeight] = useState(140);
 
   // Calculate print scale
   const calculatePrintScale = () => {
@@ -144,6 +145,25 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     };
   }, [viewMode, result]);
 
+  // Update nav height when primary nav visibility changes
+  useEffect(() => {
+    const updateNavHeight = () => {
+      const header = document.querySelector('[data-testid="app-header"]');
+      if (header) {
+        const headerRect = header.getBoundingClientRect();
+        setNavHeight(headerRect.height + 16); // Add padding
+      }
+    };
+
+    // Update immediately
+    updateNavHeight();
+
+    // Also update after a short delay to catch any animations
+    const timer = setTimeout(updateNavHeight, 350);
+
+    return () => clearTimeout(timer);
+  }, [showPrimaryNav]);
+
   if (!result) {
     return loading && showSpinner ? (
       <div className="flex items-center justify-center h-full">
@@ -180,13 +200,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
         }`}
         style={{
-          // More accurate positioning below both nav bars
-          top: (() => {
-            const primaryNavHeight = showPrimaryNav ? 64 : 0;
-            const secondaryNavHeight = 48;
-            const padding = 16;
-            return `${primaryNavHeight + secondaryNavHeight + padding}px`;
-          })(),
+          top: `${navHeight}px`,
           left: '16px'
         }}
       >
