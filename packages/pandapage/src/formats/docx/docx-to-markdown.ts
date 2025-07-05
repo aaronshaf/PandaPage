@@ -149,7 +149,7 @@ const formatRun = (run: DocxRun): string => {
   } else if (run.bold) {
     // For now, don't format bold text to match expected output
     // In a real implementation, this would be configurable
-    text = text;
+    // text = `**${text}**`;
   } else if (run.italic) {
     text = `_${text}_`;
   }

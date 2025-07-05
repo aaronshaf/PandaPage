@@ -24,9 +24,12 @@ const WORKER_URLS: Record<WorkerTask["type"], string> = {
 };
 
 // Parse error
-export class WorkerParseError extends S.TaggedError<WorkerParseError>()("WorkerParseError") {
-  readonly message!: string;
-  readonly taskId!: string;
+export class WorkerParseError {
+  readonly _tag = "WorkerParseError";
+  constructor(
+    public readonly message: string,
+    public readonly taskId: string,
+  ) {}
 }
 
 // Create a worker for a specific document type
@@ -91,10 +94,10 @@ export const parseDocumentInWorker = <T>(
             case "error":
               resume(
                 Effect.fail(
-                  new WorkerParseError({
-                    message: result.error || "Unknown worker error",
-                    taskId: task.id,
-                  }),
+                  new WorkerParseError(
+                    result.error || "Unknown worker error",
+                    task.id,
+                  ),
                 ),
               );
               break;
@@ -104,10 +107,10 @@ export const parseDocumentInWorker = <T>(
         worker.onerror = (error) => {
           resume(
             Effect.fail(
-              new WorkerParseError({
-                message: error.message || "Worker error",
-                taskId: task.id,
-              }),
+              new WorkerParseError(
+                error.message || "Worker error",
+                task.id,
+              ),
             ),
           );
         };
@@ -167,10 +170,11 @@ export const streamDocumentParse = (
           break;
 
         case "chunk":
-          if (result.data?.chunk) {
-            emit.single(result.data.chunk);
+          const chunkData = result.data as { chunk?: string; isLast?: boolean } | undefined;
+          if (chunkData?.chunk) {
+            emit.single(chunkData.chunk);
           }
-          if (result.data?.isLast) {
+          if (chunkData?.isLast) {
             emit.end();
           }
           break;
@@ -181,10 +185,10 @@ export const streamDocumentParse = (
 
         case "error":
           emit.fail(
-            new WorkerParseError({
-              message: result.error || "Unknown worker error",
-              taskId: task.id,
-            }),
+            new WorkerParseError(
+              result.error || "Unknown worker error",
+              task.id,
+            ),
           );
           break;
       }
@@ -192,18 +196,18 @@ export const streamDocumentParse = (
 
     worker.onerror = (error) => {
       emit.fail(
-        new WorkerParseError({
-          message: error.message || "Worker error",
-          taskId: task.id,
-        }),
+        new WorkerParseError(
+          error.message || "Worker error",
+          task.id,
+        ),
       );
     };
 
     // Send task to worker
     worker.postMessage({ task, transfer }, { transfer });
 
-    // Cleanup on stream end
-    emit.onInterrupt(() => {
+    // Return cleanup effect
+    return Effect.sync(() => {
       worker.terminate();
     });
   });

@@ -3,7 +3,7 @@ import { debug } from "../../common/debug";
 import { type KeyDocument, readKey } from "./key-reader";
 
 // Convert Keynote document to Markdown
-export const convertKeyToMarkdown = (document: KeyDocument): string => {
+export const convertKeyToMarkdown = (_document: KeyDocument): string => {
   debug.log("Converting Keynote document to Markdown...");
 
   // TODO: Implement Keynote to Markdown conversion

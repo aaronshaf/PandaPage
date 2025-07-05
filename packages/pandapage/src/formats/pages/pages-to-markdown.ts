@@ -3,7 +3,7 @@ import { debug } from "../../common/debug";
 import { type PagesDocument, readPages } from "./pages-reader";
 
 // Convert Apple Pages document to Markdown
-export const convertPagesToMarkdown = (document: PagesDocument): string => {
+export const convertPagesToMarkdown = (_document: PagesDocument): string => {
   debug.log("Converting Pages document to Markdown...");
 
   // TODO: Implement Pages to Markdown conversion

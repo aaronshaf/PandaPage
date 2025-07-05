@@ -3,8 +3,9 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 
 // Error types
-export class DocxParseError extends S.TaggedError<DocxParseError>()("DocxParseError") {
-  readonly message!: string;
+export class DocxParseError {
+  readonly _tag = "DocxParseError";
+  constructor(public readonly message: string) {}
 }
 
 // Basic DOCX structure types
@@ -58,7 +59,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       const { unzipSync, strFromU8 } = yield* Effect.tryPromise({
         try: () => import("fflate"),
         catch: (error) =>
-          new DocxParseError({ message: `Failed to load fflate library: ${error}` }),
+          new DocxParseError(`Failed to load fflate library: ${error}`),
       });
 
       // Convert ArrayBuffer to Uint8Array
@@ -71,7 +72,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       const documentXml = unzipped["word/document.xml"];
       if (!documentXml) {
         return yield* Effect.fail(
-          new DocxParseError({ message: "No word/document.xml found in DOCX file" }),
+          new DocxParseError("No word/document.xml found in DOCX file"),
         );
       }
 
@@ -93,9 +94,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       return { paragraphs, numbering };
     } catch (error) {
       return yield* Effect.fail(
-        new DocxParseError({
-          message: `Failed to read DOCX: ${error}`,
-        }),
+        new DocxParseError(`Failed to read DOCX: ${error}`),
       );
     }
   });
@@ -114,17 +113,18 @@ const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], Do
 
     while ((paragraphMatch = paragraphRegex.exec(xmlContent)) !== null) {
       const paragraphContent = paragraphMatch[1];
+      if (!paragraphContent) continue;
 
       // Extract paragraph style
       const styleMatch = paragraphContent.match(/<w:pStyle w:val="([^"]+)"/);
-      const style = styleMatch ? styleMatch[1] : undefined;
+      const style = styleMatch?.[1];
 
       // Extract list properties
       const numIdMatch = paragraphContent.match(/<w:numId w:val="([^"]+)"/);
-      const numId = numIdMatch ? numIdMatch[1] : undefined;
+      const numId = numIdMatch?.[1];
 
       const ilvlMatch = paragraphContent.match(/<w:ilvl w:val="([^"]+)"/);
-      const ilvl = ilvlMatch ? parseInt(ilvlMatch[1], 10) : undefined;
+      const ilvl = ilvlMatch?.[1] ? parseInt(ilvlMatch[1], 10) : undefined;
 
       // Extract runs within the paragraph
       const runs: DocxRun[] = [];
@@ -133,10 +133,11 @@ const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], Do
 
       while ((runMatch = runRegex.exec(paragraphContent)) !== null) {
         const runContent = runMatch[1];
+        if (!runContent) continue;
 
         // Extract text
         const textMatch = runContent.match(/<w:t[^>]*>([^<]*)<\/w:t>/);
-        if (textMatch) {
+        if (textMatch?.[1]) {
           const text = textMatch[1];
 
           // Check for formatting
@@ -184,6 +185,7 @@ const parseNumberingXml = (xmlContent: string): Effect.Effect<DocxNumbering, Doc
     while ((abstractMatch = abstractNumRegex.exec(xmlContent)) !== null) {
       const abstractNumId = abstractMatch[1];
       const abstractContent = abstractMatch[2];
+      if (!abstractNumId || !abstractContent) continue;
 
       // Check for style links (numStyleLink or styleLink)
       const numStyleLinkMatch = abstractContent.match(/<w:numStyleLink w:val="([^"]+)"/);
@@ -202,16 +204,19 @@ const parseNumberingXml = (xmlContent: string): Effect.Effect<DocxNumbering, Doc
       let levelMatch;
 
       while ((levelMatch = levelRegex.exec(abstractContent)) !== null) {
-        const ilvl = parseInt(levelMatch[1], 10);
+        const ilvlStr = levelMatch[1];
         const levelContent = levelMatch[2];
+        if (!ilvlStr || !levelContent) continue;
+        
+        const ilvl = parseInt(ilvlStr, 10);
 
         // Extract numFmt
         const numFmtMatch = levelContent.match(/<w:numFmt w:val="([^"]+)"/);
-        const numFmt = numFmtMatch ? numFmtMatch[1] : "decimal";
+        const numFmt = numFmtMatch?.[1] || "decimal";
 
         // Extract lvlText
         const lvlTextMatch = levelContent.match(/<w:lvlText w:val="([^"]+)"/);
-        const lvlText = lvlTextMatch ? lvlTextMatch[1] : "";
+        const lvlText = lvlTextMatch?.[1] || "";
 
         levels.set(ilvl, { numFmt, lvlText });
       }
@@ -228,10 +233,11 @@ const parseNumberingXml = (xmlContent: string): Effect.Effect<DocxNumbering, Doc
     while ((numMatch = numRegex.exec(xmlContent)) !== null) {
       const numId = numMatch[1];
       const numContent = numMatch[2];
+      if (!numId || !numContent) continue;
 
       // Extract abstractNumId reference
       const abstractNumIdMatch = numContent.match(/<w:abstractNumId w:val="([^"]+)"/);
-      if (abstractNumIdMatch) {
+      if (abstractNumIdMatch?.[1]) {
         let targetAbstractId = abstractNumIdMatch[1];
 
         // If this abstract ID has a style link, resolve it

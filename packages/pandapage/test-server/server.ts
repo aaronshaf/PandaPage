@@ -1,5 +1,5 @@
+import { join } from "node:path";
 import { serve } from "bun";
-import { join } from "path";
 
 // Simple test server for Playwright tests
 const server = serve({
@@ -229,4 +229,5 @@ const server = serve({
   },
 });
 
+// eslint-disable-next-line no-console
 console.log(`Test server running at http://localhost:${server.port}`);

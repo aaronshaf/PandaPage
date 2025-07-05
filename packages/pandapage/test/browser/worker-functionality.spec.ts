@@ -71,10 +71,14 @@ test.describe("Web Worker Functionality", () => {
     });
 
     // After transfer, original buffer should be detached (byteLength = 0)
-    expect(result.bufferAfterTransfer).toBe(0);
-    expect(result.workerReceived.received).toBe(true);
-    expect(result.workerReceived.firstByte).toBe(42);
-    expect(result.workerReceived.length).toBe(1024);
+    const transferResult = result as {
+      bufferAfterTransfer: number;
+      workerReceived: { received: boolean; firstByte: number; length: number };
+    };
+    expect(transferResult.bufferAfterTransfer).toBe(0);
+    expect(transferResult.workerReceived.received).toBe(true);
+    expect(transferResult.workerReceived.firstByte).toBe(42);
+    expect(transferResult.workerReceived.length).toBe(1024);
   });
 
   test("should handle worker errors", async ({ page }) => {
@@ -104,7 +108,8 @@ test.describe("Web Worker Functionality", () => {
       });
     });
 
-    expect(errorHandled.errorCaught).toBe(true);
+    const errorResult = errorHandled as { errorCaught: boolean };
+    expect(errorResult.errorCaught).toBe(true);
   });
 
   test("should support progress callbacks", async ({ page }) => {
@@ -171,14 +176,15 @@ test.describe("Web Worker Functionality", () => {
     });
 
     // All workers should complete
-    expect(results).toHaveLength(3);
-    expect(results[0].id).toBe(1);
-    expect(results[1].id).toBe(2);
-    expect(results[2].id).toBe(3);
+    const concurrentResults = results as Array<{ id: number; elapsed: number }>;
+    expect(concurrentResults).toHaveLength(3);
+    expect(concurrentResults[0]?.id).toBe(1);
+    expect(concurrentResults[1]?.id).toBe(2);
+    expect(concurrentResults[2]?.id).toBe(3);
 
     // Workers should run concurrently (not sequentially)
     // Worker 3 should take ~300ms, but if sequential would take 600ms
-    expect(results[2].elapsed).toBeLessThan(400);
+    expect(concurrentResults[2]?.elapsed).toBeLessThan(400);
   });
 
   test("should terminate workers on cleanup", async ({ page }) => {
@@ -223,7 +229,11 @@ test.describe("Web Worker Functionality", () => {
       });
     });
 
-    expect(cleaned.messagesBeforeTerminate).toBeGreaterThan(0);
-    expect(cleaned.terminated).toBe(true);
+    const cleanupResult = cleaned as {
+      messagesBeforeTerminate: number;
+      terminated: boolean;
+    };
+    expect(cleanupResult.messagesBeforeTerminate).toBeGreaterThan(0);
+    expect(cleanupResult.terminated).toBe(true);
   });
 });

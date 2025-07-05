@@ -3,8 +3,9 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 
 // Error types
-export class PagesParseError extends S.TaggedError<PagesParseError>()("PagesParseError") {
-  readonly message!: string;
+export class PagesParseError {
+  readonly _tag = "PagesParseError";
+  constructor(public readonly message: string) {}
 }
 
 // Basic Pages structure types (similar to DOCX but for Pages)
@@ -26,7 +27,7 @@ export interface PagesDocument {
 }
 
 // Read and parse Apple Pages file
-export const readPages = (buffer: ArrayBuffer): Effect.Effect<PagesDocument, PagesParseError> =>
+export const readPages = (_buffer: ArrayBuffer): Effect.Effect<PagesDocument, PagesParseError> =>
   Effect.gen(function* () {
     debug.log("Reading Apple Pages file...");
 
@@ -34,8 +35,6 @@ export const readPages = (buffer: ArrayBuffer): Effect.Effect<PagesDocument, Pag
     // Apple Pages files are also ZIP archives but with different structure
 
     return yield* Effect.fail(
-      new PagesParseError({
-        message: "Apple Pages support is not yet implemented",
-      }),
+      new PagesParseError("Apple Pages support is not yet implemented"),
     );
   });

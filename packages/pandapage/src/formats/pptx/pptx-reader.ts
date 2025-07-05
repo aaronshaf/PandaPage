@@ -3,8 +3,9 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 
 // Error types
-export class PptxParseError extends S.TaggedError<PptxParseError>()("PptxParseError") {
-  readonly message!: string;
+export class PptxParseError {
+  readonly _tag = "PptxParseError";
+  constructor(public readonly message: string) {}
 }
 
 // Basic PPTX structure types
@@ -41,9 +42,7 @@ export const readPptx = (buffer: ArrayBuffer): Effect.Effect<PptxDocument, PptxP
       const { unzipSync, strFromU8 } = yield* Effect.tryPromise({
         try: () => import("fflate"),
         catch: (error) =>
-          new PptxParseError({
-            message: `Failed to load fflate library: ${error}`,
-          }),
+          new PptxParseError(`Failed to load fflate library: ${error}`),
       });
 
       // Convert ArrayBuffer to Uint8Array
@@ -68,8 +67,9 @@ export const readPptx = (buffer: ArrayBuffer): Effect.Effect<PptxDocument, PptxP
 
       for (let i = 0; i < slideFiles.length; i++) {
         const slideFile = slideFiles[i];
+        if (!slideFile) continue;
+        
         const slideXml = unzipped[slideFile];
-
         if (slideXml) {
           const xmlContent = strFromU8(slideXml);
           const slide = yield* parseSlideXml(xmlContent, i + 1);
@@ -78,20 +78,19 @@ export const readPptx = (buffer: ArrayBuffer): Effect.Effect<PptxDocument, PptxP
       }
 
       // Try to get presentation metadata
-      let metadata: PptxDocument["metadata"];
+      const metadata: PptxDocument["metadata"] = {};
       const appPropsXml = unzipped["docProps/app.xml"];
       if (appPropsXml) {
         const appPropsContent = strFromU8(appPropsXml);
-        metadata = yield* parsePresentationProps(appPropsContent);
+        const props = yield* parsePresentationProps(appPropsContent);
+        Object.assign(metadata, props);
         metadata.slideCount = slides.length;
       }
 
       return { slides, metadata };
     } catch (error) {
       return yield* Effect.fail(
-        new PptxParseError({
-          message: `Failed to read PPTX: ${error}`,
-        }),
+        new PptxParseError(`Failed to read PPTX: ${error}`),
       );
     }
   });
@@ -112,6 +111,7 @@ const parseSlideXml = (
 
     while ((shapeMatch = shapeRegex.exec(xmlContent)) !== null) {
       const shapeContent = shapeMatch[1];
+      if (!shapeContent) continue;
 
       // Check if this is a title shape
       const isTitle =
@@ -124,6 +124,7 @@ const parseSlideXml = (
 
       while ((paragraphMatch = paragraphRegex.exec(shapeContent)) !== null) {
         const paragraphContent = paragraphMatch[1];
+        if (!paragraphContent) continue;
 
         // Check for bullet/list properties
         const hasBullet =
@@ -135,7 +136,8 @@ const parseSlideXml = (
         const paragraphTexts: string[] = [];
 
         while ((textMatch = textRegex.exec(paragraphContent)) !== null) {
-          paragraphTexts.push(textMatch[1]);
+          const text = textMatch[1];
+          if (text) paragraphTexts.push(text);
         }
 
         const fullText = paragraphTexts.join("");

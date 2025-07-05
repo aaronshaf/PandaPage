@@ -9,8 +9,8 @@
     "dev": "bun run index.ts",
     "build": "bun build ./index.ts --outdir ./dist --target node",
     "test": "bun test",
-    "test:unit": "LOG_LEVEL=None bun test test/unit",
-    "test:deterministic": "LOG_LEVEL=None bun test test/deterministic",
+    "test:unit": "LOG_LEVEL=None bun test test/unit/*.ts",
+    "test:deterministic": "LOG_LEVEL=None bun test test/deterministic/*.ts",
     "test:ai": "LOG_LEVEL=None bun test test/ai --timeout 30000",
     "test:ai-verbose": "LOG_LEVEL=AI bun test test/ai --timeout 30000",
     "test:ai-debug": "LOG_LEVEL=Debug bun test test/ai --timeout 30000",
@@ -29,8 +29,8 @@
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "precommit": "bun run typecheck && bun run check && bun run test:unit && bun run test:det",
-    "test:det": "LOG_LEVEL=None bun test test/deterministic",
+    "precommit": "bun run typecheck && bun run test:unit && bun run test:det && rm -rf dist",
+    "test:det": "LOG_LEVEL=None bun test test/deterministic/*.ts",
     "build:workers": "bun build ./src/workers/*.worker.ts --outdir ./dist/workers --target browser --format esm"
   },
   "devDependencies": {

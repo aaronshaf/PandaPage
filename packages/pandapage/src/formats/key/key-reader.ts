@@ -3,8 +3,9 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 
 // Error types
-export class KeyParseError extends S.TaggedError<KeyParseError>()("KeyParseError") {
-  readonly message!: string;
+export class KeyParseError {
+  readonly _tag = "KeyParseError";
+  constructor(public readonly message: string) {}
 }
 
 // Basic Keynote structure types
@@ -32,7 +33,7 @@ export interface KeyDocument {
 }
 
 // Read and parse Keynote file
-export const readKey = (buffer: ArrayBuffer): Effect.Effect<KeyDocument, KeyParseError> =>
+export const readKey = (_buffer: ArrayBuffer): Effect.Effect<KeyDocument, KeyParseError> =>
   Effect.gen(function* () {
     debug.log("Reading Keynote file...");
 
@@ -41,8 +42,6 @@ export const readKey = (buffer: ArrayBuffer): Effect.Effect<KeyDocument, KeyPars
     // This is much more complex than XML-based formats
 
     return yield* Effect.fail(
-      new KeyParseError({
-        message: "Keynote support is not yet implemented",
-      }),
+      new KeyParseError("Keynote support is not yet implemented"),
     );
   });
