@@ -586,7 +586,7 @@ const App = () => {
               </a>
             </div>
           </div>
-          </div>
+        </div>
         </div>
 
         {/* Secondary Ribbon Bar */}
@@ -867,6 +867,7 @@ const App = () => {
             null
           )}
         </div>
+      </div>
       </div>
     </div>
   );
