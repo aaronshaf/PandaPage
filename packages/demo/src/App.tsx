@@ -6,7 +6,8 @@ import {
   DocumentUpload,
   Outline,
   DocumentViewer,
-  LoadingSpinner
+  LoadingSpinner,
+  ErrorDisplay
 } from './components';
 import {
   getBasePath,
@@ -44,6 +45,7 @@ const App: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // UI state
   const [viewMode, setViewMode] = useState<'read' | 'print'>('read');
@@ -75,11 +77,38 @@ const App: React.FC = () => {
     return Math.max(0.4, maxScale * 0.9); // Use 90% of available width, min 40%
   };
 
+  // Parse error message for better user display
+  const parseErrorMessage = (error: any): string => {
+    // Handle specific error types
+    if (error && typeof error === 'object') {
+      if (error._tag === 'PagesParseError') {
+        return 'Apple Pages support is currently in development. Please try a DOCX file instead.';
+      }
+      if (error._tag === 'DocxParseError') {
+        return `Document parsing error: ${error.message || 'Unable to parse this DOCX file.'}`;
+      }
+      if (error.message) {
+        return error.message;
+      }
+    }
+    
+    // Handle string errors
+    if (typeof error === 'string') {
+      if (error.includes('Pages support is not yet implemented')) {
+        return 'Apple Pages support is currently in development. Please try a DOCX file instead.';
+      }
+      return error;
+    }
+    
+    return 'An unexpected error occurred while processing the document.';
+  };
+
   // Load document
   const loadDocument = useCallback(async (path: string, file?: File) => {
     try {
       setLoading(true);
       setShowSpinner(true);
+      setError(null);
       const startTime = performance.now();
 
       let arrayBuffer: ArrayBuffer;
@@ -108,6 +137,7 @@ const App: React.FC = () => {
       const endTime = performance.now();
       setProcessingTime(Math.round(endTime - startTime));
       setResult(markdown);
+      setError(null);
 
       // Update URL hash for sample documents
       if (!file) {
@@ -118,6 +148,8 @@ const App: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading document:', error);
+      const errorMessage = parseErrorMessage(error);
+      setError(errorMessage);
       setResult(null);
       setProcessingTime(null);
     } finally {
@@ -238,7 +270,22 @@ const App: React.FC = () => {
         <div className="flex-1 overflow-auto bg-gray-50 relative">
           <DocumentUpload isDragging={isDragging} />
           
-          {result ? (
+          {error ? (
+            <div className="p-6">
+              <ErrorDisplay 
+                error={error} 
+                onClear={() => setError(null)}
+                onRetry={() => {
+                  setError(null);
+                  if (uploadedFile) {
+                    handleFileUpload(uploadedFile);
+                  } else {
+                    handleDocumentLoad(selectedDocument);
+                  }
+                }}
+              />
+            </div>
+          ) : result ? (
             <DocumentViewer
               result={result}
               loading={loading}

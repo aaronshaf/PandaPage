@@ -100,7 +100,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
   });
 
 // Parse document.xml content
-const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], DocxParseError> =>
+export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], DocxParseError> =>
   Effect.gen(function* () {
     const paragraphs: DocxParagraph[] = [];
 
@@ -181,94 +181,99 @@ const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], Do
     return paragraphs;
   });
 
+// Simple paragraph parser helper
+export const parseParagraph = (pElement: Element): DocxParagraph => {
+  const runs: DocxRun[] = [];
+  const runElements = pElement.querySelectorAll('r');
+  
+  for (const runElement of runElements) {
+    const textElements = runElement.querySelectorAll('t');
+    for (const textElement of textElements) {
+      runs.push({
+        text: textElement.textContent || '',
+        bold: !!runElement.querySelector('b'),
+        italic: !!runElement.querySelector('i'),
+        underline: !!runElement.querySelector('u'),
+      });
+    }
+  }
+  
+  // Extract style
+  const styleElement = pElement.querySelector('pPr pStyle');
+  const style = styleElement?.getAttribute('val') || undefined;
+  
+  // Extract numbering properties
+  const numPrElement = pElement.querySelector('pPr numPr');
+  const numIdElement = numPrElement?.querySelector('numId');
+  const ilvlElement = numPrElement?.querySelector('ilvl');
+  
+  return {
+    type: "paragraph" as const,
+    style,
+    runs,
+    numId: numIdElement?.getAttribute('val') || undefined,
+    ilvl: ilvlElement ? parseInt(ilvlElement.getAttribute('val') || '0', 10) : undefined,
+  };
+};
+
 // Parse numbering.xml content
-const parseNumberingXml = (xmlContent: string): Effect.Effect<DocxNumbering, DocxParseError> =>
-  Effect.gen(function* () {
-    const instances = new Map<string, string>();
-    const abstractFormats = new Map<string, DocxAbstractFormat>();
-    const styleLinks = new Map<string, string>(); // Track style links between abstract formats
+export const parseNumbering = (numberingRoot: Element): DocxNumbering => {
+  const instances = new Map<string, string>();
+  const abstractFormats = new Map<string, DocxAbstractFormat>();
 
-    // First pass: Parse abstract numbering definitions and collect style links
-    const abstractNumRegex =
-      /<w:abstractNum w:abstractNumId="([^"]+)"[^>]*>(.*?)<\/w:abstractNum>/gs;
-    let abstractMatch;
+  // Parse abstract numbering definitions  
+  const abstractNumElements = numberingRoot.querySelectorAll('abstractNum');
+  
+  for (const abstractElement of abstractNumElements) {
+    const abstractNumId = abstractElement.getAttribute('abstractNumId');
+    if (!abstractNumId) continue;
 
-    while ((abstractMatch = abstractNumRegex.exec(xmlContent)) !== null) {
-      const abstractNumId = abstractMatch[1];
-      const abstractContent = abstractMatch[2];
-      if (!abstractNumId || !abstractContent) continue;
-
-      // Check for style links (numStyleLink or styleLink)
-      const numStyleLinkMatch = abstractContent.match(/<w:numStyleLink w:val="([^"]+)"/);
-      const styleLinkMatch = abstractContent.match(/<w:styleLink w:val="([^"]+)"/);
-
-      if (numStyleLinkMatch || styleLinkMatch) {
-        // This abstract format references another one via style
-        styleLinks.set(abstractNumId, numStyleLinkMatch?.[1] || styleLinkMatch?.[1] || "");
-      }
-
-      // Parse levels regardless of whether there's a style link
-      const levels = new Map<number, DocxLevelFormat>();
-
-      // Parse levels
-      const levelRegex = /<w:lvl w:ilvl="([^"]+)"[^>]*>(.*?)<\/w:lvl>/gs;
-      let levelMatch;
-
-      while ((levelMatch = levelRegex.exec(abstractContent)) !== null) {
-        const ilvlStr = levelMatch[1];
-        const levelContent = levelMatch[2];
-        if (!ilvlStr || !levelContent) continue;
-        
-        const ilvl = parseInt(ilvlStr, 10);
-
-        // Extract numFmt
-        const numFmtMatch = levelContent.match(/<w:numFmt w:val="([^"]+)"/);
-        const numFmt = numFmtMatch?.[1] || "decimal";
-
-        // Extract lvlText
-        const lvlTextMatch = levelContent.match(/<w:lvlText w:val="([^"]+)"/);
-        const lvlText = lvlTextMatch?.[1] || "";
-
-        levels.set(ilvl, { numFmt, lvlText });
-      }
-
-      if (levels.size > 0) {
-        abstractFormats.set(abstractNumId, { levels });
-      }
+    const levels = new Map<number, DocxLevelFormat>();
+    
+    // Parse levels within this abstract format
+    const levelElements = abstractElement.querySelectorAll('lvl');
+    
+    for (const levelElement of levelElements) {
+      const ilvlStr = levelElement.getAttribute('ilvl');
+      if (!ilvlStr) continue;
+      
+      const ilvl = parseInt(ilvlStr, 10);
+      
+      // Extract numFmt
+      const numFmtElement = levelElement.querySelector('numFmt');
+      const numFmt = numFmtElement?.getAttribute('val') || 'decimal';
+      
+      // Extract lvlText
+      const lvlTextElement = levelElement.querySelector('lvlText');
+      const lvlText = lvlTextElement?.getAttribute('val') || '';
+      
+      levels.set(ilvl, { numFmt, lvlText });
     }
-
-    // Parse numbering instances
-    const numRegex = /<w:num w:numId="([^"]+)"[^>]*>(.*?)<\/w:num>/gs;
-    let numMatch;
-
-    while ((numMatch = numRegex.exec(xmlContent)) !== null) {
-      const numId = numMatch[1];
-      const numContent = numMatch[2];
-      if (!numId || !numContent) continue;
-
-      // Extract abstractNumId reference
-      const abstractNumIdMatch = numContent.match(/<w:abstractNumId w:val="([^"]+)"/);
-      if (abstractNumIdMatch?.[1]) {
-        let targetAbstractId = abstractNumIdMatch[1];
-
-        // If this abstract ID has a style link, resolve it
-        if (styleLinks.has(targetAbstractId)) {
-          // Look for the actual abstract format with levels
-          // In the pattern we observed, it's typically the next ID (e.g., 0->1, 2->3, 4->5)
-          const nextId = String(parseInt(targetAbstractId) + 1);
-          if (abstractFormats.has(nextId)) {
-            targetAbstractId = nextId;
-          }
-        }
-
-        instances.set(numId, targetAbstractId);
-      }
+    
+    if (levels.size > 0) {
+      abstractFormats.set(abstractNumId, { levels });
     }
+  }
 
-    debug.log(
-      `Parsed ${instances.size} numbering instances and ${abstractFormats.size} abstract formats`,
-    );
-    debug.log(`Found ${styleLinks.size} style links`);
+  // Parse numbering instances
+  const numElements = numberingRoot.querySelectorAll('num');
+  
+  for (const numElement of numElements) {
+    const numId = numElement.getAttribute('numId');
+    if (!numId) continue;
+    
+    // Extract abstractNumId reference
+    const abstractNumIdElement = numElement.querySelector('abstractNumId');
+    const abstractNumId = abstractNumIdElement?.getAttribute('val');
+    
+    if (abstractNumId) {
+      instances.set(numId, abstractNumId);
+    }
+  }
 
-    return { instances, abstractFormats };
-  });
+  debug.log(
+    `Parsed ${instances.size} numbering instances and ${abstractFormats.size} abstract formats`,
+  );
+
+  return { instances, abstractFormats };
+};
