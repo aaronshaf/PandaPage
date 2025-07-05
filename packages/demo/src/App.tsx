@@ -48,7 +48,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // UI state
-  const [viewMode, setViewMode] = useState<'read' | 'print'>('read');
+  const [viewMode, setViewMode] = useState<'read' | 'print'>(getInitialViewMode());
   const [showOutline, setShowOutline] = useState(false);
   const [showPrimaryNav, setShowPrimaryNav] = useState(true);
   const [printScale, setPrintScale] = useState(1);
@@ -58,13 +58,56 @@ const App: React.FC = () => {
   // Computed values
   const wordCount = result ? countWords(removeFrontmatter(result)) : 0;
 
+  // Parse URL hash for document and view mode
+  const parseUrlHash = () => {
+    const hash = window.location.hash.slice(1); // Remove #
+    const parts = hash.split('&');
+    
+    let docId = '';
+    let mode: 'read' | 'print' = 'read';
+    
+    for (const part of parts) {
+      if (part.includes('=')) {
+        const [key, value] = part.split('=');
+        if (key === 'view' && (value === 'read' || value === 'print')) {
+          mode = value;
+        }
+      } else if (part.endsWith('.docx') || part.endsWith('.pages')) {
+        docId = part;
+      }
+    }
+    
+    return { docId, mode };
+  };
+
   // Get initial document from URL hash or default
   const getInitialDocument = () => {
-    const hash = window.location.hash.slice(1);
-    if (hash && sampleDocuments.some(doc => doc.id === hash)) {
-      return `${getBasePath()}/${hash}`;
+    const { docId } = parseUrlHash();
+    if (docId && sampleDocuments.some(doc => doc.id === docId)) {
+      return `${getBasePath()}/${docId}`;
     }
     return `${getBasePath()}/001.docx`;
+  };
+
+  // Get initial view mode from URL hash or default
+  const getInitialViewMode = (): 'read' | 'print' => {
+    const { mode } = parseUrlHash();
+    return mode;
+  };
+
+  // Update URL hash with current document and view mode
+  const updateUrlHash = (docId?: string, mode?: 'read' | 'print') => {
+    const currentDocId = docId || (selectedDocument ? selectedDocument.split('/').pop() : '001.docx');
+    const currentMode = mode || viewMode;
+    
+    // Only add view mode to URL if it's not the default 'read'
+    const hashParts = [currentDocId];
+    if (currentMode === 'print') {
+      hashParts.push(`view=${currentMode}`);
+    }
+    
+    const newHash = hashParts.join('&');
+    window.history.replaceState(null, '', `#${newHash}`);
   };
 
   // Calculate print scale
@@ -171,7 +214,7 @@ const App: React.FC = () => {
       if (!file) {
         const docId = path.split('/').pop();
         if (docId && sampleDocuments.some(doc => doc.id === docId)) {
-          window.history.replaceState(null, '', `#${docId}`);
+          updateUrlHash(docId);
         }
       }
     } catch (error) {
@@ -198,6 +241,12 @@ const App: React.FC = () => {
     setSelectedDocument('');
     loadDocument('', file);
   }, [loadDocument]);
+
+  // Handle view mode change with URL update
+  const handleViewModeChange = useCallback((newMode: 'read' | 'print') => {
+    setViewMode(newMode);
+    updateUrlHash(undefined, newMode);
+  }, [selectedDocument, viewMode]);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -238,6 +287,30 @@ const App: React.FC = () => {
       document.body.style.overflow = '';
     };
   }, []);
+
+  // Listen for URL hash changes to update view mode
+  useEffect(() => {
+    const handleHashChange = () => {
+      const { docId, mode } = parseUrlHash();
+      
+      // Update view mode if it changed
+      if (mode !== viewMode) {
+        setViewMode(mode);
+      }
+      
+      // Update document if it changed
+      if (docId && sampleDocuments.some(doc => doc.id === docId)) {
+        const newPath = `${getBasePath()}/${docId}`;
+        if (newPath !== selectedDocument) {
+          setSelectedDocument(newPath);
+          loadDocument(newPath);
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [viewMode, selectedDocument, loadDocument]);
 
   // Update print scale when view mode changes
   useEffect(() => {
@@ -281,7 +354,7 @@ const App: React.FC = () => {
         showOutline={showOutline}
         setShowOutline={setShowOutline}
         viewMode={viewMode}
-        setViewMode={setViewMode}
+        setViewMode={handleViewModeChange}
         printScale={printScale}
         setPrintScale={setPrintScale}
         result={result}
