@@ -70,17 +70,16 @@ export const parseWithDefaults = <T>(
   data: unknown,
   defaults: T
 ): Effect.Effect<T, DocxParseError> =>
-  Effect.try({
-    try: () => {
-      if (!data) {
-        return defaults;
-      }
-      
+  Effect.gen(function* () {
+    if (!data) {
+      return defaults;
+    }
+    
+    try {
       // Simple validation - just return the data if it exists
       return { ...defaults, ...(data as any) };
-    },
-    catch: (error) => {
+    } catch (error) {
       console.warn(`Validation failed, using defaults:`, error);
-      return defaults;
+      return yield* Effect.fail(new DocxParseError(`Validation failed: ${error}`));
     }
   });

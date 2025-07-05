@@ -82,17 +82,19 @@ async function parseWithErrorHandling() {
   const file = new File(["..."], "document.docx");
   const buffer = await file.arrayBuffer();
   
-  const result = await Effect.runPromiseEither(
+  const result = await Effect.runPromiseExit(
     parseDocumentInWorker("docx", buffer)
   );
   
-  if (result._tag === "Left") {
+  if (result._tag === "Failure") {
     // Handle error
-    console.error("Parse failed:", result.left);
-    alert(`Failed to parse document: ${result.left.message}`);
+    if (result.cause._tag === "Fail") {
+      console.error("Parse failed:", result.cause.error);
+      alert(`Failed to parse document: ${result.cause.error.message}`);
+    }
   } else {
     // Handle success
-    console.log("Parse successful:", result.right);
+    console.log("Parse successful:", result.value);
   }
 }
 

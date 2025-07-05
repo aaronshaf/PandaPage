@@ -30,7 +30,7 @@ export interface DocumentConfig {
 export const DEFAULT_CONFIG: DocumentConfig = {
   // Performance settings - 1MB threshold for workers
   workerThreshold: 1024 * 1024,
-  maxWorkers: Math.max(2, navigator?.hardwareConcurrency || 4),
+  maxWorkers: Math.max(2, typeof navigator !== 'undefined' ? navigator?.hardwareConcurrency || 4 : 4),
   chunkSize: 1024 * 1024, // 1MB chunks
   
   // Feature flags
@@ -71,7 +71,7 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
         ...userObj,
       };
       
-      // Type validation
+      // Type validation - ensure correct types
       if (typeof config.workerThreshold !== 'number' || config.workerThreshold <= 0) {
         config.workerThreshold = DEFAULT_CONFIG.workerThreshold;
       }
@@ -88,6 +88,26 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
         config.timeout = DEFAULT_CONFIG.timeout;
       }
       
+      // Ensure boolean types
+      if (typeof config.enableStreaming !== 'boolean') {
+        config.enableStreaming = DEFAULT_CONFIG.enableStreaming;
+      }
+      if (typeof config.enableCaching !== 'boolean') {
+        config.enableCaching = DEFAULT_CONFIG.enableCaching;
+      }
+      if (typeof config.enableCompression !== 'boolean') {
+        config.enableCompression = DEFAULT_CONFIG.enableCompression;
+      }
+      if (typeof config.preserveFormatting !== 'boolean') {
+        config.preserveFormatting = DEFAULT_CONFIG.preserveFormatting;
+      }
+      if (typeof config.includeMetadata !== 'boolean') {
+        config.includeMetadata = DEFAULT_CONFIG.includeMetadata;
+      }
+      if (typeof config.generateOutline !== 'boolean') {
+        config.generateOutline = DEFAULT_CONFIG.generateOutline;
+      }
+      
       // Additional validation
       if (config.maxWorkers > 16) {
         throw new ConfigError("maxWorkers cannot exceed 16");
@@ -99,7 +119,12 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
       
       return config;
     },
-    catch: (error) => new ConfigError(`Invalid configuration: ${error}`)
+    catch: (error) => {
+      if (error instanceof ConfigError) {
+        return error;
+      }
+      return new ConfigError(`Invalid configuration: ${error}`);
+    }
   });
 
 /**

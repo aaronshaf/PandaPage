@@ -80,7 +80,7 @@ test("getRecoveryStrategy - should return correct strategies", () => {
   
   testCases.forEach(({ error, expected }) => {
     const strategy = getRecoveryStrategy(error);
-    expect(strategy).toBe(expected);
+    expect(strategy).toBe(expected as "retry" | "fallback" | "ignore" | "abort");
   });
 });
 

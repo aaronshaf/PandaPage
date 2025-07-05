@@ -137,11 +137,11 @@ export const calculateDocumentStats = (elements: DocxElement[]): {
       } else {
         // Count text in paragraph
         paragraphCount++;
-        const text = element.runs.map(run => run.text).join("");
+        const text = element.runs.map((run: any) => run.text).join("");
         characterCount += text.length;
         
         // Simple word count (split by whitespace)
-        const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+        const words = text.trim().split(/\s+/).filter((word: string) => word.length > 0);
         wordCount += words.length;
       }
     }

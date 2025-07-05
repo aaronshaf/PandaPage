@@ -28,7 +28,6 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
 
       // Convert simple document to enhanced format
       const elements = document.paragraphs.map(p => ({ 
-        type: "paragraph" as const, 
         ...p 
       }));
 

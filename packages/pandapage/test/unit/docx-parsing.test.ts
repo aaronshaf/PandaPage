@@ -17,12 +17,14 @@ const createMockDocxBuffer = (): ArrayBuffer => {
 test("docxToMarkdown - should handle empty buffer gracefully", async () => {
   const emptyBuffer = new ArrayBuffer(0);
   
-  const result = await Effect.runPromiseEither(docxToMarkdown(emptyBuffer));
+  const result = await Effect.runPromiseExit(docxToMarkdown(emptyBuffer));
   
-  expect(result._tag).toBe("Left");
-  expect(result.left).toMatchObject({
-    _tag: "DocxParseError"
-  });
+  expect(result._tag).toBe("Failure");
+  if (result._tag === "Failure" && result.cause._tag === "Fail") {
+    expect(result.cause.error).toMatchObject({
+      _tag: "DocxParseError"
+    });
+  }
 });
 
 test("docxToMarkdown - should return Effect with proper error type", () => {
@@ -37,21 +39,25 @@ test("docxToMarkdown - should return Effect with proper error type", () => {
 test("readDocx - should handle invalid ZIP data", async () => {
   const invalidBuffer = new Uint8Array([0x00, 0x01, 0x02, 0x03]).buffer;
   
-  const result = await Effect.runPromiseEither(readDocx(invalidBuffer));
+  const result = await Effect.runPromiseExit(readDocx(invalidBuffer));
   
-  expect(result._tag).toBe("Left");
-  expect(result.left).toMatchObject({
-    _tag: "DocxParseError"
-  });
+  expect(result._tag).toBe("Failure");
+  if (result._tag === "Failure" && result.cause._tag === "Fail") {
+    expect(result.cause.error).toMatchObject({
+      _tag: "DocxParseError"
+    });
+  }
 });
 
 test("docxToMarkdown - should produce consistent error messages", async () => {
   const invalidBuffer = new ArrayBuffer(4);
   
-  const result = await Effect.runPromiseEither(docxToMarkdown(invalidBuffer));
+  const result = await Effect.runPromiseExit(docxToMarkdown(invalidBuffer));
   
-  expect(result._tag).toBe("Left");
-  expect(result.left.message).toContain("DOCX");
+  expect(result._tag).toBe("Failure");
+  if (result._tag === "Failure" && result.cause._tag === "Fail") {
+    expect(result.cause.error.message).toContain("DOCX");
+  }
 });
 
 test("Effect chain should be composable", () => {
@@ -69,11 +75,11 @@ test("Effect chain should be composable", () => {
 test("Error types should be consistent", () => {
   const buffer = new ArrayBuffer(0);
   
-  Effect.runPromiseEither(docxToMarkdown(buffer)).then(result => {
-    if (result._tag === "Left") {
-      expect(result.left).toHaveProperty("_tag");
-      expect(result.left).toHaveProperty("message");
-      expect(typeof result.left.message).toBe("string");
+  Effect.runPromiseExit(docxToMarkdown(buffer)).then(result => {
+    if (result._tag === "Failure" && result.cause._tag === "Fail") {
+      expect(result.cause.error).toHaveProperty("_tag");
+      expect(result.cause.error).toHaveProperty("message");
+      expect(typeof result.cause.error.message).toBe("string");
     }
   });
 });
@@ -84,11 +90,13 @@ test("Buffer size validation", async () => {
   
   for (const size of sizes) {
     const buffer = new ArrayBuffer(size);
-    const result = await Effect.runPromiseEither(docxToMarkdown(buffer));
+    const result = await Effect.runPromiseExit(docxToMarkdown(buffer));
     
     // All should fail gracefully with proper error structure
-    expect(result._tag).toBe("Left");
-    expect(result.left).toHaveProperty("_tag", "DocxParseError");
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure" && result.cause._tag === "Fail") {
+      expect(result.cause.error).toHaveProperty("_tag", "DocxParseError");
+    }
   }
 });
 

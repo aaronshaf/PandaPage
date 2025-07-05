@@ -140,10 +140,10 @@ test("Document metadata extraction", () => {
     
     // Simple regex-based extraction for testing
     const titleMatch = xmlContent.match(/<dc:title>([^<]+)<\/dc:title>/);
-    if (titleMatch) metadata.title = titleMatch[1];
+    if (titleMatch) metadata.title = titleMatch[1]!;
     
     const authorMatch = xmlContent.match(/<dc:creator>([^<]+)<\/dc:creator>/);
-    if (authorMatch) metadata.author = authorMatch[1];
+    if (authorMatch) metadata.author = authorMatch[1]!;
     
     return metadata;
   };
@@ -185,8 +185,8 @@ test("Memory usage patterns", () => {
   }
   
   expect(buffers.length).toBe(10);
-  expect(buffers[0].byteLength).toBe(1000);
-  expect(buffers[9].byteLength).toBe(1000);
+  expect(buffers[0]!.byteLength).toBe(1000);
+  expect(buffers[9]!.byteLength).toBe(1000);
   
   // Clear references
   buffers.length = 0;

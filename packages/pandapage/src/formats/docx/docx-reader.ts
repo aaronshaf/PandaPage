@@ -1,7 +1,6 @@
 import * as S from "@effect/schema/Schema";
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
-import { parseNumberingXml } from "./document-parser";
 
 // Error types
 export class DocxParseError {
@@ -199,6 +198,93 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
     debug.log(`Parsed ${paragraphs.length} paragraphs`);
 
     return paragraphs;
+  });
+
+// Parse numbering.xml content
+const parseNumberingXml = (xmlContent: string): Effect.Effect<DocxNumbering, DocxParseError> =>
+  Effect.gen(function* () {
+    const instances = new Map<string, string>();
+    const abstractFormats = new Map<string, DocxAbstractFormat>();
+    const styleLinks = new Map<string, string>(); // Map abstractNumId to style name
+
+    // First pass: Parse abstract numbering definitions and style links
+    const abstractNumRegex = /<w:abstractNum w:abstractNumId="(\d+)"[^>]*>([\s\S]*?)<\/w:abstractNum>/g;
+    let abstractMatch;
+    while ((abstractMatch = abstractNumRegex.exec(xmlContent)) !== null) {
+      const abstractNumId = abstractMatch[1];
+      const abstractContent = abstractMatch[2];
+      if (!abstractNumId || !abstractContent) continue;
+
+      // Check for style link
+      const styleLinkMatch = abstractContent.match(/<w:numStyleLink w:val="([^"]+)"/);
+      if (styleLinkMatch && styleLinkMatch[1]) {
+        styleLinks.set(abstractNumId, styleLinkMatch[1]);
+        continue;
+      }
+
+      const levels = new Map<number, DocxLevelFormat>();
+
+      // Parse levels
+      const lvlRegex = /<w:lvl w:ilvl="(\d+)"[^>]*>([\s\S]*?)<\/w:lvl>/g;
+      let lvlMatch;
+      while ((lvlMatch = lvlRegex.exec(abstractContent)) !== null) {
+        const ilvl = parseInt(lvlMatch[1]!, 10);
+        const lvlContent = lvlMatch[2];
+        if (!lvlContent) continue;
+
+        // Extract numFmt
+        const numFmtMatch = lvlContent.match(/<w:numFmt w:val="([^"]+)"/);
+        const numFmt = numFmtMatch?.[1] || "bullet";
+
+        // Extract lvlText
+        const lvlTextMatch = lvlContent.match(/<w:lvlText w:val="([^"]+)"/);
+        const lvlText = lvlTextMatch?.[1] || "•";
+
+        levels.set(ilvl, { numFmt, lvlText });
+      }
+
+      abstractFormats.set(abstractNumId, { levels });
+    }
+
+    // Second pass: Resolve style links to actual definitions
+    // Map style names to their actual abstract format IDs
+    const styleToAbstractId = new Map<string, string>();
+    for (const [id, format] of abstractFormats.entries()) {
+      // Check if this abstract has a styleLink pointing to it
+      const styleLinkRegex = new RegExp(`<w:styleLink w:val="([^"]+)"[^>]*>`, 'g');
+      const abstractDef = xmlContent.match(new RegExp(`<w:abstractNum w:abstractNumId="${id}"[^>]*>([\\s\\S]*?)<\\/w:abstractNum>`));
+      if (abstractDef && abstractDef[1]) {
+        const linkMatch = abstractDef[1].match(styleLinkRegex);
+        if (linkMatch && linkMatch[0]) {
+          const styleName = linkMatch[0].match(/w:val="([^"]+)"/)?.[1];
+          if (styleName) {
+            styleToAbstractId.set(styleName, id);
+          }
+        }
+      }
+    }
+
+    // Resolve style links
+    for (const [id, styleName] of styleLinks.entries()) {
+      const targetId = styleToAbstractId.get(styleName);
+      if (targetId && abstractFormats.has(targetId)) {
+        abstractFormats.set(id, abstractFormats.get(targetId)!);
+      }
+    }
+
+    // Parse num instances (mapping numId to abstractNumId)
+    const numRegex = /<w:num w:numId="(\d+)"[^>]*>[\s\S]*?<w:abstractNumId w:val="(\d+)"[\s\S]*?<\/w:num>/g;
+    let numMatch;
+    while ((numMatch = numRegex.exec(xmlContent)) !== null) {
+      const numId = numMatch[1];
+      const abstractNumId = numMatch[2];
+      if (numId && abstractNumId) {
+        instances.set(numId, abstractNumId);
+      }
+    }
+
+    debug.log(`Parsed numbering: ${instances.size} instances, ${abstractFormats.size} abstract formats`);
+    return { instances, abstractFormats };
   });
 
 // Simple paragraph parser helper
