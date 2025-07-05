@@ -480,7 +480,14 @@ const parseRunEnhanced = (rElement: Element): Effect.Effect<DocxRun, DocxParseEr
     if (rPr) {
       bold = !!xmlParser.element(rPr, "b");
       italic = !!xmlParser.element(rPr, "i");
-      underline = !!xmlParser.element(rPr, "u");
+      
+      // Check for underline - must not have w:val="none"
+      const uElement = xmlParser.element(rPr, "u");
+      if (uElement) {
+        const val = xmlParser.attr(uElement, "val");
+        // If w:val is not present or is not "none" or "0", then it's underlined
+        underline = !val || (val !== "none" && val !== "0");
+      }
     }
 
     // Extract text content

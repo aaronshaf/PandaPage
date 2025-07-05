@@ -143,7 +143,18 @@ const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], Do
           // Check for formatting
           const bold = /<w:b\s+w:val="1"/.test(runContent);
           const italic = /<w:i\s+w:val="1"/.test(runContent);
-          const underline = /<w:u\s/.test(runContent);
+          
+          // Check for underline - must not have w:val="none"
+          const underlineMatch = runContent.match(/<w:u\s+([^>]*)/);
+          let underline = false;
+          if (underlineMatch && underlineMatch[1]) {
+            const attrs = underlineMatch[1];
+            // Check if w:val is present and not "none"
+            const valMatch = attrs.match(/w:val="([^"]+)"/);
+            if (!valMatch || (valMatch[1] !== "none" && valMatch[1] !== "0")) {
+              underline = true;
+            }
+          }
 
           runs.push({
             text,
