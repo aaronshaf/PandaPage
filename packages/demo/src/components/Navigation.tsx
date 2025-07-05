@@ -212,7 +212,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             {/* Stats */}
             {result && (
               <div className="text-xs text-gray-500 whitespace-nowrap font-sans">
-                {wordCount} words{processingTime && ` · ${processingTime}ms`}
+                {wordCount.toLocaleString()} words{processingTime && ` · ${processingTime}ms`}
               </div>
             )}
             

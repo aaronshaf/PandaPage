@@ -397,6 +397,7 @@ const App: React.FC = () => {
               showSpinner={showSpinner}
               viewMode={viewMode}
               printScale={printScale}
+              showPrimaryNav={showPrimaryNav}
               removeFrontmatter={removeFrontmatter}
               splitIntoPages={splitIntoPages}
               countWords={countWords}

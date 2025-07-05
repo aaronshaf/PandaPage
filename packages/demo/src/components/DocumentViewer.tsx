@@ -7,6 +7,7 @@ interface DocumentViewerProps {
   showSpinner: boolean;
   viewMode: 'read' | 'print';
   printScale: number;
+  showPrimaryNav: boolean;
   removeFrontmatter: (markdown: string) => string;
   splitIntoPages: (html: string) => string[];
   countWords: (text: string) => number;
@@ -18,6 +19,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   showSpinner,
   viewMode,
   printScale,
+  showPrimaryNav,
   removeFrontmatter,
   splitIntoPages,
   countWords
@@ -144,9 +146,31 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {/* Page Indicator */}
           {showPageIndicator && totalPages > 0 && (
             <div 
-              className="fixed right-8 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
+              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-opacity duration-300 z-30"
               style={{
-                top: `${20 + (scrollProgress * ((typeof window !== 'undefined' ? window.innerHeight : 800) - 120))}px`,
+                // Position relative to the document container's scrollable area
+                right: '24px', // Account for scrollbar width (typically ~16px) + padding
+                top: (() => {
+                  if (typeof window === 'undefined') return '20px';
+                  
+                  // More precise navigation height calculation
+                  // Primary nav: ~64px, Secondary nav: ~48px  
+                  const primaryNavHeight = showPrimaryNav ? 64 : 0;
+                  const secondaryNavHeight = 48;
+                  const totalNavHeight = primaryNavHeight + secondaryNavHeight;
+                  
+                  // Available vertical space for the indicator movement
+                  const viewportHeight = window.innerHeight;
+                  const availableHeight = viewportHeight - totalNavHeight;
+                  const indicatorReservedSpace = 40; // Top and bottom padding
+                  const travelSpace = Math.max(0, availableHeight - indicatorReservedSpace);
+                  
+                  // Calculate position: start just below nav, travel based on scroll
+                  const startTop = totalNavHeight + 20;
+                  const calculatedTop = startTop + (scrollProgress * travelSpace);
+                  
+                  return `${calculatedTop}px`;
+                })(),
                 transform: 'translateY(-50%)'
               }}
             >
