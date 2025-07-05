@@ -1,4 +1,3 @@
-import * as S from "@effect/schema/Schema";
 import { Chunk, Effect, Stream } from "effect";
 import { debug } from "../common/debug";
 import type { WorkerResult, WorkerTask } from "./worker-pool";
@@ -6,13 +5,6 @@ import { createTransferableTask, shouldUseWorker } from "./worker-pool";
 
 // Progress callback type
 export type ProgressCallback = (progress: number) => void;
-
-// Parse options schema for validation
-export const ParseOptionsSchema = S.Struct({
-  useWorker: S.optional(S.Boolean),
-  streaming: S.optional(S.Boolean),
-  chunkSize: S.optional(S.Number.pipe(S.positive(), S.int())),
-});
 
 // Parse options with worker support
 export interface ParseOptions {

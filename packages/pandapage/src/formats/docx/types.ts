@@ -1,48 +1,6 @@
-import * as S from "@effect/schema/Schema";
-
 // Re-export existing types from docx-reader
 export type { DocxParagraph, DocxRun, DocxNumbering, DocxAbstractFormat, DocxLevelFormat } from "./docx-reader";
 export type { DocxMetadata } from "./docx-metadata";
-
-// Effect Schema definitions for runtime validation
-
-/**
- * Schema for table borders
- */
-export const DocxTableBordersSchema = S.Struct({
-  top: S.optional(S.String),
-  right: S.optional(S.String),
-  bottom: S.optional(S.String),
-  left: S.optional(S.String),
-});
-
-/**
- * Schema for table properties
- */
-export const DocxTablePropertiesSchema = S.Struct({
-  width: S.optional(S.String),
-  alignment: S.optional(S.Literal("left", "center", "right")),
-  borders: S.optional(DocxTableBordersSchema),
-  backgroundColor: S.optional(S.String),
-});
-
-/**
- * Schema for table row properties
- */
-export const DocxTableRowPropertiesSchema = S.Struct({
-  height: S.optional(S.String),
-  isHeader: S.optional(S.Boolean),
-});
-
-/**
- * Schema for table cell properties
- */
-export const DocxTableCellPropertiesSchema = S.Struct({
-  width: S.optional(S.String),
-  alignment: S.optional(S.Literal("left", "center", "right", "top", "bottom")),
-  borders: S.optional(DocxTableBordersSchema),
-  backgroundColor: S.optional(S.String),
-});
 
 /**
  * DOCX table interfaces

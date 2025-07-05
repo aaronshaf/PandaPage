@@ -5,7 +5,8 @@ import { validateConfig, DEFAULT_CONFIG, type DocumentConfig } from "../../commo
 import { safeExecute, retryWithBackoff } from "../../common/error-handling";
 import { extractCompleteMetadata } from "./docx-metadata";
 import { parseDocumentXmlEnhanced, parseNumberingXml, extractFileContent, calculateDocumentStats } from "./document-parser";
-import type { EnhancedDocxDocument, DocxParseError } from "./types";
+import type { EnhancedDocxDocument } from "./types";
+import { DocxParseError } from "./types";
 
 // Re-export types for convenience
 export type { 
