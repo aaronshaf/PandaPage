@@ -28,6 +28,11 @@ export const Outline: React.FC<OutlineProps> = ({
   const headings = extractHeadings(removeFrontmatter(result));
 
   const handleHeadingClick = (heading: Heading) => {
+    // Signal that this is programmatic scrolling to prevent page indicator
+    if ((window as any).signalProgrammaticScroll) {
+      (window as any).signalProgrammaticScroll();
+    }
+
     // Find the scrollable document container
     const scrollContainer = document.querySelector('.document-scroll-container') as HTMLElement;
     if (!scrollContainer) return;

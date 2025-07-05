@@ -28,6 +28,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [showPageIndicator, setShowPageIndicator] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false);
 
   // Calculate print scale
   const calculatePrintScale = () => {
@@ -55,6 +56,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       }
     }
   }, [viewMode, printScale]);
+
+  // Expose function to signal programmatic scroll
+  useEffect(() => {
+    (window as any).signalProgrammaticScroll = () => {
+      setIsProgrammaticScroll(true);
+    };
+    
+    return () => {
+      delete (window as any).signalProgrammaticScroll;
+    };
+  }, []);
 
   // Page tracking for print view
   useEffect(() => {
@@ -96,8 +108,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
       setScrollProgress(progress);
       
-      // Show page indicator temporarily when scrolling (but not in top 100px)
-      const shouldShowIndicator = scrollTop > 100;
+      // Show page indicator temporarily when manually scrolling (but not in top 100px or programmatic scroll)
+      const shouldShowIndicator = scrollTop > 100 && !isProgrammaticScroll;
       setShowPageIndicator(shouldShowIndicator);
       
       if (shouldShowIndicator) {
@@ -105,6 +117,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         window.pageIndicatorTimeout = window.setTimeout(() => {
           setShowPageIndicator(false);
         }, 2000);
+      }
+      
+      // Reset programmatic scroll flag after a short delay
+      if (isProgrammaticScroll) {
+        setTimeout(() => {
+          setIsProgrammaticScroll(false);
+        }, 100);
       }
     };
 
