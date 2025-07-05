@@ -586,9 +586,8 @@ const App = () => {
               </a>
             </div>
           </div>
-        </div>
           </div>
-        )}
+        </div>
 
         {/* Secondary Ribbon Bar */}
         <div className="bg-gray-100 border-b border-gray-200">
@@ -686,7 +685,7 @@ const App = () => {
               )}
               
               {/* Separator line */}
-              <div className="w-px h-6 bg-gray-300"></div>
+              <div className="w-px h-6 bg-gray-300 mx-2"></div>
               
               {/* Primary nav toggle button */}
               <button
@@ -702,7 +701,6 @@ const App = () => {
                   )}
                 </svg>
               </button>
-            </div>
             </div>
           </div>
         </div>
