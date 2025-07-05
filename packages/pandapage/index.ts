@@ -95,3 +95,21 @@ export async function renderKey(buffer: ArrayBuffer): Promise<string> {
 
 // Re-export other utilities
 export { debug } from "./src/common/debug";
+
+// Worker support
+export {
+  parseDocumentInWorker,
+  parseDocumentSmart,
+  streamDocumentParse,
+  type ParseOptions,
+  type ProgressCallback,
+  WorkerParseError
+} from "./src/workers/worker-manager";
+
+export {
+  shouldUseWorker,
+  createTransferableTask,
+  type WorkerTask,
+  type WorkerResult,
+  type WorkerPoolConfig
+} from "./src/workers/worker-pool";

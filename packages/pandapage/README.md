@@ -39,7 +39,8 @@ Apple files (.pages, .numbers, .key) are:
 - Conversion to Markdown
 
 ### PPTX Support 🚧
-- Coming soon
+- Basic slide extraction
+- Markdown conversion
 
 ### Pages Support 🚧
 - File structure analysis complete
@@ -47,6 +48,12 @@ Apple files (.pages, .numbers, .key) are:
 
 ### Keynote Support 🚧
 - Planned
+
+### Web Worker Support ✅
+- Parse large documents without blocking UI
+- Transferable objects for zero-copy performance
+- Streaming results for progressive rendering
+- Automatic worker pool management
 
 ## Installation
 
@@ -91,6 +98,32 @@ Reads and parses a DOCX file into a structured document format.
 
 #### `docxToMarkdown(buffer: ArrayBuffer): Effect<string, DocxParseError>`
 Effect-based API for converting DOCX to Markdown.
+
+### Web Worker APIs
+
+#### `parseDocumentInWorker<T>(type, buffer, options?): Effect<T, WorkerParseError>`
+Parse a document in a Web Worker with progress tracking.
+
+```typescript
+const result = await Effect.runPromise(
+  parseDocumentInWorker("docx", buffer, {
+    streaming: true,
+    onProgress: (progress) => console.log(`${progress * 100}% complete`)
+  })
+);
+```
+
+#### `streamDocumentParse(type, buffer, options?): Stream<string, WorkerParseError>`
+Stream parsing results for progressive rendering.
+
+```typescript
+const stream = streamDocumentParse("docx", largeBuffer);
+await Effect.runPromise(
+  Stream.runForEach(stream, (chunk) => 
+    Effect.sync(() => appendToUI(chunk))
+  )
+);
+```
 
 ## Development
 
