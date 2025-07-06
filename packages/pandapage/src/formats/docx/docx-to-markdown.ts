@@ -22,7 +22,6 @@ import {
 export const convertDocxToMarkdown = (document: DocxDocument): string => {
   const lines: string[] = [];
   const listCounters = new Map<string, number>(); // Track counters for numbered lists
-  let lastWasHeading = false; // Track if last paragraph was a heading for spacing
 
   for (const paragraph of document.paragraphs) {
     const text = convertParagraphToMarkdown(paragraph, document.numbering, listCounters);
@@ -32,11 +31,9 @@ export const convertDocxToMarkdown = (document: DocxDocument): string => {
       // Add extra line break after headings but not between body paragraphs
       if (paragraph.style?.startsWith("Heading")) {
         lines.push("");
-        lastWasHeading = true;
       } else if (!paragraph.numId) {
         // Only reset list counters when we're not in a list
         listCounters.clear();
-        lastWasHeading = false;
       }
     }
   }
