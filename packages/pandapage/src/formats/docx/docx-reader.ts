@@ -1,6 +1,12 @@
 import * as S from "@effect/schema/Schema";
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
+import { 
+  parseFieldsFromParagraph, 
+  fieldToMarkdown,
+  paragraphContainsFields,
+  type DocxField 
+} from "./form-field-parser";
 
 // Error types
 export class DocxParseError {
@@ -16,6 +22,8 @@ export interface DocxParagraph {
   // List properties
   numId?: string;
   ilvl?: number;
+  // Field properties
+  fields?: DocxField[];
 }
 
 export interface DocxRun {
@@ -115,6 +123,15 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
       const paragraphContent = paragraphMatch[1];
       if (!paragraphContent) continue;
 
+      // Check if paragraph contains fields
+      let fields: DocxField[] | undefined;
+      if (paragraphContainsFields(paragraphMatch[0])) {
+        const fieldsResult = yield* parseFieldsFromParagraph(paragraphMatch[0]);
+        if (fieldsResult.length > 0) {
+          fields = fieldsResult;
+        }
+      }
+
       // Extract paragraph style
       const styleMatch = paragraphContent.match(/<w:pStyle w:val="([^"]+)"/);
       const style = styleMatch?.[1];
@@ -184,13 +201,14 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
         }
       }
 
-      if (runs.length > 0) {
+      if (runs.length > 0 || fields) {
         paragraphs.push({
           type: "paragraph",
           style,
           runs,
           ...(numId && { numId }),
           ...(ilvl !== undefined && { ilvl }),
+          ...(fields && { fields }),
         });
       }
     }

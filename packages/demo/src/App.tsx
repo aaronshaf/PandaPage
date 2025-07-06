@@ -78,6 +78,7 @@ const App: React.FC = () => {
   const [printScale, setPrintScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
+  const [spinnerTimeout, setSpinnerTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Computed values
   const wordCount = result ? countWords(removeFrontmatter(result)) : 0;
@@ -253,8 +254,22 @@ const App: React.FC = () => {
   const loadDocument = useCallback(async (path: string, file?: File) => {
     try {
       setLoading(true);
-      setShowSpinner(true);
       setError(null);
+      
+      // Clear any existing spinner timeout
+      setSpinnerTimeout(prev => {
+        if (prev) {
+          clearTimeout(prev);
+        }
+        return null;
+      });
+      
+      // Only show spinner after 1 second
+      const timeout = setTimeout(() => {
+        setShowSpinner(true);
+      }, 1000);
+      setSpinnerTimeout(timeout);
+      
       const startTime = performance.now();
 
       let arrayBuffer: ArrayBuffer;
@@ -300,6 +315,16 @@ const App: React.FC = () => {
       setProcessingTime(null);
     } finally {
       setLoading(false);
+      
+      // Clear spinner timeout if it hasn't fired yet
+      setSpinnerTimeout(prev => {
+        if (prev) {
+          clearTimeout(prev);
+        }
+        return null;
+      });
+      
+      // Hide spinner with a small delay for smooth transition
       setTimeout(() => setShowSpinner(false), 300);
     }
   }, []);
@@ -353,7 +378,7 @@ const App: React.FC = () => {
     const initialDoc = getInitialDocument();
     setSelectedDocument(initialDoc);
     loadDocument(initialDoc);
-  }, [loadDocument]);
+  }, []); // Remove loadDocument dependency since it's stable now
 
   // Prevent body scrolling
   useEffect(() => {
@@ -362,6 +387,15 @@ const App: React.FC = () => {
       document.body.style.overflow = '';
     };
   }, []);
+
+  // Clean up spinner timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (spinnerTimeout) {
+        clearTimeout(spinnerTimeout);
+      }
+    };
+  }, [spinnerTimeout]);
 
   // Listen for URL hash changes to update view mode
   useEffect(() => {
@@ -449,7 +483,10 @@ const App: React.FC = () => {
         />
         
         {/* Document Content */}
-        <main className="flex-1 overflow-auto bg-gray-50 relative document-scroll-container">
+        <main 
+          data-testid="document-content"
+          className={`flex-1 overflow-auto relative document-scroll-container ${viewMode === 'read' ? 'bg-white' : 'bg-gray-50'}`}
+        >
           <DocumentUpload isDragging={isDragging} />
           
           {error ? (

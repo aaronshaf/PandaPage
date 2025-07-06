@@ -166,13 +166,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   if (!result) {
     return loading && showSpinner ? (
-      <div className="flex items-center justify-center h-full">
+      <div data-testid="loading-spinner" className="flex items-center justify-center h-full">
         <div className="text-center">
-          <svg className="animate-spin h-8 w-8 text-gray-400 mb-4 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg data-testid="spinner-icon" className="animate-spin h-8 w-8 text-gray-400 mb-4 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-gray-500">{result ? 'Converting document to Markdown...' : 'Loading document...'}</p>
+          <p data-testid="loading-text" className="text-gray-500">{result ? 'Converting document to Markdown...' : 'Loading document...'}</p>
         </div>
       </div>
     ) : null;
@@ -185,7 +185,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const topLevelHeadingCount = headings.filter(h => h.level === 1).length || headingCount; // Fall back to total if no H1s
 
   return (
-    <div className={`relative ${viewMode === 'print' ? '' : 'p-6'}`}>
+    <div 
+      data-testid="document-viewer"
+      className={`relative ${viewMode === 'print' ? '' : 'p-6'}`}
+    >
       {/* Floating Outline Button - only show if multiple headings */}
       {hasMultipleHeadings && (
         <button
@@ -222,9 +225,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       )}
 
       {viewMode === 'read' ? (
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div data-testid="read-view" className="max-w-4xl mx-auto">
+          <div 
+            data-testid="reading-mode-container"
+            className="bg-white rounded-lg shadow-sm p-6"
+          >
             <div 
+              data-testid="markdown-content"
               className="rendered-markdown prose prose-gray prose-lg max-w-none"
               dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
             />
@@ -232,7 +239,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         </div>
       ) : (
         // Print view
-        <div className="print-view relative">
+        <div data-testid="print-view" className="print-view relative">
           {/* Page Indicator */}
           {showPageIndicator && totalPages > 1 && (
             <div 
@@ -270,9 +277,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </div>
           )}
           
-          <div className="print-page-container" style={{
-            '--print-scale': printScale,
-          } as React.CSSProperties & { '--print-scale': number }}>
+          <div 
+            data-testid="print-page-container"
+            className="print-page-container" 
+            style={{
+              '--print-scale': printScale,
+            } as React.CSSProperties & { '--print-scale': number }}
+          >
             {(() => {
               const htmlContent = marked(removeFrontmatter(result));
               const pages = splitIntoPages(htmlContent);
@@ -283,13 +294,20 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               }
               
               return pages.map((pageContent, index) => (
-                <div key={index} className="print-page" data-page={index + 1}>
+                <div 
+                  key={index} 
+                  data-testid={`print-page-${index + 1}`}
+                  className="print-page" 
+                  data-page={index + 1}
+                >
                   <div 
+                    data-testid={`print-content-${index + 1}`}
                     className="print-content"
                     dangerouslySetInnerHTML={{ __html: pageContent }}
                   />
                   {/* Page number - only show in screen view */}
                   <div 
+                    data-testid={`page-number-${index + 1}`}
                     className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans"
                     aria-label={`Page ${index + 1} of ${pages.length}`}
                   >

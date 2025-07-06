@@ -8,6 +8,7 @@ import {
   type DocxRun,
   readDocx,
 } from "./docx-reader";
+import { fieldToMarkdown } from "./form-field-parser";
 import {
   type EnhancedDocxDocument,
   type DocxMetadata,
@@ -286,7 +287,23 @@ const convertParagraphToMarkdown = (
   listCounters?: Map<string, number>,
 ): string => {
   // Combine all runs into a single text
-  const combinedText = paragraph.runs.map((run) => formatRun(run)).join("");
+  let combinedText = paragraph.runs.map((run) => formatRun(run)).join("");
+
+  // If paragraph has fields, integrate their markdown representation
+  if (paragraph.fields && paragraph.fields.length > 0) {
+    // For fields with results, the result text is already in the runs
+    // For fields without results, we need to append the field markdown
+    const fieldsWithoutResults = paragraph.fields.filter(f => !f.result);
+    
+    if (fieldsWithoutResults.length > 0) {
+      const fieldMarkdowns = fieldsWithoutResults.map(fieldToMarkdown);
+      if (combinedText) {
+        combinedText = combinedText + fieldMarkdowns.join("");
+      } else {
+        combinedText = fieldMarkdowns.join(" ");
+      }
+    }
+  }
 
   // Check if this is a list item
   if (paragraph.numId && numbering) {
@@ -305,21 +322,27 @@ const convertParagraphToMarkdown = (
       return `**${combinedText}**`;
 
     case "Heading":
+    case "Heading1":
     case "Heading 1":
       return `# ${combinedText}`;
 
+    case "Heading2":
     case "Heading 2":
       return `## ${combinedText}`;
 
+    case "Heading3":
     case "Heading 3":
       return `### ${combinedText}`;
 
+    case "Heading4":
     case "Heading 4":
       return `#### ${combinedText}`;
 
+    case "Heading5":
     case "Heading 5":
       return `##### ${combinedText}`;
 
+    case "Heading6":
     case "Heading 6":
       return `###### ${combinedText}`;
 
