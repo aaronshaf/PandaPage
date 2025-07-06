@@ -103,6 +103,11 @@ const App: React.FC = () => {
 
   // Extract document title from metadata, first heading, or filename
   const getDocumentTitle = () => {
+    // Try to get title from structured document metadata first
+    if (structuredDocument?.metadata?.title) {
+      return cleanTextForTitle(structuredDocument.metadata.title);
+    }
+    
     if (!result) return 'pandapage';
     
     // Try to extract from frontmatter metadata
