@@ -20,7 +20,7 @@ test.describe('Verify Document Titles', () => {
       await page.waitForLoadState('networkidle');
       
       // Wait for content to load
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(500);
       
       const titleText = await page.textContent('[data-testid="app-title"]');
       console.log(`${doc.file}: "${titleText}"`);

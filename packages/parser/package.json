@@ -18,6 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/jszip": "^3.4.1",
     "effect": "^3.12.3",
     "jszip": "^3.10.1"
   },
