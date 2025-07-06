@@ -186,6 +186,29 @@ const App: React.FC = () => {
       }
     }
     
+    // Try to get title from structured document elements (first heading or large text)
+    if (structuredDocument?.elements) {
+      for (const element of structuredDocument.elements) {
+        if (element.type === 'paragraph') {
+          // Check if it's a heading style
+          if (element.style && (element.style.toLowerCase().includes('heading') || element.style.toLowerCase().includes('title'))) {
+            const text = element.runs?.map(run => run.text || '').join('').trim();
+            if (text) {
+              return cleanTextForTitle(text);
+            }
+          }
+          // Check if it's the first paragraph with substantial text (might be a title)
+          const text = element.runs?.map(run => run.text || '').join('').trim();
+          if (text && text.length > 10 && text.length < 100) {
+            // Check if it looks like a title (no punctuation at end except ?, capitalized, etc.)
+            if (!text.match(/[.,;:]$/) && text.match(/^[A-Z]/)) {
+              return cleanTextForTitle(text);
+            }
+          }
+        }
+      }
+    }
+    
     if (!result) {
       // Fall back to sample document title if available
       const docId = selectedDocument.split('/').pop();
