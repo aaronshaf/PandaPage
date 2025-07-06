@@ -99,6 +99,11 @@ function renderFooter(footer: DocumentElement): string {
   return `<!-- FOOTER -->\n${elements.join('\n\n')}\n<!-- /FOOTER -->`;
 }
 
+function renderBookmark(bookmark: DocumentElement): string {
+  if (bookmark.type !== 'bookmark') return '';
+  return `<a id="${bookmark.name}">${bookmark.text || ''}</a>`;
+}
+
 function renderElement(element: DocumentElement): string {
   switch (element.type) {
     case 'paragraph':
@@ -111,6 +116,8 @@ function renderElement(element: DocumentElement): string {
       return renderHeader(element);
     case 'footer':
       return renderFooter(element);
+    case 'bookmark':
+      return renderBookmark(element);
     case 'image':
       return `![${element.alt || 'Image'}](data:${element.mimeType};base64,${btoa(String.fromCharCode(...new Uint8Array(element.data)))})`;
     case 'pageBreak':

@@ -225,6 +225,11 @@ function renderFooter(footer: DocumentElement): string {
   return `<footer class="footer mt-4 pt-2 border-t border-gray-300">${elements.join('\n')}</footer>`;
 }
 
+function renderBookmark(bookmark: DocumentElement): string {
+  if (bookmark.type !== 'bookmark') return '';
+  return `<a id="${escapeHtml(bookmark.name)}" class="bookmark" data-bookmark-id="${escapeHtml(bookmark.id)}">${bookmark.text ? escapeHtml(bookmark.text) : ''}</a>`;
+}
+
 function renderElement(element: DocumentElement): string {
   switch (element.type) {
     case 'paragraph':
@@ -237,6 +242,8 @@ function renderElement(element: DocumentElement): string {
       return renderHeader(element);
     case 'footer':
       return renderFooter(element);
+    case 'bookmark':
+      return renderBookmark(element);
     case 'image':
       const imgData = btoa(String.fromCharCode(...new Uint8Array(element.data)));
       return `<img src="data:${element.mimeType};base64,${imgData}" alt="${escapeHtml(element.alt || '')}" class="max-w-full h-auto mb-4" />`;

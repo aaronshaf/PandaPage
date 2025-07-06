@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark } from "../../types/document";
 
 export class DocxParseError {
   readonly _tag = "DocxParseError";
@@ -441,6 +441,73 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer'): Header | Foo
   } as Header | Footer;
 }
 
+function parseBookmarks(element: Element, ns: string): Bookmark[] {
+  const bookmarks: Bookmark[] = [];
+  
+  // Find all bookmark start elements
+  const bookmarkStarts = element.getElementsByTagNameNS(ns, "bookmarkStart");
+  
+  for (let i = 0; i < bookmarkStarts.length; i++) {
+    const bookmarkStart = bookmarkStarts[i];
+    const id = bookmarkStart.getAttribute("w:id");
+    const name = bookmarkStart.getAttribute("w:name");
+    
+    if (id && name) {
+      // Try to find corresponding bookmark end and extract text content
+      const bookmarkEnd = findBookmarkEnd(element, id, ns);
+      let text: string | undefined;
+      
+      if (bookmarkEnd) {
+        text = extractBookmarkText(bookmarkStart, bookmarkEnd);
+      }
+      
+      bookmarks.push({
+        type: 'bookmark',
+        id,
+        name,
+        text
+      });
+    }
+  }
+  
+  return bookmarks;
+}
+
+function findBookmarkEnd(element: Element, bookmarkId: string, ns: string): Element | null {
+  const bookmarkEnds = element.getElementsByTagNameNS(ns, "bookmarkEnd");
+  
+  for (let i = 0; i < bookmarkEnds.length; i++) {
+    const bookmarkEnd = bookmarkEnds[i];
+    if (bookmarkEnd.getAttribute("w:id") === bookmarkId) {
+      return bookmarkEnd;
+    }
+  }
+  
+  return null;
+}
+
+function extractBookmarkText(startElement: Element, endElement: Element): string {
+  // This is a simplified implementation
+  // In a full implementation, you'd traverse from start to end collecting text
+  let current = startElement.nextSibling;
+  let text = '';
+  
+  while (current && current !== endElement) {
+    if (current.nodeType === 1) { // Element node
+      const element = current as Element;
+      if (element.tagName === "w:r") {
+        const textNodes = element.getElementsByTagName("w:t");
+        for (let i = 0; i < textNodes.length; i++) {
+          text += textNodes[i].textContent || '';
+        }
+      }
+    }
+    current = current.nextSibling;
+  }
+  
+  return text.trim();
+}
+
 export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, DocxParseError> =>
   Effect.gen(function* () {
     // Import JSZip
@@ -587,6 +654,10 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     }
     
     const body = bodyNodeList[0];
+    
+    // Parse bookmarks from the entire document body first
+    const bookmarks = parseBookmarks(body, ns);
+    elements.push(...bookmarks);
     
     // Parse all direct children of the body in order
     for (let i = 0; i < body.childNodes.length; i++) {

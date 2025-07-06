@@ -83,7 +83,14 @@ export interface Footer {
   elements: (Paragraph | Table)[];
 }
 
-export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer;
+export interface Bookmark {
+  type: 'bookmark';
+  id: string;
+  name: string;
+  text?: string;
+}
+
+export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer | Bookmark;
 
 export interface ParsedDocument {
   metadata: DocumentMetadata;
