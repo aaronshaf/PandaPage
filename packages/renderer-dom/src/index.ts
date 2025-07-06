@@ -59,7 +59,8 @@ function renderTextRun(run: TextRun): string {
 }
 
 function renderParagraph(paragraph: Paragraph): string {
-  const content = paragraph.runs.map(renderTextRun).join('');
+  const trimmedRuns = trimWhitespaceRuns(paragraph.runs);
+  const content = trimmedRuns.map(renderTextRun).join('');
   
   const classes: string[] = ['mb-4'];
   
@@ -85,8 +86,45 @@ function renderParagraph(paragraph: Paragraph): string {
   return `<p class="${classes.join(' ')}">${content}</p>`;
 }
 
+// Helper function to trim whitespace-only runs from start and end
+function trimWhitespaceRuns(runs: TextRun[]): TextRun[] {
+  let start = 0;
+  let end = runs.length - 1;
+  
+  // Find first non-whitespace-only run
+  while (start <= end && runs[start].text.trim() === '') {
+    start++;
+  }
+  
+  // Find last non-whitespace-only run
+  while (end >= start && runs[end].text.trim() === '') {
+    end--;
+  }
+  
+  if (start > end) {
+    return []; // All runs were whitespace
+  }
+  
+  // Create new array with trimmed runs
+  const trimmed = runs.slice(start, end + 1);
+  
+  // Trim the first and last runs
+  if (trimmed.length > 0) {
+    trimmed[0] = { ...trimmed[0], text: trimmed[0].text.trimStart() };
+    if (trimmed.length > 1) {
+      trimmed[trimmed.length - 1] = { ...trimmed[trimmed.length - 1], text: trimmed[trimmed.length - 1].text.trimEnd() };
+    } else {
+      // Only one run, trim both ends
+      trimmed[0] = { ...trimmed[0], text: trimmed[0].text.trimEnd() };
+    }
+  }
+  
+  return trimmed;
+}
+
 function renderHeading(heading: Heading): string {
-  const content = heading.runs.map(renderTextRun).join('');
+  const trimmedRuns = trimWhitespaceRuns(heading.runs);
+  const content = trimmedRuns.map(renderTextRun).join('');
   const tag = `h${heading.level}`;
   
   const classes: string[] = ['mb-4'];
