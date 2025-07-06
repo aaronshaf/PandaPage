@@ -51,7 +51,7 @@ const parseUrlHash = () => {
   const parts = hash.split('&');
   
   let docId = '';
-  let mode: 'read' | 'print' = 'read';
+  let mode: 'read' | 'print' = 'print';
   
   for (const part of parts) {
     if (part.includes('=')) {
@@ -270,9 +270,9 @@ const App: React.FC = () => {
     const currentDocId = docId || (selectedDocument ? selectedDocument.split('/').pop() : sampleDocuments[0]?.id || '');
     const currentMode = mode || viewMode;
     
-    // Only add view mode to URL if it's not the default 'read'
+    // Only add view mode to URL if it's not the default 'print'
     const hashParts = [currentDocId];
-    if (currentMode === 'print') {
+    if (currentMode === 'read') {
       hashParts.push(`view=${currentMode}`);
     }
     
