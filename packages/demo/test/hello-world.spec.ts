@@ -25,18 +25,21 @@ test.describe('Hello World Test', () => {
     // Wait for document to load
     await page.waitForLoadState('networkidle');
     
-    // Check we're in read mode by default
+    // Check we're in print mode by default (new behavior)
     await expect(page.locator('text=Read')).toBeVisible();
-    await expect(page.locator('text=Print')).toBeVisible();
-    
-    // Click Print button
-    await page.click('text=Print');
-    
-    // Wait a moment for view to change
-    await page.waitForTimeout(500);
+    await expect(page.locator('text=Print Layout')).toBeVisible();
     
     // In print view, we should see page elements
     const printPage = page.locator('.print-page').first();
     await expect(printPage).toBeVisible();
+    
+    // Click Read button to switch views
+    await page.click('text=Read');
+    
+    // Wait a moment for view to change
+    await page.waitForTimeout(500);
+    
+    // In read view, the content should be in continuous scroll format
+    await expect(page.locator('[data-testid="document-content"]')).toBeVisible();
   });
 });
