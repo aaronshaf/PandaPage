@@ -11,7 +11,7 @@ marked.setOptions({
 
 // Get base path for GitHub Pages deployment
 const getBasePath = () => {
-  return process.env.NODE_ENV === 'production' ? '/PandaPage' : '';
+  return process.env.NODE_ENV === 'production' ? '/pandapage' : '';
 };
 
 // Remove YAML frontmatter from markdown for rendering

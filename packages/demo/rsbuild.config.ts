@@ -8,7 +8,7 @@ export default defineConfig({
   },
   // Configure for GitHub Pages deployment
   output: {
-    assetPrefix: process.env.NODE_ENV === 'production' ? '/PandaPage/' : '/'
+    assetPrefix: process.env.NODE_ENV === 'production' ? '/pandapage/' : '/'
   },
   source: {
     // Include workspace packages in compilation
