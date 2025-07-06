@@ -5,13 +5,23 @@ test.describe('Document Title Tests', () => {
     // Navigate to 001.docx
     await page.goto('/#001.docx');
     
-    // Wait for document to load
+    // Wait for document to load and content to be visible
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Give time for title extraction
     
-    // The title should be visible in the navigation bar
-    // It should NOT just be "001.docx" or "pandapage"
-    const titleText = await page.textContent('[data-testid="document-title"], nav h1, nav .font-medium');
+    // Wait for the document content to be loaded (look for "Heading 1" text)
+    await page.waitForSelector('text=Heading 1', { timeout: 10000 });
+    
+    // Wait for title to update from loading state
+    await page.waitForFunction(
+      () => {
+        const title = document.querySelector('[data-testid="app-title"]');
+        return title && title.textContent !== '--' && title.textContent !== 'Loading...';
+      },
+      { timeout: 5000 }
+    );
+    
+    // Now check the title
+    const titleText = await page.textContent('[data-testid="app-title"]');
     
     console.log('Found title:', titleText);
     
@@ -23,20 +33,26 @@ test.describe('Document Title Tests', () => {
     expect(titleText).not.toBe('001.docx');
     expect(titleText).not.toBe('001');
     
-    // If it's showing pandapage, that means title extraction failed
-    if (titleText === 'pandapage') {
-      console.warn('Title extraction may have failed - showing default "pandapage"');
+    // The title should either be the sample document title or extracted from content
+    // Since 001.docx has empty metadata, it should show either "Service Agreement Template" 
+    // (from sampleDocuments) or "Heading 1" (from content extraction)
+    const acceptableTitles = ['Service Agreement Template', 'Heading 1', 'Loading...'];
+    
+    if (!acceptableTitles.includes(titleText || '')) {
+      console.warn(`Title '${titleText}' is not one of the expected values`);
     }
     
-    // The title should be something meaningful from the document
-    // For 001.docx, it should extract from content if no metadata
+    // It should definitely not be '--' or 'pandapage'
     expect(titleText).not.toBe('--');
+    expect(titleText).not.toBe('pandapage');
   });
 
   test('should show first heading as title if no metadata', async ({ page }) => {
     await page.goto('/#001.docx');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    
+    // Wait for content to load
+    await page.waitForSelector('text=Heading 1', { timeout: 10000 });
     
     // Check if "Heading 1" (the first heading in the doc) might be used as title
     const pageContent = await page.content();

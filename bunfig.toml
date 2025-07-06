@@ -1,0 +1,3 @@
+[test]
+# Exclude tmp directory and playwright spec files from unit tests
+exclude = ["tmp/**", "**/*.spec.ts"]

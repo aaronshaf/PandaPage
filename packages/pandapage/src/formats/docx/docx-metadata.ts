@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import { parseXmlString, xmlParser, type XmlParser } from "../../common/xml-parser";
+import { parseXmlString, xmlParser } from "../../common/xml-parser";
 import { debug } from "../../common/debug";
 
 /**

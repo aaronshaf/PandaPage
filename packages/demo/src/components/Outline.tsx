@@ -6,7 +6,6 @@ interface Heading {
 
 interface OutlineProps {
   showOutline: boolean;
-  setShowOutline: (show: boolean) => void;
   result: string | null;
   extractHeadings: (markdown: string) => Heading[];
   removeFrontmatter: (markdown: string) => string;
@@ -16,7 +15,6 @@ interface OutlineProps {
 
 export const Outline: React.FC<OutlineProps> = ({
   showOutline,
-  setShowOutline,
   result,
   extractHeadings,
   removeFrontmatter,

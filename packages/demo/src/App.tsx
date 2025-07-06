@@ -19,9 +19,7 @@ import {
 
 // Configure marked for better rendering
 marked.setOptions({
-  gfm: true, // GitHub Flavored Markdown
-  headerIds: false, // Don't add IDs to headers
-  mangle: false, // Don't mangle email addresses
+  gfm: true // GitHub Flavored Markdown
 });
 
 // Sample documents data
@@ -63,8 +61,15 @@ const parseUrlHash = () => {
 };
 
 const App: React.FC = () => {
-  // Document state
-  const [selectedDocument, setSelectedDocument] = useState<string>('');
+  // Document state - initialize selectedDocument with URL hash or default
+  const [selectedDocument, setSelectedDocument] = useState<string>(() => {
+    const { docId } = parseUrlHash();
+    if (docId && sampleDocuments.some(doc => doc.id === docId)) {
+      return `${getBasePath()}/${docId}`;
+    }
+    // Use first sample document as default
+    return sampleDocuments.length > 0 ? `${getBasePath()}/${sampleDocuments[0].id}` : '';
+  });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [structuredDocument, setStructuredDocument] = useState<any>(null);
@@ -108,7 +113,17 @@ const App: React.FC = () => {
       return cleanTextForTitle(structuredDocument.metadata.title);
     }
     
-    if (!result) return 'pandapage';
+    if (!result) {
+      // Fall back to sample document title if available
+      const docId = selectedDocument.split('/').pop();
+      if (docId) {
+        const sampleDoc = sampleDocuments.find(doc => doc.id === docId);
+        if (sampleDoc) {
+          return sampleDoc.title;
+        }
+      }
+      return 'Loading...';
+    }
     
     // Try to extract from frontmatter metadata
     const frontmatterMatch = result.match(/^---\n([\s\S]*?)\n---/);
@@ -174,12 +189,12 @@ const App: React.FC = () => {
     if (docId && sampleDocuments.some(doc => doc.id === docId)) {
       return `${getBasePath()}/${docId}`;
     }
-    return `${getBasePath()}/001.docx`;
+    return sampleDocuments.length > 0 ? `${getBasePath()}/${sampleDocuments[0].id}` : '';
   };
 
   // Update URL hash with current document and view mode
   const updateUrlHash = (docId?: string, mode?: 'read' | 'print') => {
-    const currentDocId = docId || (selectedDocument ? selectedDocument.split('/').pop() : '001.docx');
+    const currentDocId = docId || (selectedDocument ? selectedDocument.split('/').pop() : sampleDocuments[0]?.id || '');
     const currentMode = mode || viewMode;
     
     // Only add view mode to URL if it's not the default 'read'
@@ -483,7 +498,6 @@ const App: React.FC = () => {
         setPrintScale={setPrintScale}
         result={result}
         wordCount={wordCount}
-        processingTime={processingTime}
         documentTitle={getDocumentTitle()}
       />
 
@@ -491,7 +505,6 @@ const App: React.FC = () => {
       <div className="flex-1 flex overflow-hidden">
         <Outline
           showOutline={showOutline}
-          setShowOutline={setShowOutline}
           result={result}
           extractHeadings={extractHeadings}
           removeFrontmatter={removeFrontmatter}
@@ -532,7 +545,6 @@ const App: React.FC = () => {
               showPrimaryNav={showPrimaryNav}
               removeFrontmatter={removeFrontmatter}
               splitIntoPages={splitIntoPages}
-              countWords={countWords}
               showOutline={showOutline}
               setShowOutline={setShowOutline}
               extractHeadings={extractHeadings}

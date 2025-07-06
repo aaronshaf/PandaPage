@@ -29,7 +29,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   showPrimaryNav,
   removeFrontmatter,
   splitIntoPages,
-  countWords,
   showOutline,
   setShowOutline,
   extractHeadings
@@ -308,8 +307,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             ) : (
               // For markdown, use the existing pagination
               (() => {
-                const htmlContent = marked(removeFrontmatter(result));
-                const pages = splitIntoPages(htmlContent);
+                const htmlContent = marked.parse(removeFrontmatter(result));
+                const pages = splitIntoPages(htmlContent as string);
                 
                 // Update total pages when pages change
                 if (pages.length !== totalPages) {

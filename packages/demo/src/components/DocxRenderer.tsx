@@ -102,7 +102,7 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
     const { runs = [], fields = [] } = paragraph;
     
     // Determine paragraph style and tag
-    let Tag: keyof JSX.IntrinsicElements = 'p';
+    let Tag: keyof React.JSX.IntrinsicElements = 'p';
     let className = '';
     
     if (paragraph.style) {
@@ -130,11 +130,11 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
       className = 'mb-2';
     }
     
-    const content: JSX.Element[] = [];
+    const content: React.ReactElement[] = [];
     
     // Render runs
     runs.forEach((run, index) => {
-      let textElement: JSX.Element = <React.Fragment key={`run-${index}`}>{run.text}</React.Fragment>;
+      let textElement: React.ReactElement = <React.Fragment key={`run-${index}`}>{run.text}</React.Fragment>;
       
       if (run.bold) {
         textElement = <strong key={`run-${index}`}>{textElement}</strong>;

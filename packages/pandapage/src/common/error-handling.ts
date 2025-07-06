@@ -1,4 +1,4 @@
-import { Effect, pipe } from "effect";
+import { Effect } from "effect";
 
 /**
  * Base error interface for all PandaPage errors
@@ -88,9 +88,7 @@ export const getRecoveryStrategy = (error: CategorizedError): RecoveryStrategy =
  * Simple retry with exponential backoff
  */
 export const retryWithBackoff = <A, E>(
-  effect: Effect.Effect<A, E>,
-  maxAttempts: number = 3,
-  baseDelay: number = 1000
+  effect: Effect.Effect<A, E>
 ): Effect.Effect<A, E> => {
   // For now, just return the effect without retry logic
   // TODO: Implement proper retry logic when Effect APIs are stable
@@ -101,8 +99,7 @@ export const retryWithBackoff = <A, E>(
  * Safe effect execution with error categorization
  */
 export const safeExecute = <A>(
-  effect: Effect.Effect<A, unknown>,
-  fallback?: A
+  effect: Effect.Effect<A, unknown>
 ): Effect.Effect<A, CategorizedError> =>
   Effect.tryPromise({
     try: () => Effect.runPromise(effect),
@@ -142,6 +139,7 @@ export const safeExecute = <A>(
 /**
  * Categorize unknown errors
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const categorizeError = (error: unknown): Effect.Effect<CategorizedError, never> => {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();

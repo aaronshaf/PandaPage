@@ -5,7 +5,7 @@ interface LoadingSpinnerProps {
   startTime?: number;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ result, startTime }) => {
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ result }) => {
   const [showText, setShowText] = useState(false);
 
   useEffect(() => {

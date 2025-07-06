@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 
 interface SampleDocument {
   id: string;
@@ -22,7 +21,6 @@ interface NavigationProps {
   setPrintScale: (scale: number) => void;
   result: string | null;
   wordCount: number;
-  processingTime: number | null;
   documentTitle: string;
 }
 
@@ -43,7 +41,6 @@ export const Navigation: React.FC<NavigationProps> = ({
   setPrintScale,
   result,
   wordCount,
-  processingTime,
   documentTitle
 }) => {
   return (

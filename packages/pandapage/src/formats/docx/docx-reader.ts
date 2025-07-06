@@ -1,9 +1,7 @@
-import * as S from "@effect/schema/Schema";
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import { 
   parseFieldsFromParagraph, 
-  fieldToMarkdown,
   paragraphContainsFields,
   type DocxField 
 } from "./form-field-parser";
@@ -267,7 +265,7 @@ const parseNumberingXml = (xmlContent: string): Effect.Effect<DocxNumbering, Doc
     // Second pass: Resolve style links to actual definitions
     // Map style names to their actual abstract format IDs
     const styleToAbstractId = new Map<string, string>();
-    for (const [id, format] of abstractFormats.entries()) {
+    for (const [id] of abstractFormats.entries()) {
       // Check if this abstract has a styleLink pointing to it
       const styleLinkRegex = new RegExp(`<w:styleLink w:val="([^"]+)"[^>]*>`, 'g');
       const abstractDef = xmlContent.match(new RegExp(`<w:abstractNum w:abstractNumId="${id}"[^>]*>([\\s\\S]*?)<\\/w:abstractNum>`));

@@ -1,13 +1,11 @@
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import { parseXmlString } from "../../common/xml-parser";
-import { safeExecute, createCategorizedError } from "../../common/error-handling";
+import { safeExecute } from "../../common/error-handling";
 import { parseParagraph, parseNumbering } from "./docx-reader";
 import { parseTableEnhanced } from "./table-parser";
 import type { 
   DocxElement, 
-  DocxParagraph, 
-  DocxTable,
   DocxNumbering 
 } from "./types";
 import { DocxParseError } from "./types";
