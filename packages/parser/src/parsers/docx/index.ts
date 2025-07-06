@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer } from "../../types/document";
 
 export class DocxParseError {
   readonly _tag = "DocxParseError";
@@ -389,6 +389,58 @@ function parseMetadata(corePropsXml: string | undefined, appPropsXml: string | u
   return metadata;
 }
 
+function parseHeaderFooter(xml: string, type: 'header' | 'footer'): Header | Footer | null {
+  let doc: Document;
+  if (typeof DOMParser === 'undefined') {
+    // @ts-ignore
+    const { DOMParser: XMLDOMParser } = require('@xmldom/xmldom');
+    const parser = new XMLDOMParser();
+    doc = parser.parseFromString(xml, "text/xml");
+  } else {
+    const parser = new DOMParser();
+    doc = parser.parseFromString(xml, "text/xml");
+  }
+  
+  const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const elements: (Paragraph | Table)[] = [];
+  
+  // Get all paragraphs and tables from the header/footer
+  const body = doc.documentElement;
+  
+  // Parse all children
+  for (let i = 0; i < body.childNodes.length; i++) {
+    const child = body.childNodes[i];
+    if (child.nodeType !== 1) continue; // Skip non-element nodes
+    
+    const element = child as Element;
+    const tagName = element.tagName;
+    
+    if (tagName === "w:p") {
+      // Parse paragraph
+      const paragraph = parseParagraph(element);
+      if (paragraph) {
+        const docElement = convertToDocumentElement(paragraph);
+        if (docElement.type === 'paragraph') {
+          elements.push(docElement as Paragraph);
+        }
+      }
+    } else if (tagName === "w:tbl") {
+      // Parse table
+      const table = parseTable(element);
+      if (table) {
+        elements.push(table);
+      }
+    }
+  }
+  
+  if (elements.length === 0) return null;
+  
+  return {
+    type,
+    elements
+  } as Header | Footer;
+}
+
 export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, DocxParseError> =>
   Effect.gen(function* () {
     // Import JSZip
@@ -446,17 +498,95 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     // Extract metadata
     const metadata = parseMetadata(corePropsXml, appPropsXml);
     
+    // Parse headers and footers from relationships
+    const relsFile = zip.file("word/_rels/document.xml.rels");
+    let headers: Header[] = [];
+    let footers: Footer[] = [];
+    
+    if (relsFile) {
+      const relsXml = yield* Effect.tryPromise({
+        try: () => relsFile.async("text"),
+        catch: () => ""
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+      
+      if (relsXml) {
+        // Parse relationships to find headers and footers
+        let relsDoc: Document;
+        if (typeof DOMParser === 'undefined') {
+          const { DOMParser: XMLDOMParser } = yield* Effect.tryPromise({
+            try: () => import('@xmldom/xmldom'),
+            catch: (error) => new DocxParseError(`Failed to load XML parser: ${error}`)
+          });
+          const parser = new XMLDOMParser();
+          relsDoc = parser.parseFromString(relsXml, "text/xml") as any;
+        } else {
+          const parser = new DOMParser();
+          relsDoc = parser.parseFromString(relsXml, "text/xml");
+        }
+        
+        const relationships = relsDoc.getElementsByTagName("Relationship");
+        
+        for (let i = 0; i < relationships.length; i++) {
+          const rel = relationships[i];
+          const type = rel.getAttribute("Type");
+          const target = rel.getAttribute("Target");
+          
+          if (type && target) {
+            if (type.includes("header")) {
+              // Parse header
+              const headerFile = zip.file(`word/${target}`);
+              if (headerFile) {
+                const headerXml = yield* Effect.tryPromise({
+                  try: () => headerFile.async("text"),
+                  catch: () => ""
+                }).pipe(Effect.orElse(() => Effect.succeed("")));
+                
+                if (headerXml) {
+                  const header = parseHeaderFooter(headerXml, 'header');
+                  if (header && header.type === 'header') {
+                    headers.push(header);
+                  }
+                }
+              }
+            } else if (type.includes("footer")) {
+              // Parse footer
+              const footerFile = zip.file(`word/${target}`);
+              if (footerFile) {
+                const footerXml = yield* Effect.tryPromise({
+                  try: () => footerFile.async("text"),
+                  catch: () => ""
+                }).pipe(Effect.orElse(() => Effect.succeed("")));
+                
+                if (footerXml) {
+                  const footer = parseHeaderFooter(footerXml, 'footer');
+                  if (footer && footer.type === 'footer') {
+                    footers.push(footer);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
     // Parse all document body elements in order
     const elements: DocumentElement[] = [];
+    
+    // Add headers first
+    elements.push(...headers);
+    
     const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     
     // Get the document body
-    const bodyElements = doc.getElementsByTagNameNS(ns, "body");
-    if (bodyElements.length === 0) {
+    const bodyNodeList = doc.getElementsByTagNameNS(ns, "body");
+    if (bodyNodeList.length === 0) {
+      // Add footers at the end and return
+      elements.push(...footers);
       return { metadata, elements };
     }
     
-    const body = bodyElements[0];
+    const body = bodyNodeList[0];
     
     // Parse all direct children of the body in order
     for (let i = 0; i < body.childNodes.length; i++) {
@@ -487,6 +617,9 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       // Note: Images are typically inside paragraphs as w:drawing elements
       // We'll handle them in the paragraph parsing
     }
+    
+    // Add footers at the end
+    elements.push(...footers);
     
     return {
       metadata,

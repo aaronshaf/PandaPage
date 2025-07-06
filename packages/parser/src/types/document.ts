@@ -14,6 +14,8 @@ export interface TextRun {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  superscript?: boolean;
+  subscript?: boolean;
   fontSize?: number;
   fontFamily?: string;
   color?: string;
@@ -71,7 +73,17 @@ export interface PageBreak {
   type: 'pageBreak';
 }
 
-export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak;
+export interface Header {
+  type: 'header';
+  elements: (Paragraph | Table)[];
+}
+
+export interface Footer {
+  type: 'footer';
+  elements: (Paragraph | Table)[];
+}
+
+export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer;
 
 export interface ParsedDocument {
   metadata: DocumentMetadata;

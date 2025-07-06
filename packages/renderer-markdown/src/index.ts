@@ -21,6 +21,8 @@ function renderTextRun(run: TextRun): string {
   if (run.italic) text = `*${text}*`;
   if (run.underline) text = `<u>${text}</u>`;
   if (run.strikethrough) text = `~~${text}~~`;
+  if (run.superscript) text = `<sup>${text}</sup>`;
+  if (run.subscript) text = `<sub>${text}</sub>`;
   
   // Apply link
   if (run.link) {
@@ -69,6 +71,34 @@ function renderTable(table: Table): string {
   return lines.join('\n');
 }
 
+function renderHeader(header: DocumentElement): string {
+  if (header.type !== 'header') return '';
+  const elements = header.elements.map(el => {
+    if (el.type === 'paragraph') {
+      return renderParagraph(el);
+    } else if (el.type === 'table') {
+      return renderTable(el);
+    }
+    return '';
+  }).filter(Boolean);
+  
+  return `<!-- HEADER -->\n${elements.join('\n\n')}\n<!-- /HEADER -->`;
+}
+
+function renderFooter(footer: DocumentElement): string {
+  if (footer.type !== 'footer') return '';
+  const elements = footer.elements.map(el => {
+    if (el.type === 'paragraph') {
+      return renderParagraph(el);
+    } else if (el.type === 'table') {
+      return renderTable(el);
+    }
+    return '';
+  }).filter(Boolean);
+  
+  return `<!-- FOOTER -->\n${elements.join('\n\n')}\n<!-- /FOOTER -->`;
+}
+
 function renderElement(element: DocumentElement): string {
   switch (element.type) {
     case 'paragraph':
@@ -77,6 +107,10 @@ function renderElement(element: DocumentElement): string {
       return renderHeading(element);
     case 'table':
       return renderTable(element);
+    case 'header':
+      return renderHeader(element);
+    case 'footer':
+      return renderFooter(element);
     case 'image':
       return `![${element.alt || 'Image'}](data:${element.mimeType};base64,${btoa(String.fromCharCode(...new Uint8Array(element.data)))})`;
     case 'pageBreak':

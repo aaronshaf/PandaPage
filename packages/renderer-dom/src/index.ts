@@ -49,9 +49,10 @@ function renderTextRun(run: TextRun): string {
   
   // Handle superscript and subscript properly by wrapping the content first
   if (run.superscript) {
-    // If we have a link, build the proper structure
+    // If we have a link, build the proper structure with security attributes
     if (run.link) {
-      return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}><sup>${content}</sup></a>`;
+      const secureAttrs = 'target="_blank" rel="noopener noreferrer" onclick="return confirmDocumentLink(this.href)"';
+      return `<a href="${escapeHtml(run.link)}" ${secureAttrs}${classAttr}${styleAttr}><sup>${content}</sup></a>`;
     }
     // If we have classes or styles, wrap in a span with sup inside
     if (classAttr || styleAttr) {
@@ -59,9 +60,10 @@ function renderTextRun(run: TextRun): string {
     }
     return `<sup>${content}</sup>`;
   } else if (run.subscript) {
-    // If we have a link, build the proper structure
+    // If we have a link, build the proper structure with security attributes
     if (run.link) {
-      return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}><sub>${content}</sub></a>`;
+      const secureAttrs = 'target="_blank" rel="noopener noreferrer" onclick="return confirmDocumentLink(this.href)"';
+      return `<a href="${escapeHtml(run.link)}" ${secureAttrs}${classAttr}${styleAttr}><sub>${content}</sub></a>`;
     }
     // If we have classes or styles, wrap in a span with sub inside
     if (classAttr || styleAttr) {
@@ -70,9 +72,10 @@ function renderTextRun(run: TextRun): string {
     return `<sub>${content}</sub>`;
   }
   
-  // If we have a link, wrap everything in an anchor tag
+  // If we have a link, wrap everything in an anchor tag with security attributes
   if (run.link) {
-    return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}>${content}</a>`;
+    const secureAttrs = 'target="_blank" rel="noopener noreferrer" onclick="return confirmDocumentLink(this.href)"';
+    return `<a href="${escapeHtml(run.link)}" ${secureAttrs}${classAttr}${styleAttr}>${content}</a>`;
   }
   
   // If we have classes or styles, wrap in a span
@@ -194,6 +197,34 @@ function renderTable(table: Table): string {
   return `<table class="border-collapse mb-4">${rows.join('')}</table>`;
 }
 
+function renderHeader(header: DocumentElement): string {
+  if (header.type !== 'header') return '';
+  const elements = header.elements.map(el => {
+    if (el.type === 'paragraph') {
+      return renderParagraph(el);
+    } else if (el.type === 'table') {
+      return renderTable(el);
+    }
+    return '';
+  }).filter(Boolean);
+  
+  return `<header class="header mb-4 pb-2 border-b border-gray-300">${elements.join('\n')}</header>`;
+}
+
+function renderFooter(footer: DocumentElement): string {
+  if (footer.type !== 'footer') return '';
+  const elements = footer.elements.map(el => {
+    if (el.type === 'paragraph') {
+      return renderParagraph(el);
+    } else if (el.type === 'table') {
+      return renderTable(el);
+    }
+    return '';
+  }).filter(Boolean);
+  
+  return `<footer class="footer mt-4 pt-2 border-t border-gray-300">${elements.join('\n')}</footer>`;
+}
+
 function renderElement(element: DocumentElement): string {
   switch (element.type) {
     case 'paragraph':
@@ -202,6 +233,10 @@ function renderElement(element: DocumentElement): string {
       return renderHeading(element);
     case 'table':
       return renderTable(element);
+    case 'header':
+      return renderHeader(element);
+    case 'footer':
+      return renderFooter(element);
     case 'image':
       const imgData = btoa(String.fromCharCode(...new Uint8Array(element.data)));
       return `<img src="data:${element.mimeType};base64,${imgData}" alt="${escapeHtml(element.alt || '')}" class="max-w-full h-auto mb-4" />`;
@@ -234,6 +269,14 @@ export function renderToHtml(document: ParsedDocument, options: HtmlRenderOption
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   ${document.metadata.title ? `<title>${escapeHtml(document.metadata.title)}</title>` : ''}
+  <script>
+    function confirmDocumentLink(url) {
+      const message = 'This document contains a link to an external website:\\n\\n' + url + 
+        '\\n\\nClicking this link will open a new window and navigate to the external site.' +
+        '\\n\\n⚠️ Security Warning: Only click if you trust this link and source.\\n\\nContinue?';
+      return confirm(message);
+    }
+  </script>
   <style>
     @page {
       size: ${pageSize};
@@ -275,9 +318,15 @@ export function renderToHtml(document: ParsedDocument, options: HtmlRenderOption
     .h-auto { height: auto; }
     
     .border { border: 1px solid #e5e7eb; }
+    .border-b { border-bottom: 1px solid; }
+    .border-t { border-top: 1px solid; }
+    .border-gray-300 { border-color: #d1d5db; }
     .border-collapse { border-collapse: collapse; }
     .px-4 { padding-left: 1rem; padding-right: 1rem; }
     .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .pt-2 { padding-top: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
     
     @media print {
       .page-break { page-break-after: always; }
