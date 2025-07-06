@@ -20,9 +20,8 @@ jobs:
     - name: Install dependencies
       run: bun install
     
-    - name: Build packages
+    - name: Build all packages
       run: bun run build
-      working-directory: packages/pandapage
     
     - name: Run unit tests (deterministic only)
       run: bun run test:ci
@@ -52,9 +51,8 @@ jobs:
     - name: Install dependencies
       run: bun install
     
-    - name: Build packages
+    - name: Build all packages
       run: bun run build
-      working-directory: packages/pandapage
     
     - name: Run unit tests (deterministic only)
       run: bun run test:ci
