@@ -130,7 +130,46 @@ test("renderToHtml handles links", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('Visit <a href="https://example.com">example.com</a> for more');
+  expect(result).toContain('Visit <a href="https://example.com"');
+  expect(result).toContain('target="_blank"');
+  expect(result).toContain('>example.com</a> for more');
+});
+
+test("renderToHtml adds security attributes to links", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "example.com", link: "https://example.com" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('target="_blank"');
+  expect(result).toContain('rel="noopener noreferrer"');
+  expect(result).toContain('onclick="return confirmDocumentLink(this.href)"');
+});
+
+test("renderToHtml includes security script in full document", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "example.com", link: "https://example.com" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc, { includeStyles: true });
+  expect(result).toContain('function confirmDocumentLink(url)');
+  expect(result).toContain('Security Warning');
 });
 
 test("renderToHtml handles formatted links", () => {
@@ -147,7 +186,10 @@ test("renderToHtml handles formatted links", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<a href="https://example.com" class="font-bold">bold link</a>');
+  expect(result).toContain('<a href="https://example.com"');
+  expect(result).toContain('class="font-bold"');
+  expect(result).toContain('target="_blank"');
+  expect(result).toContain('>bold link</a>');
 });
 
 test("renderToHtml handles font styling", () => {
@@ -543,7 +585,10 @@ test("renderToHtml handles superscript with links", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<a href="https://example.com" class="font-bold"><sup>ref</sup></a>');
+  expect(result).toContain('<a href="https://example.com"');
+  expect(result).toContain('target="_blank"');
+  expect(result).toContain('class="font-bold"');
+  expect(result).toContain('><sup>ref</sup></a>');
 });
 
 test("renderToHtml handles subscript with links", () => {
@@ -560,7 +605,9 @@ test("renderToHtml handles subscript with links", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<a href="https://example.com"><sub>note</sub></a>');
+  expect(result).toContain('<a href="https://example.com"');
+  expect(result).toContain('target="_blank"');
+  expect(result).toContain('><sub>note</sub></a>');
 });
 
 test("renderToHtml handles background colors", () => {

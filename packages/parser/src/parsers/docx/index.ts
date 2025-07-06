@@ -29,7 +29,7 @@ interface DocxParagraph {
   alignment?: 'left' | 'center' | 'right' | 'justify';
 }
 
-function parseParagraph(paragraphElement: Element): DocxParagraph | null {
+function parseParagraph(paragraphElement: Element, relationships?: Map<string, string>): DocxParagraph | null {
   const runs: DocxRun[] = [];
   const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
   
@@ -87,8 +87,10 @@ function parseParagraph(paragraphElement: Element): DocxParagraph | null {
       const rId = element.getAttribute("r:id");
       let linkUrl: string | undefined;
       
-      // Note: We would need to resolve the rId to get the actual URL
-      // For now, we'll mark it as a link and extract the text
+      // Resolve rId to actual URL using relationships
+      if (rId && relationships) {
+        linkUrl = relationships.get(rId);
+      }
       
       const hyperlinkRuns = element.getElementsByTagNameNS(ns, "r");
       for (let j = 0; j < hyperlinkRuns.length; j++) {
@@ -253,7 +255,7 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
   return element;
 }
 
-function parseTable(tableElement: Element): Table | null {
+function parseTable(tableElement: Element, relationships?: Map<string, string>): Table | null {
   const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
   const rows: TableRow[] = [];
   
@@ -276,7 +278,7 @@ function parseTable(tableElement: Element): Table | null {
       
       for (let k = 0; k < cellParagraphs.length; k++) {
         const pElement = cellParagraphs[k];
-        const paragraph = parseParagraph(pElement);
+        const paragraph = parseParagraph(pElement, relationships);
         if (paragraph) {
           // Convert to Paragraph type (without list info for table cells)
           const cellParagraph: Paragraph = {
@@ -389,7 +391,7 @@ function parseMetadata(corePropsXml: string | undefined, appPropsXml: string | u
   return metadata;
 }
 
-function parseHeaderFooter(xml: string, type: 'header' | 'footer'): Header | Footer | null {
+function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships?: Map<string, string>): Header | Footer | null {
   let doc: Document;
   if (typeof DOMParser === 'undefined') {
     // @ts-ignore
@@ -416,8 +418,8 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer'): Header | Foo
     const tagName = element.tagName;
     
     if (tagName === "w:p") {
-      // Parse paragraph
-      const paragraph = parseParagraph(element);
+      // Parse paragraph with relationships for hyperlink resolution
+      const paragraph = parseParagraph(element, relationships);
       if (paragraph) {
         const docElement = convertToDocumentElement(paragraph);
         if (docElement.type === 'paragraph') {
@@ -425,8 +427,8 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer'): Header | Foo
         }
       }
     } else if (tagName === "w:tbl") {
-      // Parse table
-      const table = parseTable(element);
+      // Parse table with relationships for hyperlink resolution
+      const table = parseTable(element, relationships);
       if (table) {
         elements.push(table);
       }
@@ -565,10 +567,11 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     // Extract metadata
     const metadata = parseMetadata(corePropsXml, appPropsXml);
     
-    // Parse headers and footers from relationships
+    // Parse relationships for headers, footers, and hyperlinks
     const relsFile = zip.file("word/_rels/document.xml.rels");
     let headers: Header[] = [];
     let footers: Footer[] = [];
+    let relationshipsMap = new Map<string, string>();
     
     if (relsFile) {
       const relsXml = yield* Effect.tryPromise({
@@ -577,7 +580,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }).pipe(Effect.orElse(() => Effect.succeed("")));
       
       if (relsXml) {
-        // Parse relationships to find headers and footers
+        // Parse relationships document
         let relsDoc: Document;
         if (typeof DOMParser === 'undefined') {
           const { DOMParser: XMLDOMParser } = yield* Effect.tryPromise({
@@ -593,12 +596,17 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         
         const relationships = relsDoc.getElementsByTagName("Relationship");
         
+        // Build relationships map for hyperlinks and process headers/footers
         for (let i = 0; i < relationships.length; i++) {
           const rel = relationships[i];
+          const id = rel.getAttribute("Id");
           const type = rel.getAttribute("Type");
           const target = rel.getAttribute("Target");
           
-          if (type && target) {
+          if (id && type && target) {
+            // Store all relationships for potential hyperlink resolution
+            relationshipsMap.set(id, target);
+            
             if (type.includes("header")) {
               // Parse header
               const headerFile = zip.file(`word/${target}`);
@@ -609,7 +617,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
                 }).pipe(Effect.orElse(() => Effect.succeed("")));
                 
                 if (headerXml) {
-                  const header = parseHeaderFooter(headerXml, 'header');
+                  const header = parseHeaderFooter(headerXml, 'header', relationshipsMap);
                   if (header && header.type === 'header') {
                     headers.push(header);
                   }
@@ -625,7 +633,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
                 }).pipe(Effect.orElse(() => Effect.succeed("")));
                 
                 if (footerXml) {
-                  const footer = parseHeaderFooter(footerXml, 'footer');
+                  const footer = parseHeaderFooter(footerXml, 'footer', relationshipsMap);
                   if (footer && footer.type === 'footer') {
                     footers.push(footer);
                   }
@@ -668,15 +676,15 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       const tagName = element.tagName;
       
       if (tagName === "w:p") {
-        // Parse paragraph
-        const paragraph = parseParagraph(element);
+        // Parse paragraph with relationships for hyperlink resolution
+        const paragraph = parseParagraph(element, relationshipsMap);
         if (paragraph) {
           const docElement = convertToDocumentElement(paragraph);
           elements.push(docElement);
         }
       } else if (tagName === "w:tbl") {
-        // Parse table
-        const table = parseTable(element);
+        // Parse table with relationships for hyperlink resolution
+        const table = parseTable(element, relationshipsMap);
         if (table) {
           elements.push(table);
         }
