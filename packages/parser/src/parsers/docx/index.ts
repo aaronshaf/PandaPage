@@ -26,38 +26,61 @@ interface DocxParagraph {
 
 function parseParagraph(paragraphElement: Element): DocxParagraph | null {
   const runs: DocxRun[] = [];
+  const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
   
   // Get paragraph style
-  const styleElement = paragraphElement.querySelector("pStyle");
-  const style = styleElement?.getAttribute("val") || undefined;
+  const pPrElement = paragraphElement.getElementsByTagNameNS(ns, "pPr")[0];
+  let style: string | undefined;
+  let numId: string | undefined;
+  let ilvl: number | undefined;
   
-  // Get numbering info
-  const numPrElement = paragraphElement.querySelector("numPr");
-  const numId = numPrElement?.querySelector("numId")?.getAttribute("val") || undefined;
-  const ilvlStr = numPrElement?.querySelector("ilvl")?.getAttribute("val");
-  const ilvl = ilvlStr ? parseInt(ilvlStr, 10) : undefined;
+  if (pPrElement) {
+    const styleElement = pPrElement.getElementsByTagNameNS(ns, "pStyle")[0];
+    style = styleElement?.getAttribute("w:val") || undefined;
+    
+    // Get numbering info
+    const numPrElement = pPrElement.getElementsByTagNameNS(ns, "numPr")[0];
+    if (numPrElement) {
+      const numIdElement = numPrElement.getElementsByTagNameNS(ns, "numId")[0];
+      numId = numIdElement?.getAttribute("w:val") || undefined;
+      const ilvlElement = numPrElement.getElementsByTagNameNS(ns, "ilvl")[0];
+      const ilvlStr = ilvlElement?.getAttribute("w:val");
+      ilvl = ilvlStr ? parseInt(ilvlStr, 10) : undefined;
+    }
+  }
   
   // Parse runs
-  const runElements = paragraphElement.querySelectorAll("r");
-  runElements.forEach(runElement => {
-    const textElement = runElement.querySelector("t");
+  const runElements = paragraphElement.getElementsByTagNameNS(ns, "r");
+  for (let i = 0; i < runElements.length; i++) {
+    const runElement = runElements[i];
+    const textElement = runElement.getElementsByTagNameNS(ns, "t")[0];
     const text = textElement?.textContent || "";
     
     // Get run properties
-    const runProps = runElement.querySelector("rPr");
-    const bold = runProps?.querySelector("b") !== null;
-    const italic = runProps?.querySelector("i") !== null;
-    const underline = runProps?.querySelector("u") !== null;
-    const strikethrough = runProps?.querySelector("strike") !== null;
+    const runProps = runElement.getElementsByTagNameNS(ns, "rPr")[0];
+    let bold = false;
+    let italic = false;
+    let underline = false;
+    let strikethrough = false;
+    let fontSize: string | undefined;
+    let fontFamily: string | undefined;
+    let color: string | undefined;
     
-    const szElement = runProps?.querySelector("sz");
-    const fontSize = szElement?.getAttribute("val") || undefined;
-    
-    const fontElement = runProps?.querySelector("rFonts");
-    const fontFamily = fontElement?.getAttribute("ascii") || undefined;
-    
-    const colorElement = runProps?.querySelector("color");
-    const color = colorElement?.getAttribute("val") || undefined;
+    if (runProps) {
+      bold = runProps.getElementsByTagNameNS(ns, "b").length > 0;
+      italic = runProps.getElementsByTagNameNS(ns, "i").length > 0;
+      underline = runProps.getElementsByTagNameNS(ns, "u").length > 0;
+      strikethrough = runProps.getElementsByTagNameNS(ns, "strike").length > 0;
+      
+      const szElement = runProps.getElementsByTagNameNS(ns, "sz")[0];
+      fontSize = szElement?.getAttribute("w:val") || undefined;
+      
+      const fontElement = runProps.getElementsByTagNameNS(ns, "rFonts")[0];
+      fontFamily = fontElement?.getAttribute("w:ascii") || undefined;
+      
+      const colorElement = runProps.getElementsByTagNameNS(ns, "color")[0];
+      color = colorElement?.getAttribute("w:val") || undefined;
+    }
     
     if (text) {
       runs.push({
@@ -71,7 +94,7 @@ function parseParagraph(paragraphElement: Element): DocxParagraph | null {
         color
       });
     }
-  });
+  }
   
   return runs.length > 0 ? { runs, style, numId, ilvl } : null;
 }
@@ -120,7 +143,7 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
   if (paragraph.numId && paragraph.ilvl !== undefined) {
     element.listInfo = {
       level: paragraph.ilvl,
-      type: 'bullet' // TODO: Determine from numbering.xml
+      type: 'number' // TODO: Determine from numbering.xml
     };
   }
   
@@ -142,25 +165,30 @@ function parseMetadata(corePropsXml: string | undefined, appPropsXml: string | u
       doc = parser.parseFromString(corePropsXml, "text/xml");
     }
     
-    const title = doc.querySelector("title")?.textContent;
+    // Dublin Core namespace
+    const dcNs = "http://purl.org/dc/elements/1.1/";
+    const cpNs = "http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
+    const dctermsNs = "http://purl.org/dc/terms/";
+    
+    const title = doc.getElementsByTagNameNS(dcNs, "title")[0]?.textContent;
     if (title) metadata.title = title;
     
-    const creator = doc.querySelector("creator")?.textContent;
+    const creator = doc.getElementsByTagNameNS(dcNs, "creator")[0]?.textContent;
     if (creator) metadata.author = creator;
     
-    const created = doc.querySelector("created")?.textContent;
+    const created = doc.getElementsByTagNameNS(dctermsNs, "created")[0]?.textContent;
     if (created) metadata.createdDate = new Date(created);
     
-    const modified = doc.querySelector("modified")?.textContent;
+    const modified = doc.getElementsByTagNameNS(dctermsNs, "modified")[0]?.textContent;
     if (modified) metadata.modifiedDate = new Date(modified);
     
-    const keywords = doc.querySelector("keywords")?.textContent;
+    const keywords = doc.getElementsByTagNameNS(cpNs, "keywords")[0]?.textContent;
     if (keywords) metadata.keywords = keywords.split(',').map(k => k.trim());
     
-    const description = doc.querySelector("description")?.textContent;
+    const description = doc.getElementsByTagNameNS(dcNs, "description")[0]?.textContent;
     if (description) metadata.description = description;
     
-    const language = doc.querySelector("language")?.textContent;
+    const language = doc.getElementsByTagNameNS(dcNs, "language")[0]?.textContent;
     if (language) metadata.language = language;
   }
   
@@ -226,15 +254,16 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     
     // Parse paragraphs
     const elements: DocumentElement[] = [];
-    const paragraphElements = doc.querySelectorAll("p");
+    const paragraphElements = doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "p");
     
-    paragraphElements.forEach(pElement => {
+    for (let i = 0; i < paragraphElements.length; i++) {
+      const pElement = paragraphElements[i];
       const paragraph = parseParagraph(pElement);
       if (paragraph) {
         const element = convertToDocumentElement(paragraph);
         elements.push(element);
       }
-    });
+    }
     
     return {
       metadata,
