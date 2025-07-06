@@ -1,12 +1,10 @@
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
-import { parseXmlString } from "../../common/xml-parser";
 import { parseParagraph } from "./docx-reader";
 import { 
   validateTableProperties,
   validateTableRowProperties,
-  validateTableCellProperties,
-  parseWithDefaults
+  validateTableCellProperties
 } from "./validation";
 import type { 
   DocxTable, 
@@ -15,8 +13,7 @@ import type {
   DocxTableProperties, 
   DocxTableRowProperties, 
   DocxTableCellProperties,
-  DocxParagraph,
-  DocxNumbering
+  DocxParagraph
 } from "./types";
 import { DocxParseError } from "./types";
 

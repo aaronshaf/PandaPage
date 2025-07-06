@@ -14,7 +14,6 @@ import {
   type DocxMetadata,
   type DocxElement,
   type DocxTable,
-  type DocxTableRow,
   type DocxTableCell,
   readEnhancedDocx,
 } from "./docx-reader-enhanced";
@@ -22,7 +21,6 @@ import {
 // Convert DOCX document to Markdown
 export const convertDocxToMarkdown = (document: DocxDocument): string => {
   const lines: string[] = [];
-  let lastWasHeading = false;
   const listCounters = new Map<string, number>(); // Track counters for numbered lists
 
   for (const paragraph of document.paragraphs) {

@@ -1,6 +1,4 @@
-import { BrowserWorker } from "@effect/platform-browser";
-import * as S from "@effect/schema/Schema";
-import { Effect, Pool, Queue, Scope } from "effect";
+import { Effect } from "effect";
 import { debug } from "../common/debug";
 
 // Worker task types
@@ -51,15 +49,6 @@ export const createWorkerPool = (
   Effect.gen(function* () {
     // For now, return a simple implementation without actual pooling
     // TODO: Implement proper worker pooling when Effect Pool API is available
-    const createWorker = () => ({
-      id: Math.random().toString(36),
-      execute: (task: WorkerTask) =>
-        Effect.succeed({
-          id: task.id,
-          type: "complete" as const,
-          data: { parsed: true },
-        }),
-    });
 
     // Execute a task in the pool
     const executeTask = <T>(task: WorkerTask): Effect.Effect<T, Error> =>

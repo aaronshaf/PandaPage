@@ -1,6 +1,5 @@
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
-import type { DocxRun } from "./types";
 import { DocxParseError } from "./types";
 
 /**

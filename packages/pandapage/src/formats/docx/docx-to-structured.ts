@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { readEnhancedDocx } from "./reader-enhanced";
 import { convertTableToMarkdown } from "./docx-to-markdown";
-import type { EnhancedDocxDocument, DocxElement } from "./types";
+import type { EnhancedDocxDocument } from "./types";
 import { DocxParseError } from "./types";
 
 export interface StructuredDocxResult {

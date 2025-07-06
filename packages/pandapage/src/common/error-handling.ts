@@ -136,37 +136,3 @@ export const safeExecute = <A>(
     }
   });
 
-/**
- * Categorize unknown errors
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const categorizeError = (error: unknown): Effect.Effect<CategorizedError, never> => {
-  if (error instanceof Error) {
-    const message = error.message.toLowerCase();
-    
-    if (message.includes("network") || message.includes("fetch")) {
-      return createCategorizedError("NetworkError", error.message, "network", { recoverable: true });
-    }
-    
-    if (message.includes("timeout")) {
-      return createCategorizedError("TimeoutError", error.message, "timeout", { recoverable: true });
-    }
-    
-    if (message.includes("memory") || message.includes("allocation")) {
-      return createCategorizedError("MemoryError", error.message, "memory", { recoverable: true });
-    }
-    
-    if (message.includes("parse") || message.includes("invalid")) {
-      return createCategorizedError("ParseError", error.message, "parsing", { recoverable: false });
-    }
-    
-    return createCategorizedError("UnknownError", error.message, "unknown", { recoverable: false });
-  }
-  
-  return createCategorizedError(
-    "UnknownError", 
-    typeof error === "string" ? error : "Unknown error occurred", 
-    "unknown", 
-    { recoverable: false }
-  );
-};

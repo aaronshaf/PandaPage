@@ -1,4 +1,4 @@
-import { Chunk, Effect, Stream } from "effect";
+import { Effect, Stream } from "effect";
 import { debug } from "../common/debug";
 import type { WorkerResult, WorkerTask } from "./worker-pool";
 import { createTransferableTask, shouldUseWorker } from "./worker-pool";

@@ -224,8 +224,7 @@ export const extractDocumentOutline = (
  * Analyze document for style usage statistics
  */
 export const analyzeStyleUsage = (
-  documentXml: string,
-  stylesXml?: string
+  documentXml: string
 ): Effect.Effect<DocxStyleUsage[], DocxMetadataError> =>
   Effect.gen(function* () {
     debug.log("Analyzing style usage");

@@ -1,5 +1,5 @@
 // Import types for use in this file
-import type { DocxParagraph, DocxRun, DocxNumbering, DocxAbstractFormat, DocxLevelFormat } from "./docx-reader";
+import type { DocxParagraph, DocxNumbering } from "./docx-reader";
 import type { DocxMetadata } from "./docx-metadata";
 
 // Re-export existing types
