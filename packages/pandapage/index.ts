@@ -130,30 +130,23 @@ export {
 // Re-export other utilities
 export { debug } from "./src/common/debug";
 
-// Re-export parser functionality
-export {
-  parseDocument,
-  parseDocxDocument,
-  type ParsedDocument,
-  type DocumentElement,
-  type Paragraph,
-  type Heading,
-  type Table,
-  type TextRun,
-  type DocumentMetadata,
-  type ParseOptions as ParserOptions
+// Export wrapper functions for bundling compatibility
+export { parseDocxDocument, renderToMarkdown, renderToHtml } from "./src/wrappers";
+
+// Re-export types
+export type {
+  ParsedDocument,
+  DocumentElement,
+  Paragraph,
+  Heading,
+  Table,
+  TextRun,
+  DocumentMetadata,
+  ParseOptions as ParserOptions
 } from "@pandapage/parser";
 
-// Re-export renderers
-export {
-  renderToMarkdown,
-  type MarkdownRenderOptions
-} from "@pandapage/renderer-markdown";
-
-export {
-  renderToHtml,
-  type HtmlRenderOptions
-} from "@pandapage/renderer-dom";
+export type { MarkdownRenderOptions } from "@pandapage/renderer-markdown";
+export type { HtmlRenderOptions } from "@pandapage/renderer-dom";
 
 // Worker support
 export {
