@@ -48,6 +48,21 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
       
       // Parse elements using enhanced parser
       const elements = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      
+      // Parse metadata from core.xml if available
+      const { parseCoreProperties } = await import("./docx-metadata");
+      let parsedMetadata: any = {};
+      
+      try {
+        const coreXml = unzipped["docProps/core.xml"];
+        if (coreXml) {
+          const coreContent = strFromU8(coreXml);
+          const coreProps = await Effect.runPromise(parseCoreProperties(coreContent));
+          parsedMetadata = { ...parsedMetadata, ...coreProps };
+        }
+      } catch (e) {
+        debug.log("Failed to parse metadata:", e);
+      }
 
       const processingTime = Date.now() - startTime;
       debug.log(`Enhanced DOCX parsing completed in ${processingTime}ms`);
@@ -55,6 +70,7 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
       return {
         elements,
         metadata: {
+          ...parsedMetadata,
           extractedAt: new Date(),
           originalFormat: "docx" as const
         },

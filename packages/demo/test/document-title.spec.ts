@@ -27,6 +27,10 @@ test.describe('Document Title Tests', () => {
     if (titleText === 'pandapage') {
       console.warn('Title extraction may have failed - showing default "pandapage"');
     }
+    
+    // The title should be something meaningful from the document
+    // For 001.docx, it should extract from content if no metadata
+    expect(titleText).not.toBe('--');
   });
 
   test('should show first heading as title if no metadata', async ({ page }) => {
