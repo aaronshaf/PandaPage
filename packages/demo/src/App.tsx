@@ -654,6 +654,7 @@ const App: React.FC = () => {
             <DocumentViewer
               result={result}
               structuredDocument={structuredDocument}
+              parsedDocument={parsedDocument}
               loading={loading}
               showSpinner={showSpinner}
               viewMode={viewMode}

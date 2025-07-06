@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { DocxRenderer } from './DocxRenderer';
-import type { EnhancedDocxDocument } from '@pandapage/pandapage';
+import { renderToHtml } from '@pandapage/renderer-dom';
+import type { EnhancedDocxDocument, ParsedDocument } from '@pandapage/pandapage';
 
 interface DocumentViewerProps {
   result: string | null;
   structuredDocument?: EnhancedDocxDocument | null;
+  parsedDocument?: ParsedDocument | null;
   loading: boolean;
   showSpinner: boolean;
   viewMode: 'read' | 'print';
@@ -22,6 +24,7 @@ interface DocumentViewerProps {
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   result,
   structuredDocument,
+  parsedDocument,
   loading,
   showSpinner,
   viewMode,
@@ -294,8 +297,19 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               '--print-scale': printScale,
             } as React.CSSProperties & { '--print-scale': number }}
           >
-            {structuredDocument?.elements ? (
-              // For structured documents, render directly
+            {parsedDocument ? (
+              // For new parser documents, use DOM renderer (preferred for print layout)
+              <div className="print-page" data-testid="print-page-1" data-page={1}>
+                <div data-testid="print-content-1" className="print-content">
+                  <div 
+                    dangerouslySetInnerHTML={{ 
+                      __html: renderToHtml(parsedDocument, { includeStyles: false })
+                    }}
+                  />
+                </div>
+              </div>
+            ) : structuredDocument?.elements ? (
+              // Fallback to structured documents
               <div className="print-page" data-testid="print-page-1" data-page={1}>
                 <div data-testid="print-content-1" className="print-content">
                   <DocxRenderer 

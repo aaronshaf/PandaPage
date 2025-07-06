@@ -22,6 +22,7 @@ interface DocxParagraph {
   style?: string;
   numId?: string;
   ilvl?: number;
+  alignment?: string;
 }
 
 function parseParagraph(paragraphElement: Element): DocxParagraph | null {
@@ -33,10 +34,23 @@ function parseParagraph(paragraphElement: Element): DocxParagraph | null {
   let style: string | undefined;
   let numId: string | undefined;
   let ilvl: number | undefined;
+  let alignment: string | undefined;
   
   if (pPrElement) {
     const styleElement = pPrElement.getElementsByTagNameNS(ns, "pStyle")[0];
     style = styleElement?.getAttribute("w:val") || undefined;
+    
+    // Get alignment
+    const jcElement = pPrElement.getElementsByTagNameNS(ns, "jc")[0];
+    const jcVal = jcElement?.getAttribute("w:val");
+    if (jcVal) {
+      switch (jcVal) {
+        case 'center': alignment = 'center'; break;
+        case 'right': alignment = 'right'; break;
+        case 'both': case 'justify': alignment = 'justify'; break;
+        case 'left': default: alignment = 'left'; break;
+      }
+    }
     
     // Get numbering info
     const numPrElement = pPrElement.getElementsByTagNameNS(ns, "numPr")[0];
@@ -96,7 +110,7 @@ function parseParagraph(paragraphElement: Element): DocxParagraph | null {
     }
   }
   
-  return runs.length > 0 ? { runs, style, numId, ilvl } : null;
+  return runs.length > 0 ? { runs, style, numId, ilvl, alignment } : null;
 }
 
 function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
@@ -127,7 +141,8 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
       return {
         type: 'heading',
         level,
-        runs
+        runs,
+        alignment: paragraph.alignment
       };
     }
   }
@@ -136,7 +151,8 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
   const element: Paragraph = {
     type: 'paragraph',
     runs,
-    style: paragraph.style
+    style: paragraph.style,
+    alignment: paragraph.alignment
   };
   
   // Add list info if present
