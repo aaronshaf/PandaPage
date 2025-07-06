@@ -457,6 +457,175 @@ test("renderToHtml handles fragment output", () => {
   expect(result).toContain('<p class="mb-4">Content</p>');
 });
 
+test("renderToHtml handles superscript formatting", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "E=mc" },
+          { text: "2", superscript: true },
+          { text: " is Einstein's equation" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('E=mc<sup>2</sup> is Einstein&#039;s equation');
+});
+
+test("renderToHtml handles subscript formatting", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "H" },
+          { text: "2", subscript: true },
+          { text: "O is water" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('H<sub>2</sub>O is water');
+});
+
+test("renderToHtml handles formatted superscript", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "x", superscript: true, bold: true, color: "#FF0000" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('<span class="font-bold" style="color: #FF0000"><sup>x</sup></span>');
+});
+
+test("renderToHtml handles formatted subscript", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "n", subscript: true, italic: true, backgroundColor: "#FFFF00" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('<span class="italic" style="background-color: #FFFF00"><sub>n</sub></span>');
+});
+
+test("renderToHtml handles superscript with links", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "ref", superscript: true, link: "https://example.com", bold: true }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('<a href="https://example.com" class="font-bold"><sup>ref</sup></a>');
+});
+
+test("renderToHtml handles subscript with links", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "note", subscript: true, link: "https://example.com" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('<a href="https://example.com"><sub>note</sub></a>');
+});
+
+test("renderToHtml handles background colors", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "yellow highlight", backgroundColor: "#FFFF00" },
+          { text: " and " },
+          { text: "green background", backgroundColor: "#00FF00" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('style="background-color: #FFFF00"');
+  expect(result).toContain('style="background-color: #00FF00"');
+});
+
+test("renderToHtml handles complex color combinations", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "inverse video", color: "#FFFFFF", backgroundColor: "#000000" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('style="color: #FFFFFF; background-color: #000000"');
+});
+
+test("renderToHtml handles multiple style combinations", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { 
+            text: "complex", 
+            bold: true, 
+            italic: true, 
+            superscript: true,
+            color: "#FF0000",
+            backgroundColor: "#FFFF00",
+            fontSize: 14,
+            fontFamily: "Arial"
+          }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToHtml(doc);
+  expect(result).toContain('<span class="font-bold italic" style="font-size: 14pt; font-family: Arial; color: #FF0000; background-color: #FFFF00"><sup>complex</sup></span>');
+});
+
 test("renderToHtml handles unknown element types gracefully", () => {
   const doc: ParsedDocument = {
     metadata: {},

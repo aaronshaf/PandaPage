@@ -368,6 +368,152 @@ test("renderToMarkdown handles mixed content", () => {
   expect(result).toContain("## Section");
 });
 
+test("renderToMarkdown handles superscript formatting", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "E=mc" },
+          { text: "2", superscript: true },
+          { text: " is Einstein's equation" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("E=mc<sup>2</sup> is Einstein's equation");
+});
+
+test("renderToMarkdown handles subscript formatting", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "H" },
+          { text: "2", subscript: true },
+          { text: "O is water" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("H<sub>2</sub>O is water");
+});
+
+test("renderToMarkdown handles formatted superscript", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "x", superscript: true, bold: true, italic: true }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("<sup>***x***</sup>");
+});
+
+test("renderToMarkdown handles formatted subscript", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "n", subscript: true, underline: true, strikethrough: true }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("<sub>~~<u>n</u>~~</sub>");
+});
+
+test("renderToMarkdown handles superscript with links", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "ref", superscript: true, link: "https://example.com", bold: true }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("[<sup>**ref**</sup>](https://example.com)");
+});
+
+test("renderToMarkdown handles subscript with links", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "note", subscript: true, link: "https://example.com" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("[<sub>note</sub>](https://example.com)");
+});
+
+test("renderToMarkdown handles complex formatting combinations", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "super", superscript: true, bold: true },
+          { text: " and " },
+          { text: "sub", subscript: true, italic: true, underline: true }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("<sup>**super**</sup> and <sub><u>*sub*</u></sub>");
+});
+
+test("renderToMarkdown handles mixed superscript and subscript in text", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "x" },
+          { text: "2", superscript: true },
+          { text: " + y" },
+          { text: "3", subscript: true },
+          { text: " = z" }
+        ]
+      }
+    ]
+  };
+  
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("x<sup>2</sup> + y<sub>3</sub> = z");
+});
+
 test("renderToMarkdown handles unknown element types gracefully", () => {
   const doc: ParsedDocument = {
     metadata: {},
