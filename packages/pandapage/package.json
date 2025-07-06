@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "bun run index.ts",
     "build": "bun build ./index.ts --outdir ./dist --target node",
+    "typecheck": "tsc --noEmit",
     "test": "bun test test/*.test.ts",
     "test:coverage": "bun test --coverage test/*.test.ts",
     "test:unit": "LOG_LEVEL=None bun test test/*.test.ts",

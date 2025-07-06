@@ -13,7 +13,7 @@
     "test:all": "cd packages/pandapage && bun test:all && cd ../demo && bun test:e2e",
     "test:coverage": "bun run --filter '*' test:coverage",
     "test:unit": "cd packages/parser && bun test && cd ../renderer-markdown && bun test && cd ../renderer-dom && bun test && cd ../pandapage && bun run test:unit",
-    "typecheck": "cd packages/parser && bun run typecheck && cd ../renderer-markdown && bun run typecheck && cd ../renderer-dom && bun run typecheck && cd ../pandapage && npx tsc --noEmit && cd ../demo && npx tsc --noEmit",
+    "typecheck": "cd packages/parser && bun run typecheck && cd ../renderer-markdown && bun run typecheck && cd ../renderer-dom && bun run typecheck && cd ../pandapage && bun run typecheck && cd ../demo && npx tsc --noEmit",
     "test:e2e:headless": "cd packages/demo && bun run build && npx playwright test --config=playwright.precommit.config.ts",
     "precommit": "bun run typecheck && bun run test:unit && bun run test:e2e:headless",
     "prepare": "simple-git-hooks",
