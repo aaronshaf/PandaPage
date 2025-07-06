@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "bun run --filter '*' dev",
-    "build": "bun run --filter '*' build",
+    "build": "cd packages/parser && bun run build && cd ../renderer-markdown && bun run build && cd ../renderer-dom && bun run build && cd ../pandapage && bun run build && cd ../demo && bun run build",
     "test": "cd packages/pandapage && bun test",
     "test:all": "cd packages/pandapage && bun test:all && cd ../demo && bun test:e2e",
     "test:coverage": "bun run --filter '*' test:coverage",
