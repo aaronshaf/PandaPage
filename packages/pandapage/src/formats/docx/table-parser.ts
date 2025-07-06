@@ -130,6 +130,16 @@ export const parseTableProperties = (tblPr: Element): Effect.Effect<DocxTablePro
       }
     }
     
+    // Parse table indentation (used for centering)
+    const tblInd = tblPr.querySelector("tblInd");
+    if (tblInd) {
+      const w = tblInd.getAttribute("w");
+      const type = tblInd.getAttribute("type");
+      if (w) {
+        properties.indentation = type === "pct" ? `${w}%` : `${w}px`;
+      }
+    }
+    
     // Parse table borders
     const tblBorders = tblPr.querySelector("tblBorders");
     if (tblBorders) {

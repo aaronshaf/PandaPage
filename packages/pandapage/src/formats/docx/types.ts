@@ -28,6 +28,7 @@ export interface DocxTableCell {
 export interface DocxTableProperties {
   width?: string;
   alignment?: "left" | "center" | "right";
+  indentation?: string;
   borders?: DocxTableBorders;
   backgroundColor?: string;
 }

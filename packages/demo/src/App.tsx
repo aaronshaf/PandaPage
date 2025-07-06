@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { marked } from 'marked';
-import { renderDocxWithMetadata, renderPages } from '@pandapage/pandapage';
+import { renderDocxWithMetadata, renderPages, parseDocxToStructured } from '@pandapage/pandapage';
 import {
   Navigation,
   DocumentUpload,
@@ -67,6 +67,7 @@ const App: React.FC = () => {
   const [selectedDocument, setSelectedDocument] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [structuredDocument, setStructuredDocument] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -288,9 +289,13 @@ const App: React.FC = () => {
       const fileName = file?.name || path;
 
       if (fileName.endsWith('.docx')) {
-        markdown = await renderDocxWithMetadata(arrayBuffer);
+        // Parse to structured format
+        const structured = await parseDocxToStructured(arrayBuffer);
+        setStructuredDocument(structured.document);
+        markdown = structured.markdown;
       } else if (fileName.endsWith('.pages')) {
         markdown = await renderPages(arrayBuffer);
+        setStructuredDocument(null);
       } else {
         throw new Error('Unsupported file format. Please use .docx or .pages files.');
       }
@@ -507,6 +512,7 @@ const App: React.FC = () => {
           ) : result ? (
             <DocumentViewer
               result={result}
+              structuredDocument={structuredDocument}
               loading={loading}
               showSpinner={showSpinner}
               viewMode={viewMode}

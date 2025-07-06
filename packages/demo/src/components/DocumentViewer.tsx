@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
+import { DocxRenderer } from './DocxRenderer';
+import type { EnhancedDocxDocument } from '@pandapage/pandapage';
 
 interface DocumentViewerProps {
   result: string | null;
+  structuredDocument?: EnhancedDocxDocument | null;
   loading: boolean;
   showSpinner: boolean;
   viewMode: 'read' | 'print';
@@ -18,6 +21,7 @@ interface DocumentViewerProps {
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   result,
+  structuredDocument,
   loading,
   showSpinner,
   viewMode,
@@ -230,11 +234,18 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             data-testid="reading-mode-container"
             className="bg-white rounded-lg shadow-sm p-6"
           >
-            <div 
-              data-testid="markdown-content"
-              className="rendered-markdown prose prose-gray prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
-            />
+            {structuredDocument?.elements ? (
+              <DocxRenderer 
+                elements={structuredDocument.elements} 
+                viewMode={viewMode}
+              />
+            ) : (
+              <div 
+                data-testid="markdown-content"
+                className="rendered-markdown prose prose-gray prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
+              />
+            )}
           </div>
         </div>
       ) : (
@@ -284,38 +295,51 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               '--print-scale': printScale,
             } as React.CSSProperties & { '--print-scale': number }}
           >
-            {(() => {
-              const htmlContent = marked(removeFrontmatter(result));
-              const pages = splitIntoPages(htmlContent);
-              
-              // Update total pages when pages change
-              if (pages.length !== totalPages) {
-                setTimeout(() => setTotalPages(pages.length), 0);
-              }
-              
-              return pages.map((pageContent, index) => (
-                <div 
-                  key={index} 
-                  data-testid={`print-page-${index + 1}`}
-                  className="print-page" 
-                  data-page={index + 1}
-                >
-                  <div 
-                    data-testid={`print-content-${index + 1}`}
-                    className="print-content"
-                    dangerouslySetInnerHTML={{ __html: pageContent }}
+            {structuredDocument?.elements ? (
+              // For structured documents, render directly
+              <div className="print-page" data-testid="print-page-1" data-page={1}>
+                <div data-testid="print-content-1" className="print-content">
+                  <DocxRenderer 
+                    elements={structuredDocument.elements} 
+                    viewMode={viewMode}
                   />
-                  {/* Page number - only show in screen view */}
-                  <div 
-                    data-testid={`page-number-${index + 1}`}
-                    className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans"
-                    aria-label={`Page ${index + 1} of ${pages.length}`}
-                  >
-                    {index + 1} of {pages.length}
-                  </div>
                 </div>
-              ));
-            })()}
+              </div>
+            ) : (
+              // For markdown, use the existing pagination
+              (() => {
+                const htmlContent = marked(removeFrontmatter(result));
+                const pages = splitIntoPages(htmlContent);
+                
+                // Update total pages when pages change
+                if (pages.length !== totalPages) {
+                  setTimeout(() => setTotalPages(pages.length), 0);
+                }
+                
+                return pages.map((pageContent, index) => (
+                  <div 
+                    key={index} 
+                    data-testid={`print-page-${index + 1}`}
+                    className="print-page" 
+                    data-page={index + 1}
+                  >
+                    <div 
+                      data-testid={`print-content-${index + 1}`}
+                      className="print-content"
+                      dangerouslySetInnerHTML={{ __html: pageContent }}
+                    />
+                    {/* Page number - only show in screen view */}
+                    <div 
+                      data-testid={`page-number-${index + 1}`}
+                      className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans"
+                      aria-label={`Page ${index + 1} of ${pages.length}`}
+                    >
+                      {index + 1} of {pages.length}
+                    </div>
+                  </div>
+                ));
+              })()
+            )}
           </div>
         </div>
       )}

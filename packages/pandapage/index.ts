@@ -106,6 +106,27 @@ export async function renderKey(buffer: ArrayBuffer): Promise<string> {
   );
 }
 
+// Re-export types for document structure
+export type { 
+  DocxElement,
+  DocxTable,
+  DocxTableRow,
+  DocxTableCell,
+  DocxTableProperties,
+  DocxTableRowProperties,
+  DocxTableCellProperties,
+  EnhancedDocxDocument
+} from "./src/formats/docx/types";
+
+// Re-export reader function
+export { readEnhancedDocx } from "./src/formats/docx/reader-enhanced";
+
+// Re-export structured parsing
+export { 
+  parseDocxToStructured,
+  type StructuredDocxResult 
+} from "./src/formats/docx/docx-to-structured";
+
 // Re-export other utilities
 export { debug } from "./src/common/debug";
 

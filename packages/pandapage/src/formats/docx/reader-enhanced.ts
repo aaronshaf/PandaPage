@@ -22,14 +22,32 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
       debug.log("Reading enhanced DOCX file...");
       const startTime = Date.now();
 
-      // Import the working simple reader and use it
-      const { readDocx } = await import("./docx-reader");
-      const document = await Effect.runPromise(readDocx(buffer));
-
-      // Convert simple document to enhanced format
-      const elements = document.paragraphs.map(p => ({ 
-        ...p 
-      }));
+      // Import required modules
+      const { parseDocumentXmlEnhanced } = await import("./document-parser");
+      const { parseXmlString } = await import("../../common/xml-parser");
+      const { unzipSync, strFromU8 } = await import("fflate");
+      
+      // Convert ArrayBuffer to Uint8Array
+      const uint8Array = new Uint8Array(buffer);
+      
+      // Unzip the DOCX file
+      const unzipped = unzipSync(uint8Array);
+      
+      // Get the main document content
+      const documentXml = unzipped["word/document.xml"];
+      if (!documentXml) {
+        throw new Error("No word/document.xml found in DOCX file");
+      }
+      
+      // Convert to string
+      const xmlContent = strFromU8(documentXml);
+      
+      // Parse XML
+      const parsedXml = await Effect.runPromise(parseXmlString(xmlContent));
+      const root = parsedXml.documentElement;
+      
+      // Parse elements using enhanced parser
+      const elements = await Effect.runPromise(parseDocumentXmlEnhanced(root));
 
       const processingTime = Date.now() - startTime;
       debug.log(`Enhanced DOCX parsing completed in ${processingTime}ms`);
@@ -38,28 +56,24 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
         elements,
         metadata: {
           extractedAt: new Date(),
-          originalFormat: "docx" as const,
-          wordCount: elements.reduce((count, el) => {
-            if (el.type === "paragraph") {
-              return count + el.runs.map(r => r.text).join("").split(/\s+/).length;
-            }
-            return count;
-          }, 0),
-          characterCount: elements.reduce((count, el) => {
-            if (el.type === "paragraph") {
-              return count + el.runs.map(r => r.text).join("").length;
-            }
-            return count;
-          }, 0),
-          paragraphCount: elements.filter(el => el.type === "paragraph").length,
+          originalFormat: "docx" as const
         },
-        numbering: document.numbering,
         processingTime,
         extractedAt: new Date(),
         originalFormat: "docx" as const,
-        wordCount: 0,
-        characterCount: 0,
-        paragraphCount: 0,
+        wordCount: elements.reduce((count, el) => {
+          if (el.type === "paragraph") {
+            return count + el.runs.map(r => r.text).join("").split(/\s+/).filter(w => w.length > 0).length;
+          }
+          return count;
+        }, 0),
+        characterCount: elements.reduce((count, el) => {
+          if (el.type === "paragraph") {
+            return count + el.runs.map(r => r.text).join("").length;
+          }
+          return count;
+        }, 0),
+        paragraphCount: elements.filter(el => el.type === "paragraph").length,
       };
     },
     catch: (error) => new DocxParseError(`Failed to parse DOCX: ${error}`)
