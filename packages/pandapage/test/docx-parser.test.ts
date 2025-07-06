@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Effect } from "effect";
-import { DocxParseError, readDocx } from "../../src/formats/docx/docx-reader";
-import { convertDocxToMarkdown } from "../../src/formats/docx/docx-to-markdown";
+import { DocxParseError, readDocx } from "../src/formats/docx/docx-reader";
+import { convertDocxToMarkdown } from "../src/formats/docx/docx-to-markdown";
 
 // Pure function tests for DOCX parsing (no browser APIs needed)
 test("convertDocxToMarkdown handles empty document", () => {

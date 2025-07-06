@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { Effect, pipe } from "effect";
-import { docxToMarkdownWithMetadata } from "../../src/formats/docx/docx-to-markdown";
-import { readEnhancedDocx } from "../../src/formats/docx/docx-reader-enhanced";
+import { docxToMarkdownWithMetadata } from "../src/formats/docx/docx-to-markdown";
+import { readEnhancedDocx } from "../src/formats/docx/docx-reader-enhanced";
 
 test("readEnhancedDocx includes metadata", async () => {
   // Use a minimal valid DOCX file (empty document)

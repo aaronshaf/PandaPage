@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { convertPptxToMarkdown } from "../../src/formats/pptx/pptx-to-markdown";
+import { convertPptxToMarkdown } from "../src/formats/pptx/pptx-to-markdown";
 
 // Pure function tests for PPTX parsing
 test("convertPptxToMarkdown handles empty presentation", () => {

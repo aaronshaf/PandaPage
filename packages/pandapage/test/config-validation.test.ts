@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { Effect } from "effect";
-import { validateConfig, DEFAULT_CONFIG, ConfigError } from "../../src/common/config";
+import { validateConfig, DEFAULT_CONFIG, ConfigError } from "../src/common/config";
 
 test("validateConfig - should use defaults for empty input", async () => {
   const result = await Effect.runPromise(validateConfig({}));

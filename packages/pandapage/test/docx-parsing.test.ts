@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { Effect } from "effect";
-import { docxToMarkdown } from "../../src/formats/docx/docx-to-markdown";
-import { readDocx } from "../../src/formats/docx/docx-reader";
+import { docxToMarkdown } from "../src/formats/docx/docx-to-markdown";
+import { readDocx } from "../src/formats/docx/docx-reader";
 
 // Simple mock DOCX structure for testing
 const createMockDocxBuffer = (): ArrayBuffer => {

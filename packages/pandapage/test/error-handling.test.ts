@@ -4,7 +4,7 @@ import {
   getRecoveryStrategy,
   type ErrorCategory,
   type CategorizedError 
-} from "../../src/common/error-handling";
+} from "../src/common/error-handling";
 import { Effect } from "effect";
 
 test("createCategorizedError - should create proper error structure", async () => {

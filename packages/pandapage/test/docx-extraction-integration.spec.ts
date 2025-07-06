@@ -2,12 +2,12 @@ import { expect, test } from "bun:test";
 import { Effect } from "effect";
 import * as fs from "fs";
 import * as path from "path";
-import { readDocx } from "../../src/formats/docx/docx-reader";
-import { docxToMarkdown } from "../../src/formats/docx/docx-to-markdown";
+import { readDocx } from "../src/formats/docx/docx-reader";
+import { docxToMarkdown } from "../src/formats/docx/docx-to-markdown";
 
 // Helper to load DOCX file
 const loadDocx = (filename: string): ArrayBuffer => {
-  const docxPath = path.join(__dirname, "../../../../documents", filename);
+  const docxPath = path.join(__dirname, "../test-fixtures/documents", filename);
   const buffer = fs.readFileSync(docxPath);
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 };

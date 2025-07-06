@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { parseDocxToStructured } from "../../src/formats/docx/docx-to-structured";
+import { parseDocxToStructured } from "../src/formats/docx/docx-to-structured";
 
 describe("Title Extraction from DOCX", () => {
   test("should handle empty buffer gracefully", async () => {

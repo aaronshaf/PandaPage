@@ -3,7 +3,7 @@ import {
   createTransferableTask,
   shouldUseWorker,
   type WorkerTask,
-} from "../../src/workers/worker-pool";
+} from "../src/workers/worker-pool";
 
 // Pure function tests for worker pool (no browser APIs)
 test("shouldUseWorker threshold is 1MB", () => {
