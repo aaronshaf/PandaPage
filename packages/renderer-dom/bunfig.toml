@@ -1,6 +1,6 @@
 [test]
 # Enable coverage for renderer-dom package
-coverage = false
+coverage = true
 
 # Set low thresholds for now (10%)
 coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1, branches = 0.1 }
