@@ -31,7 +31,7 @@ function renderTextRun(run: TextRun): string {
 }
 
 function renderParagraph(paragraph: Paragraph): string {
-  const text = paragraph.runs.map(renderTextRun).join('');
+  const text = paragraph.runs.map(renderTextRun).join('').trim();
   
   if (paragraph.listInfo) {
     const indent = '  '.repeat(paragraph.listInfo.level);
@@ -43,7 +43,7 @@ function renderParagraph(paragraph: Paragraph): string {
 }
 
 function renderHeading(heading: Heading): string {
-  const text = heading.runs.map(renderTextRun).join('');
+  const text = heading.runs.map(renderTextRun).join('').trim();
   const hashes = '#'.repeat(heading.level);
   return `${hashes} ${text}`;
 }
@@ -54,7 +54,7 @@ function renderTable(table: Table): string {
   table.rows.forEach((row, rowIndex) => {
     const cells = row.cells.map(cell => {
       // Join all paragraphs in the cell
-      return cell.paragraphs.map(p => p.runs.map(r => r.text).join('')).join(' ');
+      return cell.paragraphs.map(p => p.runs.map(r => r.text).join('').trim()).join(' ');
     });
     
     lines.push(`| ${cells.join(' | ')} |`);
