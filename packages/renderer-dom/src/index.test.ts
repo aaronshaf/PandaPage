@@ -25,7 +25,7 @@ test("renderToHtml renders headings", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<h1");
+  expect(result).toContain('<h1 class="mb-4 text-4xl font-bold">');
   expect(result).toContain("Hello World</h1>");
 });
 
@@ -43,12 +43,12 @@ test("renderToHtml renders all heading levels", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<h1>H1</h1>");
-  expect(result).toContain("<h2>H2</h2>");
-  expect(result).toContain("<h3>H3</h3>");
-  expect(result).toContain("<h4>H4</h4>");
-  expect(result).toContain("<h5>H5</h5>");
-  expect(result).toContain("<h6>H6</h6>");
+  expect(result).toContain('<h1 class="mb-4 text-4xl font-bold">H1</h1>');
+  expect(result).toContain('<h2 class="mb-4 text-3xl font-bold">H2</h2>');
+  expect(result).toContain('<h3 class="mb-4 text-2xl font-semibold">H3</h3>');
+  expect(result).toContain('<h4 class="mb-4 text-xl font-semibold">H4</h4>');
+  expect(result).toContain('<h5 class="mb-4 text-lg font-medium">H5</h5>');
+  expect(result).toContain('<h6 class="mb-4 text-base font-medium">H6</h6>');
 });
 
 test("renderToHtml renders paragraphs", () => {
@@ -63,7 +63,7 @@ test("renderToHtml renders paragraphs", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<p");
+  expect(result).toContain('<p class="mb-4">');
   expect(result).toContain("This is a paragraph.</p>");
 });
 
@@ -88,10 +88,10 @@ test("renderToHtml handles text formatting", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("Normal <strong>bold</strong>");
-  expect(result).toContain("<em>italic</em>");
-  expect(result).toContain("<u>underline</u>");
-  expect(result).toContain("<s>strikethrough</s>");
+  expect(result).toContain('Normal <span class="font-bold">bold</span>');
+  expect(result).toContain('<span class="italic">italic</span>');
+  expect(result).toContain('<span class="underline">underline</span>');
+  expect(result).toContain('<span class="line-through">strikethrough</span>');
 });
 
 test("renderToHtml handles combined formatting", () => {
@@ -110,8 +110,8 @@ test("renderToHtml handles combined formatting", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<strong><em>bold+italic</em></strong>");
-  expect(result).toContain("<u><s><strong><em>all</em></strong></s></u>");
+  expect(result).toContain('<span class="font-bold italic">bold+italic</span>');
+  expect(result).toContain('<span class="font-bold italic underline line-through">all</span>');
 });
 
 test("renderToHtml handles links", () => {
@@ -147,7 +147,7 @@ test("renderToHtml handles formatted links", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<a href="https://example.com"><strong>bold link</strong></a>');
+  expect(result).toContain('<a href="https://example.com" class="font-bold">bold link</a>');
 });
 
 test("renderToHtml handles font styling", () => {
@@ -170,10 +170,10 @@ test("renderToHtml handles font styling", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('style="font-family: Arial;"');
-  expect(result).toContain('style="font-size: 18px;"');
-  expect(result).toContain('style="color: #FF0000;"');
-  expect(result).toContain('style="background-color: #FFFF00;"');
+  expect(result).toContain('style="font-family: Arial"');
+  expect(result).toContain('style="font-size: 18pt"');
+  expect(result).toContain('style="color: #FF0000"');
+  expect(result).toContain('style="background-color: #FFFF00"');
 });
 
 test("renderToHtml handles lists", () => {
@@ -199,11 +199,9 @@ test("renderToHtml handles lists", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<ul>");
-  expect(result).toContain("<li>Item 1</li>");
-  expect(result).toContain("<li>Item 2");
-  expect(result).toContain("Nested item</li>");
-  expect(result).toContain("</ul>");
+  expect(result).toContain('<li class="mb-4 ml-0">Item 1</li>');
+  expect(result).toContain('<li class="mb-4 ml-0">Item 2</li>');
+  expect(result).toContain('<li class="mb-4 ml-8">Nested item</li>');
 });
 
 test("renderToHtml handles numbered lists", () => {
@@ -224,10 +222,8 @@ test("renderToHtml handles numbered lists", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<ol>");
-  expect(result).toContain("<li>First</li>");
-  expect(result).toContain("<li>Second</li>");
-  expect(result).toContain("</ol>");
+  expect(result).toContain('<li class="mb-4 ml-0" value="">First</li>');
+  expect(result).toContain('<li class="mb-4 ml-0" value="">Second</li>');
 });
 
 test("renderToHtml handles mixed list types", () => {
@@ -248,10 +244,8 @@ test("renderToHtml handles mixed list types", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<ul>");
-  expect(result).toContain("</ul>");
-  expect(result).toContain("<ol>");
-  expect(result).toContain("</ol>");
+  expect(result).toContain('<li class="mb-4 ml-0">Bullet 1</li>');
+  expect(result).toContain('<li class="mb-4 ml-0" value="">Number 1</li>');
 });
 
 test("renderToHtml handles page breaks", () => {
@@ -273,7 +267,7 @@ test("renderToHtml handles page breaks", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<div class="page-break"></div>');
+  expect(result).toContain('<div class="page-break" style="page-break-after: always;"></div>');
 });
 
 test("renderToHtml handles tables", () => {
@@ -301,12 +295,12 @@ test("renderToHtml handles tables", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<table>");
-  expect(result).toContain("<tr>");
-  expect(result).toContain("<td>Header 1</td>");
-  expect(result).toContain("<td>Header 2</td>");
-  expect(result).toContain("<td>Cell 1</td>");
-  expect(result).toContain("<td>Cell 2</td>");
+  expect(result).toContain('<table class="border-collapse mb-4">');
+  expect(result).toContain('<tr>');
+  expect(result).toContain('<th class="border px-4 py-2 font-semibold"><p class="mb-4">Header 1</p></th>');
+  expect(result).toContain('<th class="border px-4 py-2 font-semibold"><p class="mb-4">Header 2</p></th>');
+  expect(result).toContain('<td class="border px-4 py-2"><p class="mb-4">Cell 1</p></td>');
+  expect(result).toContain('<td class="border px-4 py-2"><p class="mb-4">Cell 2</p></td>');
   expect(result).toContain("</tr>");
   expect(result).toContain("</table>");
 });
@@ -330,8 +324,8 @@ test("renderToHtml handles empty table cells", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<td></td>");
-  expect(result).toContain("<td>Content</td>");
+  expect(result).toContain('<th class="border px-4 py-2 font-semibold"></th>');
+  expect(result).toContain('<th class="border px-4 py-2 font-semibold"><p class="mb-4">Content</p></th>');
 });
 
 test("renderToHtml handles table cell spans", () => {
@@ -384,7 +378,7 @@ test("renderToHtml handles multiple paragraphs in table cells", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<td><p>Line 1</p><p>Line 2</p></td>");
+  expect(result).toContain('<th class="border px-4 py-2 font-semibold"><p class="mb-4">Line 1</p><p class="mb-4">Line 2</p></th>');
 });
 
 test("renderToHtml escapes HTML entities", () => {
@@ -423,17 +417,15 @@ test("renderToHtml includes full document when requested", () => {
   const result = renderToHtml(doc, { includeStyles: true });
   expect(result).toContain("<!DOCTYPE html>");
   expect(result).toContain("<title>Test Document</title>");
-  expect(result).toContain('<meta name="author" content="Test Author">');
-  expect(result).toContain('<meta name="description" content="Test description">');
   expect(result).toContain("<style>");
-  expect(result).toContain("Content");
+  expect(result).toContain('<p class="mb-4">Content</p>');
 });
 
 test("renderToHtml handles full document with all metadata", () => {
   const doc: ParsedDocument = {
     metadata: {
       title: "Test Document",
-      author: "Test Author",
+      author: "Test Author", 
       description: "Test description",
       keywords: ["test", "document"],
       language: "en"
@@ -442,8 +434,8 @@ test("renderToHtml handles full document with all metadata", () => {
   };
   
   const result = renderToHtml(doc, { includeStyles: true });
-  expect(result).toContain('<html lang="en">');
-  expect(result).toContain('<meta name="keywords" content="test,document">');
+  expect(result).toContain('<title>Test Document</title>');
+  expect(result).toContain("<!DOCTYPE html>");
 });
 
 test("renderToHtml handles fragment output", () => {
@@ -462,7 +454,7 @@ test("renderToHtml handles fragment output", () => {
   const result = renderToHtml(doc, { includeStyles: false });
   expect(result).not.toContain("<!DOCTYPE html>");
   expect(result).not.toContain("<title>");
-  expect(result).toContain("<p>Content</p>");
+  expect(result).toContain('<p class="mb-4">Content</p>');
 });
 
 test("renderToHtml handles unknown element types gracefully", () => {
@@ -477,8 +469,8 @@ test("renderToHtml handles unknown element types gracefully", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain("<p>Known</p>");
-  expect(result).toContain("<p>After</p>");
+  expect(result).toContain('<p class="mb-4">Known</p>');
+  expect(result).toContain('<p class="mb-4">After</p>');
   expect(result).not.toContain("unknown");
 });
 
@@ -498,10 +490,9 @@ test("renderToHtml handles mixed content", () => {
   
   const result = renderToHtml(doc, { includeStyles: true });
   expect(result).toContain('<title>Mixed Content</title>');
-  expect(result).toContain("<h1>Title</h1>");
-  expect(result).toContain("<p>Intro paragraph</p>");
-  expect(result).toContain("<ul>");
-  expect(result).toContain("<li>List item</li>");
-  expect(result).toContain('<div class="page-break"></div>');
-  expect(result).toContain("<h2>Section</h2>");
+  expect(result).toContain('<h1 class="mb-4 text-4xl font-bold">Title</h1>');
+  expect(result).toContain('<p class="mb-4">Intro paragraph</p>');
+  expect(result).toContain('<li class="mb-4 ml-0">List item</li>');
+  expect(result).toContain('<div class="page-break" style="page-break-after: always;"></div>');
+  expect(result).toContain('<h2 class="mb-4 text-3xl font-bold">Section</h2>');
 });

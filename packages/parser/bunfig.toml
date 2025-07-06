@@ -2,8 +2,8 @@
 # Enable coverage for parser package
 coverage = true
 
-# Set low thresholds for now (10%)
-coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1, branches = 0.1 }
+# Realistic thresholds based on current coverage
+coverageThreshold = { lines = 0.95, functions = 0.75, statements = 0.95, branches = 0.5 }
 
 # Exclude test files from coverage
 coverageSkipTestFiles = true
