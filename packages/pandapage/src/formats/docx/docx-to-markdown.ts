@@ -136,7 +136,7 @@ const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: Docx
 };
 
 // Convert a table to Markdown
-const convertTableToMarkdown = (table: DocxTable, numbering?: DocxNumbering): string => {
+export const convertTableToMarkdown = (table: DocxTable, numbering?: DocxNumbering): string => {
   if (table.rows.length === 0) return "";
   
   const lines: string[] = [];
