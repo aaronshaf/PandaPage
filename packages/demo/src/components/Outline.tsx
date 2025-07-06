@@ -8,24 +8,33 @@ interface OutlineProps {
   showOutline: boolean;
   result: string | null;
   extractHeadings: (markdown: string) => Heading[];
+  extractHeadingsFromDocument?: (document: any) => Heading[];
   removeFrontmatter: (markdown: string) => string;
   viewMode: 'read' | 'print';
   showPrimaryNav: boolean;
+  parsedDocument?: any;
 }
 
 export const Outline: React.FC<OutlineProps> = ({
   showOutline,
   result,
   extractHeadings,
+  extractHeadingsFromDocument,
   removeFrontmatter,
   viewMode,
-  showPrimaryNav
+  showPrimaryNav,
+  parsedDocument
 }) => {
-  if (!showOutline || !result || extractHeadings(removeFrontmatter(result)).length <= 1) {
+  // Prefer extracting headings from parsed document structure
+  const headings = parsedDocument && extractHeadingsFromDocument
+    ? extractHeadingsFromDocument(parsedDocument)
+    : result 
+      ? extractHeadings(removeFrontmatter(result))
+      : [];
+
+  if (!showOutline || headings.length <= 1) {
     return null;
   }
-
-  const headings = extractHeadings(removeFrontmatter(result));
 
   const handleHeadingClick = (heading: Heading) => {
     // Signal that this is programmatic scrolling to prevent page indicator

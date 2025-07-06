@@ -21,7 +21,33 @@ export const countWords = (text: string): number => {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 };
 
-// Extract headings from markdown for outline view
+// Extract headings from parsed document for outline view (preferred method)
+export const extractHeadingsFromDocument = (document: any): Array<{level: number, text: string, id: string}> => {
+  const headings: Array<{level: number, text: string, id: string}> = [];
+  
+  if (!document || !document.elements) {
+    return headings;
+  }
+  
+  for (const element of document.elements) {
+    if (element.type === 'heading') {
+      // Extract text from runs (preserves original formatting and structure)
+      const text = element.runs.map((run: any) => run.text).join('').trim();
+      if (text) {
+        const id = text.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+        headings.push({ 
+          level: element.level, 
+          text, 
+          id 
+        });
+      }
+    }
+  }
+  
+  return headings;
+};
+
+// Extract headings from markdown for outline view (fallback method)
 export const extractHeadings = (markdown: string): Array<{level: number, text: string, id: string}> => {
   const lines = markdown.split('\n');
   const headings: Array<{level: number, text: string, id: string}> = [];

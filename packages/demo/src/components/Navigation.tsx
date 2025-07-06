@@ -65,7 +65,23 @@ export const Navigation: React.FC<NavigationProps> = ({
     return null;
   };
 
+  // Check if metadata has any meaningful content to display
+  const hasMetadataContent = (metadata: any) => {
+    if (!metadata) return false;
+    
+    return !!(
+      metadata.title ||
+      metadata.author ||
+      metadata.description ||
+      (metadata.keywords && metadata.keywords.length > 0) ||
+      metadata.language ||
+      metadata.createdDate ||
+      metadata.modifiedDate
+    );
+  };
+
   const metadata = getMetadata();
+  const shouldShowMetadataButton = hasMetadataContent(metadata);
 
   // Calculate popover position
   const updatePopoverPosition = () => {
@@ -161,7 +177,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">{documentTitle}</h1>
               
               {/* Metadata info button */}
-              {metadata && (
+              {shouldShowMetadataButton && (
                 <div className="relative">
                   <button
                     ref={buttonRef}

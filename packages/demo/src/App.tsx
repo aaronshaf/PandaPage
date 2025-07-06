@@ -21,6 +21,7 @@ import {
   removeFrontmatter,
   countWords,
   extractHeadings,
+  extractHeadingsFromDocument,
   splitIntoPages
 } from './utils';
 
@@ -623,9 +624,11 @@ const App: React.FC = () => {
           showOutline={showOutline}
           result={result}
           extractHeadings={extractHeadings}
+          extractHeadingsFromDocument={extractHeadingsFromDocument}
           removeFrontmatter={removeFrontmatter}
           viewMode={viewMode}
           showPrimaryNav={showPrimaryNav}
+          parsedDocument={parsedDocument}
         />
         
         {/* Document Content */}
