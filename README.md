@@ -1,6 +1,6 @@
 # PandaPage
 
-A high-performance document parser and renderer built with Effect and TypeScript. Parse DOCX documents and render them to HTML or Markdown with full formatting preservation.
+A document parser and renderer built with Effect and TypeScript. Parse DOCX documents and render them to HTML or Markdown.
 
 ## [Try the Demo](https://aaronshaf.github.io/PandaPage/)
 
@@ -8,12 +8,11 @@ See PandaPage in action with our interactive demo where you can upload and view 
 
 ## Features
 
-- Parse DOCX documents with comprehensive format support
-- Render to clean HTML with DOM elements or Markdown
-- Preserve text formatting, tables, headers, footers, and hyperlinks
-- Security-focused link handling with user confirmation dialogs
+- Parse DOCX documents with support for common formatting
+- Render to HTML with DOM elements or Markdown
+- Handle text formatting, tables, headers, footers, and hyperlinks
 - Built with modern TypeScript and Effect for type safety and error handling
-- Comprehensive test coverage with unit and integration tests
+- Test coverage for core functionality
 
 ## Quick Start
 
