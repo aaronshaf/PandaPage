@@ -22,6 +22,7 @@ import {
 export const convertDocxToMarkdown = (document: DocxDocument): string => {
   const lines: string[] = [];
   const listCounters = new Map<string, number>(); // Track counters for numbered lists
+  let lastWasHeading = false; // Track if last paragraph was a heading for spacing
 
   for (const paragraph of document.paragraphs) {
     const text = convertParagraphToMarkdown(paragraph, document.numbering, listCounters);

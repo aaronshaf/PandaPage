@@ -306,7 +306,7 @@ export const extractCompleteMetadata = (parts: {
       : [];
       
     const styleUsage = parts.documentXml
-      ? yield* analyzeStyleUsage(parts.documentXml, parts.stylesXml)
+      ? yield* analyzeStyleUsage(parts.documentXml)
       : [];
     
     const processingTime = Date.now() - startTime;
