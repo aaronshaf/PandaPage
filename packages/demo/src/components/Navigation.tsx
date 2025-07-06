@@ -68,11 +68,8 @@ export const Navigation: React.FC<NavigationProps> = ({
   // Close popover on click outside or ESC key
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popoverRef.current) {
-        const popoverContent = popoverRef.current.querySelector('.bg-white');
-        if (popoverContent && !popoverContent.contains(event.target as Node)) {
-          setShowMetadata(false);
-        }
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setShowMetadata(false);
       }
     };
 
@@ -159,7 +156,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   
                   {/* Metadata popover */}
                   {showMetadata && (
-                    <div ref={popoverRef} className="fixed inset-0 z-[60] flex items-start justify-start" style={{ paddingTop: '60px', paddingLeft: '20px' }}>
+                    <div ref={popoverRef} className="absolute left-0 top-full mt-1 z-[60]">
                       <div className="bg-white rounded-lg shadow-2xl border border-gray-300 w-80 max-w-sm">
                         <div className="px-4 py-3 border-b border-gray-200">
                           <div className="flex justify-between items-center">
