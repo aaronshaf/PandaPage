@@ -289,10 +289,17 @@ const App: React.FC = () => {
       const fileName = file?.name || path;
 
       if (fileName.endsWith('.docx')) {
-        // Parse to structured format
-        const structured = await parseDocxToStructured(arrayBuffer);
-        setStructuredDocument(structured.document);
-        markdown = structured.markdown;
+        try {
+          // Try to parse to structured format
+          const structured = await parseDocxToStructured(arrayBuffer);
+          setStructuredDocument(structured.document);
+          markdown = structured.markdown;
+        } catch (structuredError) {
+          console.error('Failed to parse structured DOCX, falling back to simple parser:', structuredError);
+          // Fall back to simple markdown conversion
+          markdown = await renderDocxWithMetadata(arrayBuffer);
+          setStructuredDocument(null);
+        }
       } else if (fileName.endsWith('.pages')) {
         markdown = await renderPages(arrayBuffer);
         setStructuredDocument(null);

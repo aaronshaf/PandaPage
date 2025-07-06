@@ -28,7 +28,7 @@ export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable
     debug.log("Parsing table element");
     
     const rows: DocxTableRow[] = [];
-    const trElements = tblElement.querySelectorAll(":scope > tr");
+    const trElements = tblElement.querySelectorAll(":scope > tr, :scope > w\\:tr");
     
     for (const trElement of trElements) {
       const row = yield* parseTableRowEnhanced(trElement);
@@ -36,7 +36,7 @@ export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable
     }
     
     // Parse table properties if present
-    const tblPr = tblElement.querySelector(":scope > tblPr");
+    const tblPr = tblElement.querySelector(":scope > tblPr, :scope > w\\:tblPr");
     const rawProperties = tblPr ? yield* parseTableProperties(tblPr) : undefined;
     const properties = rawProperties ? yield* validateTableProperties(rawProperties) : undefined;
     
@@ -55,7 +55,7 @@ export const parseTableRowEnhanced = (trElement: Element): Effect.Effect<DocxTab
     debug.log("Parsing table row");
     
     const cells: DocxTableCell[] = [];
-    const tcElements = trElement.querySelectorAll(":scope > tc");
+    const tcElements = trElement.querySelectorAll(":scope > tc, :scope > w\\:tc");
     
     for (const tcElement of tcElements) {
       const cell = yield* parseTableCellEnhanced(tcElement);
@@ -63,7 +63,7 @@ export const parseTableRowEnhanced = (trElement: Element): Effect.Effect<DocxTab
     }
     
     // Parse row properties if present
-    const trPr = trElement.querySelector(":scope > trPr");
+    const trPr = trElement.querySelector(":scope > trPr, :scope > w\\:trPr");
     const rawProperties = trPr ? yield* parseTableRowProperties(trPr) : undefined;
     const properties = rawProperties ? yield* validateTableRowProperties(rawProperties) : undefined;
     
@@ -81,7 +81,7 @@ export const parseTableCellEnhanced = (tcElement: Element): Effect.Effect<DocxTa
     debug.log("Parsing table cell");
     
     const content: DocxParagraph[] = [];
-    const pElements = tcElement.querySelectorAll(":scope > p");
+    const pElements = tcElement.querySelectorAll(":scope > p, :scope > w\\:p");
     
     for (const pElement of pElements) {
       try {
@@ -94,7 +94,7 @@ export const parseTableCellEnhanced = (tcElement: Element): Effect.Effect<DocxTa
     }
     
     // Parse cell properties if present
-    const tcPr = tcElement.querySelector(":scope > tcPr");
+    const tcPr = tcElement.querySelector(":scope > tcPr, :scope > w\\:tcPr");
     const rawProperties = tcPr ? yield* parseTableCellProperties(tcPr) : undefined;
     const properties = rawProperties ? yield* validateTableCellProperties(rawProperties) : undefined;
     

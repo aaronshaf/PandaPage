@@ -19,7 +19,26 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
   Effect.gen(function* () {
     debug.log("Parsing document XML with enhanced parser");
     
-    const body = root.querySelector("body");
+    // Try multiple ways to find the body element
+    let body: Element | null = root.querySelector("body");
+    if (!body) {
+      // Try with namespace
+      const bodies = root.getElementsByTagNameNS("*", "body");
+      if (bodies.length > 0) {
+        body = bodies[0] || null;
+      }
+    }
+    if (!body) {
+      // Try looking for any element with local name "body"
+      const allElements = root.getElementsByTagName("*");
+      for (let i = 0; i < allElements.length; i++) {
+        const elem = allElements[i];
+        if (elem && elem.localName === "body") {
+          body = elem;
+          break;
+        }
+      }
+    }
     if (!body) {
       return yield* Effect.fail(new DocxParseError("No body element found in document"));
     }
@@ -29,15 +48,16 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
     
     for (const child of children) {
       const parseElement = Effect.gen(function* () {
-        if (child.tagName === "p") {
+        const tagName = child.tagName || child.localName;
+        if (tagName === "p" || tagName === "w:p") {
           // Parse paragraph with safe execution
           return yield* safeExecute(
             Effect.sync(() => parseParagraph(child))
           );
-        } else if (child.tagName === "tbl") {
+        } else if (tagName === "tbl" || tagName === "w:tbl") {
           // Parse table
           return yield* parseTableEnhanced(child);
-        } else if (child.tagName === "sectPr") {
+        } else if (tagName === "sectPr" || tagName === "w:sectPr") {
           // Section properties - skip for now but could be parsed later
           debug.log("Skipping section properties");
           return null;
