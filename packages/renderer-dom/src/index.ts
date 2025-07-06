@@ -29,7 +29,7 @@ function escapeHtml(text: string): string {
 }
 
 function renderTextRun(run: TextRun): string {
-  let text = escapeHtml(run.text);
+  let content = escapeHtml(run.text);
   
   const styles: string[] = [];
   const classes: string[] = [];
@@ -47,15 +47,40 @@ function renderTextRun(run: TextRun): string {
   const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
   const classAttr = classes.length > 0 ? ` class="${classes.join(' ')}"` : '';
   
+  // Handle superscript and subscript properly by wrapping the content first
+  if (run.superscript) {
+    // If we have a link, build the proper structure
+    if (run.link) {
+      return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}><sup>${content}</sup></a>`;
+    }
+    // If we have classes or styles, wrap in a span with sup inside
+    if (classAttr || styleAttr) {
+      return `<span${classAttr}${styleAttr}><sup>${content}</sup></span>`;
+    }
+    return `<sup>${content}</sup>`;
+  } else if (run.subscript) {
+    // If we have a link, build the proper structure
+    if (run.link) {
+      return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}><sub>${content}</sub></a>`;
+    }
+    // If we have classes or styles, wrap in a span with sub inside
+    if (classAttr || styleAttr) {
+      return `<span${classAttr}${styleAttr}><sub>${content}</sub></span>`;
+    }
+    return `<sub>${content}</sub>`;
+  }
+  
+  // If we have a link, wrap everything in an anchor tag
   if (run.link) {
-    return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}>${text}</a>`;
+    return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}>${content}</a>`;
   }
   
+  // If we have classes or styles, wrap in a span
   if (classAttr || styleAttr) {
-    return `<span${classAttr}${styleAttr}>${text}</span>`;
+    return `<span${classAttr}${styleAttr}>${content}</span>`;
   }
   
-  return text;
+  return content;
 }
 
 function renderParagraph(paragraph: Paragraph): string {
