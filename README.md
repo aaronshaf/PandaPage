@@ -1,6 +1,6 @@
 # PandaPage
 
-A document parser and renderer built with Effect and TypeScript. Parse DOCX documents and render them to HTML or Markdown.
+A document parser and renderer built with TypeScript. Parse DOCX documents and render them to HTML or Markdown.
 
 ## [Try the Demo](https://aaronshaf.github.io/PandaPage/)
 
