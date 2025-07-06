@@ -50,7 +50,9 @@ export const Navigation: React.FC<NavigationProps> = ({
   structuredDocument
 }) => {
   const [showMetadata, setShowMetadata] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0 });
   const popoverRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Get metadata from either parsed or structured document
   const getMetadata = () => {
@@ -64,6 +66,23 @@ export const Navigation: React.FC<NavigationProps> = ({
   };
 
   const metadata = getMetadata();
+
+  // Calculate popover position
+  const updatePopoverPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPopoverPosition({
+        top: rect.bottom + 4,
+        left: rect.left
+      });
+    }
+  };
+
+  // Show metadata and calculate position
+  const handleShowMetadata = () => {
+    setShowMetadata(true);
+    setTimeout(updatePopoverPosition, 0); // Wait for next tick
+  };
 
   // Close popover on click outside or ESC key
   useEffect(() => {
@@ -145,7 +164,8 @@ export const Navigation: React.FC<NavigationProps> = ({
               {metadata && (
                 <div className="relative">
                   <button
-                    onClick={() => setShowMetadata(!showMetadata)}
+                    ref={buttonRef}
+                    onClick={handleShowMetadata}
                     className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                     title="Document information"
                   >
@@ -156,7 +176,14 @@ export const Navigation: React.FC<NavigationProps> = ({
                   
                   {/* Metadata popover */}
                   {showMetadata && (
-                    <div ref={popoverRef} className="absolute left-0 top-full mt-1 z-[60]">
+                    <div 
+                      ref={popoverRef} 
+                      className="fixed z-[100]"
+                      style={{ 
+                        top: `${popoverPosition.top}px`, 
+                        left: `${popoverPosition.left}px` 
+                      }}
+                    >
                       <div className="bg-white rounded-lg shadow-2xl border border-gray-300 w-80 max-w-sm">
                         <div className="px-4 py-3 border-b border-gray-200">
                           <div className="flex justify-between items-center">
