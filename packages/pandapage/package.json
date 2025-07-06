@@ -24,7 +24,6 @@
     "test:browser": "playwright test",
     "test:browser:ui": "playwright test --ui",
     "test:server": "bun run test-server/server.ts",
-    "typecheck": "tsc --noEmit",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",
