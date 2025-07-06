@@ -82,7 +82,7 @@ const App: React.FC = () => {
   const [structuredDocument, setStructuredDocument] = useState<any>(null);
   const [parsedDocument, setParsedDocument] = useState<ParsedDocument | null>(null);
   const [loading, setLoading] = useState(true);
-  const [processingTime, setProcessingTime] = useState<number | null>(null);
+  const [, setProcessingTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // UI state
@@ -639,6 +639,7 @@ const App: React.FC = () => {
               showOutline={showOutline}
               setShowOutline={setShowOutline}
               extractHeadings={extractHeadings}
+              countWords={countWords}
             />
           ) : loading && showSpinner ? (
             <LoadingSpinner result={result} />
