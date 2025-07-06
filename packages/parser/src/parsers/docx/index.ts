@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Heading, TextRun, DocumentMetadata } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata } from "../../types/document";
 
 export class DocxParseError {
   readonly _tag = "DocxParseError";
@@ -12,9 +12,13 @@ interface DocxRun {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  superscript?: boolean;
+  subscript?: boolean;
   fontSize?: string;
   fontFamily?: string;
   color?: string;
+  backgroundColor?: string;
+  link?: string;
 }
 
 interface DocxParagraph {
@@ -63,54 +67,133 @@ function parseParagraph(paragraphElement: Element): DocxParagraph | null {
     }
   }
   
-  // Parse runs
-  const runElements = paragraphElement.getElementsByTagNameNS(ns, "r");
-  for (let i = 0; i < runElements.length; i++) {
-    const runElement = runElements[i];
-    const textElement = runElement.getElementsByTagNameNS(ns, "t")[0];
-    const text = textElement?.textContent || "";
+  // Parse runs - both direct runs and runs inside hyperlinks
+  const allChildren = Array.from(paragraphElement.childNodes);
+  
+  for (let i = 0; i < allChildren.length; i++) {
+    const child = allChildren[i];
+    if (child.nodeType !== 1) continue; // Skip non-element nodes
     
-    // Get run properties
-    const runProps = runElement.getElementsByTagNameNS(ns, "rPr")[0];
-    let bold = false;
-    let italic = false;
-    let underline = false;
-    let strikethrough = false;
-    let fontSize: string | undefined;
-    let fontFamily: string | undefined;
-    let color: string | undefined;
+    const element = child as Element;
     
-    if (runProps) {
-      bold = runProps.getElementsByTagNameNS(ns, "b").length > 0;
-      italic = runProps.getElementsByTagNameNS(ns, "i").length > 0;
-      underline = runProps.getElementsByTagNameNS(ns, "u").length > 0;
-      strikethrough = runProps.getElementsByTagNameNS(ns, "strike").length > 0;
+    if (element.tagName === "w:r") {
+      // Direct run element
+      const run = parseRun(element, ns);
+      if (run && run.text) {
+        runs.push(run);
+      }
+    } else if (element.tagName === "w:hyperlink") {
+      // Hyperlink element containing runs
+      const rId = element.getAttribute("r:id");
+      let linkUrl: string | undefined;
       
-      const szElement = runProps.getElementsByTagNameNS(ns, "sz")[0];
-      fontSize = szElement?.getAttribute("w:val") || undefined;
+      // Note: We would need to resolve the rId to get the actual URL
+      // For now, we'll mark it as a link and extract the text
       
-      const fontElement = runProps.getElementsByTagNameNS(ns, "rFonts")[0];
-      fontFamily = fontElement?.getAttribute("w:ascii") || undefined;
-      
-      const colorElement = runProps.getElementsByTagNameNS(ns, "color")[0];
-      color = colorElement?.getAttribute("w:val") || undefined;
-    }
-    
-    if (text) {
-      runs.push({
-        text,
-        bold,
-        italic,
-        underline,
-        strikethrough,
-        fontSize,
-        fontFamily,
-        color
-      });
+      const hyperlinkRuns = element.getElementsByTagNameNS(ns, "r");
+      for (let j = 0; j < hyperlinkRuns.length; j++) {
+        const runElement = hyperlinkRuns[j];
+        const run = parseRun(runElement, ns, linkUrl);
+        if (run && run.text) {
+          runs.push(run);
+        }
+      }
     }
   }
   
   return runs.length > 0 ? { runs, style, numId, ilvl, alignment } : null;
+}
+
+function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | null {
+  const textElement = runElement.getElementsByTagNameNS(ns, "t")[0];
+  const text = textElement?.textContent || "";
+  
+  if (!text) return null;
+  
+  // Get run properties
+  const runProps = runElement.getElementsByTagNameNS(ns, "rPr")[0];
+  let bold = false;
+  let italic = false;
+  let underline = false;
+  let strikethrough = false;
+  let superscript = false;
+  let subscript = false;
+  let fontSize: string | undefined;
+  let fontFamily: string | undefined;
+  let color: string | undefined;
+  let backgroundColor: string | undefined;
+  
+  if (runProps) {
+    bold = runProps.getElementsByTagNameNS(ns, "b").length > 0;
+    italic = runProps.getElementsByTagNameNS(ns, "i").length > 0;
+    underline = runProps.getElementsByTagNameNS(ns, "u").length > 0;
+    strikethrough = runProps.getElementsByTagNameNS(ns, "strike").length > 0;
+    
+    // Check for superscript/subscript
+    const vertAlignElement = runProps.getElementsByTagNameNS(ns, "vertAlign")[0];
+    const vertAlign = vertAlignElement?.getAttribute("w:val");
+    if (vertAlign === "superscript") {
+      superscript = true;
+    } else if (vertAlign === "subscript") {
+      subscript = true;
+    }
+    
+    const szElement = runProps.getElementsByTagNameNS(ns, "sz")[0];
+    fontSize = szElement?.getAttribute("w:val") || undefined;
+    
+    const fontElement = runProps.getElementsByTagNameNS(ns, "rFonts")[0];
+    fontFamily = fontElement?.getAttribute("w:ascii") || undefined;
+    
+    const colorElement = runProps.getElementsByTagNameNS(ns, "color")[0];
+    color = colorElement?.getAttribute("w:val") || undefined;
+    
+    // Background color/highlighting
+    const highlightElement = runProps.getElementsByTagNameNS(ns, "highlight")[0];
+    const highlightColor = highlightElement?.getAttribute("w:val");
+    if (highlightColor && highlightColor !== "auto") {
+      // Map DOCX highlight colors to hex values
+      const highlightMap: Record<string, string> = {
+        'yellow': '#FFFF00',
+        'green': '#00FF00',
+        'cyan': '#00FFFF',
+        'magenta': '#FF00FF',
+        'blue': '#0000FF',
+        'red': '#FF0000',
+        'darkBlue': '#000080',
+        'darkCyan': '#008080',
+        'darkGreen': '#008000',
+        'darkMagenta': '#800080',
+        'darkRed': '#800000',
+        'darkYellow': '#808000',
+        'darkGray': '#808080',
+        'lightGray': '#C0C0C0',
+        'black': '#000000'
+      };
+      backgroundColor = highlightMap[highlightColor] || `#${highlightColor}`;
+    }
+    
+    // Also check for shading background
+    const shadingElement = runProps.getElementsByTagNameNS(ns, "shd")[0];
+    const shadingFill = shadingElement?.getAttribute("w:fill");
+    if (shadingFill && shadingFill !== "auto" && !backgroundColor) {
+      backgroundColor = `#${shadingFill}`;
+    }
+  }
+  
+  return {
+    text,
+    bold,
+    italic,
+    underline,
+    strikethrough,
+    superscript,
+    subscript,
+    fontSize,
+    fontFamily,
+    color,
+    backgroundColor,
+    link: linkUrl
+  };
 }
 
 function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
@@ -120,9 +203,13 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
     italic: run.italic,
     underline: run.underline,
     strikethrough: run.strikethrough,
+    superscript: run.superscript,
+    subscript: run.subscript,
     fontSize: run.fontSize ? Math.round(parseInt(run.fontSize) / 2) : undefined,
     fontFamily: run.fontFamily,
-    color: run.color ? `#${run.color}` : undefined
+    color: run.color ? `#${run.color}` : undefined,
+    backgroundColor: run.backgroundColor,
+    link: run.link
   }));
   
   // Check if it's a heading
@@ -164,6 +251,97 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
   }
   
   return element;
+}
+
+function parseTable(tableElement: Element): Table | null {
+  const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const rows: TableRow[] = [];
+  
+  // Get all table rows
+  const rowElements = tableElement.getElementsByTagNameNS(ns, "tr");
+  
+  for (let i = 0; i < rowElements.length; i++) {
+    const rowElement = rowElements[i];
+    const cells: TableCell[] = [];
+    
+    // Get all table cells in this row
+    const cellElements = rowElement.getElementsByTagNameNS(ns, "tc");
+    
+    for (let j = 0; j < cellElements.length; j++) {
+      const cellElement = cellElements[j];
+      const paragraphs: Paragraph[] = [];
+      
+      // Get all paragraphs in this cell
+      const cellParagraphs = cellElement.getElementsByTagNameNS(ns, "p");
+      
+      for (let k = 0; k < cellParagraphs.length; k++) {
+        const pElement = cellParagraphs[k];
+        const paragraph = parseParagraph(pElement);
+        if (paragraph) {
+          // Convert to Paragraph type (without list info for table cells)
+          const cellParagraph: Paragraph = {
+            type: 'paragraph',
+            runs: paragraph.runs.map(run => ({
+              text: run.text,
+              bold: run.bold,
+              italic: run.italic,
+              underline: run.underline,
+              strikethrough: run.strikethrough,
+              superscript: run.superscript,
+              subscript: run.subscript,
+              fontSize: run.fontSize ? Math.round(parseInt(run.fontSize) / 2) : undefined,
+              fontFamily: run.fontFamily,
+              color: run.color ? `#${run.color}` : undefined,
+              backgroundColor: run.backgroundColor,
+              link: run.link
+            })),
+            style: paragraph.style,
+            alignment: paragraph.alignment
+          };
+          paragraphs.push(cellParagraph);
+        }
+      }
+      
+      // Check for cell spanning properties
+      const tcPr = cellElement.getElementsByTagNameNS(ns, "tcPr")[0];
+      let colspan: number | undefined;
+      let rowspan: number | undefined;
+      
+      if (tcPr) {
+        const gridSpan = tcPr.getElementsByTagNameNS(ns, "gridSpan")[0];
+        if (gridSpan) {
+          const val = gridSpan.getAttribute("w:val");
+          if (val) colspan = parseInt(val);
+        }
+        
+        const vMerge = tcPr.getElementsByTagNameNS(ns, "vMerge")[0];
+        if (vMerge) {
+          // Note: DOCX vertical merge is complex, we'll handle basic cases
+          const val = vMerge.getAttribute("w:val");
+          if (val === "restart") rowspan = 1; // This is a simplification
+        }
+      }
+      
+      const cell: TableCell = {
+        paragraphs,
+        colspan,
+        rowspan
+      };
+      
+      cells.push(cell);
+    }
+    
+    if (cells.length > 0) {
+      rows.push({ cells });
+    }
+  }
+  
+  if (rows.length === 0) return null;
+  
+  return {
+    type: 'table',
+    rows
+  };
 }
 
 function parseMetadata(corePropsXml: string | undefined, appPropsXml: string | undefined): DocumentMetadata {
@@ -268,17 +446,46 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     // Extract metadata
     const metadata = parseMetadata(corePropsXml, appPropsXml);
     
-    // Parse paragraphs
+    // Parse all document body elements in order
     const elements: DocumentElement[] = [];
-    const paragraphElements = doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "p");
+    const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     
-    for (let i = 0; i < paragraphElements.length; i++) {
-      const pElement = paragraphElements[i];
-      const paragraph = parseParagraph(pElement);
-      if (paragraph) {
-        const element = convertToDocumentElement(paragraph);
-        elements.push(element);
+    // Get the document body
+    const bodyElements = doc.getElementsByTagNameNS(ns, "body");
+    if (bodyElements.length === 0) {
+      return { metadata, elements };
+    }
+    
+    const body = bodyElements[0];
+    
+    // Parse all direct children of the body in order
+    for (let i = 0; i < body.childNodes.length; i++) {
+      const child = body.childNodes[i];
+      if (child.nodeType !== 1) continue; // Skip non-element nodes
+      
+      const element = child as Element;
+      const tagName = element.tagName;
+      
+      if (tagName === "w:p") {
+        // Parse paragraph
+        const paragraph = parseParagraph(element);
+        if (paragraph) {
+          const docElement = convertToDocumentElement(paragraph);
+          elements.push(docElement);
+        }
+      } else if (tagName === "w:tbl") {
+        // Parse table
+        const table = parseTable(element);
+        if (table) {
+          elements.push(table);
+        }
+      } else if (tagName === "w:sectPr") {
+        // Section properties - might contain page breaks
+        // For now, add a page break
+        elements.push({ type: "pageBreak" });
       }
+      // Note: Images are typically inside paragraphs as w:drawing elements
+      // We'll handle them in the paragraph parsing
     }
     
     return {
