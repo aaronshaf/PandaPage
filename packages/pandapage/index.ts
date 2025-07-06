@@ -130,6 +130,31 @@ export {
 // Re-export other utilities
 export { debug } from "./src/common/debug";
 
+// Re-export parser functionality
+export {
+  parseDocument,
+  parseDocxDocument,
+  type ParsedDocument,
+  type DocumentElement,
+  type Paragraph,
+  type Heading,
+  type Table,
+  type TextRun,
+  type DocumentMetadata,
+  type ParseOptions as ParserOptions
+} from "@pandapage/parser";
+
+// Re-export renderers
+export {
+  renderToMarkdown,
+  type MarkdownRenderOptions
+} from "@pandapage/renderer-markdown";
+
+export {
+  renderToHtml,
+  type HtmlRenderOptions
+} from "@pandapage/renderer-dom";
+
 // Worker support
 export {
   type ParseOptions,

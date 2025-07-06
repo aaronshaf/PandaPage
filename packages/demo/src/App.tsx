@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { marked } from 'marked';
-import { renderDocxWithMetadata, renderPages, parseDocxToStructured } from '@pandapage/pandapage';
+import { 
+  renderPages, 
+  parseDocxToStructured,
+  parseDocxDocument,
+  renderToMarkdown,
+  type ParsedDocument
+} from '@pandapage/pandapage';
 import {
   Navigation,
   DocumentUpload,
@@ -73,6 +79,7 @@ const App: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [structuredDocument, setStructuredDocument] = useState<any>(null);
+  const [parsedDocument, setParsedDocument] = useState<ParsedDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -89,54 +96,35 @@ const App: React.FC = () => {
   // Computed values
   const wordCount = result ? countWords(removeFrontmatter(result)) : 0;
 
-  // Helper to strip HTML and markdown from text
-  const cleanTextForTitle = (text: string): string => {
-    return text
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&nbsp;/g, ' ')
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert markdown links to text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic
-      .replace(/`([^`]+)`/g, '$1') // Remove inline code
-      .trim();
-  };
+  // Extract document title from parsed document
 
-  // Extract document title from metadata, first heading, or filename
   const getDocumentTitle = () => {
-    // Try to get title from structured document metadata first
-    if (structuredDocument?.metadata?.title) {
-      return cleanTextForTitle(structuredDocument.metadata.title);
+    // Try to get title from parsed document metadata first
+    if (parsedDocument?.metadata?.title) {
+      return parsedDocument.metadata.title;
     }
     
-    // Try to get title from structured document elements (first heading or large text)
-    if (structuredDocument?.elements) {
-      // First pass: look for explicit heading/title styles
-      for (const element of structuredDocument.elements) {
-        if (element.type === 'paragraph' && element.style) {
-          const styleNormalized = element.style.toLowerCase();
-          if (styleNormalized === 'heading' || styleNormalized.startsWith('heading') || styleNormalized.includes('title')) {
-            const text = element.runs?.map(run => run.text || '').join('').trim();
-            if (text) {
-              return cleanTextForTitle(text);
-            }
+    // Try to get title from parsed document elements
+    if (parsedDocument?.elements) {
+      // Look for first heading
+      for (const element of parsedDocument.elements) {
+        if (element.type === 'heading') {
+          const text = element.runs.map(run => run.text).join('').trim();
+          if (text) {
+            return text;
           }
         }
       }
       
-      // Second pass: look for first non-empty paragraph that looks like a title
-      for (const element of structuredDocument.elements) {
+      // Look for first non-empty paragraph that looks like a title
+      for (const element of parsedDocument.elements) {
         if (element.type === 'paragraph') {
-          const text = element.runs?.map(run => run.text || '').join('').trim();
+          const text = element.runs.map(run => run.text).join('').trim();
           if (text && text.length > 5) {
             // If it's short (less than 100 chars), doesn't end with common punctuation,
             // and starts with a capital letter, it's likely a title
             if (text.length < 100 && !text.match(/[.,;:]$/) && text.match(/^[A-Z]/)) {
-              return cleanTextForTitle(text);
+              return text;
             }
             // If we've found a paragraph with substantial text that's not a title, stop looking
             if (text.length > 100) {
@@ -145,6 +133,11 @@ const App: React.FC = () => {
           }
         }
       }
+    }
+    
+    // Fallback to old structured document for backward compatibility
+    if (structuredDocument?.metadata?.title) {
+      return structuredDocument.metadata.title;
     }
     
     if (!result) {
@@ -344,18 +337,37 @@ const App: React.FC = () => {
 
       if (fileName.endsWith('.docx')) {
         try {
-          // Try to parse to structured format
-          const structured = await parseDocxToStructured(arrayBuffer);
-          setStructuredDocument(structured.document);
-          markdown = structured.markdown;
-        } catch (structuredError) {
-          console.error('Failed to parse structured DOCX, falling back to simple parser:', structuredError);
-          // Fall back to simple markdown conversion
-          markdown = await renderDocxWithMetadata(arrayBuffer);
+          // Parse document structure
+          const parsed = await parseDocxDocument(arrayBuffer);
+          setParsedDocument(parsed);
+          
+          // Render to markdown
+          markdown = renderToMarkdown(parsed, { includeFrontmatter: true });
+          
+          // Keep backward compatibility with structured document
+          try {
+            const structured = await parseDocxToStructured(arrayBuffer);
+            setStructuredDocument(structured.document);
+          } catch (e) {
+            setStructuredDocument(null);
+          }
+        } catch (parseError) {
+          console.error('Failed to parse DOCX:', parseError);
+          setParsedDocument(null);
           setStructuredDocument(null);
+          
+          // Fall back to legacy parsing
+          try {
+            const structured = await parseDocxToStructured(arrayBuffer);
+            setStructuredDocument(structured.document);
+            markdown = structured.markdown;
+          } catch (e) {
+            throw new Error('Failed to parse DOCX file');
+          }
         }
       } else if (fileName.endsWith('.pages')) {
         markdown = await renderPages(arrayBuffer);
+        setParsedDocument(null);
         setStructuredDocument(null);
       } else {
         throw new Error('Unsupported file format. Please use .docx or .pages files.');

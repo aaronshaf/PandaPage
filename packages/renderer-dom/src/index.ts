@@ -1,0 +1,228 @@
+import type {
+  ParsedDocument,
+  DocumentElement,
+  Paragraph,
+  Heading,
+  Table,
+  TextRun,
+  DocumentMetadata
+} from '@pandapage/parser';
+
+export interface HtmlRenderOptions {
+  includeStyles?: boolean;
+  pageSize?: 'letter' | 'a4';
+  margins?: {
+    top: string;
+    right: string;
+    bottom: string;
+    left: string;
+  };
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function renderTextRun(run: TextRun): string {
+  let text = escapeHtml(run.text);
+  
+  const styles: string[] = [];
+  const classes: string[] = [];
+  
+  if (run.bold) classes.push('font-bold');
+  if (run.italic) classes.push('italic');
+  if (run.underline) classes.push('underline');
+  if (run.strikethrough) classes.push('line-through');
+  
+  if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
+  if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
+  if (run.color) styles.push(`color: ${run.color}`);
+  if (run.backgroundColor) styles.push(`background-color: ${run.backgroundColor}`);
+  
+  const styleAttr = styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
+  const classAttr = classes.length > 0 ? ` class="${classes.join(' ')}"` : '';
+  
+  if (run.link) {
+    return `<a href="${escapeHtml(run.link)}"${classAttr}${styleAttr}>${text}</a>`;
+  }
+  
+  if (classAttr || styleAttr) {
+    return `<span${classAttr}${styleAttr}>${text}</span>`;
+  }
+  
+  return text;
+}
+
+function renderParagraph(paragraph: Paragraph): string {
+  const content = paragraph.runs.map(renderTextRun).join('');
+  
+  const classes: string[] = ['mb-4'];
+  
+  if (paragraph.alignment) {
+    switch (paragraph.alignment) {
+      case 'center': classes.push('text-center'); break;
+      case 'right': classes.push('text-right'); break;
+      case 'justify': classes.push('text-justify'); break;
+    }
+  }
+  
+  if (paragraph.listInfo) {
+    const indent = paragraph.listInfo.level * 2;
+    classes.push(`ml-${indent * 4}`);
+    
+    if (paragraph.listInfo.type === 'bullet') {
+      return `<li class="${classes.join(' ')}">${content}</li>`;
+    } else {
+      return `<li class="${classes.join(' ')}" value="${paragraph.listInfo.text || ''}">${content}</li>`;
+    }
+  }
+  
+  return `<p class="${classes.join(' ')}">${content}</p>`;
+}
+
+function renderHeading(heading: Heading): string {
+  const content = heading.runs.map(renderTextRun).join('');
+  const tag = `h${heading.level}`;
+  
+  const classes: string[] = ['mb-4'];
+  
+  // Add size classes based on heading level
+  switch (heading.level) {
+    case 1: classes.push('text-4xl', 'font-bold'); break;
+    case 2: classes.push('text-3xl', 'font-bold'); break;
+    case 3: classes.push('text-2xl', 'font-semibold'); break;
+    case 4: classes.push('text-xl', 'font-semibold'); break;
+    case 5: classes.push('text-lg', 'font-medium'); break;
+    case 6: classes.push('text-base', 'font-medium'); break;
+  }
+  
+  if (heading.alignment) {
+    switch (heading.alignment) {
+      case 'center': classes.push('text-center'); break;
+      case 'right': classes.push('text-right'); break;
+    }
+  }
+  
+  return `<${tag} class="${classes.join(' ')}">${content}</${tag}>`;
+}
+
+function renderTable(table: Table): string {
+  const rows = table.rows.map((row, rowIndex) => {
+    const cells = row.cells.map(cell => {
+      const content = cell.paragraphs.map(p => renderParagraph(p)).join('');
+      const tag = rowIndex === 0 ? 'th' : 'td';
+      const classes = rowIndex === 0 ? 'border px-4 py-2 font-semibold' : 'border px-4 py-2';
+      
+      const attrs: string[] = [`class="${classes}"`];
+      if (cell.colspan) attrs.push(`colspan="${cell.colspan}"`);
+      if (cell.rowspan) attrs.push(`rowspan="${cell.rowspan}"`);
+      
+      return `<${tag} ${attrs.join(' ')}>${content}</${tag}>`;
+    });
+    
+    return `<tr>${cells.join('')}</tr>`;
+  });
+  
+  return `<table class="border-collapse mb-4">${rows.join('')}</table>`;
+}
+
+function renderElement(element: DocumentElement): string {
+  switch (element.type) {
+    case 'paragraph':
+      return renderParagraph(element);
+    case 'heading':
+      return renderHeading(element);
+    case 'table':
+      return renderTable(element);
+    case 'image':
+      const imgData = btoa(String.fromCharCode(...new Uint8Array(element.data)));
+      return `<img src="data:${element.mimeType};base64,${imgData}" alt="${escapeHtml(element.alt || '')}" class="max-w-full h-auto mb-4" />`;
+    case 'pageBreak':
+      return '<div class="page-break" style="page-break-after: always;"></div>';
+    default:
+      return '';
+  }
+}
+
+export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
+  const elements = document.elements.map(renderElement).join('\n');
+  
+  if (!options.includeStyles) {
+    return elements;
+  }
+  
+  // Include full HTML document with styles
+  const pageSize = options.pageSize || 'letter';
+  const margins = options.margins || {
+    top: '1in',
+    right: '1in',
+    bottom: '1in',
+    left: '1in'
+  };
+  
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  ${document.metadata.title ? `<title>${escapeHtml(document.metadata.title)}</title>` : ''}
+  <style>
+    @page {
+      size: ${pageSize};
+      margin: ${margins.top} ${margins.right} ${margins.bottom} ${margins.left};
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: ${pageSize === 'letter' ? '8.5in' : '210mm'};
+      margin: 0 auto;
+      padding: ${margins.top} ${margins.right} ${margins.bottom} ${margins.left};
+    }
+    
+    .font-bold { font-weight: bold; }
+    .font-semibold { font-weight: 600; }
+    .font-medium { font-weight: 500; }
+    .italic { font-style: italic; }
+    .underline { text-decoration: underline; }
+    .line-through { text-decoration: line-through; }
+    
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-justify { text-align: justify; }
+    
+    .text-4xl { font-size: 2.25rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-base { font-size: 1rem; }
+    
+    .mb-4 { margin-bottom: 1rem; }
+    .ml-8 { margin-left: 2rem; }
+    .ml-16 { margin-left: 4rem; }
+    
+    .max-w-full { max-width: 100%; }
+    .h-auto { height: auto; }
+    
+    .border { border: 1px solid #e5e7eb; }
+    .border-collapse { border-collapse: collapse; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    
+    @media print {
+      .page-break { page-break-after: always; }
+    }
+  </style>
+</head>
+<body>
+${elements}
+</body>
+</html>`;
+}
