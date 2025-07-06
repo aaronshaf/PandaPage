@@ -1,3 +1,5 @@
+import { useState, useEffect, useRef } from 'react';
+import type { ParsedDocument } from '@pandapage/pandapage';
 
 interface SampleDocument {
   id: string;
@@ -22,6 +24,8 @@ interface NavigationProps {
   result: string | null;
   wordCount: number;
   documentTitle: string;
+  parsedDocument: ParsedDocument | null;
+  structuredDocument: any;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -41,8 +45,53 @@ export const Navigation: React.FC<NavigationProps> = ({
   setPrintScale,
   result,
   wordCount,
-  documentTitle
+  documentTitle,
+  parsedDocument,
+  structuredDocument
 }) => {
+  const [showMetadata, setShowMetadata] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Get metadata from either parsed or structured document
+  const getMetadata = () => {
+    if (parsedDocument?.metadata) {
+      return parsedDocument.metadata;
+    }
+    if (structuredDocument?.metadata) {
+      return structuredDocument.metadata;
+    }
+    return null;
+  };
+
+  const metadata = getMetadata();
+
+  // Close popover on click outside or ESC key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current) {
+        const popoverContent = popoverRef.current.querySelector('.bg-white');
+        if (popoverContent && !popoverContent.contains(event.target as Node)) {
+          setShowMetadata(false);
+        }
+      }
+    };
+
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowMetadata(false);
+      }
+    };
+
+    if (showMetadata) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscKey);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [showMetadata]);
   return (
     <header className="sticky top-0 z-40" data-testid="app-header">
       {/* Primary Header */}
@@ -92,7 +141,119 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </svg>
               </div>
             )}
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">{documentTitle}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">{documentTitle}</h1>
+              
+              {/* Metadata info button */}
+              {metadata && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMetadata(!showMetadata)}
+                    className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                    title="Document information"
+                  >
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                  </button>
+                  
+                  {/* Metadata popover */}
+                  {showMetadata && (
+                    <div ref={popoverRef} className="fixed inset-0 z-[60] flex items-start justify-start" style={{ paddingTop: '60px', paddingLeft: '20px' }}>
+                      <div className="bg-white rounded-lg shadow-2xl border border-gray-300 w-80 max-w-sm">
+                        <div className="px-4 py-3 border-b border-gray-200">
+                          <div className="flex justify-between items-center">
+                            <h3 className="text-sm font-medium text-gray-900">Document details</h3>
+                            <button
+                              onClick={() => setShowMetadata(false)}
+                              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="px-4 py-3 max-h-96 overflow-y-auto">
+                          <div className="space-y-4 text-sm">
+                            {metadata.title && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Title</div>
+                                <div className="text-gray-900">{metadata.title}</div>
+                              </div>
+                            )}
+                            
+                            {metadata.author && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Author</div>
+                                <div className="text-gray-900">{metadata.author}</div>
+                              </div>
+                            )}
+                            
+                            {metadata.description && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Description</div>
+                                <div className="text-gray-900">{metadata.description}</div>
+                              </div>
+                            )}
+                            
+                            {metadata.keywords && metadata.keywords.length > 0 && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Keywords</div>
+                                <div className="text-gray-900">{metadata.keywords.join(', ')}</div>
+                              </div>
+                            )}
+                            
+                            {metadata.language && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Language</div>
+                                <div className="text-gray-900">{metadata.language}</div>
+                              </div>
+                            )}
+                            
+                            {metadata.createdDate && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Created</div>
+                                <div className="text-gray-900">{new Date(metadata.createdDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}</div>
+                              </div>
+                            )}
+                            
+                            {metadata.modifiedDate && (
+                              <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Modified</div>
+                                <div className="text-gray-900">{new Date(metadata.modifiedDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'long', 
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}</div>
+                              </div>
+                            )}
+                            
+                            {!metadata.title && !metadata.author && !metadata.description && !metadata.keywords?.length && !metadata.language && !metadata.createdDate && !metadata.modifiedDate && (
+                              <div className="text-gray-500 text-center py-4">
+                                <svg className="h-8 w-8 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                No details available
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Document controls */}

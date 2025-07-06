@@ -613,6 +613,8 @@ const App: React.FC = () => {
         result={result}
         wordCount={wordCount}
         documentTitle={getDocumentTitle()}
+        parsedDocument={parsedDocument}
+        structuredDocument={structuredDocument}
       />
 
       {/* Main Content Area */}
