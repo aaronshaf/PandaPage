@@ -22,7 +22,7 @@ interface DocxParagraph {
   style?: string;
   numId?: string;
   ilvl?: number;
-  alignment?: string;
+  alignment?: 'left' | 'center' | 'right' | 'justify';
 }
 
 function parseParagraph(paragraphElement: Element): DocxParagraph | null {
@@ -34,7 +34,7 @@ function parseParagraph(paragraphElement: Element): DocxParagraph | null {
   let style: string | undefined;
   let numId: string | undefined;
   let ilvl: number | undefined;
-  let alignment: string | undefined;
+  let alignment: 'left' | 'center' | 'right' | 'justify' | undefined;
   
   if (pPrElement) {
     const styleElement = pPrElement.getElementsByTagNameNS(ns, "pStyle")[0];
