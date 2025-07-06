@@ -15,10 +15,12 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@types/jszip": "^3.4.1",
+    "@xmldom/xmldom": "^0.9.8",
     "effect": "^3.12.3",
     "jszip": "^3.10.1"
   },

@@ -10,6 +10,12 @@ export default defineConfig({
   output: {
     assetPrefix: process.env.NODE_ENV === 'production' ? '/PandaPage/' : '/'
   },
+  source: {
+    // Include workspace packages in compilation
+    include: [
+      /node_modules[\\/]@pandapage[\\/]/,
+    ],
+  },
   tools: {
     postcss: {
       plugins: [

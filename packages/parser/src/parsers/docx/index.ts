@@ -131,8 +131,16 @@ function parseMetadata(corePropsXml: string | undefined, appPropsXml: string | u
   const metadata: DocumentMetadata = {};
   
   if (corePropsXml) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(corePropsXml, "text/xml");
+    let doc: Document;
+    if (typeof DOMParser === 'undefined') {
+      // @ts-ignore
+      const { DOMParser: XMLDOMParser } = require('@xmldom/xmldom');
+      const parser = new XMLDOMParser();
+      doc = parser.parseFromString(corePropsXml, "text/xml");
+    } else {
+      const parser = new DOMParser();
+      doc = parser.parseFromString(corePropsXml, "text/xml");
+    }
     
     const title = doc.querySelector("title")?.textContent;
     if (title) metadata.title = title;
@@ -199,9 +207,19 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         catch: () => ""
       }).pipe(Effect.orElse(() => Effect.succeed(undefined))) : undefined;
     
-    // Parse XML
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(documentXml, "text/xml");
+    // Parse XML (use xmldom in Node.js)
+    let doc: Document;
+    if (typeof DOMParser === 'undefined') {
+      const { DOMParser: XMLDOMParser } = yield* Effect.tryPromise({
+        try: () => import('@xmldom/xmldom'),
+        catch: (error) => new DocxParseError(`Failed to load XML parser: ${error}`)
+      });
+      const parser = new XMLDOMParser();
+      doc = parser.parseFromString(documentXml, "text/xml") as any;
+    } else {
+      const parser = new DOMParser();
+      doc = parser.parseFromString(documentXml, "text/xml");
+    }
     
     // Extract metadata
     const metadata = parseMetadata(corePropsXml, appPropsXml);

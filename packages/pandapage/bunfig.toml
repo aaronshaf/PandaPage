@@ -1,12 +1,10 @@
 [test]
-# Exclude tmp directory and playwright spec files from unit tests
-exclude = ["tmp/**", "**/*.spec.ts"]
-
 # Coverage is disabled by default, use --coverage flag to enable
 coverage = false
 
 # Set low thresholds for now (10%)
 coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1, branches = 0.1 }
 
-# Skip coverage for demo package
+# Exclude test files and types from coverage
 coverageSkipTestFiles = true
+exclude = ["**/*.spec.ts", "**/*.test.ts", "test/**"]
