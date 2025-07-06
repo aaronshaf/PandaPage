@@ -27,7 +27,7 @@ test.describe('Hello World Test', () => {
     
     // Check we're in print mode by default (new behavior)
     await expect(page.locator('text=Read')).toBeVisible();
-    await expect(page.locator('text=Print Layout')).toBeVisible();
+    await expect(page.locator('text=View')).toBeVisible();
     
     // In print view, we should see page elements
     const printPage = page.locator('.print-page').first();
