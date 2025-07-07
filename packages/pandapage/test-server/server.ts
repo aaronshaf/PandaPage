@@ -13,7 +13,7 @@ const server = serve({
         `<!DOCTYPE html>
         <html>
           <head>
-            <title>PandaPage Test</title>
+            <title>pandapage Test</title>
             <meta charset="utf-8">
             <style>
               body { font-family: sans-serif; padding: 20px; }
@@ -44,7 +44,7 @@ const server = serve({
             </style>
           </head>
           <body>
-            <h1>PandaPage Test Page</h1>
+            <h1>pandapage Test Page</h1>
             
             <div id="drop-zone">
               Drop DOCX/PPTX files here or
@@ -71,7 +71,7 @@ const server = serve({
       );
     }
 
-    // Serve PandaPage library
+    // Serve pandapage library
     if (url.pathname === "/pandapage.js") {
       const bundled = await Bun.build({
         entrypoints: [join(import.meta.dir, "../index.ts")],

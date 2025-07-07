@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers development workflows, testing, and contribution guidelines for PandaPage.
+This guide covers development workflows, testing, and contribution guidelines for pandapage.
 
 ## Testing
 

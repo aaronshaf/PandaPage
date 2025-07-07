@@ -1,4 +1,4 @@
-# PandaPage DOCX Enhancement Plan
+# pandapage DOCX Enhancement Plan
 
 ## Analysis Summary
 
@@ -150,7 +150,7 @@ interface ChunkingStrategy {
 ```typescript
 interface MarkdownDocument {
   frontmatter: DocxMetadata & {
-    // PandaPage-specific metadata
+    // pandapage-specific metadata
     originalFormat: 'docx';
     extractedAt: string;
     processingTime: number;
@@ -344,4 +344,4 @@ interface IncrementalProcessor {
 - Keyboard navigation for page controls
 - High contrast mode for document viewing
 
-This plan provides a roadmap for transforming PandaPage into a robust, scalable DOCX processing solution capable of handling large documents with advanced features while maintaining excellent user experience.
+This plan provides a roadmap for transforming pandapage into a robust, scalable DOCX processing solution capable of handling large documents with advanced features while maintaining excellent user experience.

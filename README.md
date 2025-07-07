@@ -1,10 +1,10 @@
-# PandaPage
+# pandapage
 
 A document parser and renderer built with TypeScript. Parse DOCX documents and render them to HTML or Markdown.
 
-## [Try the Demo](https://aaronshaf.github.io/PandaPage/)
+## [Try the Demo](https://aaronshaf.github.io/pandapage/)
 
-See PandaPage in action with our interactive demo where you can upload and view DOCX documents.
+See pandapage in action with our interactive demo where you can upload and view DOCX documents.
 
 ## Features
 

@@ -1,8 +1,8 @@
-# Web Workers Architecture Plan for PandaPage
+# Web Workers Architecture Plan for pandapage
 
 ## Overview
 
-Web Workers will allow PandaPage to parse large documents without blocking the main thread, providing a smooth user experience even with multi-megabyte files. By using Transferable objects, we can efficiently move ArrayBuffers between threads without copying.
+Web Workers will allow pandapage to parse large documents without blocking the main thread, providing a smooth user experience even with multi-megabyte files. By using Transferable objects, we can efficiently move ArrayBuffers between threads without copying.
 
 ## Key Benefits
 

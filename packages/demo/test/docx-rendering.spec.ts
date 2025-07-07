@@ -8,8 +8,8 @@ test.describe("DOCX Rendering in Browser", () => {
   });
 
   test("should load test page", async ({ page }) => {
-    await expect(page).toHaveTitle("PandaPage Test");
-    await expect(page.locator("h1")).toContainText("PandaPage Test Page");
+    await expect(page).toHaveTitle("pandapage Test");
+    await expect(page.locator("h1")).toContainText("pandapage Test Page");
   });
 
   test("should detect when to use worker", async ({ page }) => {

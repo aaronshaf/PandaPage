@@ -132,7 +132,7 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 4. **Use index files** to maintain clean import paths
 5. **Maintain functionality** while improving structure
 
-## Project Context: PandaPage Document Parser
+## Project Context: pandapage Document Parser
 
 This project aims to parse and render modern document formats in the browser:
 

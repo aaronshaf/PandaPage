@@ -1,10 +1,10 @@
-# PandaPage
+# pandapage
 
-A library for parsing and rendering modern document formats in the browser. PandaPage enables web applications to work with native office documents without server-side processing.
+A library for parsing and rendering modern document formats in the browser. pandapage enables web applications to work with native office documents without server-side processing.
 
 ## Project Goals
 
-The primary goal of PandaPage is to support parsing and rendering of modern documents directly in the browser:
+The primary goal of pandapage is to support parsing and rendering of modern documents directly in the browser:
 - **Microsoft Office**: .docx, .pptx
 - **Apple iWork**: .pages, .key
 
@@ -127,7 +127,7 @@ await Effect.runPromise(
 
 ## Testing
 
-PandaPage uses two testing strategies:
+pandapage uses two testing strategies:
 
 ### Unit Tests (Bun)
 For pure functions that don't require browser APIs:

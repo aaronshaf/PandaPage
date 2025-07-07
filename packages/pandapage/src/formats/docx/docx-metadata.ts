@@ -34,7 +34,7 @@ export interface DocxMetadata {
   lines?: number;
   paragraphs?: number;
   
-  // PandaPage-specific metadata
+  // pandapage-specific metadata
   extractedAt: Date;
   originalFormat: "docx";
   processingTime?: number;
