@@ -1,10 +1,14 @@
 [test]
-# Disable coverage for now to fix CI
-coverage = false
+# Enable coverage for parser package
+coverage = true
 
-# Coverage thresholds - currently at 85.76% lines, 73.26% functions
-# TODO: Enable coverage and increase thresholds as we improve test coverage
-# coverageThreshold = { lines = 0.85, functions = 0.70, statements = 0.85, branches = 0.50 }
+# Only run tests from src directory, not dist
+include = ["src/**/*.test.ts", "src/**/*.spec.ts"]
 
-# Exclude test files from coverage
+# Coverage thresholds - set to actual source file coverage levels
+# Current coverage: 69.65% lines (src), 46.51% functions
+# TODO: Increase these thresholds as we improve test coverage
+coverageThreshold = { lines = 0.69, functions = 0.46, statements = 0.69, branches = 0.45 }
+
+# Exclude test files and dist directory from coverage
 coverageSkipTestFiles = true
