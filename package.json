@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "bun run --filter '*' dev",
     "build": "cd packages/demo && bun run build",
-    "test": "cd packages/pandapage && bun test",
+    "test": "bun test packages/parser/src packages/renderer-markdown/src packages/renderer-dom/src packages/pandapage/test packages/pandapage/src",
     "test:all": "cd packages/pandapage && bun test:all && cd ../demo && bun test:e2e",
     "test:coverage": "bun run --filter '*' test:coverage",
     "test:unit": "cd packages/parser && bun test && cd ../renderer-markdown && bun test && cd ../renderer-dom && bun test && cd ../pandapage && bun run test:unit",
