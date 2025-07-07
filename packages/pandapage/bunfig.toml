@@ -1,6 +1,6 @@
 [test]
-# Enable coverage with realistic thresholds
-coverage = true
+# Coverage is disabled by default, use --coverage flag to enable
+coverage = false
 
 # Start with achievable thresholds and increase over time
 coverageThreshold = { lines = 0.38, functions = 0.47, statements = 0.38, branches = 0.20 }
