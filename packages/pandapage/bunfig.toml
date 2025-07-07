@@ -2,8 +2,8 @@
 # Coverage is enabled for --coverage flag and test:coverage script
 coverage = true
 
-# Coverage enabled without thresholds - can be added later when coverage improves
-# coverageThreshold = { lines = 0.30, functions = 0.40, statements = 0.30, branches = 0.05 }
+# Coverage enabled without thresholds - debugging threshold issues
+# coverageThreshold = { lines = 0.01, functions = 0.01, statements = 0.01, branches = 0.01 }
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true
