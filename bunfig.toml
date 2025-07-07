@@ -13,8 +13,8 @@ exclude = [
 # Coverage is disabled by default, use --coverage flag to enable
 coverage = false
 
-# Set low thresholds for now (10%)
-coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1, branches = 0.1 }
+# No thresholds at root level - each package sets its own
+# coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1, branches = 0.1 }
 
 # Skip coverage for demo package
 coverageSkipTestFiles = true

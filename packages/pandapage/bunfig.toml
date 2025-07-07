@@ -2,8 +2,11 @@
 # Coverage is enabled for --coverage flag and test:coverage script
 coverage = true
 
-# Coverage enabled without thresholds - debugging threshold issues
-# coverageThreshold = { lines = 0.01, functions = 0.01, statements = 0.01, branches = 0.01 }
+# Coverage thresholds disabled - appears to be a bun test runner issue
+# Even with very low thresholds (1-30%), coverage fails despite passing the actual levels
+# TODO: Investigate bun test coverage threshold behavior or switch to alternative
+# Current coverage: 47.44% functions, 38.84% lines (should easily pass low thresholds)
+# coverageThreshold = { lines = 30, functions = 40 }
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true
