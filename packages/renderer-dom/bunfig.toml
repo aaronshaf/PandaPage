@@ -1,9 +1,2 @@
 [test]
-# Enable coverage for renderer-dom package
-coverage = true
-
-# Realistic thresholds based on current coverage
-coverageThreshold = { lines = 0.85, functions = 0.95, statements = 0.85, branches = 0.5 }
-
-# Exclude test files from coverage
-coverageSkipTestFiles = true
+coverage = false

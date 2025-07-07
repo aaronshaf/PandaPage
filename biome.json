@@ -1,0 +1,88 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json"],
+    "ignoreUnknown": true,
+    "experimentalScannerIgnores": [
+      "node_modules/**",
+      "dist/**",
+      "deprecated/**",
+      "test-fixtures/**",
+      "*.docx",
+      "*.pages",
+      "*.pptx",
+      "*.key",
+      "*.pdf",
+      "bun.lock",
+      "**/playwright-report/**",
+      "**/test-results/**"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "off",
+        "useOptionalChain": "off",
+        "noUselessSwitchCase": "off",
+        "useRegexLiterals": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noConsole": "off",
+        "noArrayIndexKey": "off",
+        "noGlobalIsNan": "off",
+        "noImplicitAnyLet": "off",
+        "noAssignInExpressions": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useTemplate": "off",
+        "useNodejsImportProtocol": "off",
+        "useImportType": "off",
+        "useConst": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "useSemanticElements": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "noStaticElementInteractions": "off"
+      },
+      "correctness": {
+        "noUnusedImports": "off",
+        "useExhaustiveDependencies": "off",
+        "noUnusedVariables": "off",
+        "noUnusedFunctionParameters": "off",
+        "useYield": "off",
+        "noSwitchDeclarations": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always"
+    }
+  }
+}

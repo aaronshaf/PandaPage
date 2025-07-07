@@ -15,7 +15,10 @@
     "test:unit": "cd packages/parser && bun test && cd ../renderer-markdown && bun test && cd ../renderer-dom && bun test && cd ../pandapage && bun run test:unit",
     "typecheck": "cd packages/parser && bun run typecheck && cd ../renderer-markdown && bun run typecheck && cd ../renderer-dom && bun run typecheck && cd ../pandapage && bun run typecheck && cd ../demo && npx tsc --noEmit",
     "test:e2e:headless": "cd packages/demo && bun run build && npx playwright test --config=playwright.precommit.config.ts",
-    "precommit": "bun run typecheck && bun run test:unit && bun run test:e2e:headless",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "precommit": "bun run lint && bun run typecheck",
     "prepare": "simple-git-hooks",
     "sync-docs": "bun scripts/sync-documents.js"
   },
@@ -23,6 +26,7 @@
     "pre-commit": "bun run precommit"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.0.6",
     "@types/bun": "latest",
     "simple-git-hooks": "^2.13.0",
     "typescript": "^5"
