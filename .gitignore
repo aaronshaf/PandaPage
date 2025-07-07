@@ -37,3 +37,6 @@ pdf.js
 tmp
 *.tmp.*
 TODO.md
+
+# Playwright test results
+**/test-results/
