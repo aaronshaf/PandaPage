@@ -7,4 +7,4 @@ coverageThreshold = { lines = 0.38, functions = 0.47, statements = 0.38, branche
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true
-exclude = ["**/*.spec.ts", "**/*.test.ts", "test/**"]
+exclude = ["**/*.spec.ts", "**/*.test.ts", "test/**", "tmp/**"]
