@@ -50,7 +50,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     const containerWidth = window.innerWidth - 320; // Account for potential sidebar
     const pageWidth = 8.5 * 96; // 8.5 inches at 96 DPI
     const maxScale = Math.min(containerWidth / pageWidth, 1.2); // Max 120%
-    return Math.max(0.4, maxScale * 0.9); // Use 90% of available width, min 40%
+    return Math.max(0.4, maxScale * 0.83); // Use 83% of available width for 100% default scale, min 40%
   };
 
   useEffect(() => {
