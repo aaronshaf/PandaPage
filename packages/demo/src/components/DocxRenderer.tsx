@@ -47,13 +47,13 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
         data-testid={`table-${index}`}
       >
         <tbody>
-          {table.rows.map((row, rowIndex) => (
+          {table.rows.map((row: any, rowIndex: number) => (
             <tr 
               key={rowIndex}
               className={row.properties?.isHeader ? 'font-semibold' : ''}
               data-testid={`table-${index}-row-${rowIndex}`}
             >
-              {row.cells.map((cell, cellIndex) => {
+              {row.cells.map((cell: any, cellIndex: number) => {
                 const Tag = row.properties?.isHeader ? 'th' : 'td';
                 const cellStyle: React.CSSProperties = {};
                 
@@ -85,7 +85,7 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
                     style={cellStyle}
                     data-testid={`table-${index}-cell-${rowIndex}-${cellIndex}`}
                   >
-                    {cell.content.map((paragraph, pIndex) => 
+                    {cell.content.map((paragraph: any, pIndex: number) => 
                       renderParagraph(paragraph, `${index}-${rowIndex}-${cellIndex}-${pIndex}`)
                     )}
                   </Tag>
@@ -133,7 +133,7 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
     const content: React.ReactElement[] = [];
     
     // Render runs
-    runs.forEach((run, index) => {
+    runs.forEach((run: any, index: number) => {
       let textElement: React.ReactElement = <React.Fragment key={`run-${index}`}>{run.text}</React.Fragment>;
       
       if (run.bold) {
@@ -152,7 +152,7 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
     });
     
     // Render form fields
-    fields?.forEach((field, index) => {
+    fields?.forEach((field: any, index: number) => {
       if (field.type === 'FORMTEXT') {
         content.push(
           <span 

@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
@@ -9,7 +10,11 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    "paths": {
+      "@pandapage/parser": ["../../packages/parser/src/index.ts"],
+      "@pandapage/parser/*": ["../../packages/parser/src/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

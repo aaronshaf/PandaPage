@@ -4,8 +4,7 @@ import type {
   Paragraph,
   Heading,
   Table,
-  TextRun,
-  DocumentMetadata
+  TextRun
 } from '@pandapage/parser';
 
 export interface HtmlRenderOptions {
@@ -120,12 +119,12 @@ function trimWhitespaceRuns(runs: TextRun[]): TextRun[] {
   let end = runs.length - 1;
   
   // Find first non-whitespace-only run
-  while (start <= end && runs[start].text.trim() === '') {
+  while (start <= end && runs[start]?.text.trim() === '') {
     start++;
   }
   
   // Find last non-whitespace-only run
-  while (end >= start && runs[end].text.trim() === '') {
+  while (end >= start && runs[end]?.text.trim() === '') {
     end--;
   }
   
@@ -138,9 +137,9 @@ function trimWhitespaceRuns(runs: TextRun[]): TextRun[] {
   
   // Trim the first and last runs
   if (trimmed.length > 0) {
-    trimmed[0] = { ...trimmed[0], text: trimmed[0].text.trimStart() };
+    trimmed[0] = { ...trimmed[0]!, text: trimmed[0]!.text.trimStart() };
     if (trimmed.length > 1) {
-      trimmed[trimmed.length - 1] = { ...trimmed[trimmed.length - 1], text: trimmed[trimmed.length - 1].text.trimEnd() };
+      trimmed[trimmed.length - 1] = { ...trimmed[trimmed.length - 1]!, text: trimmed[trimmed.length - 1]!.text.trimEnd() };
     } else {
       // Only one run, trim both ends
       trimmed[0] = { ...trimmed[0], text: trimmed[0].text.trimEnd() };
@@ -178,9 +177,9 @@ function renderHeading(heading: Heading): string {
 }
 
 function renderTable(table: Table): string {
-  const rows = table.rows.map((row, rowIndex) => {
-    const cells = row.cells.map(cell => {
-      const content = cell.paragraphs.map(p => renderParagraph(p)).join('');
+  const rows = table.rows.map((row: any, rowIndex: number) => {
+    const cells = row.cells.map((cell: any) => {
+      const content = cell.paragraphs.map((p: any) => renderParagraph(p)).join('');
       const tag = rowIndex === 0 ? 'th' : 'td';
       const classes = rowIndex === 0 ? 'border px-4 py-2 font-semibold' : 'border px-4 py-2';
       
@@ -199,7 +198,7 @@ function renderTable(table: Table): string {
 
 function renderHeader(header: DocumentElement): string {
   if (header.type !== 'header') return '';
-  const elements = header.elements.map(el => {
+  const elements = header.elements.map((el: any) => {
     if (el.type === 'paragraph') {
       return renderParagraph(el);
     } else if (el.type === 'table') {
@@ -213,7 +212,7 @@ function renderHeader(header: DocumentElement): string {
 
 function renderFooter(footer: DocumentElement): string {
   if (footer.type !== 'footer') return '';
-  const elements = footer.elements.map(el => {
+  const elements = footer.elements.map((el: any) => {
     if (el.type === 'paragraph') {
       return renderParagraph(el);
     } else if (el.type === 'table') {

@@ -129,7 +129,7 @@ const App: React.FC = () => {
       // Look for first heading
       for (const element of parsedDocument.elements) {
         if (element.type === 'heading') {
-          const text = element.runs.map(run => run.text).join('').trim();
+          const text = element.runs.map((run: any) => run.text).join('').trim();
           if (text) {
             return text;
           }
@@ -139,7 +139,7 @@ const App: React.FC = () => {
       // Look for first paragraph that looks like a title
       for (const element of parsedDocument.elements) {
         if (element.type === 'paragraph') {
-          const text = element.runs.map(run => run.text).join('').trim();
+          const text = element.runs.map((run: any) => run.text).join('').trim();
           if (text && text.length > 5 && text.length < 100 && !text.match(/[.,;:]$/) && text.match(/^[A-Z]/)) {
             return text;
           }

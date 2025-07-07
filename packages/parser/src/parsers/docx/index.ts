@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark } from "../../types/document";
 
 export class DocxParseError {
   readonly _tag = "DocxParseError";
@@ -72,7 +72,7 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
   
   for (let i = 0; i < allChildren.length; i++) {
     const child = allChildren[i];
-    if (child.nodeType !== 1) continue; // Skip non-element nodes
+    if (!child || child.nodeType !== 1) continue; // Skip non-element nodes
     
     const element = child as Element;
     
@@ -95,6 +95,7 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
       const hyperlinkRuns = element.getElementsByTagNameNS(ns, "r");
       for (let j = 0; j < hyperlinkRuns.length; j++) {
         const runElement = hyperlinkRuns[j];
+        if (!runElement) continue;
         const run = parseRun(runElement, ns, linkUrl);
         if (run && run.text) {
           runs.push(run);
@@ -220,7 +221,7 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
     if (styleNormalized === 'heading' || styleNormalized.startsWith('heading') || styleNormalized.includes('title')) {
       let level: 1 | 2 | 3 | 4 | 5 | 6 = 1;
       const match = styleNormalized.match(/heading\s*(\d)/);
-      if (match) {
+      if (match && match[1]) {
         const parsedLevel = parseInt(match[1]);
         if (parsedLevel >= 1 && parsedLevel <= 6) {
           level = parsedLevel as 1 | 2 | 3 | 4 | 5 | 6;
@@ -264,6 +265,7 @@ function parseTable(tableElement: Element, relationships?: Map<string, string>):
   
   for (let i = 0; i < rowElements.length; i++) {
     const rowElement = rowElements[i];
+    if (!rowElement) continue;
     const cells: TableCell[] = [];
     
     // Get all table cells in this row
@@ -271,6 +273,7 @@ function parseTable(tableElement: Element, relationships?: Map<string, string>):
     
     for (let j = 0; j < cellElements.length; j++) {
       const cellElement = cellElements[j];
+      if (!cellElement) continue;
       const paragraphs: Paragraph[] = [];
       
       // Get all paragraphs in this cell
@@ -278,6 +281,7 @@ function parseTable(tableElement: Element, relationships?: Map<string, string>):
       
       for (let k = 0; k < cellParagraphs.length; k++) {
         const pElement = cellParagraphs[k];
+        if (!pElement) continue;
         const paragraph = parseParagraph(pElement, relationships);
         if (paragraph) {
           // Convert to Paragraph type (without list info for table cells)
@@ -305,7 +309,7 @@ function parseTable(tableElement: Element, relationships?: Map<string, string>):
       }
       
       // Check for cell spanning properties
-      const tcPr = cellElement.getElementsByTagNameNS(ns, "tcPr")[0];
+      const tcPr = cellElement ? cellElement.getElementsByTagNameNS(ns, "tcPr")[0] : undefined;
       let colspan: number | undefined;
       let rowspan: number | undefined;
       
@@ -346,7 +350,7 @@ function parseTable(tableElement: Element, relationships?: Map<string, string>):
   };
 }
 
-function parseMetadata(corePropsXml: string | undefined, appPropsXml: string | undefined): DocumentMetadata {
+function parseMetadata(corePropsXml: string | undefined, _appPropsXml: string | undefined): DocumentMetadata {
   const metadata: DocumentMetadata = {};
   
   if (corePropsXml) {
@@ -403,7 +407,6 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships
     doc = parser.parseFromString(xml, "text/xml");
   }
   
-  const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
   const elements: (Paragraph | Table)[] = [];
   
   // Get all paragraphs and tables from the header/footer
@@ -412,7 +415,7 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships
   // Parse all children
   for (let i = 0; i < body.childNodes.length; i++) {
     const child = body.childNodes[i];
-    if (child.nodeType !== 1) continue; // Skip non-element nodes
+    if (!child || child.nodeType !== 1) continue; // Skip non-element nodes
     
     const element = child as Element;
     const tagName = element.tagName;
@@ -451,6 +454,7 @@ function parseBookmarks(element: Element, ns: string): Bookmark[] {
   
   for (let i = 0; i < bookmarkStarts.length; i++) {
     const bookmarkStart = bookmarkStarts[i];
+    if (!bookmarkStart) continue;
     const id = bookmarkStart.getAttribute("w:id");
     const name = bookmarkStart.getAttribute("w:name");
     
@@ -459,7 +463,7 @@ function parseBookmarks(element: Element, ns: string): Bookmark[] {
       const bookmarkEnd = findBookmarkEnd(element, id, ns);
       let text: string | undefined;
       
-      if (bookmarkEnd) {
+      if (bookmarkEnd && bookmarkStart) {
         text = extractBookmarkText(bookmarkStart, bookmarkEnd);
       }
       
@@ -480,6 +484,7 @@ function findBookmarkEnd(element: Element, bookmarkId: string, ns: string): Elem
   
   for (let i = 0; i < bookmarkEnds.length; i++) {
     const bookmarkEnd = bookmarkEnds[i];
+    if (!bookmarkEnd) continue;
     if (bookmarkEnd.getAttribute("w:id") === bookmarkId) {
       return bookmarkEnd;
     }
@@ -500,7 +505,9 @@ function extractBookmarkText(startElement: Element, endElement: Element): string
       if (element.tagName === "w:r") {
         const textNodes = element.getElementsByTagName("w:t");
         for (let i = 0; i < textNodes.length; i++) {
-          text += textNodes[i].textContent || '';
+          const textNode = textNodes[i];
+          if (!textNode) continue;
+          text += textNode.textContent || '';
         }
       }
     }
@@ -599,6 +606,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         // Build relationships map for hyperlinks and process headers/footers
         for (let i = 0; i < relationships.length; i++) {
           const rel = relationships[i];
+          if (!rel) continue;
           const id = rel.getAttribute("Id");
           const type = rel.getAttribute("Type");
           const target = rel.getAttribute("Target");
@@ -662,6 +670,11 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     }
     
     const body = bodyNodeList[0];
+    if (!body) {
+      // Add footers at the end and return
+      elements.push(...footers);
+      return { metadata, elements };
+    }
     
     // Parse bookmarks from the entire document body first
     const bookmarks = parseBookmarks(body, ns);
@@ -670,7 +683,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     // Parse all direct children of the body in order
     for (let i = 0; i < body.childNodes.length; i++) {
       const child = body.childNodes[i];
-      if (child.nodeType !== 1) continue; // Skip non-element nodes
+      if (!child || child.nodeType !== 1) continue; // Skip non-element nodes
       
       const element = child as Element;
       const tagName = element.tagName;

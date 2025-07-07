@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test test/*.test.ts",
     "test:coverage": "bun test --coverage test/*.test.ts",
-    "test:unit": "LOG_LEVEL=None bun test test/*.test.ts",
+    "test:unit": "LOG_LEVEL=None bun test --no-coverage test/*.test.ts",
     "test:integration": "LOG_LEVEL=None bun test test/*.spec.ts",
     "test:ai": "LOG_LEVEL=None bun test test/ai --timeout 30000",
     "test:ai-verbose": "LOG_LEVEL=AI bun test test/ai --timeout 30000",

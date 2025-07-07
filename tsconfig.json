@@ -24,6 +24,18 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Path mappings for workspace packages
+    "paths": {
+      "@pandapage/parser": ["./packages/parser/src/index.ts"],
+      "@pandapage/parser/*": ["./packages/parser/src/*"],
+      "@pandapage/renderer-markdown": ["./packages/renderer-markdown/src/index.ts"],
+      "@pandapage/renderer-markdown/*": ["./packages/renderer-markdown/src/*"],
+      "@pandapage/renderer-dom": ["./packages/renderer-dom/src/index.ts"],
+      "@pandapage/renderer-dom/*": ["./packages/renderer-dom/src/*"],
+      "@pandapage/pandapage": ["./packages/pandapage/src/index.ts"],
+      "@pandapage/pandapage/*": ["./packages/pandapage/src/*"]
+    }
   }
 }

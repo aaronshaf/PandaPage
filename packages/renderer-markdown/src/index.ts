@@ -53,10 +53,10 @@ function renderHeading(heading: Heading): string {
 function renderTable(table: Table): string {
   const lines: string[] = [];
   
-  table.rows.forEach((row, rowIndex) => {
-    const cells = row.cells.map(cell => {
+  table.rows.forEach((row, rowIndex: number) => {
+    const cells = row.cells.map((cell: any) => {
       // Join all paragraphs in the cell
-      return cell.paragraphs.map(p => p.runs.map(r => r.text).join('').trim()).join(' ');
+      return cell.paragraphs.map((p: any) => p.runs.map((r: any) => r.text).join('').trim()).join(' ');
     });
     
     lines.push(`| ${cells.join(' | ')} |`);
@@ -73,7 +73,7 @@ function renderTable(table: Table): string {
 
 function renderHeader(header: DocumentElement): string {
   if (header.type !== 'header') return '';
-  const elements = header.elements.map(el => {
+  const elements = header.elements.map((el: any) => {
     if (el.type === 'paragraph') {
       return renderParagraph(el);
     } else if (el.type === 'table') {
@@ -87,7 +87,7 @@ function renderHeader(header: DocumentElement): string {
 
 function renderFooter(footer: DocumentElement): string {
   if (footer.type !== 'footer') return '';
-  const elements = footer.elements.map(el => {
+  const elements = footer.elements.map((el: any) => {
     if (el.type === 'paragraph') {
       return renderParagraph(el);
     } else if (el.type === 'table') {
@@ -135,7 +135,7 @@ function renderFrontmatter(metadata: DocumentMetadata): string {
   if (metadata.createdDate) lines.push(`created: ${metadata.createdDate.toISOString()}`);
   if (metadata.modifiedDate) lines.push(`modified: ${metadata.modifiedDate.toISOString()}`);
   if (metadata.keywords && metadata.keywords.length > 0) {
-    lines.push(`keywords: [${metadata.keywords.map(k => `"${k}"`).join(', ')}]`);
+    lines.push(`keywords: [${metadata.keywords.map((k: string) => `"${k}"`).join(', ')}]`);
   }
   if (metadata.description) lines.push(`description: "${metadata.description}"`);
   if (metadata.language) lines.push(`language: ${metadata.language}`);
@@ -154,7 +154,7 @@ export function renderToMarkdown(document: ParsedDocument, options: MarkdownRend
   }
   
   // Render each element
-  document.elements.forEach(element => {
+  document.elements.forEach((element: DocumentElement) => {
     const rendered = renderElement(element);
     if (rendered) {
       lines.push(rendered);

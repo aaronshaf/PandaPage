@@ -25,6 +25,16 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "noImplicitReturns": false,
-    "exactOptionalPropertyTypes": false
+    "exactOptionalPropertyTypes": false,
+
+    // Path mappings for workspace packages
+    "paths": {
+      "@pandapage/parser": ["../parser/src/index.ts"],
+      "@pandapage/parser/*": ["../parser/src/*"],
+      "@pandapage/renderer-markdown": ["../renderer-markdown/src/index.ts"],
+      "@pandapage/renderer-markdown/*": ["../renderer-markdown/src/*"],
+      "@pandapage/renderer-dom": ["../renderer-dom/src/index.ts"],
+      "@pandapage/renderer-dom/*": ["../renderer-dom/src/*"]
+    }
   }
 }
