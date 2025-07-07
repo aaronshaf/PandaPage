@@ -1,5 +1,5 @@
 [test]
 # Enable coverage with low initial thresholds
 coverage = true
-coverageThreshold = { lines = 0.50, functions = 0.50, statements = 0.50, branches = 0.30 }
+coverageThreshold = { lines = 0.77, functions = 0.78, statements = 0.77, branches = 0.30 }
 coverageSkipTestFiles = true

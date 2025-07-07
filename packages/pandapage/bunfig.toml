@@ -3,7 +3,7 @@
 coverage = true
 
 # Start with achievable thresholds and increase over time
-coverageThreshold = { lines = 0.30, functions = 0.30, statements = 0.30, branches = 0.20 }
+coverageThreshold = { lines = 0.38, functions = 0.47, statements = 0.38, branches = 0.20 }
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true

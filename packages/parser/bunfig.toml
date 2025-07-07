@@ -2,11 +2,9 @@
 # Enable coverage for parser package
 coverage = true
 
-# Only run tests from src directory, not dist
-include = ["src/**/*.test.ts", "src/**/*.spec.ts"]
 
 # Coverage thresholds - set to actual source file coverage levels
-# Current coverage: 69.65% lines (src), 46.51% functions
+# Current coverage: 69.65% lines, 46.51% functions (for actual source, not test files)
 # TODO: Increase these thresholds as we improve test coverage
 coverageThreshold = { lines = 0.69, functions = 0.46, statements = 0.69, branches = 0.45 }
 
