@@ -34,19 +34,17 @@ For detailed development information, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ### Parsing & Rendering Features
 
-#### Currently Supported
-- [x] **Text formatting**: Bold, italic, underline, strikethrough
-- [x] **Advanced formatting**: Superscript, subscript, font colors, background colors
-- [x] **Document structure**: Headings (H1-H6), paragraphs, page breaks
-- [x] **Tables**: Complete table parsing with cell spans and formatting
-- [x] **Lists**: Numbered and bulleted lists with nesting
-- [x] **Hyperlinks**: Full URL resolution with security confirmation dialogs
-- [x] **Headers & footers**: Document header and footer content
-- [x] **Bookmarks**: Document bookmark parsing and rendering
-- [x] **Metadata**: Document properties (title, author, dates, keywords)
-- [x] **Security**: Safe link handling with user confirmation
-
 #### In Progress
+- [ ] **Text formatting**: Bold, italic, underline, strikethrough
+- [ ] **Advanced formatting**: Superscript, subscript, font colors, background colors
+- [ ] **Document structure**: Headings (H1-H6), paragraphs, page breaks
+- [ ] **Tables**: Complete table parsing with cell spans and formatting
+- [ ] **Lists**: Numbered and bulleted lists with nesting
+- [ ] **Hyperlinks**: Full URL resolution with security confirmation dialogs
+- [ ] **Headers & footers**: Document header and footer content
+- [ ] **Bookmarks**: Document bookmark parsing and rendering
+- [ ] **Metadata**: Document properties (title, author, dates, keywords)
+- [ ] **Security**: Safe link handling with user confirmation
 - [ ] **Images**: Embedded image extraction and rendering
 - [ ] **Merge fields**: Document template field support
 - [ ] **Form fields**: Interactive form elements
@@ -60,3 +58,8 @@ For detailed development information, see [DEVELOPMENT.md](DEVELOPMENT.md).
 - [ ] **Track changes**: Revision history support
 - [ ] **Equations**: Mathematical formula rendering
 - [ ] **Drawing objects**: Shapes and drawing elements
+
+## See also
+
+* [mammoth.js](https://github.com/mwilliamson/mammoth.js)
+* [docxjs](https://github.com/VolodymyrBaydalka/docxjs)
