@@ -78,37 +78,22 @@ export const extractContent = (html: string): string => {
   // Look for page-content divs and extract their content
   const pageContent = tempDiv.querySelector('.page-content');
   if (pageContent) {
-    // Extract main content
-    let content = pageContent.innerHTML;
-    
-    // Also extract any footnotes that might be siblings of the page content
-    const footnotes = tempDiv.querySelectorAll('.footnote');
-    footnotes.forEach(footnote => {
-      content += footnote.outerHTML;
-    });
-    
-    return content;
+    // Page content should already include footnotes, so just return its innerHTML
+    return pageContent.innerHTML;
   }
   
   // Look for page divs and extract their content
   const page = tempDiv.querySelector('.page');
   if (page) {
-    // Extract main content from page
+    // Extract all content from the page, including footnotes
     let content = '';
     
-    // Get all content except nested .page divs
+    // Get all child elements, preserving footnotes
     const children = Array.from(page.children);
     children.forEach(child => {
+      // Skip nested .page divs but include everything else (including footnotes)
       if (!child.classList.contains('page')) {
         content += child.outerHTML;
-      }
-    });
-    
-    // Also extract any footnotes that might be elsewhere
-    const footnotes = tempDiv.querySelectorAll('.footnote');
-    footnotes.forEach(footnote => {
-      if (!content.includes(footnote.outerHTML)) {
-        content += footnote.outerHTML;
       }
     });
     
