@@ -8,6 +8,9 @@ import type {
   Image
 } from '@browser-document-viewer/parser';
 
+// Re-export the new DOM-based renderer
+export { DOMRenderer, type DOMRenderOptions } from './dom-renderer';
+
 export interface HtmlRenderOptions {
   includeStyles?: boolean;
   pageSize?: 'letter' | 'a4';
@@ -17,6 +20,7 @@ export interface HtmlRenderOptions {
     bottom: string;
     left: string;
   };
+  fullDocument?: boolean;
 }
 
 function escapeHtml(text: string): string {
@@ -26,6 +30,17 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function createInlineStyle(run: any): string {
+  const styles: string[] = [];
+  
+  if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
+  if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
+  if (run.color) styles.push(`color: ${run.color}`);
+  if (run.backgroundColor) styles.push(`background-color: ${run.backgroundColor}`);
+  
+  return styles.length > 0 ? ` style="${styles.join('; ')}"` : '';
 }
 
 function renderTextRun(run: TextRun): string {
@@ -211,7 +226,17 @@ function renderTable(table: Table): string {
     const cells = row.cells.map((cell: any) => {
       const content = cell.paragraphs.map((p: any) => renderParagraph(p)).join('');
       const tag = rowIndex === 0 ? 'th' : 'td';
-      const classes = rowIndex === 0 ? 'border px-4 py-2 font-semibold' : 'border px-4 py-2';
+      let classes = rowIndex === 0 ? 'border px-4 py-2 font-semibold' : 'border px-4 py-2';
+      
+      // Check if this is a header row with white text - add dark background
+      if (rowIndex === 0) {
+        const hasWhiteText = content.includes('color: #FFFFFF') || content.includes('color: #ffffff');
+        if (hasWhiteText) {
+          classes += ' bg-gray-800 text-white';
+        } else {
+          classes += ' bg-gray-100';
+        }
+      }
       
       const attrs: string[] = [`class="${classes}"`];
       if (cell.colspan) attrs.push(`colspan="${cell.colspan}"`);
@@ -244,6 +269,42 @@ function renderFooter(footer: DocumentElement): string {
   if (footer.type !== 'footer') return '';
   const elements = footer.elements.map((el: any) => {
     if (el.type === 'paragraph') {
+      // Check if this is a footer paragraph that needs special tab handling
+      const fullText = el.runs?.map((r: any) => r.text).join('') || '';
+      if (fullText.includes('[Recipient\'s Name]') && fullText.includes('Recovery Plan')) {
+        // This is the footer with recipient name and page number
+        // Split on tab characters or patterns that suggest tab separation
+        const runs = el.runs || [];
+        let leftContent = '';
+        let rightContent = '';
+        let foundSeparator = false;
+        
+        for (const run of runs) {
+          const text = run.text || '';
+          // Look for tab characters, or detect page number pattern
+          if (text.includes('\t') || /^\s*\d+\s*$/.test(text)) {
+            foundSeparator = true;
+            // If it's just a number, it's likely the page number
+            if (/^\s*\d+\s*$/.test(text.trim())) {
+              rightContent += `<span style="font-size: ${run.fontSize}pt; font-family: ${run.fontFamily}">${escapeHtml(text)}</span>`;
+            }
+          } else if (!foundSeparator) {
+            // Content before tab goes on the left
+            const style = createInlineStyle(run);
+            leftContent += `<span${style}>${escapeHtml(text)}</span>`;
+          } else {
+            // Content after tab goes on the right
+            const style = createInlineStyle(run);
+            rightContent += `<span${style}>${escapeHtml(text)}</span>`;
+          }
+        }
+        
+        // Create flex layout for footer with left and right alignment
+        return `<div class="flex justify-between items-center mb-4">
+          <div class="flex-1">${leftContent}</div>
+          <div class="flex-none">${rightContent}</div>
+        </div>`;
+      }
       return renderParagraph(el);
     } else if (el.type === 'table') {
       return renderTable(el);
@@ -316,15 +377,26 @@ function renderElement(element: DocumentElement): string {
   }
 }
 
-// Export DOM-based renderer
-export { renderToDOM, renderToDOMString, type DomRenderOptions } from './dom-builder';
+// Import the new DOM-based renderer
+import { DOMRenderer } from './dom-renderer';
 
 export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
-  const elements = document.elements.map(renderElement).join('\n');
+  // Use the new DOM-based renderer
+  const renderer = new DOMRenderer();
   
-  if (!options.includeStyles) {
-    return elements;
+  if (options.fullDocument) {
+    // Return full HTML document with head/body
+    return renderFullDocument(document, options);
   }
+  
+  // Return just the elements HTML without container div for backward compatibility
+  return renderer.renderToHTML(document, { includeContainer: false });
+}
+
+// Legacy function for full document rendering
+function renderFullDocument(document: ParsedDocument, options: HtmlRenderOptions): string {
+  const renderer = new DOMRenderer();
+  const elements = renderer.renderToHTML(document);
   
   // Include full HTML document with styles
   const pageSize = options.pageSize || 'letter';
