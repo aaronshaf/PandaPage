@@ -1,6 +1,6 @@
 # pandapage
 
-A document parser and renderer built with TypeScript. Parse DOCX documents and render them to HTML or Markdown.
+A document parser and renderer built with TypeScript. Parse DOCX documents and render them to HTML or Markdown, with aspirations to support PPTX (PowerPoint), Keynote, and Apple Pages formats.
 
 ## [Try the Demo](https://aaronshaf.github.io/pandapage/)
 
@@ -31,6 +31,14 @@ bun dev
 For detailed development information, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Document Support
+
+### Current Support
+- **DOCX**: Microsoft Word documents (actively supported)
+
+### Planned Support
+- **PPTX**: Microsoft PowerPoint presentations
+- **Keynote**: Apple Keynote presentations  
+- **Pages**: Apple Pages documents
 
 ### Parsing & Rendering Features
 
