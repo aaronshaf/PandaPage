@@ -249,7 +249,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         <div data-testid="read-view" className="max-w-2xl mx-auto">
           <div 
             data-testid="reading-mode-container"
-            className="bg-white rounded-lg shadow-sm p-6"
+            className="bg-white p-6"
           >
             {parsedDocument ? (
               <div 
