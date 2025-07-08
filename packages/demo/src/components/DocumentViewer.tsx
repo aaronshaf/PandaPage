@@ -202,7 +202,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
         disabled={!hasMultipleHeadings}
         aria-label={`Toggle document outline${!showOutline && headingCount > 0 ? ` (${topLevelHeadingCount} sections)` : ''}`}
-        className={`fixed z-50 flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm ${
+        className={`fixed z-50 hidden sm:flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm ${
           !hasMultipleHeadings
             ? 'text-gray-400 cursor-not-allowed bg-gray-50 border border-gray-200'
             : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
