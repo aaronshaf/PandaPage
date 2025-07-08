@@ -81,7 +81,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   };
 
   const metadata = getMetadata();
-  const shouldShowMetadataButton = hasMetadataContent(metadata);
+  const shouldShowMetadataButton = hasMetadataContent(metadata) && documentTitle;
 
   // Calculate popover position
   const updatePopoverPosition = () => {
@@ -174,7 +174,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               </div>
             )}
             <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900" data-testid="app-title">{documentTitle}</h1>
+              <h1 className={`text-lg sm:text-xl font-semibold text-gray-900 ${documentTitle ? 'document-title' : ''}`} data-testid="app-title">{documentTitle}</h1>
               
               {/* Metadata info button */}
               {shouldShowMetadataButton && (
