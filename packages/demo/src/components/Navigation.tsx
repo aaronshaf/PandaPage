@@ -134,7 +134,7 @@ export const Navigation: React.FC<NavigationProps> = ({
       role="banner">
         <nav className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4" aria-label="Primary navigation">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {/* Document type icon */}
             {(selectedDocument.endsWith('.docx') || uploadedFile?.name.endsWith('.docx')) && (
               <div className="relative h-5 w-5 flex-shrink-0">
@@ -173,8 +173,8 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </svg>
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <h1 className={`text-lg sm:text-xl font-semibold text-gray-900 ${documentTitle ? 'document-title' : ''}`} data-testid="app-title">{documentTitle}</h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className={`text-lg sm:text-xl font-semibold text-gray-900 truncate ${documentTitle ? 'document-title' : ''}`} data-testid="app-title">{documentTitle}</h1>
               
               {/* Metadata info button */}
               {shouldShowMetadataButton && (
@@ -297,7 +297,7 @@ export const Navigation: React.FC<NavigationProps> = ({
           </div>
           
           {/* Document controls */}
-          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {/* Document dropdown */}
             <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 shadow-sm border border-gray-200">
               <label htmlFor="document-select" className="hidden sm:inline text-sm font-medium text-gray-700 whitespace-nowrap">
