@@ -1,8 +1,8 @@
 [test]
 # Coverage is enabled for --coverage flag and test:coverage script
 coverage = true
-# Pandapage package: Updated to 73.79% functions, 64.04% lines after adding validation tests
-coverageThreshold = { line = 60, function = 70, statement = 55, branch = 45 }
+# Pandapage package: Updated to 80.31% functions, 69.54% lines after adding xml-parser tests
+coverageThreshold = { line = 69, function = 80, statement = 60, branch = 50 }
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true
