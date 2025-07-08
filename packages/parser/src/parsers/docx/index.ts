@@ -216,6 +216,7 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
   let inField = false;
   let fieldInstruction = "";
   let fieldRunProperties: any = null;
+  let skipFieldValue = false; // Track when to skip the field value between separate and end
   
   for (let i = 0; i < allChildren.length; i++) {
     const child = allChildren[i];
@@ -251,13 +252,15 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
           if (fldCharType === "begin") {
             inField = true;
             fieldInstruction = "";
+            skipFieldValue = false;
             // Get run properties for the field
             const runProps = element.getElementsByTagNameNS(ns, "rPr")[0];
             if (runProps) {
               fieldRunProperties = runProps.cloneNode(true);
             }
           } else if (fldCharType === "separate") {
-            // Skip the separator - the next run will have the field value
+            // After separator, skip the field value runs until we hit end
+            skipFieldValue = true;
           } else if (fldCharType === "end" && inField) {
             // Field complete - create a run with the field code
             if (fieldInstruction.trim()) {
@@ -267,16 +270,17 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
               }
             }
             inField = false;
+            skipFieldValue = false;
             fieldInstruction = "";
             fieldRunProperties = null;
           }
-        } else if (instrTextElements.length > 0 && inField) {
+        } else if (instrTextElements.length > 0 && inField && !skipFieldValue) {
           // Collect field instruction text
           const instrText = instrTextElements[0];
           if (instrText) {
             fieldInstruction += instrText.textContent || "";
           }
-        } else if (!inField) {
+        } else if (!inField && !skipFieldValue) {
           // Direct run element (not part of a field)
           const run = parseRun(element, ns);
           if (run && run.text) {
@@ -327,6 +331,66 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
         const run = parseRun(runElement, ns, linkUrl);
         if (run && run.text) {
           runs.push(run);
+        }
+      }
+    } else if (element.tagName === "w:sdt") {
+      // Structured Document Tag (content control) - parse content inside
+      const sdtContent = element.getElementsByTagNameNS(ns, "sdtContent")[0];
+      if (sdtContent) {
+        // Parse all runs inside the SDT content
+        const sdtChildren = Array.from(sdtContent.childNodes);
+        for (const sdtChild of sdtChildren) {
+          if (sdtChild.nodeType === 1) {
+            const sdtElement = sdtChild as Element;
+            if (sdtElement.tagName === "w:r") {
+              // Check for field codes in SDT runs
+              const fldCharElements = sdtElement.getElementsByTagNameNS(ns, "fldChar");
+              const instrTextElements = sdtElement.getElementsByTagNameNS(ns, "instrText");
+              
+              if (fldCharElements.length > 0) {
+                const fldChar = fldCharElements[0];
+                const fldCharType = fldChar?.getAttribute("w:fldCharType");
+                
+                if (fldCharType === "begin") {
+                  inField = true;
+                  fieldInstruction = "";
+                  skipFieldValue = false;
+                  // Get run properties for the field
+                  const runProps = sdtElement.getElementsByTagNameNS(ns, "rPr")[0];
+                  if (runProps) {
+                    fieldRunProperties = runProps.cloneNode(true);
+                  }
+                } else if (fldCharType === "separate") {
+                  // After separator, skip the field value runs until we hit end
+                  skipFieldValue = true;
+                } else if (fldCharType === "end" && inField) {
+                  // Field complete - create a run with the field code
+                  if (fieldInstruction.trim()) {
+                    const fieldRun = parseFieldRun(fieldInstruction, fieldRunProperties, ns);
+                    if (fieldRun) {
+                      runs.push(fieldRun);
+                    }
+                  }
+                  inField = false;
+                  skipFieldValue = false;
+                  fieldInstruction = "";
+                  fieldRunProperties = null;
+                }
+              } else if (instrTextElements.length > 0 && inField && !skipFieldValue) {
+                // Collect field instruction text
+                const instrText = instrTextElements[0];
+                if (instrText) {
+                  fieldInstruction += instrText.textContent || "";
+                }
+              } else if (!inField && !skipFieldValue) {
+                // Regular run inside SDT
+                const run = parseRun(sdtElement, ns);
+                if (run && run.text) {
+                  runs.push(run);
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -471,7 +535,8 @@ function convertToDocumentElement(paragraph: DocxParagraph, processedImages?: Im
     color: run.color ? `#${run.color}` : undefined,
     backgroundColor: run.backgroundColor,
     link: run.link,
-    _footnoteRef: run._footnoteRef
+    _footnoteRef: run._footnoteRef,
+    _fieldCode: run._fieldCode
   }));
   
   // Check if it's a heading

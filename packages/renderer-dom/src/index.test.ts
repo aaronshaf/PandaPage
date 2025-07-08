@@ -9,7 +9,7 @@ test("renderToHtml handles empty document", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toBe("");
+  expect(result).toBe('<div class="page" data-page-number="1"><div class="page-content"></div></div>');
 });
 
 test("renderToHtml renders headings", () => {
@@ -315,7 +315,11 @@ test("renderToHtml handles page breaks", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<div class="page-break" style="page-break-after: always;"></div>');
+  // Page breaks now split content into separate page divs
+  expect(result).toContain('data-page-number="1"');
+  expect(result).toContain('data-page-number="2"');
+  expect(result).toContain('Page 1');
+  expect(result).toContain('Page 2');
 });
 
 test("renderToHtml handles tables", () => {
@@ -482,8 +486,8 @@ test("renderToHtml handles full document with all metadata", () => {
   };
   
   const result = renderToHtml(doc, { includeStyles: true });
-  // DOM renderer returns empty string for empty elements
-  expect(result).toBe("");
+  // DOM renderer returns a page even for empty documents
+  expect(result).toBe('<div class="page" data-page-number="1"><div class="page-content"></div></div>');
 });
 
 test("renderToHtml handles fragment output", () => {
@@ -720,7 +724,9 @@ test("renderToHtml handles mixed content", () => {
   expect(result).toContain('<p class="mb-4"><span>Intro paragraph</span></p>');
   // Lists are rendered as paragraphs
   expect(result).toContain('<p class="mb-4"><span>List item</span></p>');
-  expect(result).toContain('<div class="page-break" style="page-break-after: always;"></div>');
+  // Page breaks now split content into separate pages
+  expect(result).toContain('data-page-number="1"');
+  expect(result).toContain('data-page-number="2"');
   expect(result).toContain('<h2 class="mb-4 font-bold text-3xl"><span>Section</span></h2>');
 });
 
@@ -738,7 +744,7 @@ test("renderToHtml handles bookmarks as invisible anchors", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toBe('<span id="Chapter1" class="bookmark-anchor" data-bookmark-id="bm1"></span>');
+  expect(result).toBe('<div class="page" data-page-number="1"><div class="page-content"><span id="Chapter1" class="bookmark-anchor" data-bookmark-id="bm1"></span></div></div>');
 });
 
 test("renderToHtml handles bookmarks with special characters", () => {
@@ -755,7 +761,7 @@ test("renderToHtml handles bookmarks with special characters", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toBe('<span id="Section_2.1" class="bookmark-anchor" data-bookmark-id="bm2"></span>');
+  expect(result).toBe('<div class="page" data-page-number="1"><div class="page-content"><span id="Section_2.1" class="bookmark-anchor" data-bookmark-id="bm2"></span></div></div>');
 });
 
 test("renderToHtml handles bookmarks without text content", () => {
@@ -771,7 +777,7 @@ test("renderToHtml handles bookmarks without text content", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toBe('<span id="EmptyBookmark" class="bookmark-anchor" data-bookmark-id="bm3"></span>');
+  expect(result).toBe('<div class="page" data-page-number="1"><div class="page-content"><span id="EmptyBookmark" class="bookmark-anchor" data-bookmark-id="bm3"></span></div></div>');
 });
 
 test("renderToHtml renders bookmarks with content for deep linking", () => {

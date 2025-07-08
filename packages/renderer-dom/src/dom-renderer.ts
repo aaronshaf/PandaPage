@@ -17,6 +17,8 @@ export interface DOMRenderOptions {
 
 export class DOMRenderer {
   private doc: Document;
+  private currentPageNumber: number = 1;
+  private totalPages: number = 1;
   
   constructor(options: DOMRenderOptions = {}) {
     this.doc = options.document || (typeof document !== 'undefined' ? document : this.createDocument());
@@ -53,12 +55,41 @@ export class DOMRenderer {
       this.addStyles();
     }
     
-    // Render each element
-    parsedDoc.elements.forEach(element => {
-      const rendered = this.renderElement(element);
-      if (rendered) {
-        container.appendChild(rendered);
+    // Split content into pages based on page breaks
+    const pages = this.splitIntoPages(parsedDoc.elements);
+    this.totalPages = pages.length;
+    
+    // Render each page with appropriate footers
+    pages.forEach((pageElements, pageIndex) => {
+      this.currentPageNumber = pageIndex + 1;
+      const pageDiv = this.doc.createElement('div');
+      pageDiv.className = 'page';
+      pageDiv.setAttribute('data-page-number', this.currentPageNumber.toString());
+      
+      // Create page content wrapper
+      const contentDiv = this.doc.createElement('div');
+      contentDiv.className = 'page-content';
+      
+      // Render page content
+      pageElements.forEach(element => {
+        const rendered = this.renderElement(element);
+        if (rendered) {
+          contentDiv.appendChild(rendered);
+        }
+      });
+      
+      pageDiv.appendChild(contentDiv);
+      
+      // Add footer to page if available
+      if (parsedDoc.footers) {
+        const footer = this.getFooterForPage(this.currentPageNumber, this.totalPages, parsedDoc.footers);
+        if (footer) {
+          const footerEl = this.renderFooterWithPageNumber(footer, this.currentPageNumber, this.totalPages);
+          pageDiv.appendChild(footerEl);
+        }
       }
+      
+      container.appendChild(pageDiv);
     });
     
     return container;
@@ -118,6 +149,22 @@ export class DOMRenderer {
   }
   
   private renderTextRun(run: TextRun): HTMLElement {
+    // Handle field codes
+    if ((run as any)._fieldCode) {
+      const fieldCode = (run as any)._fieldCode;
+      let modifiedRun = { ...run };
+      
+      switch (fieldCode) {
+        case 'PAGE':
+          modifiedRun.text = this.currentPageNumber.toString();
+          break;
+        case 'NUMPAGES':
+          modifiedRun.text = this.totalPages.toString();
+          break;
+      }
+      
+      run = modifiedRun;
+    }
     // Check for footnote reference first
     if ((run as any)._footnoteRef) {
       const footnoteId = (run as any)._footnoteRef;
@@ -237,95 +284,9 @@ export class DOMRenderer {
   }
   
   private renderFooter(footer: any): HTMLElement {
-    const footerEl = this.doc.createElement('footer');
-    footerEl.className = 'footer mt-4 pt-2 border-t border-gray-300';
-    
-    footer.elements.forEach((el: any) => {
-      if (el.type === 'paragraph') {
-        // Check if this is a footer with recipient name and page number
-        const fullText = el.runs?.map((r: any) => r.text).join('') || '';
-        
-        if (fullText.includes('[Recipient') && fullText.includes('Recovery Plan')) {
-          // Check if there's actually a tab character in the runs
-          const hasTab = el.runs?.some((r: any) => r.text?.includes('\t')) || false;
-          
-          if (hasTab) {
-            // Create flex container for left-right alignment
-            const flexDiv = this.doc.createElement('div');
-            flexDiv.className = 'flex justify-between items-center mb-4';
-            
-            const leftDiv = this.doc.createElement('div');
-            leftDiv.className = 'flex-1';
-            
-            const rightDiv = this.doc.createElement('div');
-            rightDiv.className = 'flex-none';
-            
-            let foundTab = false;
-            const runs = el.runs || [];
-            
-            for (const run of runs) {
-              const text = run.text || '';
-              
-              // Check if this run contains a tab
-              if (text.includes('\t')) {
-                // Split on tab
-                const parts = text.split('\t');
-                
-                // Add pre-tab content to left
-                if (parts[0]) {
-                  const leftRun = { ...run, text: parts[0] };
-                  leftDiv.appendChild(this.renderTextRun(leftRun));
-                }
-                
-                // Add post-tab content to right
-                if (parts[1]) {
-                  const rightRun = { ...run, text: parts[1] };
-                  rightDiv.appendChild(this.renderTextRun(rightRun));
-                } else if (!rightDiv.hasChildNodes()) {
-                  // If nothing after tab, assume it's a page number field
-                  // Add a placeholder page number
-                  const pageSpan = this.doc.createElement('span');
-                  pageSpan.style.fontSize = run.fontSize ? `${run.fontSize}pt` : '10pt';
-                  pageSpan.style.fontFamily = run.fontFamily || 'Arial';
-                  pageSpan.textContent = '1'; // Default page number
-                  rightDiv.appendChild(pageSpan);
-                }
-                
-                foundTab = true;
-              } else if (!foundTab) {
-                // Before tab, add to left
-                leftDiv.appendChild(this.renderTextRun(run));
-              } else {
-                // After tab, add to right
-                rightDiv.appendChild(this.renderTextRun(run));
-              }
-            }
-            
-            // If right div is empty, add a default page number
-            if (!rightDiv.hasChildNodes() && foundTab) {
-              const pageSpan = this.doc.createElement('span');
-              pageSpan.style.fontSize = '10pt';
-              pageSpan.style.fontFamily = 'Arial';
-              pageSpan.textContent = '1';
-              rightDiv.appendChild(pageSpan);
-            }
-            
-            flexDiv.appendChild(leftDiv);
-            flexDiv.appendChild(rightDiv);
-            footerEl.appendChild(flexDiv);
-          } else {
-            // No tab found, render normally
-            footerEl.appendChild(this.renderParagraph(el));
-          }
-        } else {
-          footerEl.appendChild(this.renderParagraph(el));
-        }
-      } else if (el.type === 'table') {
-        footerEl.appendChild(this.renderTable(el));
-      }
-    });
-    
-    return footerEl;
+    // This is now only used for inline footers in the document
+    // For page footers, use renderFooterWithPageNumber
+    return this.renderFooterWithPageNumber(footer, this.currentPageNumber, this.totalPages);
   }
   
   private renderHeader(header: any): HTMLElement {
@@ -449,6 +410,27 @@ export class DOMRenderer {
     const style = document.createElement('style');
     style.id = 'browser-document-viewer-styles';
     style.textContent = `
+      .page {
+        position: relative;
+        margin-bottom: 2rem;
+        min-height: 11in;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .page-content {
+        padding: 1in;
+        padding-bottom: 2in; /* Space for footer */
+      }
+      
+      .footer {
+        position: absolute;
+        bottom: 0;
+        left: 1in;
+        right: 1in;
+        padding-bottom: 0.5in;
+      }
+      
       .footnote-reference {
         color: #3b82f6;
         text-decoration: none;
@@ -484,9 +466,152 @@ export class DOMRenderer {
         height: 0;
         overflow: hidden;
       }
+      
+      @media print {
+        .page {
+          page-break-after: always;
+          margin: 0;
+          box-shadow: none;
+        }
+      }
     `;
     
     document.head.appendChild(style);
+  }
+  
+  private splitIntoPages(elements: DocumentElement[]): DocumentElement[][] {
+    const pages: DocumentElement[][] = [];
+    let currentPage: DocumentElement[] = [];
+    
+    elements.forEach(element => {
+      if (element.type === 'pageBreak') {
+        // Start a new page
+        if (currentPage.length > 0) {
+          pages.push(currentPage);
+          currentPage = [];
+        }
+      } else if (element.type !== 'footer' && element.type !== 'header') {
+        // Add non-footer/header elements to current page
+        currentPage.push(element);
+      }
+    });
+    
+    // Add the last page if it has content
+    if (currentPage.length > 0) {
+      pages.push(currentPage);
+    }
+    
+    // If no pages were created, create at least one
+    if (pages.length === 0) {
+      pages.push([]);
+    }
+    
+    return pages;
+  }
+  
+  private getFooterForPage(pageNumber: number, totalPages: number, footers: any): any {
+    // For first page, use first page footer if available
+    if (pageNumber === 1 && footers.first) {
+      return footers.first;
+    }
+    
+    // For even pages, use even footer if available
+    if (pageNumber % 2 === 0 && footers.even) {
+      return footers.even;
+    }
+    
+    // For odd pages, use odd footer if available
+    if (pageNumber % 2 === 1 && footers.odd) {
+      return footers.odd;
+    }
+    
+    // Otherwise use default footer
+    return footers.default;
+  }
+  
+  private renderFooterWithPageNumber(footer: any, pageNumber: number, totalPages: number): HTMLElement {
+    // Store current page context
+    const prevPageNumber = this.currentPageNumber;
+    const prevTotalPages = this.totalPages;
+    this.currentPageNumber = pageNumber;
+    this.totalPages = totalPages;
+    
+    const footerEl = this.doc.createElement('footer');
+    footerEl.className = 'footer mt-4 pt-2 border-t border-gray-300';
+    
+    footer.elements.forEach((el: any) => {
+      if (el.type === 'paragraph') {
+        // Check if this is a footer with recipient name and page number
+        const fullText = el.runs?.map((r: any) => r.text).join('') || '';
+        
+        if (fullText.includes('[Recipient') && fullText.includes('Recovery Plan')) {
+          // Check if there's actually a tab character in the runs
+          const hasTab = el.runs?.some((r: any) => r.text?.includes('\t')) || false;
+          
+          if (hasTab) {
+            // Create flex container for left-right alignment
+            const flexDiv = this.doc.createElement('div');
+            flexDiv.className = 'flex justify-between items-center mb-4';
+            
+            const leftDiv = this.doc.createElement('div');
+            leftDiv.className = 'flex-1';
+            
+            const rightDiv = this.doc.createElement('div');
+            rightDiv.className = 'flex-none';
+            
+            let foundTab = false;
+            const runs = el.runs || [];
+            
+            for (const run of runs) {
+              const text = run.text || '';
+              
+              // Check if this run contains a tab
+              if (text.includes('\t')) {
+                // Split on tab
+                const parts = text.split('\t');
+                
+                // Add pre-tab content to left
+                if (parts[0]) {
+                  const leftRun = { ...run, text: parts[0] };
+                  leftDiv.appendChild(this.renderTextRun(leftRun));
+                }
+                
+                // Add post-tab content to right
+                if (parts[1]) {
+                  const rightRun = { ...run, text: parts[1] };
+                  rightDiv.appendChild(this.renderTextRun(rightRun));
+                }
+                
+                foundTab = true;
+              } else if (!foundTab) {
+                // Before tab, add to left
+                leftDiv.appendChild(this.renderTextRun(run));
+              } else {
+                // After tab, add to right
+                rightDiv.appendChild(this.renderTextRun(run));
+              }
+            }
+            
+            flexDiv.appendChild(leftDiv);
+            flexDiv.appendChild(rightDiv);
+            footerEl.appendChild(flexDiv);
+          } else {
+            // No tab found, render normally
+            footerEl.appendChild(this.renderParagraph(el));
+          }
+        } else {
+          footerEl.appendChild(this.renderParagraph(el));
+        }
+      } else if (el.type === 'table') {
+        footerEl.appendChild(this.renderTable(el));
+      }
+    });
+    
+    // Restore page context
+    this.currentPageNumber = prevPageNumber;
+    this.totalPages = prevTotalPages;
+    
+    return footerEl;
   }
   
   // Convert DOM element to HTML string
