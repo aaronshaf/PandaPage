@@ -7,9 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "rm -rf packages/*/node_modules/.vite && bun run --filter '*' dev",
-    "build": "rm -rf packages/*/node_modules/.vite && cd packages/demo && bun run build",
-    "clean": "rm -rf packages/*/node_modules/.vite packages/*/dist",
+    "dev": "bun run --filter '*' dev",
+    "build": "cd packages/demo && bun run build",
+    "clean": "find packages -name '.vite' -type d -exec rm -rf {} + 2>/dev/null || true && find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true",
     "test": "bun test",
     "test:all": "cd packages/core && bun test:all && cd ../demo && bun test:e2e",
     "test:coverage": "cd packages/parser && bun run test:coverage && cd ../renderer-markdown && bun run test:coverage && cd ../renderer-dom && bun run test:coverage && cd ../core && bun run test:coverage",
