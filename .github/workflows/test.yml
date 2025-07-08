@@ -25,7 +25,7 @@ jobs:
     
     - name: Run unit tests (deterministic only)
       run: bun run test:ci
-      working-directory: packages/pandapage
+      working-directory: packages/core
     
     # Temporarily disabled - Playwright tests need fixing
     # - name: Run E2E tests
@@ -56,4 +56,4 @@ jobs:
     
     - name: Run unit tests (deterministic only)
       run: bun run test:ci
-      working-directory: packages/pandapage
+      working-directory: packages/core
