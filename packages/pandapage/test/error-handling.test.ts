@@ -1,7 +1,9 @@
-import { test, expect } from "bun:test";
+import { test, expect, describe } from "bun:test";
 import { 
   createCategorizedError, 
   getRecoveryStrategy,
+  retryWithBackoff,
+  safeExecute,
   type ErrorCategory,
   type CategorizedError 
 } from "../src/common/error-handling";
@@ -135,4 +137,183 @@ test("Error messages should be non-empty strings", async () => {
   expect(typeof error.message).toBe("string");
   expect(error.message.length).toBeGreaterThan(0);
   expect(error.message.trim()).toBe(error.message); // No leading/trailing whitespace
+});
+
+describe("retryWithBackoff", () => {
+  test("should return the original effect (TODO implementation)", async () => {
+    const successEffect = Effect.succeed(42);
+    const retried = retryWithBackoff(successEffect);
+    
+    const result = await Effect.runPromise(retried);
+    expect(result).toBe(42);
+  });
+
+  test("should pass through failures without retry (TODO implementation)", async () => {
+    const failEffect = Effect.fail(new Error("Test error"));
+    const retried = retryWithBackoff(failEffect);
+    
+    await expect(Effect.runPromise(retried)).rejects.toThrow("Test error");
+  });
+});
+
+describe("safeExecute", () => {
+  test("should handle successful effects", async () => {
+    const successEffect = Effect.succeed("success");
+    const result = await Effect.runPromise(safeExecute(successEffect));
+    
+    expect(result).toBe("success");
+  });
+
+  test("should categorize network errors", async () => {
+    const networkError = Effect.fail(new Error("Network connection failed"));
+    
+    const result = await Effect.runPromiseExit(safeExecute(networkError));
+    
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure") {
+      const error = result.cause as any;
+      expect(error._tag).toBe("Fail");
+      const errorValue = error.error;
+      expect(errorValue).toMatchObject({
+        _tag: "NetworkError",
+        message: "Network connection failed",
+        category: "network",
+        recoverable: true,
+        timestamp: expect.any(Date)
+      });
+    }
+  });
+
+  test("should categorize fetch errors as network errors", async () => {
+    const fetchError = Effect.fail(new Error("Failed to fetch resource"));
+    
+    const result = await Effect.runPromiseExit(safeExecute(fetchError));
+    
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure") {
+      const error = result.cause as any;
+      expect(error._tag).toBe("Fail");
+      const errorValue = error.error;
+      expect(errorValue).toMatchObject({
+        _tag: "NetworkError",
+        message: "Failed to fetch resource",
+        category: "network",
+        recoverable: true
+      });
+    }
+  });
+
+  test("should handle unknown errors", async () => {
+    const unknownError = Effect.fail(new Error("Some random error"));
+    
+    const result = await Effect.runPromiseExit(safeExecute(unknownError));
+    
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure") {
+      const error = result.cause as any;
+      expect(error._tag).toBe("Fail");
+      const errorValue = error.error;
+      expect(errorValue).toMatchObject({
+        _tag: "UnknownError",
+        message: "Some random error",
+        category: "unknown",
+        recoverable: false,
+        timestamp: expect.any(Date)
+      });
+    }
+  });
+
+  test("should handle non-Error objects", async () => {
+    const stringError = Effect.fail("string error");
+    
+    const result = await Effect.runPromiseExit(safeExecute(stringError));
+    
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure") {
+      const error = result.cause as any;
+      expect(error._tag).toBe("Fail");
+      const errorValue = error.error;
+      expect(errorValue).toMatchObject({
+        _tag: "UnknownError",
+        message: "string error",
+        category: "unknown",
+        recoverable: false
+      });
+    }
+  });
+
+  test("should handle null/undefined errors", async () => {
+    const nullError = Effect.fail(null);
+    
+    const result = await Effect.runPromiseExit(safeExecute(nullError));
+    
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure") {
+      const error = result.cause as any;
+      expect(error._tag).toBe("Fail");
+      const errorValue = error.error;
+      expect(errorValue).toMatchObject({
+        _tag: "UnknownError",
+        message: "Unknown error occurred",
+        category: "unknown",
+        recoverable: false
+      });
+    }
+  });
+
+  test("should handle objects without message property", async () => {
+    const objectError = Effect.fail({ code: "ERR_123", data: "some data" });
+    
+    const result = await Effect.runPromiseExit(safeExecute(objectError));
+    
+    expect(result._tag).toBe("Failure");
+    if (result._tag === "Failure") {
+      const error = result.cause as any;
+      expect(error._tag).toBe("Fail");
+      const errorValue = error.error;
+      expect(errorValue).toMatchObject({
+        _tag: "UnknownError",
+        message: "Unknown error occurred",
+        category: "unknown",
+        recoverable: false
+      });
+    }
+  });
+});
+
+describe("getRecoveryStrategy edge cases", () => {
+  test("should handle timeout errors", () => {
+    const timeoutError: CategorizedError = {
+      _tag: "TimeoutError",
+      message: "Request timed out",
+      category: "timeout",
+      recoverable: true
+    };
+    
+    expect(getRecoveryStrategy(timeoutError)).toBe("retry");
+  });
+
+  test("should handle validation errors", () => {
+    const validationError: CategorizedError = {
+      _tag: "ValidationError",
+      message: "Invalid input",
+      category: "validation",
+      recoverable: true
+    };
+    
+    // Validation doesn't have a specific case, so it should default to "abort"
+    expect(getRecoveryStrategy(validationError)).toBe("abort");
+  });
+
+  test("should handle worker errors", () => {
+    const workerError: CategorizedError = {
+      _tag: "WorkerError",
+      message: "Worker crashed",
+      category: "worker",
+      recoverable: true
+    };
+    
+    // Worker doesn't have a specific case, so it should default to "abort"
+    expect(getRecoveryStrategy(workerError)).toBe("abort");
+  });
 });

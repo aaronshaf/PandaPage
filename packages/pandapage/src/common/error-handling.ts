@@ -101,38 +101,35 @@ export const retryWithBackoff = <A, E>(
 export const safeExecute = <A>(
   effect: Effect.Effect<A, unknown>
 ): Effect.Effect<A, CategorizedError> =>
-  Effect.tryPromise({
-    try: () => Effect.runPromise(effect),
-    catch: (error) => {
-      if (error instanceof Error) {
-        const message = error.message.toLowerCase();
-        
-        if (message.includes("network") || message.includes("fetch")) {
-          return {
-            _tag: "NetworkError",
-            message: error.message,
-            category: "network" as const,
-            recoverable: true,
-            timestamp: new Date()
-          };
-        }
-        
-        return {
-          _tag: "UnknownError",
+  Effect.catchAll(effect, (error): Effect.Effect<never, CategorizedError> => {
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      
+      if (message.includes("network") || message.includes("fetch")) {
+        return Effect.fail<CategorizedError>({
+          _tag: "NetworkError",
           message: error.message,
-          category: "unknown" as const,
-          recoverable: false,
+          category: "network",
+          recoverable: true,
           timestamp: new Date()
-        };
+        });
       }
       
-      return {
+      return Effect.fail<CategorizedError>({
         _tag: "UnknownError",
-        message: typeof error === "string" ? error : "Unknown error occurred",
-        category: "unknown" as const,
+        message: error.message,
+        category: "unknown",
         recoverable: false,
         timestamp: new Date()
-      };
+      });
     }
+    
+    return Effect.fail<CategorizedError>({
+      _tag: "UnknownError",
+      message: typeof error === "string" ? error : "Unknown error occurred",
+      category: "unknown",
+      recoverable: false,
+      timestamp: new Date()
+    });
   });
 
