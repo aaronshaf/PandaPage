@@ -129,7 +129,16 @@ function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | 
   if (runProps) {
     bold = runProps.getElementsByTagNameNS(ns, "b").length > 0;
     italic = runProps.getElementsByTagNameNS(ns, "i").length > 0;
-    underline = runProps.getElementsByTagNameNS(ns, "u").length > 0;
+    
+    // Check for underline - need to verify the w:val attribute
+    const underlineElement = runProps.getElementsByTagNameNS(ns, "u")[0];
+    if (underlineElement) {
+      const val = underlineElement.getAttribute("w:val");
+      // Only apply underline if val is not "none" or "0"
+      if (!val || (val !== "none" && val !== "0")) {
+        underline = true;
+      }
+    }
     strikethrough = runProps.getElementsByTagNameNS(ns, "strike").length > 0;
     
     // Check for superscript/subscript
