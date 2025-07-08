@@ -226,7 +226,8 @@ function renderFooter(footer: DocumentElement): string {
 
 function renderBookmark(bookmark: DocumentElement): string {
   if (bookmark.type !== 'bookmark') return '';
-  return `<a id="${escapeHtml(bookmark.name)}" class="bookmark" data-bookmark-id="${escapeHtml(bookmark.id)}">${bookmark.text ? escapeHtml(bookmark.text) : ''}</a>`;
+  // Render as invisible anchor for deep linking
+  return `<span id="${escapeHtml(bookmark.name)}" class="bookmark-anchor" data-bookmark-id="${escapeHtml(bookmark.id)}"></span>`;
 }
 
 function renderElement(element: DocumentElement): string {
