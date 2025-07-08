@@ -540,7 +540,9 @@ export class DOMRenderer {
   private splitIntoPages(elements: DocumentElement[]): DocumentElement[][] {
     const pages: DocumentElement[][] = [];
     let currentPage: DocumentElement[] = [];
+    const footnotes: DocumentElement[] = [];
     
+    // First pass: collect footnotes and regular content
     elements.forEach(element => {
       if (element.type === 'pageBreak') {
         // Start a new page
@@ -548,6 +550,9 @@ export class DOMRenderer {
           pages.push(currentPage);
           currentPage = [];
         }
+      } else if (element.type === 'footnote') {
+        // Collect footnotes separately
+        footnotes.push(element);
       } else if (element.type !== 'footer' && element.type !== 'header') {
         // Add non-footer/header elements to current page
         currentPage.push(element);
@@ -564,7 +569,46 @@ export class DOMRenderer {
       pages.push([]);
     }
     
+    // Second pass: add footnotes to each page that references them
+    if (footnotes.length > 0) {
+      pages.forEach(page => {
+        // Find footnote references in this page
+        const referencedFootnotes = new Set<string>();
+        
+        page.forEach(element => {
+          this.findFootnoteReferences(element, referencedFootnotes);
+        });
+        
+        // Add referenced footnotes to the end of this page
+        footnotes.forEach(footnote => {
+          if (referencedFootnotes.has((footnote as any).id)) {
+            page.push(footnote);
+          }
+        });
+      });
+    }
+    
     return pages;
+  }
+  
+  private findFootnoteReferences(element: DocumentElement, referencedFootnotes: Set<string>): void {
+    if (element.type === 'paragraph') {
+      element.runs.forEach(run => {
+        if ((run as any)._footnoteRef) {
+          referencedFootnotes.add((run as any)._footnoteRef);
+        }
+      });
+    } else if (element.type === 'footnoteReference') {
+      referencedFootnotes.add((element as any).id);
+    } else if (element.type === 'table') {
+      element.rows.forEach(row => {
+        row.cells.forEach(cell => {
+          cell.paragraphs.forEach(paragraph => {
+            this.findFootnoteReferences(paragraph, referencedFootnotes);
+          });
+        });
+      });
+    }
   }
   
   private getFooterForPage(pageNumber: number, totalPages: number, footers: any): any {
