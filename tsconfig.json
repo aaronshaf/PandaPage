@@ -34,8 +34,8 @@
       "@browser-document-viewer/renderer-markdown/*": ["./packages/renderer-markdown/src/*"],
       "@browser-document-viewer/renderer-dom": ["./packages/renderer-dom/src/index.ts"],
       "@browser-document-viewer/renderer-dom/*": ["./packages/renderer-dom/src/*"],
-      "@browser-document-viewer/pandapage": ["./packages/pandapage/src/index.ts"],
-      "@browser-document-viewer/pandapage/*": ["./packages/pandapage/src/*"]
+      "@browser-document-viewer/core": ["./packages/core/src/index.ts"],
+      "@browser-document-viewer/core/*": ["./packages/core/src/*"]
     }
   }
 }

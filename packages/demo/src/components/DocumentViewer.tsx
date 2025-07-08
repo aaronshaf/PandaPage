@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { DocxRenderer } from './DocxRenderer';
 import { renderToHtml } from '@browser-document-viewer/renderer-dom';
-import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/pandapage';
+import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/core';
 
 interface DocumentViewerProps {
   result: string | null;

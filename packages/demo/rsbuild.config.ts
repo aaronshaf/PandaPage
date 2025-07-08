@@ -19,7 +19,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@browser-document-viewer/pandapage': resolve(__dirname, '../pandapage/index.ts'),
+      '@browser-document-viewer/core': resolve(__dirname, '../core/index.ts'),
       '@browser-document-viewer/parser': resolve(__dirname, '../parser/src/index.ts'),
       '@browser-document-viewer/renderer-dom': resolve(__dirname, '../renderer-dom/src/index.ts'),
       '@browser-document-viewer/renderer-markdown': resolve(__dirname, '../renderer-markdown/src/index.ts'),

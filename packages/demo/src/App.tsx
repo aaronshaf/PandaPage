@@ -7,7 +7,7 @@ import {
   parseDocxDocument,
   renderToMarkdown,
   type ParsedDocument
-} from '@browser-document-viewer/pandapage';
+} from '@browser-document-viewer/core';
 import {
   Navigation,
   DocumentUpload,
