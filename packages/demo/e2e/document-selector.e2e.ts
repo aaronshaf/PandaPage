@@ -24,35 +24,41 @@ test.describe('Document Selector', () => {
   });
 
   test('should have appropriate width on different screen sizes', async ({ page }) => {
-    // Test mobile size (max-w-[120px])
+    // Test mobile size (max-w-[150px])
     await page.setViewportSize({ width: 375, height: 667 });
     const mobileSelect = await page.$('#document-select');
     const mobileClasses = await mobileSelect?.getAttribute('class');
-    expect(mobileClasses).toContain('max-w-[120px]');
+    expect(mobileClasses).toContain('max-w-[150px]');
 
-    // Test small screens (sm: max-w-[280px])
+    // Test small screens (sm: max-w-[350px])
     await page.setViewportSize({ width: 640, height: 768 });
     const smSelect = await page.$('#document-select');
     const smClasses = await smSelect?.getAttribute('class');
-    expect(smClasses).toContain('sm:max-w-[280px]');
+    expect(smClasses).toContain('sm:max-w-[350px]');
 
-    // Test medium screens (md: max-w-[350px])
+    // Test medium screens (md: max-w-[450px])
     await page.setViewportSize({ width: 768, height: 1024 });
     const mdSelect = await page.$('#document-select');
     const mdClasses = await mdSelect?.getAttribute('class');
-    expect(mdClasses).toContain('md:max-w-[350px]');
+    expect(mdClasses).toContain('md:max-w-[450px]');
 
-    // Test large screens (lg: max-w-[400px])
+    // Test large screens (lg: max-w-[550px])
     await page.setViewportSize({ width: 1024, height: 768 });
     const lgSelect = await page.$('#document-select');
     const lgClasses = await lgSelect?.getAttribute('class');
-    expect(lgClasses).toContain('lg:max-w-[400px]');
+    expect(lgClasses).toContain('lg:max-w-[550px]');
 
-    // Test extra large screens (xl: max-w-[450px])
+    // Test extra large screens (xl: max-w-[650px])
     await page.setViewportSize({ width: 1280, height: 1024 });
     const xlSelect = await page.$('#document-select');
     const xlClasses = await xlSelect?.getAttribute('class');
-    expect(xlClasses).toContain('xl:max-w-[450px]');
+    expect(xlClasses).toContain('xl:max-w-[650px]');
+
+    // Test 2xl screens (2xl: max-w-[750px])
+    await page.setViewportSize({ width: 1536, height: 1024 });
+    const xxlSelect = await page.$('#document-select');
+    const xxlClasses = await xxlSelect?.getAttribute('class');
+    expect(xxlClasses).toContain('2xl:max-w-[750px]');
   });
 
   test('should contain all sample documents', async ({ page }) => {
