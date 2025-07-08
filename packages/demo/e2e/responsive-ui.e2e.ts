@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Responsive UI Elements', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Navigate to a document with multiple headings
+    await page.goto('/#003.docx');
     await page.waitForSelector('[data-testid="app-title"]');
   });
 

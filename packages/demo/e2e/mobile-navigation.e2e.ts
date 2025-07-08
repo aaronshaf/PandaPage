@@ -56,13 +56,13 @@ test.describe('Mobile Navigation', () => {
     // Check document selector has width constraint
     const selector = await page.$('#document-select');
     const selectorClasses = await selector?.getAttribute('class');
-    expect(selectorClasses).toContain('w-[120px]'); // Mobile width
+    expect(selectorClasses).toContain('w-[140px]'); // Mobile width
     
     // Verify it doesn't push other elements off screen
     const selectorBox = await selector?.boundingBox();
     if (selectorBox) {
       expect(selectorBox.x + selectorBox.width).toBeLessThanOrEqual(375);
-      expect(selectorBox.width).toBeLessThanOrEqual(130); // Should be around 120px plus some padding
+      expect(selectorBox.width).toBeLessThanOrEqual(150); // Should be around 140px plus some padding
     }
   });
 });

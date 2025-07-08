@@ -231,7 +231,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       )}
 
       {viewMode === 'read' ? (
-        <div data-testid="read-view" className="max-w-4xl mx-auto">
+        <div data-testid="read-view" className="max-w-2xl mx-auto">
           <div 
             data-testid="reading-mode-container"
             className="bg-white rounded-lg shadow-sm p-6"

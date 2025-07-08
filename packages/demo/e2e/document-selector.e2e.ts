@@ -28,25 +28,25 @@ test.describe('Document Selector', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     let select = await page.$('#document-select');
     let classes = await select?.getAttribute('class');
-    expect(classes).toContain('w-[120px]');
+    expect(classes).toContain('w-[140px]');
     
     // Test small screens (sm breakpoint)
     await page.setViewportSize({ width: 640, height: 768 });
     select = await page.$('#document-select');
     classes = await select?.getAttribute('class');
-    expect(classes).toContain('sm:w-[180px]');
+    expect(classes).toContain('sm:w-[220px]');
     
     // Test medium screens (md breakpoint)
     await page.setViewportSize({ width: 768, height: 1024 });
     select = await page.$('#document-select');
     classes = await select?.getAttribute('class');
-    expect(classes).toContain('md:w-[280px]');
+    expect(classes).toContain('md:w-[320px]');
     
     // Test large screens (lg breakpoint)
     await page.setViewportSize({ width: 1024, height: 768 });
     select = await page.$('#document-select');
     classes = await select?.getAttribute('class');
-    expect(classes).toContain('lg:w-[320px]');
+    expect(classes).toContain('lg:w-[380px]');
   });
 
   test('should contain all sample documents', async ({ page }) => {
