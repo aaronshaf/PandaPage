@@ -2,6 +2,5 @@
 # Enable coverage reporting with thresholds
 # Renderer Markdown package: 82.35% functions, 72.32% lines
 coverage = true
-# TODO: Re-enable when bun fixes coverage threshold feature
-# coverageThreshold = 70
+coverageThreshold = { line = 70, function = 80, statement = 70, branch = 60 }
 coverageSkipTestFiles = true

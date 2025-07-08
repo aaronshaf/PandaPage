@@ -2,8 +2,7 @@
 # Enable coverage for parser package
 coverage = true
 # Current actual coverage: 73.26% functions, 84.70% lines
-# TODO: Re-enable when bun fixes coverage threshold feature
-# coverageThreshold = 70
+coverageThreshold = { line = 80, function = 70, statement = 80, branch = 60 }
 
 # Exclude test files and dist directory from coverage
 coverageSkipTestFiles = true
