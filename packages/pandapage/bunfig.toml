@@ -1,8 +1,8 @@
 [test]
 # Coverage is enabled for --coverage flag and test:coverage script
 coverage = true
-# Pandapage package: 47.44% functions, 38.84% lines (lowest coverage - needs improvement)
-coverageThreshold = { line = 35, function = 45, statement = 35, branch = 30 }
+# Pandapage package: Updated to 69.72% functions, 59.54% lines after adding document parser tests
+coverageThreshold = { line = 55, function = 65, statement = 50, branch = 40 }
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true
