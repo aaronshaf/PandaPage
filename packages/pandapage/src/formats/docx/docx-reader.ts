@@ -318,11 +318,28 @@ export const parseParagraph = (pElement: Element): DocxParagraph => {
   for (const runElement of runElements) {
     const textElements = runElement.querySelectorAll('t');
     for (const textElement of textElements) {
+      // Check for underline with proper attribute analysis
+      const underlineElement = runElement.querySelector('u');
+      let underline = false;
+      if (underlineElement) {
+        const val = underlineElement.getAttribute('val');
+        const color = underlineElement.getAttribute('color');
+        
+        if (val) {
+          // If w:val is present, only apply underline if it's not "none" or "0"
+          underline = val !== "none" && val !== "0";
+        } else if (!color) {
+          // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
+          underline = true;
+        }
+        // If w:color but no w:val, it's likely for color styling only, not underline
+      }
+      
       runs.push({
         text: textElement.textContent || '',
         bold: !!runElement.querySelector('b'),
         italic: !!runElement.querySelector('i'),
-        underline: !!runElement.querySelector('u'),
+        underline,
       });
     }
   }
