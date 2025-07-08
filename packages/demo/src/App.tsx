@@ -415,19 +415,6 @@ const App: React.FC = () => {
         try {
           // Try new parser first
           const parsed = await parseDocxDocument(arrayBuffer);
-          console.log('Parsed document:', parsed);
-          console.log('Document elements:', parsed.elements);
-          console.log('Image elements:', parsed.elements.filter(el => el.type === 'image'));
-          
-          // Check for images within paragraphs
-          let totalImages = 0;
-          parsed.elements.forEach((el, index) => {
-            if ('images' in el && el.images && el.images.length > 0) {
-              console.log(`Element ${index} (${el.type}) has ${el.images.length} images`);
-              totalImages += el.images.length;
-            }
-          });
-          console.log('Total images in all elements:', totalImages);
           setParsedDocument(parsed);
           markdown = await renderToMarkdown(parsed, { includeFrontmatter: true });
           
