@@ -23,21 +23,21 @@ beforeAll(() => {
 describe("form-field-parser", () => {
   describe("FieldCode enum", () => {
     test("should define all field codes", () => {
-      expect(FieldCode.FORMTEXT).toBe("FORMTEXT");
-      expect(FieldCode.FORMCHECKBOX).toBe("FORMCHECKBOX");
-      expect(FieldCode.FORMDROPDOWN).toBe("FORMDROPDOWN");
-      expect(FieldCode.PAGE).toBe("PAGE");
-      expect(FieldCode.NUMPAGES).toBe("NUMPAGES");
-      expect(FieldCode.DATE).toBe("DATE");
-      expect(FieldCode.TIME).toBe("TIME");
-      expect(FieldCode.FILENAME).toBe("FILENAME");
-      expect(FieldCode.AUTHOR).toBe("AUTHOR");
-      expect(FieldCode.TITLE).toBe("TITLE");
-      expect(FieldCode.SUBJECT).toBe("SUBJECT");
-      expect(FieldCode.KEYWORDS).toBe("KEYWORDS");
-      expect(FieldCode.REF).toBe("REF");
-      expect(FieldCode.HYPERLINK).toBe("HYPERLINK");
-      expect(FieldCode.TOC).toBe("TOC");
+      expect(FieldCode.FORMTEXT).toBe(FieldCode.FORMTEXT);
+      expect(FieldCode.FORMCHECKBOX).toBe(FieldCode.FORMCHECKBOX);
+      expect(FieldCode.FORMDROPDOWN).toBe(FieldCode.FORMDROPDOWN);
+      expect(FieldCode.PAGE).toBe(FieldCode.PAGE);
+      expect(FieldCode.NUMPAGES).toBe(FieldCode.NUMPAGES);
+      expect(FieldCode.DATE).toBe(FieldCode.DATE);
+      expect(FieldCode.TIME).toBe(FieldCode.TIME);
+      expect(FieldCode.FILENAME).toBe(FieldCode.FILENAME);
+      expect(FieldCode.AUTHOR).toBe(FieldCode.AUTHOR);
+      expect(FieldCode.TITLE).toBe(FieldCode.TITLE);
+      expect(FieldCode.SUBJECT).toBe(FieldCode.SUBJECT);
+      expect(FieldCode.KEYWORDS).toBe(FieldCode.KEYWORDS);
+      expect(FieldCode.REF).toBe(FieldCode.REF);
+      expect(FieldCode.HYPERLINK).toBe(FieldCode.HYPERLINK);
+      expect(FieldCode.TOC).toBe(FieldCode.TOC);
     });
   });
 

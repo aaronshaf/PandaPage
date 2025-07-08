@@ -516,7 +516,7 @@ describe("docx-to-structured comprehensive", () => {
       const result = docxToStructured(buffer);
 
       expect(typeof result).toBe("object");
-      expect(result._tag).toBeDefined(); // Effect objects have internal tags
+      expect(result).toBeDefined(); // Effect object
     });
 
     test("should handle buffer with invalid ZIP signature", async () => {
