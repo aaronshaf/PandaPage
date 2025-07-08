@@ -23,22 +23,30 @@ test.describe('Document Selector', () => {
     expect(await desktopSelector?.isVisible()).toBe(true);
   });
 
-  test('should have max width of 300px on all screen sizes', async ({ page }) => {
-    const screenSizes = [
-      { width: 375, height: 667, name: 'mobile' },
-      { width: 640, height: 768, name: 'small' },
-      { width: 768, height: 1024, name: 'medium' },
-      { width: 1024, height: 768, name: 'large' },
-      { width: 1280, height: 1024, name: 'extra large' },
-      { width: 1536, height: 1024, name: '2xl' }
-    ];
-
-    for (const size of screenSizes) {
-      await page.setViewportSize({ width: size.width, height: size.height });
-      const select = await page.$('#document-select');
-      const classes = await select?.getAttribute('class');
-      expect(classes).toContain('max-w-[300px]');
-    }
+  test('should have responsive max width on different screen sizes', async ({ page }) => {
+    // Test mobile size
+    await page.setViewportSize({ width: 375, height: 667 });
+    let select = await page.$('#document-select');
+    let classes = await select?.getAttribute('class');
+    expect(classes).toContain('max-w-[120px]');
+    
+    // Test small screens (sm breakpoint)
+    await page.setViewportSize({ width: 640, height: 768 });
+    select = await page.$('#document-select');
+    classes = await select?.getAttribute('class');
+    expect(classes).toContain('sm:max-w-[200px]');
+    
+    // Test medium screens (md breakpoint)
+    await page.setViewportSize({ width: 768, height: 1024 });
+    select = await page.$('#document-select');
+    classes = await select?.getAttribute('class');
+    expect(classes).toContain('md:max-w-[250px]');
+    
+    // Test large screens (lg breakpoint)
+    await page.setViewportSize({ width: 1024, height: 768 });
+    select = await page.$('#document-select');
+    classes = await select?.getAttribute('class');
+    expect(classes).toContain('lg:max-w-[300px]');
   });
 
   test('should contain all sample documents', async ({ page }) => {

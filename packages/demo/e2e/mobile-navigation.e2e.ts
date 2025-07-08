@@ -56,12 +56,16 @@ test.describe('Mobile Navigation', () => {
     // Check document selector has max-width constraint
     const selector = await page.$('#document-select');
     const selectorClasses = await selector?.getAttribute('class');
-    expect(selectorClasses).toContain('max-w-[300px]');
+    expect(selectorClasses).toContain('max-w-[120px]'); // Mobile max width
+    expect(selectorClasses).toContain('sm:max-w-[200px]');
+    expect(selectorClasses).toContain('md:max-w-[250px]');
+    expect(selectorClasses).toContain('lg:max-w-[300px]');
     
     // Verify it doesn't push other elements off screen
     const selectorBox = await selector?.boundingBox();
     if (selectorBox) {
       expect(selectorBox.x + selectorBox.width).toBeLessThanOrEqual(375);
+      expect(selectorBox.width).toBeLessThanOrEqual(120); // Should respect max-width
     }
   });
 });
