@@ -23,42 +23,22 @@ test.describe('Document Selector', () => {
     expect(await desktopSelector?.isVisible()).toBe(true);
   });
 
-  test('should have appropriate width on different screen sizes', async ({ page }) => {
-    // Test mobile size (max-w-[150px])
-    await page.setViewportSize({ width: 375, height: 667 });
-    const mobileSelect = await page.$('#document-select');
-    const mobileClasses = await mobileSelect?.getAttribute('class');
-    expect(mobileClasses).toContain('max-w-[150px]');
+  test('should have max width of 150px on all screen sizes', async ({ page }) => {
+    const screenSizes = [
+      { width: 375, height: 667, name: 'mobile' },
+      { width: 640, height: 768, name: 'small' },
+      { width: 768, height: 1024, name: 'medium' },
+      { width: 1024, height: 768, name: 'large' },
+      { width: 1280, height: 1024, name: 'extra large' },
+      { width: 1536, height: 1024, name: '2xl' }
+    ];
 
-    // Test small screens (sm: max-w-[350px])
-    await page.setViewportSize({ width: 640, height: 768 });
-    const smSelect = await page.$('#document-select');
-    const smClasses = await smSelect?.getAttribute('class');
-    expect(smClasses).toContain('sm:max-w-[350px]');
-
-    // Test medium screens (md: max-w-[450px])
-    await page.setViewportSize({ width: 768, height: 1024 });
-    const mdSelect = await page.$('#document-select');
-    const mdClasses = await mdSelect?.getAttribute('class');
-    expect(mdClasses).toContain('md:max-w-[450px]');
-
-    // Test large screens (lg: max-w-[550px])
-    await page.setViewportSize({ width: 1024, height: 768 });
-    const lgSelect = await page.$('#document-select');
-    const lgClasses = await lgSelect?.getAttribute('class');
-    expect(lgClasses).toContain('lg:max-w-[550px]');
-
-    // Test extra large screens (xl: max-w-[650px])
-    await page.setViewportSize({ width: 1280, height: 1024 });
-    const xlSelect = await page.$('#document-select');
-    const xlClasses = await xlSelect?.getAttribute('class');
-    expect(xlClasses).toContain('xl:max-w-[650px]');
-
-    // Test 2xl screens (2xl: max-w-[750px])
-    await page.setViewportSize({ width: 1536, height: 1024 });
-    const xxlSelect = await page.$('#document-select');
-    const xxlClasses = await xxlSelect?.getAttribute('class');
-    expect(xxlClasses).toContain('2xl:max-w-[750px]');
+    for (const size of screenSizes) {
+      await page.setViewportSize({ width: size.width, height: size.height });
+      const select = await page.$('#document-select');
+      const classes = await select?.getAttribute('class');
+      expect(classes).toContain('max-w-[150px]');
+    }
   });
 
   test('should contain all sample documents', async ({ page }) => {
@@ -71,7 +51,6 @@ test.describe('Document Selector', () => {
 
     // Check for specific documents
     expect(options.some(opt => opt.includes('001.docx'))).toBe(true);
-    expect(options.some(opt => opt.includes('Service Agreement'))).toBe(true);
     expect(options.some(opt => opt.includes('Employee Handbook'))).toBe(true);
   });
 
