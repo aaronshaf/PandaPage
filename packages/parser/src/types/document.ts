@@ -22,6 +22,7 @@ export interface TextRun {
   backgroundColor?: string;
   link?: string;
   _footnoteRef?: string;
+  _fieldCode?: string;
 }
 
 export interface Paragraph {
@@ -86,6 +87,13 @@ export interface Footer {
   elements: (Paragraph | Table)[];
 }
 
+export interface HeaderFooterInfo {
+  default?: Header | Footer;
+  first?: Header | Footer;
+  even?: Header | Footer;
+  odd?: Header | Footer;
+}
+
 export interface Bookmark {
   type: 'bookmark';
   id: string;
@@ -110,6 +118,8 @@ export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | 
 export interface ParsedDocument {
   metadata: DocumentMetadata;
   elements: DocumentElement[];
+  headers?: HeaderFooterInfo;
+  footers?: HeaderFooterInfo;
 }
 
 export interface ParseOptions {

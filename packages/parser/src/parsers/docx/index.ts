@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image, Footnote, FootnoteReference } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image, Footnote, FootnoteReference, HeaderFooterInfo } from "../../types/document";
 import { parseDrawing, parseRelationships, extractImageData, createImageElement } from "./image-parser";
 
 // Helper function to get MIME type from file extension
@@ -24,6 +24,126 @@ export class DocxParseError {
   constructor(public readonly message: string) {}
 }
 
+function parseFieldRun(fieldInstruction: string, runProperties: Element | null, ns: string): DocxRun | null {
+  // Parse the field instruction (e.g., "PAGE \* MERGEFORMAT")
+  const instruction = fieldInstruction.trim();
+  
+  // Extract the field type
+  const fieldType = instruction.split(/\s+/)[0];
+  
+  // Create a placeholder text based on the field type
+  let text = "";
+  switch (fieldType) {
+    case "PAGE":
+      text = "1"; // Placeholder - will be replaced by actual page number during rendering
+      break;
+    case "NUMPAGES":
+      text = "1"; // Placeholder - will be replaced by total page count
+      break;
+    default:
+      // For other field types, just show the field code
+      text = `{${fieldType}}`;
+  }
+  
+  // Parse run properties if available
+  let fontSize: string | undefined;
+  let fontFamily: string | undefined;
+  let bold = false;
+  let italic = false;
+  
+  if (runProperties) {
+    const szElement = runProperties.getElementsByTagNameNS(ns, "sz")[0];
+    fontSize = szElement?.getAttribute("w:val") || undefined;
+    
+    const fontElement = runProperties.getElementsByTagNameNS(ns, "rFonts")[0];
+    fontFamily = fontElement?.getAttribute("w:ascii") || undefined;
+    
+    bold = runProperties.getElementsByTagNameNS(ns, "b").length > 0;
+    italic = runProperties.getElementsByTagNameNS(ns, "i").length > 0;
+  }
+  
+  return {
+    text,
+    bold,
+    italic,
+    fontSize,
+    fontFamily,
+    _fieldCode: fieldType
+  };
+}
+
+function parseSectionProperties(doc: Document, headerMap: Map<string, Header>, footerMap: Map<string, Footer>): { headers?: HeaderFooterInfo; footers?: HeaderFooterInfo } {
+  const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const relsNs = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  
+  const headers: HeaderFooterInfo = {};
+  const footers: HeaderFooterInfo = {};
+  
+  // Find section properties in the document
+  const sectPrElements = doc.getElementsByTagNameNS(ns, "sectPr");
+  
+  // Usually the last sectPr is the main document section
+  if (sectPrElements.length > 0) {
+    const sectPr = sectPrElements[sectPrElements.length - 1];
+    if (sectPr) {
+      // Parse header references
+      const headerRefs = sectPr.getElementsByTagNameNS(ns, "headerReference");
+      for (let i = 0; i < headerRefs.length; i++) {
+        const ref = headerRefs[i];
+        if (!ref) continue;
+        const type = ref.getAttribute("w:type");
+        const rId = ref.getAttribute("r:id");
+        
+        if (rId && headerMap.has(rId)) {
+          const header = headerMap.get(rId)!;
+          switch (type) {
+            case "first":
+              headers.first = header;
+              break;
+            case "even":
+              headers.even = header;
+              break;
+            case "default":
+            default:
+              headers.default = header;
+              break;
+          }
+        }
+      }
+      
+      // Parse footer references
+      const footerRefs = sectPr.getElementsByTagNameNS(ns, "footerReference");
+      for (let i = 0; i < footerRefs.length; i++) {
+        const ref = footerRefs[i];
+        if (!ref) continue;
+        const type = ref.getAttribute("w:type");
+        const rId = ref.getAttribute("r:id");
+        
+        if (rId && footerMap.has(rId)) {
+          const footer = footerMap.get(rId)!;
+          switch (type) {
+            case "first":
+              footers.first = footer;
+              break;
+            case "even":
+              footers.even = footer;
+              break;
+            case "default":
+            default:
+              footers.default = footer;
+              break;
+          }
+        }
+      }
+    }
+  }
+  
+  return {
+    headers: Object.keys(headers).length > 0 ? headers : undefined,
+    footers: Object.keys(footers).length > 0 ? footers : undefined
+  };
+}
+
 interface DocxRun {
   text: string;
   bold?: boolean;
@@ -38,6 +158,7 @@ interface DocxRun {
   backgroundColor?: string;
   link?: string;
   _footnoteRef?: string;
+  _fieldCode?: string; // For PAGE, NUMPAGES, etc. fields
 }
 
 interface DocxParagraph {
@@ -91,6 +212,11 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
   // Parse runs - both direct runs and runs inside hyperlinks
   const allChildren = Array.from(paragraphElement.childNodes);
   
+  // Track field parsing state
+  let inField = false;
+  let fieldInstruction = "";
+  let fieldRunProperties: any = null;
+  
   for (let i = 0; i < allChildren.length; i++) {
     const child = allChildren[i];
     if (!child || child.nodeType !== 1) continue; // Skip non-element nodes
@@ -114,10 +240,48 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
           }
         }
       } else {
-        // Direct run element
-        const run = parseRun(element, ns);
-        if (run && run.text) {
-          runs.push(run);
+        // Check for field codes
+        const fldCharElements = element.getElementsByTagNameNS(ns, "fldChar");
+        const instrTextElements = element.getElementsByTagNameNS(ns, "instrText");
+        
+        if (fldCharElements.length > 0) {
+          const fldChar = fldCharElements[0];
+          const fldCharType = fldChar?.getAttribute("w:fldCharType");
+          
+          if (fldCharType === "begin") {
+            inField = true;
+            fieldInstruction = "";
+            // Get run properties for the field
+            const runProps = element.getElementsByTagNameNS(ns, "rPr")[0];
+            if (runProps) {
+              fieldRunProperties = runProps.cloneNode(true);
+            }
+          } else if (fldCharType === "separate") {
+            // Skip the separator - the next run will have the field value
+          } else if (fldCharType === "end" && inField) {
+            // Field complete - create a run with the field code
+            if (fieldInstruction.trim()) {
+              const fieldRun = parseFieldRun(fieldInstruction, fieldRunProperties, ns);
+              if (fieldRun) {
+                runs.push(fieldRun);
+              }
+            }
+            inField = false;
+            fieldInstruction = "";
+            fieldRunProperties = null;
+          }
+        } else if (instrTextElements.length > 0 && inField) {
+          // Collect field instruction text
+          const instrText = instrTextElements[0];
+          if (instrText) {
+            fieldInstruction += instrText.textContent || "";
+          }
+        } else if (!inField) {
+          // Direct run element (not part of a field)
+          const run = parseRun(element, ns);
+          if (run && run.text) {
+            runs.push(run);
+          }
         }
       }
       
@@ -784,8 +948,8 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     
     // Parse relationships for headers, footers, and hyperlinks
     const relsFile = zip.file("word/_rels/document.xml.rels");
-    let headers: Header[] = [];
-    let footers: Footer[] = [];
+    let headerMap = new Map<string, Header>(); // Map rId to header
+    let footerMap = new Map<string, Footer>(); // Map rId to footer
     let relationshipsMap = new Map<string, string>();
     let imageRelationships = new Map<string, { id: string; target: string; type: string }>();
     
@@ -841,7 +1005,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
                 if (headerXml) {
                   const header = parseHeaderFooter(headerXml, 'header', relationshipsMap);
                   if (header && header.type === 'header') {
-                    headers.push(header);
+                    headerMap.set(id, header);
                   }
                 }
               }
@@ -857,7 +1021,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
                 if (footerXml) {
                   const footer = parseHeaderFooter(footerXml, 'footer', relationshipsMap);
                   if (footer && footer.type === 'footer') {
-                    footers.push(footer);
+                    footerMap.set(id, footer);
                   }
                 }
               }
@@ -885,26 +1049,24 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     // Parse all document body elements in order
     const elements: DocumentElement[] = [];
     
-    // Add headers first
-    elements.push(...headers);
+    // Parse section properties to determine header/footer assignments
+    const { headers: headerInfo, footers: footerInfo } = parseSectionProperties(doc, headerMap, footerMap);
     
     const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
     
     // Get the document body
     const bodyNodeList = doc.getElementsByTagNameNS(ns, "body");
     if (bodyNodeList.length === 0) {
-      // Add footers at the end and return
-      elements.push(...footers);
+      // Add footnotes at the end and return
       elements.push(...footnotes);
-      return { metadata, elements };
+      return { metadata, elements, headers: headerInfo, footers: footerInfo };
     }
     
     const body = bodyNodeList[0];
     if (!body) {
-      // Add footers at the end and return
-      elements.push(...footers);
+      // Add footnotes at the end and return
       elements.push(...footnotes);
-      return { metadata, elements };
+      return { metadata, elements, headers: headerInfo, footers: footerInfo };
     }
     
     // Parse bookmarks from the entire document body first
@@ -980,15 +1142,14 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
     
-    // Add footers at the end
-    elements.push(...footers);
-    
     // Add footnotes at the end
     elements.push(...footnotes);
     
     return {
       metadata,
-      elements
+      elements,
+      headers: headerInfo,
+      footers: footerInfo
     };
   });
 
