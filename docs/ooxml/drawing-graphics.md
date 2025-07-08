@@ -1,8 +1,44 @@
-# Drawing and Graphics in DOCX
+# OOXML Drawing and Graphics (DrawingML)
 
 ## Overview
 
-DOCX documents can contain various types of graphics and drawing objects through DrawingML (Drawing Markup Language). Understanding the two positioning modes and coordinate systems is essential for proper rendering.
+DrawingML (Drawing Markup Language) is the shared graphics system across all OOXML formats (DOCX, XLSX, PPTX). It provides a comprehensive framework for shapes, images, charts, and effects using precise coordinate systems. In DOCX, graphics are embedded through WordprocessingML drawing elements with two primary positioning modes.
+
+## DrawingML Coordinate System
+
+### EMU Units (English Metric Units)
+
+**Schema Definition:** DrawingML uses EMUs as defined by `ST_Coordinate` and `ST_PositiveCoordinate` in `dml-main.xsd`:
+
+**Coordinate Ranges:**
+- **ST_CoordinateUnqualified**: -27,273,042,329,600 to 27,273,042,316,900 EMUs
+- **ST_PositiveCoordinate**: 0 to 27,273,042,316,900 EMUs
+
+**Core Constants:**
+- **1 inch = 914,400 EMUs**
+- **1 point = 12,700 EMUs** 
+- **1 centimeter = 360,000 EMUs**
+- **1 twip = 635 EMUs**
+
+### Schema-Defined Coordinate Elements
+
+#### CT_Point2D - Position Coordinates
+```xml
+<a:off x="1143000" y="1143000"/>  <!-- 1.25" x 1.25" offset in EMUs -->
+```
+
+#### CT_PositiveSize2D - Object Dimensions  
+```xml
+<a:ext cx="2286000" cy="1714500"/>  <!-- 2.5" x 1.875" size in EMUs -->
+```
+
+#### CT_Transform2D - Complete Transform
+```xml
+<a:xfrm rot="0" flipH="false" flipV="false">
+  <a:off x="1143000" y="1143000"/>    <!-- Position (CT_Point2D) -->
+  <a:ext cx="2286000" cy="1714500"/>  <!-- Size (CT_PositiveSize2D) -->
+</a:xfrm>
+```
 
 ## Two Positioning Modes
 

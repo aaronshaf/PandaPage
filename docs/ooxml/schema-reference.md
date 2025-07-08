@@ -2,41 +2,118 @@
 
 ## Overview
 
-This document synthesizes key information from the official ISO/IEC 29500-1:2016 OOXML schemas to provide accurate implementation guidance.
+This document synthesizes key information from the official ISO/IEC 29500-1:2016 OOXML schemas to provide accurate implementation guidance for browser-based document rendering.
 
-## Core Document Structure
+## WordprocessingML Schema (wml.xsd)
 
-### Document Elements
+### Document Structure Hierarchy
 
-From `wml.xsd`, the core document structure follows this hierarchy:
+The WordprocessingML schema defines a precise document hierarchy based on the official OOXML specification:
 
-```xml
-<w:document>
-  <w:body>
-    <!-- Block-level content -->
-    <w:p>           <!-- Paragraph (CT_P) -->
-      <w:pPr/>      <!-- Paragraph properties (CT_PPr) -->
-      <w:r>         <!-- Run (CT_R) -->
-        <w:rPr/>    <!-- Run properties (CT_RPr) -->
-        <w:t/>      <!-- Text (CT_Text) -->
-      </w:r>
-    </w:p>
-    <w:tbl>         <!-- Table (CT_Tbl) -->
-      <w:tblPr/>    <!-- Table properties -->
-      <w:tblGrid/>  <!-- Table grid definition -->
-      <w:tr>        <!-- Table row (CT_Row) -->
-        <w:tc>      <!-- Table cell -->
-          <!-- Cell content: paragraphs -->
-        </w:tc>
-      </w:tr>
-    </w:tbl>
-  </w:body>
-</w:document>
+```
+CT_Document (root element: w:document)
+├── CT_Body (w:body)
+    ├── EG_BlockLevelElts (block-level content group)
+    │   ├── EG_ContentBlockContent
+    │   │   ├── CT_P (w:p) - Paragraphs
+    │   │   ├── CT_Tbl (w:tbl) - Tables  
+    │   │   ├── CT_CustomXmlBlock - Custom XML
+    │   │   └── CT_SdtBlock - Structured document tags
+    │   └── CT_AltChunk (w:altChunk) - Alternative content
+    └── CT_SectPr (w:sectPr) - Section properties
 ```
 
-### Text Content
+### Paragraph Structure (CT_P)
 
-The `CT_Text` type is simple but important:
+Paragraphs follow this precise content model:
+
+```xml
+<w:p>
+  <w:pPr/>          <!-- Paragraph properties (CT_PPr) -->
+  <!-- EG_PContent group: -->
+  <w:r>             <!-- Run (CT_R) -->
+    <w:rPr/>        <!-- Run properties -->
+    <!-- EG_RunInnerContent: -->
+    <w:t/>          <!-- Text (CT_Text) -->
+    <w:br/>         <!-- Break (CT_Br) -->
+    <w:contentPart/><!-- Content part reference -->
+    <!-- Other run content... -->
+  </w:r>
+  <w:fldSimple/>    <!-- Simple field (CT_SimpleField) -->
+  <w:hyperlink/>    <!-- Hyperlink (CT_Hyperlink) -->
+  <w:subDoc/>       <!-- Subdocument reference -->
+</w:p>
+```
+
+### Run Content Elements (EG_RunInnerContent)
+
+Runs can contain these specific elements per the schema:
+
+- `w:t` - Text content (CT_Text)
+- `w:br` - Line breaks (CT_Br) 
+- `w:contentPart` - Content part references
+- `w:delText` - Deleted text (revision tracking)
+- `w:instrText` - Instruction text (field codes)
+- `w:noBreakHyphen` - Non-breaking hyphens
+- `w:softHyphen` - Soft hyphens
+- Date/time elements: `w:dayShort`, `w:monthShort`, `w:yearShort`, etc.
+- Reference elements: `w:footnoteRef`, `w:endnoteRef`, `w:annotationRef`
+- Separator elements for footnotes/endnotes
+
+## Shared Simple Types (shared-commonSimpleTypes.xsd)
+
+### Core Data Types
+
+OOXML defines fundamental data types used across all schemas:
+
+#### Boolean and On/Off (ST_OnOff)
+```xml
+<!-- ST_OnOff is a union of xsd:boolean -->
+<w:b w:val="true"/>      <!-- Explicit boolean -->
+<w:b/>                   <!-- Empty element = true -->
+<w:b w:val="false"/>     <!-- Explicit false -->
+<w:b w:val="0"/>         <!-- Zero = false -->
+<w:b w:val="1"/>         <!-- Non-zero = true -->
+```
+
+#### Measurement Units
+
+**ST_TwipsMeasure** - Union of numbers and universal measures:
+```xml
+<w:spacing w:before="240"/>    <!-- Raw twips -->
+<w:spacing w:before="12pt"/>   <!-- Universal measure -->
+```
+
+**ST_UniversalMeasure** - Pattern: `-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)`
+```xml
+<w:ind w:left="0.5in"/>       <!-- Inches -->
+<w:ind w:left="1.27cm"/>      <!-- Centimeters -->
+<w:ind w:left="36pt"/>        <!-- Points -->
+<w:ind w:left="3pc"/>         <!-- Picas -->
+```
+
+**ST_PositiveUniversalMeasure** - Same pattern but positive values only
+
+#### Percentage Types
+
+**ST_Percentage** - Pattern: `-?[0-9]+(\.[0-9]+)?%`
+```xml
+<w:tblW w:w="50%" w:type="pct"/>    <!-- Table width percentage -->
+```
+
+**ST_FixedPercentage** - Limited to 0-100%
+**ST_PositivePercentage** - Positive percentages only
+
+#### Numeric Types
+
+**ST_UnsignedDecimalNumber** - Based on `xsd:unsignedLong`
+```xml
+<w:numId w:val="1"/>          <!-- List numbering ID -->
+```
+
+### Text Content (CT_Text)
+
+Text elements have specific whitespace handling:
 
 ```xml
 <xsd:complexType name="CT_Text">

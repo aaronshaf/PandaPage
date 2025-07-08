@@ -6,19 +6,45 @@ OOXML uses multiple coordinate systems and units depending on the context and fo
 
 ## Core Unit Systems
 
-### 1. Twips (Word Processing)
+### 1. Twips (Word Processing) - ST_TwipsMeasure
 
-**Twips** are the fundamental unit in WordprocessingML:
+**Twips** are the fundamental unit in WordprocessingML (defined as `s:ST_TwipsMeasure` in shared types):
 - **1 inch = 1,440 twips**
-- **1 point = 20 twips**
+- **1 point = 20 twips**  
 - **1 centimeter ≈ 567 twips**
 
-Used for:
-- Paragraph margins and indentation
-- Table dimensions
-- Font sizes (as half-points)
-- Page margins and dimensions
-- Character spacing
+**Schema Usage:** Used throughout WordprocessingML for precise measurements:
+
+#### Page Layout (CT_PageSz, CT_PageMar)
+```xml
+<w:pgSz w="12240" h="15840" orient="portrait"/>  <!-- 8.5" x 11" in twips -->
+<w:pgMar top="1440" right="1440" bottom="1440" left="1440" 
+         header="720" footer="720" gutter="0"/>    <!-- 1" margins in twips -->
+```
+
+#### Paragraph Spacing (CT_Spacing) 
+```xml
+<w:spacing before="240" after="240" line="240"/>  <!-- 12pt spacing in twips -->
+```
+
+#### Table Dimensions (CT_TblWidth, CT_TblGridCol)
+```xml
+<w:gridCol w="2880"/>  <!-- 2" column width in twips -->
+```
+
+#### Run Properties - Positioning
+```xml
+<w:position w:val="120"/>  <!-- 6pt text position adjustment in twips -->
+```
+
+### Signed Twips (ST_SignedTwipsMeasure)
+
+Some elements use signed twips allowing negative values:
+- **Page margins** (top/bottom can be negative)
+- **Text positioning** (baseline adjustments)
+- **Table positioning** (offsets from anchors)
+
+**Schema Definition:** Union of `xsd:integer` and `s:ST_UniversalMeasure`
 
 ```typescript
 const TWIPS_PER_INCH = 1440;
@@ -30,18 +56,54 @@ function inchesToTwips(inches: number): number {
   return Math.round(inches * TWIPS_PER_INCH);
 }
 
+// Handle signed twips measurements
+function parseSignedTwips(value: string | number): number {
+  if (typeof value === 'number') return value;
+  
+  // Check for universal measure units (in, pt, cm, etc.)
+  const universalMatch = value.match(/^(-?\d+(?:\.\d+)?)(in|pt|cm|mm|pc|pi)$/);
+  if (universalMatch) {
+    const [, num, unit] = universalMatch;
+    return convertToTwips(parseFloat(num), unit);
+  }
+  
+  // Default to integer twips
+  return parseInt(value, 10) || 0;
+}
+
 function pointsToTwips(points: number): number {
   return Math.round(points * TWIPS_PER_POINT);
 }
 ```
 
-### 2. EMUs (Drawing)
+### 2. EMUs (Drawing and Graphics) - ST_Coordinate
 
-**English Metric Units (EMUs)** are used in DrawingML:
+**English Metric Units (EMUs)** are used in DrawingML (defined in `dml-main.xsd`):
 - **1 inch = 914,400 EMUs**
 - **1 centimeter = 360,000 EMUs**
 - **1 point = 12,700 EMUs**
 - **1 twip = 635 EMUs**
+
+**Schema Types:**
+- `ST_Coordinate`: -27,273,042,329,600 to 27,273,042,316,900 (signed, for positions)
+- `ST_PositiveCoordinate`: 0 to 27,273,042,316,900 (unsigned, for dimensions)
+- `ST_Coordinate32`: 32-bit integer version for smaller ranges
+
+#### DrawingML Usage Examples
+
+**Shape Position and Size (CT_Transform2D):**
+```xml
+<a:xfrm>
+  <a:off x="914400" y="914400"/>      <!-- 1" x 1" position in EMUs -->
+  <a:ext cx="2743200" cy="1828800"/>  <!-- 3" x 2" size in EMUs -->
+</a:xfrm>
+```
+
+**Text Box Margins (CT_TextBodyProperties):**
+```xml
+<a:bodyPr marL="91440" marR="91440" marT="45720" marB="45720"/>
+<!-- 0.1" left/right, 0.05" top/bottom margins in EMUs -->
+```
 
 Used for:
 - Image dimensions and positioning
