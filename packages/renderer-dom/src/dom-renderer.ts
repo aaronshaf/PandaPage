@@ -126,12 +126,12 @@ export class DOMRenderer {
     const p = this.doc.createElement('p');
     // Only add margin if not in a table cell
     if (!context?.inTableCell) {
-      p.className = 'mb-4';
+      p.style.marginBottom = '12pt'; // Standard paragraph spacing
     }
     
     // Add alignment
     if (paragraph.alignment) {
-      p.classList.add(`text-${paragraph.alignment}`);
+      p.style.textAlign = paragraph.alignment;
     }
     
     // Render runs
@@ -199,16 +199,11 @@ export class DOMRenderer {
       element = this.doc.createElement('span');
     }
     
-    // Apply formatting classes
-    const classes: string[] = [];
-    if (run.bold) classes.push('font-bold');
-    if (run.italic) classes.push('italic');
-    if (run.underline) classes.push('underline');
-    if (run.strikethrough) classes.push('line-through');
-    
-    if (classes.length > 0) {
-      element.className = classes.join(' ');
-    }
+    // Apply formatting styles
+    if (run.bold) element.style.fontWeight = 'bold';
+    if (run.italic) element.style.fontStyle = 'italic';
+    if (run.underline) element.style.textDecoration = 'underline';
+    if (run.strikethrough) element.style.textDecoration = 'line-through';
     
     // Apply inline styles
     const styles: string[] = [];
@@ -239,7 +234,8 @@ export class DOMRenderer {
   
   private renderTable(table: Table): HTMLElement {
     const tableEl = this.doc.createElement('table');
-    tableEl.className = 'border-collapse mb-4';
+    tableEl.style.borderCollapse = 'collapse';
+    tableEl.style.marginBottom = '12pt';
     
     table.rows.forEach((row, rowIndex) => {
       const tr = this.doc.createElement('tr');
@@ -248,10 +244,12 @@ export class DOMRenderer {
         const isHeader = rowIndex === 0;
         const td = this.doc.createElement(isHeader ? 'th' : 'td');
         
-        // Base classes - reduced padding
-        let classes = 'border px-2 py-1';
+        // Add border and padding styles
+        td.style.border = '1px solid #ccc';
+        td.style.padding = '4pt'; // Standard cell padding
+        
         if (isHeader) {
-          classes += ' font-semibold';
+          td.style.fontWeight = '600';
           
           // Check if content has white text and add dark background
           const hasWhiteText = cell.paragraphs.some(p => 
@@ -259,13 +257,12 @@ export class DOMRenderer {
           );
           
           if (hasWhiteText) {
-            classes += ' bg-gray-800 text-white';
+            td.style.backgroundColor = '#1f2937';
+            td.style.color = 'white';
           } else {
-            classes += ' bg-gray-100';
+            td.style.backgroundColor = '#f3f4f6';
           }
         }
-        
-        td.className = classes;
         
         // Add cell attributes
         if (cell.colspan) td.setAttribute('colspan', cell.colspan.toString());
@@ -302,7 +299,9 @@ export class DOMRenderer {
   
   private renderHeader(header: any): HTMLElement {
     const headerEl = this.doc.createElement('header');
-    headerEl.className = 'header mb-4 pb-2 border-b border-gray-300';
+    headerEl.style.marginBottom = '12pt';
+    headerEl.style.paddingBottom = '8pt';
+    headerEl.style.borderBottom = '1px solid #d1d5db';
     
     header.elements.forEach((el: any) => {
       if (el.type === 'paragraph') {
@@ -317,22 +316,23 @@ export class DOMRenderer {
   
   private renderHeading(heading: Heading): HTMLElement {
     const h = this.doc.createElement(`h${heading.level}`);
-    h.className = 'mb-4 font-bold';
+    h.style.marginBottom = '12pt'; // Standard heading spacing
+    h.style.fontWeight = 'bold';
     
-    // Add size classes based on level
-    const sizeClasses = {
-      1: 'text-4xl',
-      2: 'text-3xl',
-      3: 'text-2xl',
-      4: 'text-xl',
-      5: 'text-lg',
-      6: 'text-base'
+    // Add size styles based on level (using points for document consistency)
+    const fontSizes = {
+      1: '24pt',  // Heading 1
+      2: '20pt',  // Heading 2
+      3: '16pt',  // Heading 3
+      4: '14pt',  // Heading 4
+      5: '12pt',  // Heading 5
+      6: '11pt'   // Heading 6
     };
-    h.classList.add(sizeClasses[heading.level] || 'text-base');
+    h.style.fontSize = fontSizes[heading.level] || '12pt';
     
     // Add alignment
     if (heading.alignment) {
-      h.classList.add(`text-${heading.alignment}`);
+      h.style.textAlign = heading.alignment;
     }
     
     // Render runs
@@ -401,7 +401,9 @@ export class DOMRenderer {
     if (image.height) img.height = image.height;
     if (image.alt) img.alt = image.alt;
     
-    img.className = 'max-w-full h-auto mb-4';
+    img.style.maxWidth = '100%';
+    img.style.height = 'auto';
+    img.style.marginBottom = '12pt';
     
     return img;
   }
@@ -423,7 +425,7 @@ export class DOMRenderer {
     style.textContent = `
       .page {
         position: relative;
-        margin-bottom: 2rem;
+        margin-bottom: 24pt; /* 1/3 inch spacing between pages */
         min-height: 11in;
         background: white;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -431,7 +433,9 @@ export class DOMRenderer {
       
       .page-content {
         padding: 1in;
-        padding-bottom: 2in; /* Space for footer */
+        padding-bottom: 1.5in; /* Space for footer */
+        font-size: 12pt; /* Default document font size */
+        line-height: 1.2; /* Standard line height for readability */
       }
       
       .footer {
@@ -453,16 +457,16 @@ export class DOMRenderer {
       }
       
       .footnote {
-        margin-top: 2rem;
-        padding: 1rem;
+        margin-top: 16pt;
+        padding: 12pt;
         background-color: #f9fafb;
         border-left: 4px solid #e5e7eb;
         border-radius: 0.375rem;
       }
       
       .footnote-content {
-        font-size: 0.875rem;
-        line-height: 1.25rem;
+        font-size: 10pt;
+        line-height: 12pt;
       }
       
       .footnote-number {
@@ -548,7 +552,10 @@ export class DOMRenderer {
     this.totalPages = totalPages;
     
     const footerEl = this.doc.createElement('footer');
-    footerEl.className = 'footer mt-4 pt-2 border-t border-gray-300';
+    footerEl.className = 'footer'; // Keep footer class for positioning
+    footerEl.style.marginTop = '12pt';
+    footerEl.style.paddingTop = '8pt';
+    footerEl.style.borderTop = '1px solid #d1d5db';
     
     footer.elements.forEach((el: any) => {
       if (el.type === 'paragraph') {
@@ -562,13 +569,16 @@ export class DOMRenderer {
           if (hasTab) {
             // Create flex container for left-right alignment
             const flexDiv = this.doc.createElement('div');
-            flexDiv.className = 'flex justify-between items-center mb-4';
+            flexDiv.style.display = 'flex';
+            flexDiv.style.justifyContent = 'space-between';
+            flexDiv.style.alignItems = 'center';
+            flexDiv.style.marginBottom = '12pt';
             
             const leftDiv = this.doc.createElement('div');
-            leftDiv.className = 'flex-1';
+            leftDiv.style.flex = '1';
             
             const rightDiv = this.doc.createElement('div');
-            rightDiv.className = 'flex-none';
+            rightDiv.style.flexShrink = '0';
             
             let foundTab = false;
             const runs = el.runs || [];
