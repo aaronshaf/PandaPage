@@ -310,26 +310,56 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             } as React.CSSProperties & { '--print-scale': number }}
           >
             {parsedDocument ? (
-              // For new parser documents, use DOM renderer (preferred for print layout)
-              <div className="print-page" data-testid="print-page-1" data-page={1}>
-                <div data-testid="print-content-1" className="print-content">
+              // For new parser documents, use DOM renderer with pagination
+              (() => {
+                const htmlContent = renderToHtml(parsedDocument, { includeStyles: false });
+                const pages = splitIntoPages(htmlContent);
+                
+                // Update total pages when pages change
+                if (pages.length !== totalPages) {
+                  setTimeout(() => setTotalPages(pages.length), 0);
+                }
+                
+                return pages.map((pageContent, index) => (
                   <div 
-                    dangerouslySetInnerHTML={{ 
-                      __html: renderToHtml(parsedDocument, { includeStyles: false })
-                    }}
-                  />
-                </div>
-              </div>
+                    key={index} 
+                    data-testid={`print-page-${index + 1}`}
+                    className="print-page" 
+                    data-page={index + 1}
+                  >
+                    <div data-testid={`print-content-${index + 1}`} className="print-content">
+                      <div dangerouslySetInnerHTML={{ __html: pageContent }} />
+                    </div>
+                  </div>
+                ));
+              })()
             ) : structuredDocument?.elements ? (
-              // Fallback to structured documents
-              <div className="print-page" data-testid="print-page-1" data-page={1}>
-                <div data-testid="print-content-1" className="print-content">
-                  <DocxRenderer 
-                    elements={structuredDocument.elements} 
-                    viewMode={viewMode}
-                  />
-                </div>
-              </div>
+              // For structured documents, convert to HTML and split into pages
+              (() => {
+                // Use the DocxRenderer to convert to HTML first
+                const tempDiv = document.createElement('div');
+                const tempRoot = document.createElement('div');
+                tempDiv.appendChild(tempRoot);
+                
+                // Render the DocxRenderer content to get HTML
+                // For now, fallback to single page until we can extract HTML from DocxRenderer
+                const pages = [''];
+                
+                if (pages.length !== totalPages) {
+                  setTimeout(() => setTotalPages(1), 0);
+                }
+                
+                return (
+                  <div className="print-page" data-testid="print-page-1" data-page={1}>
+                    <div data-testid="print-content-1" className="print-content">
+                      <DocxRenderer 
+                        elements={structuredDocument.elements} 
+                        viewMode={viewMode}
+                      />
+                    </div>
+                  </div>
+                );
+              })()
             ) : (
               // For markdown, use the existing pagination
               (() => {
