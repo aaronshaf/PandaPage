@@ -56,7 +56,7 @@ describe("Title Extraction from DOCX", () => {
         return structuredDoc.metadata.title;
       }
       
-      if (!markdown) return 'pandapage';
+      if (!markdown) return 'Browser Document Viewer';
       
       // Try to get first heading
       const headingMatch = markdown.match(/^#\s+(.+)$/m);
@@ -64,12 +64,12 @@ describe("Title Extraction from DOCX", () => {
         return headingMatch[1];
       }
       
-      return 'pandapage';
+      return 'Browser Document Viewer';
     };
     
     // Test priority: metadata > heading > default
     expect(getTitle(mockStructuredDoc, mockResult)).toBe("Metadata Title");
     expect(getTitle(null, mockResult)).toBe("First Heading");
-    expect(getTitle(null, null)).toBe("pandapage");
+    expect(getTitle(null, null)).toBe("Browser Document Viewer");
   });
 });
