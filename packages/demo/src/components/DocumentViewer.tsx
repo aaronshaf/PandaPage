@@ -154,8 +154,11 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
     scrollContainer.addEventListener('scroll', handleScroll);
     
-    // Initial call with fake event
+    // Initial call with fake event - mark as programmatic to avoid showing page indicator
+    setIsProgrammaticScroll(true);
     handleScroll({ target: scrollContainer } as any);
+    // Reset programmatic flag after initial setup
+    setTimeout(() => setIsProgrammaticScroll(false), 100);
 
     return () => {
       scrollContainer.removeEventListener('scroll', handleScroll);
