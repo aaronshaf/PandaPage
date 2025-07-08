@@ -20,7 +20,7 @@ LOG_LEVEL=All bun test
 LOG_LEVEL=None bun test
 ```
 
-See [`packages/pandapage/LOGGING.md`](packages/pandapage/LOGGING.md) for detailed logging documentation.
+See [`packages/core/LOGGING.md`](packages/core/LOGGING.md) for detailed logging documentation.
 
 ### Running Specific Tests
 
@@ -49,7 +49,7 @@ This is a Bun monorepo with the following packages:
 - `packages/parser` - Core DOCX parsing logic
 - `packages/renderer-dom` - HTML/DOM rendering output
 - `packages/renderer-markdown` - Markdown rendering output
-- `packages/pandapage` - Legacy package with additional DOCX processing
+- `packages/core` - Core package with advanced DOCX processing
 - `packages/demo` - Interactive demo application
 
 ### Building

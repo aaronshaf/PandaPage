@@ -132,7 +132,7 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 4. **Use index files** to maintain clean import paths
 5. **Maintain functionality** while improving structure
 
-## Project Context: pandapage Document Parser
+## Project Context: Browser Document Viewer
 
 This project aims to parse and render modern document formats in the browser:
 
@@ -161,7 +161,7 @@ This project aims to parse and render modern document formats in the browser:
 ### Testing Approach
 - Deterministic tests comparing output to expected Markdown
 - Use Effect.js for error handling and async operations
-- Test files in packages/pandapage/ root for parser verification
+- Test files in packages/core/ root for parser verification
 
 ### Current Implementation Status
 - DOCX: Text, formatting, headings, lists ✓

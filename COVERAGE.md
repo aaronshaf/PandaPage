@@ -44,7 +44,7 @@ cd packages/parser && bun run test:coverage
 
 1. **Same-or-Better Policy**: New code must not decrease overall coverage percentages
 2. **Manual Review**: PRs that decrease coverage require justification
-3. **Focus Areas**: Priority for improvement is pandapage package (lowest coverage)
+3. **Focus Areas**: Priority for improvement is core package (lowest coverage)
 
 ### TODO: Coverage Thresholds
 

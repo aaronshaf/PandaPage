@@ -58,13 +58,13 @@ Apple files (.pages, .numbers, .key) are:
 ## Installation
 
 ```bash
-bun add @pandapage/pandapage
+bun add @browser-document-viewer/core
 ```
 
 ## Usage
 
 ```typescript
-import { renderDocx } from '@pandapage/pandapage';
+import { renderDocx } from '@browser-document-viewer/core';
 
 // Convert DOCX to Markdown
 const arrayBuffer = await fetch('document.docx').then(r => r.arrayBuffer());
@@ -127,7 +127,7 @@ await Effect.runPromise(
 
 ## Testing
 
-pandapage uses two testing strategies:
+Browser Document Viewer uses two testing strategies:
 
 ### Unit Tests (Bun)
 For pure functions that don't require browser APIs:
