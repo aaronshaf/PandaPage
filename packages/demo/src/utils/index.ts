@@ -1,6 +1,11 @@
 // Get base path for GitHub Pages deployment
 export const getBasePath = () => {
-  return process.env.NODE_ENV === 'production' ? '/pandapage' : '';
+  // Use import.meta.env for Vite
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.PROD ? '/pandapage' : '';
+  }
+  // Fallback for tests or other environments
+  return '';
 };
 
 // Remove YAML frontmatter from markdown for rendering

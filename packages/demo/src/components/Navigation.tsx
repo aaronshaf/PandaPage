@@ -299,8 +299,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           {/* Document controls */}
           <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
             {/* Document dropdown */}
-            <div className="hidden sm:flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 shadow-sm border border-gray-200">
-              <label htmlFor="document-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 shadow-sm border border-gray-200">
+              <label htmlFor="document-select" className="hidden sm:inline text-sm font-medium text-gray-700 whitespace-nowrap">
                 Document:
               </label>
               <select
@@ -314,7 +314,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     handleDocumentLoad(value);
                   }
                 }}
-                className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-2 sm:px-3 py-2 pr-8 sm:pr-10 bg-white shadow-sm font-medium max-w-[150px] sm:max-w-[200px] lg:max-w-[250px]"
+                className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-2 sm:px-3 py-1.5 sm:py-2 pr-8 sm:pr-10 bg-white shadow-sm font-medium max-w-[120px] sm:max-w-[200px] lg:max-w-[250px]"
               >
               {uploadedFile && (
                 <option value="uploaded">{uploadedFile.name}</option>
@@ -322,7 +322,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               {sampleDocuments.map((doc) => {
                 const docPath = `${getBasePath()}/${doc.id}`;
                 return (
-                  <option key={doc.id} value={docPath}>
+                  <option key={doc.id} value={docPath} title={`${doc.id} - ${doc.title}`}>
                     {doc.id} - {doc.title}
                   </option>
                 );
