@@ -42,6 +42,18 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false);
   const [navHeight, setNavHeight] = useState(140);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Calculate print scale
   const calculatePrintScale = () => {
@@ -195,14 +207,14 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       data-testid="document-viewer"
       className={`relative ${viewMode === 'print' ? '' : 'p-6'}`}
     >
-      {/* Floating Outline Button - only show if multiple headings */}
-      {hasMultipleHeadings && (
+      {/* Floating Outline Button - only show if multiple headings and not on mobile */}
+      {hasMultipleHeadings && !isMobile && (
         <button
         data-testid="document-outline-button"
         onClick={() => hasMultipleHeadings && setShowOutline(!showOutline)}
         disabled={!hasMultipleHeadings}
         aria-label={`Toggle document outline${!showOutline && headingCount > 0 ? ` (${topLevelHeadingCount} sections)` : ''}`}
-        className={`fixed z-50 hidden sm:flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm ${
+        className={`fixed z-50 flex items-center gap-1 px-2 py-2 text-sm font-medium rounded-lg shadow-sm ${
           !hasMultipleHeadings
             ? 'text-gray-400 cursor-not-allowed bg-gray-50 border border-gray-200'
             : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'

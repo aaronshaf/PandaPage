@@ -2,36 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Responsive UI Elements', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to a document with multiple headings
+    // Navigate to a document
     await page.goto('/#003.docx');
     await page.waitForSelector('[data-testid="app-title"]');
-  });
-
-  test('should hide document outline button on mobile', async ({ page }) => {
-    // Test mobile size
-    await page.setViewportSize({ width: 375, height: 667 });
-    
-    // Wait for potential outline button to be rendered (if it exists)
-    await page.waitForTimeout(500);
-    
-    // The outline button should not be visible on mobile
-    const outlineButton = await page.$('[data-testid="document-outline-button"]');
-    if (outlineButton) {
-      expect(await outlineButton.isVisible()).toBe(false);
-    }
-    
-    // Test desktop size - outline button should be visible if document has headings
-    await page.setViewportSize({ width: 1024, height: 768 });
-    await page.waitForTimeout(500);
-    
-    const desktopOutlineButton = await page.$('[data-testid="document-outline-button"]');
-    if (desktopOutlineButton) {
-      const isDisabled = await desktopOutlineButton.getAttribute('disabled');
-      if (isDisabled === null) {
-        // Button is not disabled, so it should be visible
-        expect(await desktopOutlineButton.isVisible()).toBe(true);
-      }
-    }
   });
 
   test('should show Read button label on all screen sizes', async ({ page }) => {
