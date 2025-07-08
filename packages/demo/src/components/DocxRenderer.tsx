@@ -106,25 +106,66 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
     let className = '';
     
     if (paragraph.style) {
-      switch (paragraph.style) {
-        case 'Title':
-          Tag = 'h1';
-          className = 'text-3xl font-bold mb-4';
-          break;
-        case 'Heading1':
-          Tag = 'h1';
-          className = 'text-2xl font-bold mb-3';
-          break;
-        case 'Heading2':
-          Tag = 'h2';
-          className = 'text-xl font-bold mb-2';
-          break;
-        case 'Heading3':
-          Tag = 'h3';
-          className = 'text-lg font-bold mb-2';
-          break;
-        default:
-          className = 'mb-2';
+      const styleNormalized = paragraph.style.toLowerCase().replace(/\s+/g, '');
+      
+      // More robust heading detection for DocxRenderer
+      if (styleNormalized === 'title') {
+        Tag = 'h1';
+        className = 'text-3xl font-bold mb-4';
+      } else if (styleNormalized === 'heading1') {
+        Tag = 'h1';
+        className = 'text-2xl font-bold mb-3';
+      } else if (styleNormalized === 'heading2') {
+        Tag = 'h2';
+        className = 'text-xl font-bold mb-2';
+      } else if (styleNormalized === 'heading3') {
+        Tag = 'h3';
+        className = 'text-lg font-bold mb-2';
+      } else if (styleNormalized === 'heading4') {
+        Tag = 'h4';
+        className = 'text-base font-bold mb-2';
+      } else if (styleNormalized === 'heading5') {
+        Tag = 'h5';
+        className = 'text-sm font-bold mb-2';
+      } else if (styleNormalized === 'heading6') {
+        Tag = 'h6';
+        className = 'text-xs font-bold mb-2';
+      } else if (styleNormalized.startsWith('heading') || styleNormalized.startsWith('head')) {
+        // Fallback for other heading variations
+        const levelMatch = styleNormalized.match(/(\d)/);
+        const level = levelMatch ? parseInt(levelMatch[1]) : 1;
+        
+        switch (level) {
+          case 1:
+            Tag = 'h1';
+            className = 'text-2xl font-bold mb-3';
+            break;
+          case 2:
+            Tag = 'h2';
+            className = 'text-xl font-bold mb-2';
+            break;
+          case 3:
+            Tag = 'h3';
+            className = 'text-lg font-bold mb-2';
+            break;
+          case 4:
+            Tag = 'h4';
+            className = 'text-base font-bold mb-2';
+            break;
+          case 5:
+            Tag = 'h5';
+            className = 'text-sm font-bold mb-2';
+            break;
+          case 6:
+            Tag = 'h6';
+            className = 'text-xs font-bold mb-2';
+            break;
+          default:
+            Tag = 'h1';
+            className = 'text-2xl font-bold mb-3';
+        }
+      } else {
+        className = 'mb-2';
       }
     } else {
       className = 'mb-2';

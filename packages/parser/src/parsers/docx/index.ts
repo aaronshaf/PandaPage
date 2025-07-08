@@ -217,15 +217,47 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
   
   // Check if it's a heading
   if (paragraph.style) {
-    const styleNormalized = paragraph.style.toLowerCase();
-    if (styleNormalized === 'heading' || styleNormalized.startsWith('heading') || styleNormalized.includes('title')) {
+    const styleNormalized = paragraph.style.toLowerCase().replace(/\s+/g, '');
+    
+    // More comprehensive heading detection
+    const isHeading = (
+      styleNormalized === 'title' ||
+      styleNormalized === 'heading' ||
+      styleNormalized.startsWith('heading') ||
+      styleNormalized.startsWith('head') ||
+      styleNormalized.includes('title') ||
+      // Common DOCX heading style variations
+      /^h[1-6]$/.test(styleNormalized) ||
+      /^heading[1-6]$/.test(styleNormalized) ||
+      /^title\d*$/.test(styleNormalized)
+    );
+    
+    if (isHeading) {
       let level: 1 | 2 | 3 | 4 | 5 | 6 = 1;
-      const match = styleNormalized.match(/heading\s*(\d)/);
-      if (match && match[1]) {
-        const parsedLevel = parseInt(match[1]);
-        if (parsedLevel >= 1 && parsedLevel <= 6) {
-          level = parsedLevel as 1 | 2 | 3 | 4 | 5 | 6;
+      
+      // Extract level from various patterns
+      const levelMatches = [
+        styleNormalized.match(/heading\s*(\d)/),
+        styleNormalized.match(/head\s*(\d)/),
+        styleNormalized.match(/h(\d)/),
+        styleNormalized.match(/title(\d)/),
+        // Look for digit at the end
+        styleNormalized.match(/(\d)$/),
+      ];
+      
+      for (const match of levelMatches) {
+        if (match && match[1]) {
+          const parsedLevel = parseInt(match[1]);
+          if (parsedLevel >= 1 && parsedLevel <= 6) {
+            level = parsedLevel as 1 | 2 | 3 | 4 | 5 | 6;
+            break;
+          }
         }
+      }
+      
+      // Special case: 'title' without number is typically level 1
+      if (styleNormalized === 'title') {
+        level = 1;
       }
       
       return {
