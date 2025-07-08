@@ -55,7 +55,11 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
   };
   
   // Find the blip element which contains the relationship ID
-  const blipElements = drawingElement.getElementsByTagNameNS(ns.a, "blip");
+  let blipElements = drawingElement.getElementsByTagNameNS(ns.a, "blip");
+  if (blipElements.length === 0) {
+    // Try with prefixed name
+    blipElements = drawingElement.getElementsByTagName("a:blip");
+  }
   if (blipElements.length === 0) return null;
   
   const blip = blipElements[0];
@@ -64,7 +68,10 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
   if (!relationshipId) return null;
   
   // Extract dimensions from extent element
-  const extentElements = drawingElement.getElementsByTagNameNS(ns.wp, "extent");
+  let extentElements = drawingElement.getElementsByTagNameNS(ns.wp, "extent");
+  if (extentElements.length === 0) {
+    extentElements = drawingElement.getElementsByTagName("wp:extent");
+  }
   let width: number | undefined;
   let height: number | undefined;
   
@@ -82,7 +89,10 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
   }
   
   // Extract name and description
-  const docPrElements = drawingElement.getElementsByTagNameNS(ns.wp, "docPr");
+  let docPrElements = drawingElement.getElementsByTagNameNS(ns.wp, "docPr");
+  if (docPrElements.length === 0) {
+    docPrElements = drawingElement.getElementsByTagName("wp:docPr");
+  }
   let name: string | undefined;
   let description: string | undefined;
   
