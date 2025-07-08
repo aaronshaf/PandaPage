@@ -162,13 +162,31 @@
   font-style: italic;
 }
 
-.rendered-markdown a {
+/* Override Tailwind prose plugin's aggressive underline styles */
+.rendered-markdown.prose *,
+.rendered-markdown.prose-gray * {
+  text-decoration: none;
+}
+
+/* Only apply underlines to actual links and explicit underline elements */
+.rendered-markdown a,
+.rendered-markdown.prose a,
+.rendered-markdown.prose-gray a {
   color: #2563eb;
   text-decoration: underline;
 }
 
-.rendered-markdown a:hover {
+.rendered-markdown a:hover,
+.rendered-markdown.prose a:hover,
+.rendered-markdown.prose-gray a:hover {
   color: #1d4ed8;
+}
+
+/* Ensure explicit underline elements are still underlined */
+.rendered-markdown u,
+.rendered-markdown.prose u,
+.rendered-markdown.prose-gray u {
+  text-decoration: underline;
 }
 
 .rendered-markdown hr {
