@@ -38,7 +38,7 @@ jobs:
 
       - name: Run deterministic tests
         run: bun run test:ci
-        working-directory: packages/pandapage
+        working-directory: packages/core
 
   # Build and deploy job
   deploy:
