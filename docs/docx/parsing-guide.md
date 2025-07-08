@@ -30,6 +30,85 @@ docx-parser/
     └── converter.ts       # Format conversion
 ```
 
+## Official Schema Compliance
+
+### Unit System Understanding
+
+OOXML uses a hierarchical unit system based on the official schemas:
+
+```typescript
+// Core unit constants from official schema
+const TWIPS_PER_INCH = 1440;           // Word's fundamental unit
+const TWIPS_PER_POINT = 20;            // Typography unit
+const EMUS_PER_INCH = 914400;          // DrawingML unit  
+const EMUS_PER_TWIP = 635;             // Conversion factor
+
+// Universal measure parser (ST_UniversalMeasure)
+function parseUniversalMeasure(value: string | number): number {
+  if (typeof value === 'number') return value; // Raw twips
+  
+  const match = value.match(/^(-?[0-9]+(?:\.[0-9]+)?)(mm|cm|in|pt|pc|pi)$/);
+  if (!match) return parseInt(value) || 0; // Fallback to raw number
+  
+  const [, numStr, unit] = match;
+  const num = parseFloat(numStr);
+  
+  switch (unit) {
+    case 'in': return Math.round(num * TWIPS_PER_INCH);
+    case 'pt': return Math.round(num * TWIPS_PER_POINT);
+    case 'pc': return Math.round(num * 12 * TWIPS_PER_POINT); // 1 pica = 12 points
+    case 'mm': return Math.round(num * TWIPS_PER_INCH / 25.4);
+    case 'cm': return Math.round(num * TWIPS_PER_INCH / 2.54);
+    default: return 0;
+  }
+}
+```
+
+### Boolean Property Handling (ST_OnOff)
+
+OOXML uses flexible boolean properties:
+
+```typescript
+function parseOnOff(element: Element, attrName: string, defaultValue: boolean = false): boolean {
+  const attr = element.getAttribute(`w:${attrName}`);
+  
+  // No attribute = default value
+  if (attr === null) return defaultValue;
+  
+  // Empty attribute = true (e.g., <w:b/>)
+  if (attr === '') return true;
+  
+  // Parse value
+  switch (attr.toLowerCase()) {
+    case 'true': case '1': case 'on': return true;
+    case 'false': case '0': case 'off': return false;
+    default: return true; // Unknown values default to true
+  }
+}
+
+// Usage examples
+const isBold = parseOnOff(runProps, 'b');
+const isItalic = parseOnOff(runProps, 'i'); 
+const isHidden = parseOnOff(runProps, 'vanish');
+```
+
+### Font Size Conversion
+
+Font sizes in OOXML use half-points:
+
+```typescript
+function parseFontSize(element: Element, propName: string = 'sz'): number | undefined {
+  const sizeEl = element.querySelector(`w\\:${propName}`);
+  if (!sizeEl) return undefined;
+  
+  const halfPoints = parseInt(sizeEl.getAttribute('w:val') || '0');
+  return halfPoints / 2; // Convert to actual points
+}
+
+// Example: <w:sz w:val="24"/> = 12pt font
+const fontSize = parseFontSize(runProperties); // Returns 12
+```
+
 ## Step-by-Step Implementation
 
 ### 1. ZIP Handling

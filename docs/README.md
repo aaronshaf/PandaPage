@@ -11,7 +11,9 @@ Comprehensive documentation about the DOCX format, its structure, and implementa
 #### Core Concepts
 - [DOCX Overview](./docx/overview.md) - Introduction to DOCX format and key concepts
 - [Document Structure](./docx/document-structure.md) - Deep dive into XML structure
+- [Official Schema Reference](./docx/official-schema-reference.md) - Comprehensive schema-based documentation
 - [Parsing Guide](./docx/parsing-guide.md) - Practical implementation guide
+- [Measurement Units](./docx/measurement-units.md) - Units, coordinates, and conversions
 
 #### Text and Formatting
 - [Text Formatting](./docx/text-formatting.md) - Text properties, inheritance, and styling
@@ -23,6 +25,7 @@ Comprehensive documentation about the DOCX format, its structure, and implementa
 - [Advanced Tables](./docx/advanced-tables.md) - Multi-page tables, floating tables, complex features
 - [Numbering and Lists](./docx/numbering-lists.md) - Three-tier numbering system and list formatting
 - [Images and Media](./docx/images.md) - Embedded content, positioning, and formats
+- [Drawing and Graphics](./docx/drawing-graphics.md) - DrawingML, positioning, and text wrapping
 - [Headers and Footers](./docx/headers-footers.md) - Page headers/footers implementation
 
 #### Browser Implementation

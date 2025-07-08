@@ -87,6 +87,67 @@ Toggle properties use XOR logic - if both parent and child specify the property,
 </w:p>
 ```
 
+## Complete Run Properties (Official Schema)
+
+From the official OOXML schema (`EG_RPrBase`), here are all supported run properties:
+
+### Basic Formatting
+```xml
+<w:b/>              <!-- Bold -->
+<w:bCs/>            <!-- Bold complex script -->
+<w:i/>              <!-- Italic -->
+<w:iCs/>            <!-- Italic complex script -->
+<w:caps/>           <!-- All capitals -->
+<w:smallCaps/>      <!-- Small capitals -->
+<w:strike/>         <!-- Strikethrough -->
+<w:dstrike/>        <!-- Double strikethrough -->
+<w:outline/>        <!-- Outline -->
+<w:shadow/>         <!-- Shadow -->
+<w:emboss/>         <!-- Emboss -->
+<w:imprint/>        <!-- Imprint -->
+<w:vanish/>         <!-- Hidden text -->
+<w:webHidden/>      <!-- Hidden in web view -->
+<w:noProof/>        <!-- No spell/grammar check -->
+<w:snapToGrid/>     <!-- Snap to document grid -->
+```
+
+### Typography Properties
+```xml
+<w:sz w:val="24"/>            <!-- Font size (half-points: 24 = 12pt) -->
+<w:szCs w:val="24"/>          <!-- Complex script font size -->
+<w:color w:val="FF0000"/>     <!-- Text color (hex RGB) -->
+<w:spacing w:val="20"/>       <!-- Character spacing (twips: 20 = 1pt) -->
+<w:w w:val="150"/>            <!-- Text scale (percentage: 150 = 150%) -->
+<w:kern w:val="28"/>          <!-- Kerning threshold (half-points: 28 = 14pt) -->
+<w:position w:val="6"/>       <!-- Raised/lowered position (half-points) -->
+<w:highlight w:val="yellow"/> <!-- Highlight color -->
+<w:u w:val="single"/>         <!-- Underline type -->
+<w:effect w:val="blinkBackground"/> <!-- Text effects -->
+<w:vertAlign w:val="superscript"/>  <!-- Vertical alignment -->
+```
+
+### Border and Shading
+```xml
+<w:bdr w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+<w:shd w:val="clear" w:color="auto" w:fill="FFFF00"/>
+<w:fitText w:val="1440"/>     <!-- Fit text in specified width (twips) -->
+```
+
+### Language and Script
+```xml
+<w:rtl/>                      <!-- Right-to-left text -->
+<w:cs/>                       <!-- Complex script text -->
+<w:lang w:val="en-US" w:eastAsia="zh-CN" w:bidi="ar-SA"/>
+<w:eastAsianLayout w:id="1" w:combine="on" w:combineBrackets="angle"/>
+<w:em w:val="dot"/>           <!-- East Asian emphasis -->
+```
+
+### Special Properties
+```xml
+<w:specVanish/>               <!-- Special hidden text -->
+<w:oMath/>                    <!-- Office Math formatting -->
+```
+
 ## Font Properties
 
 ### Font Families
