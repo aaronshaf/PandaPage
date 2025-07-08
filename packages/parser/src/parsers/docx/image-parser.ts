@@ -136,7 +136,7 @@ export function extractImageData(
 /**
  * Get MIME type from file extension
  */
-function getMimeType(extension?: string): string {
+export function getMimeType(extension?: string): string {
   const mimeTypes: Record<string, string> = {
     'png': 'image/png',
     'jpg': 'image/jpeg',
