@@ -70,7 +70,7 @@ export const extractHeadings = (markdown: string): Array<{level: number, text: s
   return headings;
 };
 
-// Extract content from rendered HTML (remove page wrappers)
+// Extract content from rendered HTML (remove page wrappers but preserve footnotes)
 export const extractContent = (html: string): string => {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
@@ -78,13 +78,41 @@ export const extractContent = (html: string): string => {
   // Look for page-content divs and extract their content
   const pageContent = tempDiv.querySelector('.page-content');
   if (pageContent) {
-    return pageContent.innerHTML;
+    // Extract main content
+    let content = pageContent.innerHTML;
+    
+    // Also extract any footnotes that might be siblings of the page content
+    const footnotes = tempDiv.querySelectorAll('.footnote');
+    footnotes.forEach(footnote => {
+      content += footnote.outerHTML;
+    });
+    
+    return content;
   }
   
   // Look for page divs and extract their content
   const page = tempDiv.querySelector('.page');
   if (page) {
-    return page.innerHTML;
+    // Extract main content from page
+    let content = '';
+    
+    // Get all content except nested .page divs
+    const children = Array.from(page.children);
+    children.forEach(child => {
+      if (!child.classList.contains('page')) {
+        content += child.outerHTML;
+      }
+    });
+    
+    // Also extract any footnotes that might be elsewhere
+    const footnotes = tempDiv.querySelectorAll('.footnote');
+    footnotes.forEach(footnote => {
+      if (!content.includes(footnote.outerHTML)) {
+        content += footnote.outerHTML;
+      }
+    });
+    
+    return content;
   }
   
   // If no page structure found, return original HTML
