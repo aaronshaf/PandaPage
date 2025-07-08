@@ -172,8 +172,23 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
 }
 
 function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | null {
-  const textElement = runElement.getElementsByTagNameNS(ns, "t")[0];
-  const text = textElement?.textContent || "";
+  // Parse all text content including tabs
+  let text = "";
+  
+  // Process all child elements in order
+  const children = Array.from(runElement.childNodes);
+  for (const child of children) {
+    if (child.nodeType === 1) { // Element node
+      const element = child as Element;
+      if (element.localName === "t") {
+        // Text element
+        text += element.textContent || "";
+      } else if (element.localName === "tab") {
+        // Tab element - add tab character
+        text += "\t";
+      }
+    }
+  }
   
   if (!text) return null;
   

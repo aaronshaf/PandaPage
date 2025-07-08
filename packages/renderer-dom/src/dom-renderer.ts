@@ -245,40 +245,78 @@ export class DOMRenderer {
         // Check if this is a footer with recipient name and page number
         const fullText = el.runs?.map((r: any) => r.text).join('') || '';
         
-        if (fullText.includes('[Recipient\'s Name]') && fullText.includes('Recovery Plan')) {
-          // Create flex container for left-right alignment
-          const flexDiv = this.doc.createElement('div');
-          flexDiv.className = 'flex justify-between items-center mb-4';
+        if (fullText.includes('[Recipient') && fullText.includes('Recovery Plan')) {
+          // Check if there's actually a tab character in the runs
+          const hasTab = el.runs?.some((r: any) => r.text?.includes('\t')) || false;
           
-          const leftDiv = this.doc.createElement('div');
-          leftDiv.className = 'flex-1';
-          
-          const rightDiv = this.doc.createElement('div');
-          rightDiv.className = 'flex-none';
-          
-          let foundSeparator = false;
-          const runs = el.runs || [];
-          
-          for (const run of runs) {
-            const text = run.text || '';
-            const span = this.renderTextRun(run);
+          if (hasTab) {
+            // Create flex container for left-right alignment
+            const flexDiv = this.doc.createElement('div');
+            flexDiv.className = 'flex justify-between items-center mb-4';
             
-            // Detect page number pattern or tab
-            if (text.includes('\t') || /^\s*\d+\s*$/.test(text.trim())) {
-              foundSeparator = true;
-              if (/^\s*\d+\s*$/.test(text.trim())) {
-                rightDiv.appendChild(span);
+            const leftDiv = this.doc.createElement('div');
+            leftDiv.className = 'flex-1';
+            
+            const rightDiv = this.doc.createElement('div');
+            rightDiv.className = 'flex-none';
+            
+            let foundTab = false;
+            const runs = el.runs || [];
+            
+            for (const run of runs) {
+              const text = run.text || '';
+              
+              // Check if this run contains a tab
+              if (text.includes('\t')) {
+                // Split on tab
+                const parts = text.split('\t');
+                
+                // Add pre-tab content to left
+                if (parts[0]) {
+                  const leftRun = { ...run, text: parts[0] };
+                  leftDiv.appendChild(this.renderTextRun(leftRun));
+                }
+                
+                // Add post-tab content to right
+                if (parts[1]) {
+                  const rightRun = { ...run, text: parts[1] };
+                  rightDiv.appendChild(this.renderTextRun(rightRun));
+                } else if (!rightDiv.hasChildNodes()) {
+                  // If nothing after tab, assume it's a page number field
+                  // Add a placeholder page number
+                  const pageSpan = this.doc.createElement('span');
+                  pageSpan.style.fontSize = run.fontSize ? `${run.fontSize}pt` : '10pt';
+                  pageSpan.style.fontFamily = run.fontFamily || 'Arial';
+                  pageSpan.textContent = '1'; // Default page number
+                  rightDiv.appendChild(pageSpan);
+                }
+                
+                foundTab = true;
+              } else if (!foundTab) {
+                // Before tab, add to left
+                leftDiv.appendChild(this.renderTextRun(run));
+              } else {
+                // After tab, add to right
+                rightDiv.appendChild(this.renderTextRun(run));
               }
-            } else if (!foundSeparator) {
-              leftDiv.appendChild(span);
-            } else {
-              rightDiv.appendChild(span);
             }
+            
+            // If right div is empty, add a default page number
+            if (!rightDiv.hasChildNodes() && foundTab) {
+              const pageSpan = this.doc.createElement('span');
+              pageSpan.style.fontSize = '10pt';
+              pageSpan.style.fontFamily = 'Arial';
+              pageSpan.textContent = '1';
+              rightDiv.appendChild(pageSpan);
+            }
+            
+            flexDiv.appendChild(leftDiv);
+            flexDiv.appendChild(rightDiv);
+            footerEl.appendChild(flexDiv);
+          } else {
+            // No tab found, render normally
+            footerEl.appendChild(this.renderParagraph(el));
           }
-          
-          flexDiv.appendChild(leftDiv);
-          flexDiv.appendChild(rightDiv);
-          footerEl.appendChild(flexDiv);
         } else {
           footerEl.appendChild(this.renderParagraph(el));
         }
