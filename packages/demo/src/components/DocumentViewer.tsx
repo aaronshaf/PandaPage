@@ -19,6 +19,7 @@ interface DocumentViewerProps {
   showOutline: boolean;
   setShowOutline: (show: boolean) => void;
   extractHeadings: (markdown: string) => Array<{level: number, text: string, id: string}>;
+  extractContent: (html: string) => string;
 }
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
@@ -34,7 +35,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   splitIntoPages,
   showOutline,
   setShowOutline,
-  extractHeadings
+  extractHeadings,
+  extractContent
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -322,7 +324,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               // For new parser documents, use DOM renderer with pagination
               (() => {
                 const htmlContent = renderToHtml(parsedDocument, { includeStyles: false });
-                const pages = splitIntoPages(htmlContent);
+                const contentOnly = extractContent(htmlContent);
+                const pages = splitIntoPages(contentOnly);
                 
                 // Update total pages when pages change
                 if (pages.length !== totalPages) {
@@ -332,14 +335,28 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 return pages.map((pageContent, index) => (
                   <div 
                     key={index} 
-                    data-testid={`print-page-${index + 1}`}
-                    className="print-page" 
-                    data-page={index + 1}
-                  >
-                    <div data-testid={`print-content-${index + 1}`} className="print-content">
-                      <div dangerouslySetInnerHTML={{ __html: pageContent }} />
-                    </div>
-                  </div>
+                    data-testid={`parsed-document-page-${index + 1}`}
+                    data-page-number={index + 1}
+                    data-page-type="parsed-document"
+                    data-content-type="dom-rendered"
+                    data-total-pages={pages.length}
+                    style={{
+                      width: '8.5in',
+                      minHeight: '11in',
+                      margin: '0 auto 2rem auto',
+                      background: 'white',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
+                      padding: '1in',
+                      position: 'relative',
+                      breakAfter: 'page' as const,
+                      border: '1px solid #e5e7eb',
+                      boxSizing: 'border-box' as const,
+                      fontSize: '12pt',
+                      lineHeight: '1.2',
+                      fontFamily: 'Times New Roman, serif'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: pageContent }}
+                  />
                 ));
               })()
             ) : structuredDocument?.elements ? (
@@ -359,14 +376,26 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 }
                 
                 return (
-                  <div className="print-page" data-testid="print-page-1" data-page={1}>
-                    <div data-testid="print-content-1" className="print-content">
-                      <DocxRenderer 
-                        elements={structuredDocument.elements} 
-                        viewMode={viewMode}
-                      />
-                    </div>
-                  </div>
+                  <DocxRenderer 
+                    elements={structuredDocument.elements} 
+                    viewMode={viewMode}
+                    style={{
+                      width: '8.5in',
+                      minHeight: '11in',
+                      margin: '0 auto 2rem auto',
+                      background: 'white',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
+                      padding: '1in',
+                      position: 'relative',
+                      breakAfter: 'page' as const,
+                      border: '1px solid #e5e7eb',
+                      boxSizing: 'border-box' as const,
+                      fontSize: '12pt',
+                      lineHeight: '1.2',
+                      fontFamily: 'Times New Roman, serif'
+                    }}
+                    className=""
+                  />
                 );
               })()
             ) : (
@@ -381,21 +410,42 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 }
                 
                 return pages.map((pageContent, index) => (
-                  <div 
-                    key={index} 
-                    data-testid={`print-page-${index + 1}`}
-                    className="print-page" 
-                    data-page={index + 1}
-                  >
+                  <div key={index} data-testid={`markdown-page-container-${index + 1}`} style={{ position: 'relative' }}>
                     <div 
-                      data-testid={`print-content-${index + 1}`}
-                      className="print-content"
+                      data-testid={`markdown-page-${index + 1}`}
+                      data-page-number={index + 1}
+                      data-page-type="markdown"
+                      data-content-type="markdown-rendered"
+                      data-total-pages={pages.length}
+                      style={{
+                        width: '8.5in',
+                        minHeight: '11in',
+                        margin: '0 auto 2rem auto',
+                        background: 'white',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
+                        padding: '1in',
+                        position: 'relative',
+                        breakAfter: 'page' as const,
+                        border: '1px solid #e5e7eb',
+                        boxSizing: 'border-box' as const,
+                        fontSize: '12pt',
+                        lineHeight: '1.2',
+                        fontFamily: 'Times New Roman, serif'
+                      }}
                       dangerouslySetInnerHTML={{ __html: pageContent }}
                     />
                     {/* Page number - only show in screen view */}
                     <div 
                       data-testid={`page-number-${index + 1}`}
-                      className="absolute bottom-6 right-6 text-xs text-gray-400 print:hidden font-sans"
+                      style={{
+                        position: 'absolute',
+                        bottom: '24px',
+                        right: '24px',
+                        fontSize: '12px',
+                        color: '#9ca3af',
+                        fontFamily: 'system-ui, -apple-system, sans-serif'
+                      }}
+                      className="print:hidden"
                       aria-label={`Page ${index + 1} of ${pages.length}`}
                     >
                       {index + 1} of {pages.length}

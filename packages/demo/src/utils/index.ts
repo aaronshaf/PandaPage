@@ -70,6 +70,27 @@ export const extractHeadings = (markdown: string): Array<{level: number, text: s
   return headings;
 };
 
+// Extract content from rendered HTML (remove page wrappers)
+export const extractContent = (html: string): string => {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  
+  // Look for page-content divs and extract their content
+  const pageContent = tempDiv.querySelector('.page-content');
+  if (pageContent) {
+    return pageContent.innerHTML;
+  }
+  
+  // Look for page divs and extract their content
+  const page = tempDiv.querySelector('.page');
+  if (page) {
+    return page.innerHTML;
+  }
+  
+  // If no page structure found, return original HTML
+  return html;
+};
+
 // Split HTML content into pages for print view with better logic
 export const splitIntoPages = (html: string): string[] => {
   // Create a temporary DOM to work with the HTML
@@ -108,7 +129,13 @@ export const splitIntoPages = (html: string): string[] => {
       case 'BLOCKQUOTE': return Math.max(2, textLines + 1);
       case 'PRE': return textContent.split('\n').length + 1;
       case 'HR': return 1;
-      case 'DIV': return textLines > 0 ? Math.max(1, textLines) : 0;
+      case 'DIV': {
+        // Special handling for footnotes - they should be compact
+        if (element.classList.contains('footnote')) {
+          return Math.max(1, textLines * 0.8);
+        }
+        return textLines > 0 ? Math.max(1, textLines) : 0;
+      }
       default: return textLines > 0 ? Math.max(0.5, textLines) : 0;
     }
   };
@@ -121,8 +148,10 @@ export const splitIntoPages = (html: string): string[] => {
       return true;
     }
     
-    // Remove automatic H2 page breaks - let them flow naturally with content
-    // H2 and lower headings should stay with their content unless forced by space
+    // Don't break before footnotes - they should stay with their content
+    if (element.classList.contains('footnote')) {
+      return false;
+    }
     
     // Break before tables if they won't fit
     if (tagName === 'TABLE') {
@@ -152,7 +181,13 @@ export const splitIntoPages = (html: string): string[] => {
     if (currentPageElements.length > 0) {
       const pageDiv = document.createElement('div');
       currentPageElements.forEach(el => pageDiv.appendChild(el.cloneNode(true)));
-      pages.push(pageDiv.innerHTML);
+      const pageContent = pageDiv.innerHTML;
+      
+      // Only add non-empty pages (avoid blank pages from whitespace)
+      if (pageContent.trim().length > 0) {
+        pages.push(pageContent);
+      }
+      
       currentPageElements = [];
       currentPageHeight = 0;
     }
@@ -167,7 +202,11 @@ export const splitIntoPages = (html: string): string[] => {
     // Check if we need a page break
     if (shouldPageBreakBefore(element, currentPageHeight) || 
         (currentPageHeight + elementHeight > maxPageHeight && currentPageElements.length > 0)) {
-      finishCurrentPage();
+      
+      // Only create a new page if current page has substantial content
+      if (currentPageHeight > maxPageHeight * 0.1) { // At least 10% of page height
+        finishCurrentPage();
+      }
     }
     
     // Handle very large elements that might need to be split
@@ -193,8 +232,8 @@ export const splitIntoPages = (html: string): string[] => {
   // Finish the last page
   finishCurrentPage();
   
-  // Ensure we have at least one page
-  if (pages.length === 0) {
+  // Ensure we have at least one page, but only if there's actual content
+  if (pages.length === 0 && html.trim().length > 0) {
     pages.push(html);
   }
   

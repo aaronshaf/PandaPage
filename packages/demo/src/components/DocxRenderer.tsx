@@ -4,9 +4,16 @@ import type { DocxElement, DocxTable, DocxParagraph } from '@browser-document-vi
 interface DocxRendererProps {
   elements: DocxElement[];
   viewMode: 'read' | 'print';
+  style?: React.CSSProperties;
+  className?: string;
+  'data-testid'?: string;
+  'data-page-number'?: number;
+  'data-page-type'?: string;
+  'data-content-type'?: string;
+  'data-total-pages'?: number;
 }
 
-export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }) => {
+export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode, style, className }) => {
   const renderTable = (table: DocxTable, index: number) => {
     const { properties } = table;
     
@@ -231,7 +238,10 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
   };
   
   return (
-    <div className={viewMode === 'print' ? 'print-content' : 'prose prose-gray max-w-none'}>
+    <div 
+      className={className || (viewMode === 'print' ? 'print-content' : 'prose prose-gray max-w-none')}
+      style={style}
+    >
       {elements.map((element, index) => {
         if (element.type === 'table') {
           return renderTable(element, index);

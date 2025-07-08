@@ -221,6 +221,7 @@
   position: relative;
   page-break-after: always;
   border: 1px solid #e5e7eb;
+  box-sizing: border-box;
 }
 
 /* Auto-scale to fit container width */
@@ -261,8 +262,9 @@
 .print-content {
   font-family: 'Times New Roman', serif;
   font-size: 12pt;
-  line-height: 1.6;
+  line-height: 1.2;
   color: #000;
+  position: relative;
 }
 
 .print-content h1 {

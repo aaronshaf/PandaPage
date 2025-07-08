@@ -22,7 +22,8 @@ import {
   countWords,
   extractHeadings,
   extractHeadingsFromDocument,
-  splitIntoPages
+  splitIntoPages,
+  extractContent
 } from './utils';
 
 // Configure marked for better rendering
@@ -674,6 +675,7 @@ const App: React.FC = () => {
               showOutline={showOutline}
               setShowOutline={setShowOutline}
               extractHeadings={extractHeadings}
+              extractContent={extractContent}
               countWords={countWords}
             />
           ) : loading && showSpinner ? (
