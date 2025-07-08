@@ -21,6 +21,7 @@ export interface TextRun {
   color?: string;
   backgroundColor?: string;
   link?: string;
+  _footnoteRef?: string;
 }
 
 export interface Paragraph {
@@ -92,7 +93,19 @@ export interface Bookmark {
   text?: string;
 }
 
-export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer | Bookmark;
+export interface FootnoteReference {
+  type: 'footnoteReference';
+  id: string;
+  text: string; // The reference number or marker
+}
+
+export interface Footnote {
+  type: 'footnote';
+  id: string;
+  elements: (Paragraph | Table)[];
+}
+
+export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer | Bookmark | FootnoteReference | Footnote;
 
 export interface ParsedDocument {
   metadata: DocumentMetadata;

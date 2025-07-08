@@ -49,6 +49,13 @@ function renderTextRun(run: TextRun): string {
   
   // Handle superscript and subscript properly by wrapping the content first
   if (run.superscript) {
+    // Check if this is a footnote reference
+    if ((run as any)._footnoteRef) {
+      const footnoteId = (run as any)._footnoteRef;
+      return `<a href="#footnote-${escapeHtml(footnoteId)}" class="footnote-reference" data-footnote-id="${escapeHtml(footnoteId)}">
+        <sup>${content}</sup>
+      </a>`;
+    }
     // If we have a link, build the proper structure with security attributes
     if (run.link) {
       const secureAttrs = 'target="_blank" rel="noopener noreferrer" onclick="return confirmDocumentLink(this.href)"';
@@ -253,6 +260,32 @@ function renderBookmark(bookmark: DocumentElement): string {
   return `<span id="${escapeHtml(bookmark.name)}" class="bookmark-anchor" data-bookmark-id="${escapeHtml(bookmark.id)}"></span>`;
 }
 
+function renderFootnote(footnote: DocumentElement): string {
+  if (footnote.type !== 'footnote') return '';
+  const elements = footnote.elements.map((el: any) => {
+    if (el.type === 'paragraph') {
+      return renderParagraph(el);
+    } else if (el.type === 'table') {
+      return renderTable(el);
+    }
+    return '';
+  }).filter(Boolean);
+  
+  return `<div class="footnote" id="footnote-${escapeHtml(footnote.id)}" data-footnote-id="${escapeHtml(footnote.id)}">
+    <div class="footnote-content">
+      <span class="footnote-number">${escapeHtml(footnote.id)}</span>
+      ${elements.join('\n')}
+    </div>
+  </div>`;
+}
+
+function renderFootnoteReference(footnoteRef: DocumentElement): string {
+  if (footnoteRef.type !== 'footnoteReference') return '';
+  return `<a href="#footnote-${escapeHtml(footnoteRef.id)}" class="footnote-reference" data-footnote-id="${escapeHtml(footnoteRef.id)}">
+    <sup>${escapeHtml(footnoteRef.text)}</sup>
+  </a>`;
+}
+
 function renderElement(element: DocumentElement): string {
   switch (element.type) {
     case 'paragraph':
@@ -267,6 +300,10 @@ function renderElement(element: DocumentElement): string {
       return renderFooter(element);
     case 'bookmark':
       return renderBookmark(element);
+    case 'footnote':
+      return renderFootnote(element);
+    case 'footnoteReference':
+      return renderFootnoteReference(element);
     case 'image':
       const imgData = btoa(String.fromCharCode(...new Uint8Array(element.data)));
       const widthAttr = element.width ? ` width="${element.width}"` : '';
@@ -362,6 +399,36 @@ export function renderToHtml(document: ParsedDocument, options: HtmlRenderOption
     .pb-2 { padding-bottom: 0.5rem; }
     .pt-2 { padding-top: 0.5rem; }
     .mt-4 { margin-top: 1rem; }
+    
+    /* Footnote styles */
+    .footnote-reference {
+      color: #2563eb;
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    
+    .footnote-reference:hover {
+      text-decoration: underline;
+    }
+    
+    .footnote {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background-color: #f9fafb;
+      border-left: 3px solid #e5e7eb;
+      font-size: 0.875rem;
+    }
+    
+    .footnote-content {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .footnote-number {
+      font-weight: bold;
+      color: #374151;
+      min-width: 1.5rem;
+    }
     
     @media print {
       .page-break { page-break-after: always; }

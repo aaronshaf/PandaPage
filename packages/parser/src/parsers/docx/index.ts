@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image, Footnote, FootnoteReference } from "../../types/document";
 import { parseDrawing, parseRelationships, extractImageData, createImageElement } from "./image-parser";
 
 // Helper function to get MIME type from file extension
@@ -37,6 +37,7 @@ interface DocxRun {
   color?: string;
   backgroundColor?: string;
   link?: string;
+  _footnoteRef?: string;
 }
 
 interface DocxParagraph {
@@ -97,10 +98,27 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
     const element = child as Element;
     
     if (element.tagName === "w:r") {
-      // Direct run element
-      const run = parseRun(element, ns);
-      if (run && run.text) {
-        runs.push(run);
+      // Check for footnote references first
+      const footnoteRefElements = element.getElementsByTagNameNS(ns, "footnoteReference");
+      if (footnoteRefElements.length > 0) {
+        const footnoteRef = footnoteRefElements[0];
+        if (footnoteRef) {
+          const footnoteId = footnoteRef.getAttribute("w:id");
+          if (footnoteId) {
+            // Add a superscript run for the footnote reference
+            runs.push({
+              text: footnoteId, // Use the footnote ID as the reference text
+              superscript: true,
+              _footnoteRef: footnoteId // Mark this as a footnote reference
+            });
+          }
+        }
+      } else {
+        // Direct run element
+        const run = parseRun(element, ns);
+        if (run && run.text) {
+          runs.push(run);
+        }
       }
       
       // Check for drawing elements (images) in the run
@@ -273,7 +291,8 @@ function convertToDocumentElement(paragraph: DocxParagraph, processedImages?: Im
     fontFamily: run.fontFamily,
     color: run.color ? `#${run.color}` : undefined,
     backgroundColor: run.backgroundColor,
-    link: run.link
+    link: run.link,
+    _footnoteRef: run._footnoteRef
   }));
   
   // Check if it's a heading
@@ -551,6 +570,75 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships
   } as Header | Footer;
 }
 
+function parseFootnotes(xml: string, relationships?: Map<string, string>): Footnote[] {
+  let doc: Document;
+  if (typeof DOMParser === 'undefined') {
+    // @ts-ignore
+    const { DOMParser: XMLDOMParser } = require('@xmldom/xmldom');
+    const parser = new XMLDOMParser();
+    doc = parser.parseFromString(xml, "text/xml");
+  } else {
+    const parser = new DOMParser();
+    doc = parser.parseFromString(xml, "text/xml");
+  }
+  
+  const footnotes: Footnote[] = [];
+  
+  // Get all footnote elements
+  const footnoteElements = doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "footnote");
+  
+  for (let i = 0; i < footnoteElements.length; i++) {
+    const footnoteElement = footnoteElements[i];
+    if (!footnoteElement) continue;
+    
+    const id = footnoteElement.getAttribute("w:id");
+    const type = footnoteElement.getAttribute("w:type");
+    
+    // Skip separator, continuationSeparator, and continuationNotice footnotes
+    if (type === "separator" || type === "continuationSeparator" || type === "continuationNotice") {
+      continue;
+    }
+    
+    if (id) {
+      const elements: (Paragraph | Table)[] = [];
+      
+      // Parse all paragraphs and tables in this footnote
+      for (let j = 0; j < footnoteElement.childNodes.length; j++) {
+        const child = footnoteElement.childNodes[j];
+        if (!child || child.nodeType !== 1) continue;
+        
+        const element = child as Element;
+        const tagName = element.tagName;
+        
+        if (tagName === "w:p") {
+          const paragraph = parseParagraph(element, relationships);
+          if (paragraph) {
+            const docElement = convertToDocumentElement(paragraph);
+            if (docElement.type === 'paragraph' || docElement.type === 'heading') {
+              elements.push(docElement as Paragraph);
+            }
+          }
+        } else if (tagName === "w:tbl") {
+          const table = parseTable(element, relationships);
+          if (table) {
+            elements.push(table);
+          }
+        }
+      }
+      
+      if (elements.length > 0) {
+        footnotes.push({
+          type: 'footnote',
+          id,
+          elements
+        });
+      }
+    }
+  }
+  
+  return footnotes;
+}
+
 function parseBookmarks(element: Element, ns: string): Bookmark[] {
   const bookmarks: Bookmark[] = [];
   
@@ -764,6 +852,21 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
     
+    // Parse footnotes
+    const footnotes: Footnote[] = [];
+    const footnotesFile = zip.file("word/footnotes.xml");
+    if (footnotesFile) {
+      const footnotesXml = yield* Effect.tryPromise({
+        try: () => footnotesFile.async("text"),
+        catch: () => ""
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+      
+      if (footnotesXml) {
+        const parsedFootnotes = parseFootnotes(footnotesXml, relationshipsMap);
+        footnotes.push(...parsedFootnotes);
+      }
+    }
+    
     // Parse all document body elements in order
     const elements: DocumentElement[] = [];
     
@@ -777,6 +880,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     if (bodyNodeList.length === 0) {
       // Add footers at the end and return
       elements.push(...footers);
+      elements.push(...footnotes);
       return { metadata, elements };
     }
     
@@ -784,6 +888,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     if (!body) {
       // Add footers at the end and return
       elements.push(...footers);
+      elements.push(...footnotes);
       return { metadata, elements };
     }
     
@@ -862,6 +967,9 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     
     // Add footers at the end
     elements.push(...footers);
+    
+    // Add footnotes at the end
+    elements.push(...footnotes);
     
     return {
       metadata,
