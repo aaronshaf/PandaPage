@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { marked } from 'marked';
-import { renderDocxWithMetadata, renderPages } from '@pandapage/pandapage';
+import { renderDocxWithMetadata, renderPages } from '@browser-document-viewer/pandapage';
 
 // Configure marked for better rendering
 marked.setOptions({

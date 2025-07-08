@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { renderToHtml } from "./index";
-import type { ParsedDocument } from "@pandapage/parser";
+import type { ParsedDocument } from "@browser-document-viewer/parser";
 
 test("renderToHtml handles empty document", () => {
   const doc: ParsedDocument = {

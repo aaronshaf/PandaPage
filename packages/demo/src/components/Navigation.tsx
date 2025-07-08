@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { ParsedDocument } from '@pandapage/pandapage';
+import type { ParsedDocument } from '@browser-document-viewer/pandapage';
 
 interface SampleDocument {
   id: string;

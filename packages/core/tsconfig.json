@@ -29,12 +29,12 @@
 
     // Path mappings for workspace packages
     "paths": {
-      "@pandapage/parser": ["../parser/src/index.ts"],
-      "@pandapage/parser/*": ["../parser/src/*"],
-      "@pandapage/renderer-markdown": ["../renderer-markdown/src/index.ts"],
-      "@pandapage/renderer-markdown/*": ["../renderer-markdown/src/*"],
-      "@pandapage/renderer-dom": ["../renderer-dom/src/index.ts"],
-      "@pandapage/renderer-dom/*": ["../renderer-dom/src/*"]
+      "@browser-document-viewer/parser": ["../parser/src/index.ts"],
+      "@browser-document-viewer/parser/*": ["../parser/src/*"],
+      "@browser-document-viewer/renderer-markdown": ["../renderer-markdown/src/index.ts"],
+      "@browser-document-viewer/renderer-markdown/*": ["../renderer-markdown/src/*"],
+      "@browser-document-viewer/renderer-dom": ["../renderer-dom/src/index.ts"],
+      "@browser-document-viewer/renderer-dom/*": ["../renderer-dom/src/*"]
     }
   }
 }

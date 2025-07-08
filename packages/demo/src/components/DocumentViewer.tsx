@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { DocxRenderer } from './DocxRenderer';
-import { renderToHtml } from '@pandapage/renderer-dom';
-import type { EnhancedDocxDocument, ParsedDocument } from '@pandapage/pandapage';
+import { renderToHtml } from '@browser-document-viewer/renderer-dom';
+import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/pandapage';
 
 interface DocumentViewerProps {
   result: string | null;

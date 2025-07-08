@@ -7,7 +7,7 @@ import {
   parseDocxDocument,
   renderToMarkdown,
   type ParsedDocument
-} from '@pandapage/pandapage';
+} from '@browser-document-viewer/pandapage';
 import {
   Navigation,
   DocumentUpload,
@@ -283,7 +283,7 @@ const App: React.FC = () => {
     // Don't show sample doc title as fallback to prevent flickering
     // Just show the filename without extension
     const docId = selectedDocument.split('/').pop()?.replace(/\.(docx|pages)$/i, '');
-    return docId || 'pandapage';
+    return docId || 'browser-document-viewer';
   };
 
   // Get initial document from URL hash or default

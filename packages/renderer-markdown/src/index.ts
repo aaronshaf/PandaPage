@@ -7,7 +7,7 @@ import type {
   TextRun,
   DocumentMetadata,
   Image
-} from '@pandapage/parser';
+} from '@browser-document-viewer/parser';
 
 export interface MarkdownRenderOptions {
   includeFrontmatter?: boolean;

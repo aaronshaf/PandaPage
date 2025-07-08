@@ -6,7 +6,7 @@ import type {
   Table,
   TextRun,
   Image
-} from '@pandapage/parser';
+} from '@browser-document-viewer/parser';
 
 export interface DomRenderOptions {
   includeStyles?: boolean;

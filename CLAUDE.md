@@ -14,11 +14,11 @@
 - Parser: 73% functions, 84% lines
 - Renderer Markdown: 82% functions, 72% lines  
 - Renderer DOM: 78% functions, 77% lines
-- Pandapage: 47% functions, 38% lines (priority for improvement)
+- Core: 47% functions, 38% lines (priority for improvement)
 
 ## Areas Needing Coverage Improvement
 
-### Pandapage Package (Priority - Currently 38.84% line coverage)
+### Core Package (Priority - Currently 38.84% line coverage)
 1. XML parsing utilities (16.22% coverage) - `src/common/xml-parser.ts`
 2. Document parsers (7.38% coverage) - `src/formats/docx/document-parser.ts`
 3. DOCX reader (13.31% coverage) - `src/formats/docx/docx-reader.ts`

@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 
 /**
- * Base error interface for all pandapage errors
+ * Base error interface for all browser-document-viewer errors
  */
 export interface BaseError {
   _tag: string;

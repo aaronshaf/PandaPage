@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers development workflows, testing, and contribution guidelines for pandapage.
+This guide covers development workflows, testing, and contribution guidelines for browser-document-viewer.
 
 ## Testing
 

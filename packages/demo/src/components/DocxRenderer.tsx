@@ -1,5 +1,5 @@
 import React from 'react';
-import type { DocxElement, DocxTable, DocxParagraph } from '@pandapage/pandapage';
+import type { DocxElement, DocxTable, DocxParagraph } from '@browser-document-viewer/pandapage';
 
 interface DocxRendererProps {
   elements: DocxElement[];

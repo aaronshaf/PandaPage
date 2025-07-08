@@ -1,5 +1,5 @@
 {
-  "name": "@pandapage/renderer-dom",
+  "name": "@browser-document-viewer/renderer-dom",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pandapage/parser": "workspace:*"
+    "@browser-document-viewer/parser": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

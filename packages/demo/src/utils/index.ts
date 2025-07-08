@@ -2,7 +2,7 @@
 export const getBasePath = () => {
   // Use import.meta.env for Vite
   if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env.PROD ? '/pandapage' : '';
+    return import.meta.env.PROD ? '/browser-document-viewer' : '';
   }
   // Fallback for tests or other environments
   return '';

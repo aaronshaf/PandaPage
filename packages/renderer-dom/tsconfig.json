@@ -12,8 +12,8 @@
     "noEmit": true,
     "types": ["bun-types"],
     "paths": {
-      "@pandapage/parser": ["../../packages/parser/src/index.ts"],
-      "@pandapage/parser/*": ["../../packages/parser/src/*"]
+      "@browser-document-viewer/parser": ["../../packages/parser/src/index.ts"],
+      "@browser-document-viewer/parser/*": ["../../packages/parser/src/*"]
     }
   },
   "include": ["src/**/*"],

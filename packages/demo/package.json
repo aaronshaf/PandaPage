@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pandapage/pandapage": "workspace:*",
+    "@browser-document-viewer/core": "workspace:*",
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/typography": "^0.5.16",
     "@xmldom/xmldom": "^0.9.8",

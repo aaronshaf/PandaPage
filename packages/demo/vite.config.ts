@@ -4,13 +4,13 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === 'production' ? '/pandapage/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/browser-document-viewer/' : '/',
   resolve: {
     alias: {
-      '@pandapage/pandapage': resolve(__dirname, '../pandapage/index.ts'),
-      '@pandapage/parser': resolve(__dirname, '../parser/src/index.ts'),
-      '@pandapage/renderer-dom': resolve(__dirname, '../renderer-dom/src/index.ts'),
-      '@pandapage/renderer-markdown': resolve(__dirname, '../renderer-markdown/src/index.ts'),
+      '@browser-document-viewer/pandapage': resolve(__dirname, '../pandapage/index.ts'),
+      '@browser-document-viewer/parser': resolve(__dirname, '../parser/src/index.ts'),
+      '@browser-document-viewer/renderer-dom': resolve(__dirname, '../renderer-dom/src/index.ts'),
+      '@browser-document-viewer/renderer-markdown': resolve(__dirname, '../renderer-markdown/src/index.ts'),
     },
   },
   server: {
@@ -20,6 +20,6 @@ export default defineConfig({
     outDir: 'dist',
   },
   optimizeDeps: {
-    include: ['@pandapage/pandapage', '@pandapage/parser', '@pandapage/renderer-dom', '@pandapage/renderer-markdown'],
+    include: ['@browser-document-viewer/pandapage', '@browser-document-viewer/parser', '@browser-document-viewer/renderer-dom', '@browser-document-viewer/renderer-markdown'],
   },
 });

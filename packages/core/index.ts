@@ -144,10 +144,10 @@ export type {
   Image,
   DocumentMetadata,
   ParseOptions as ParserOptions
-} from "@pandapage/parser";
+} from "@browser-document-viewer/parser";
 
-export type { MarkdownRenderOptions } from "@pandapage/renderer-markdown";
-export type { HtmlRenderOptions } from "@pandapage/renderer-dom";
+export type { MarkdownRenderOptions } from "@browser-document-viewer/renderer-markdown";
+export type { HtmlRenderOptions } from "@browser-document-viewer/renderer-dom";
 
 // Worker support
 export {

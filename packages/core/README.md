@@ -1,10 +1,10 @@
-# pandapage
+# browser-document-viewer
 
-A library for parsing and rendering modern document formats in the browser. pandapage enables web applications to work with native office documents without server-side processing.
+A library for parsing and rendering modern document formats in the browser. browser-document-viewer enables web applications to work with native office documents without server-side processing.
 
 ## Project Goals
 
-The primary goal of pandapage is to support parsing and rendering of modern documents directly in the browser:
+The primary goal of browser-document-viewer is to support parsing and rendering of modern documents directly in the browser:
 - **Microsoft Office**: .docx, .pptx
 - **Apple iWork**: .pages, .key
 

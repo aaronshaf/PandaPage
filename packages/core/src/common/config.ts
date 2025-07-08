@@ -132,16 +132,16 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
  */
 export const loadConfigFromEnv = (): Effect.Effect<DocumentConfig, ConfigError> => {
   const envConfig = {
-    workerThreshold: process.env.PANDAPAGE_WORKER_THRESHOLD 
-      ? parseInt(process.env.PANDAPAGE_WORKER_THRESHOLD, 10) 
+    workerThreshold: process.env.BROWSER_DOC_VIEWER_WORKER_THRESHOLD 
+      ? parseInt(process.env.BROWSER_DOC_VIEWER_WORKER_THRESHOLD, 10) 
       : undefined,
-    maxWorkers: process.env.PANDAPAGE_MAX_WORKERS 
-      ? parseInt(process.env.PANDAPAGE_MAX_WORKERS, 10) 
+    maxWorkers: process.env.BROWSER_DOC_VIEWER_MAX_WORKERS 
+      ? parseInt(process.env.BROWSER_DOC_VIEWER_MAX_WORKERS, 10) 
       : undefined,
-    enableStreaming: process.env.PANDAPAGE_STREAMING === 'true',
-    enableCaching: process.env.PANDAPAGE_CACHING !== 'false',
-    maxFileSize: process.env.PANDAPAGE_MAX_FILE_SIZE 
-      ? parseInt(process.env.PANDAPAGE_MAX_FILE_SIZE, 10) 
+    enableStreaming: process.env.BROWSER_DOC_VIEWER_STREAMING === 'true',
+    enableCaching: process.env.BROWSER_DOC_VIEWER_CACHING !== 'false',
+    maxFileSize: process.env.BROWSER_DOC_VIEWER_MAX_FILE_SIZE 
+      ? parseInt(process.env.BROWSER_DOC_VIEWER_MAX_FILE_SIZE, 10) 
       : undefined,
   };
   

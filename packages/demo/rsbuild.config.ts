@@ -9,20 +9,20 @@ export default defineConfig({
   },
   // Configure for GitHub Pages deployment
   output: {
-    assetPrefix: process.env.NODE_ENV === 'production' ? '/pandapage/' : '/'
+    assetPrefix: process.env.NODE_ENV === 'production' ? '/browser-document-viewer/' : '/'
   },
   source: {
     // Include workspace packages in compilation
     include: [
-      /node_modules[\\/]@pandapage[\\/]/,
+      /node_modules[\\/]@browser-document-viewer[\\/]/,
     ],
   },
   resolve: {
     alias: {
-      '@pandapage/pandapage': resolve(__dirname, '../pandapage/index.ts'),
-      '@pandapage/parser': resolve(__dirname, '../parser/src/index.ts'),
-      '@pandapage/renderer-dom': resolve(__dirname, '../renderer-dom/src/index.ts'),
-      '@pandapage/renderer-markdown': resolve(__dirname, '../renderer-markdown/src/index.ts'),
+      '@browser-document-viewer/pandapage': resolve(__dirname, '../pandapage/index.ts'),
+      '@browser-document-viewer/parser': resolve(__dirname, '../parser/src/index.ts'),
+      '@browser-document-viewer/renderer-dom': resolve(__dirname, '../renderer-dom/src/index.ts'),
+      '@browser-document-viewer/renderer-markdown': resolve(__dirname, '../renderer-markdown/src/index.ts'),
     },
   },
   tools: {

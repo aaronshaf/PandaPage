@@ -1,10 +1,10 @@
-# pandapage
+# Browser Document Viewer
 
 A document parser and renderer built with TypeScript. Parse DOCX documents and render them to HTML or Markdown, with aspirations to support PPTX (PowerPoint), Keynote, and Apple Pages formats.
 
-## [Try the Demo](https://aaronshaf.github.io/pandapage/)
+## [Try the Demo](https://aaronshaf.github.io/browser-document-viewer/)
 
-See pandapage in action with our interactive demo where you can upload and view DOCX documents.
+See Browser Document Viewer in action with our interactive demo where you can upload and view DOCX documents.
 
 ## Features
 
