@@ -248,7 +248,13 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             data-testid="reading-mode-container"
             className="bg-white rounded-lg shadow-sm p-6"
           >
-            {structuredDocument?.elements ? (
+            {parsedDocument ? (
+              <div 
+                data-testid="parsed-content"
+                className="rendered-markdown prose prose-gray prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: renderToHtml(parsedDocument, { includeStyles: false }) }}
+              />
+            ) : structuredDocument?.elements ? (
               <DocxRenderer 
                 elements={structuredDocument.elements} 
                 viewMode={viewMode}

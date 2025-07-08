@@ -108,61 +108,67 @@ export const DocxRenderer: React.FC<DocxRendererProps> = ({ elements, viewMode }
     if (paragraph.style) {
       const styleNormalized = paragraph.style.toLowerCase().replace(/\s+/g, '');
       
-      // More robust heading detection for DocxRenderer
-      if (styleNormalized === 'title') {
-        Tag = 'h1';
-        className = 'text-3xl font-bold mb-4';
-      } else if (styleNormalized === 'heading1') {
-        Tag = 'h1';
-        className = 'text-2xl font-bold mb-3';
-      } else if (styleNormalized === 'heading2') {
-        Tag = 'h2';
-        className = 'text-xl font-bold mb-2';
-      } else if (styleNormalized === 'heading3') {
-        Tag = 'h3';
-        className = 'text-lg font-bold mb-2';
-      } else if (styleNormalized === 'heading4') {
-        Tag = 'h4';
-        className = 'text-base font-bold mb-2';
-      } else if (styleNormalized === 'heading5') {
-        Tag = 'h5';
-        className = 'text-sm font-bold mb-2';
-      } else if (styleNormalized === 'heading6') {
-        Tag = 'h6';
-        className = 'text-xs font-bold mb-2';
-      } else if (styleNormalized.startsWith('heading') || styleNormalized.startsWith('head')) {
-        // Fallback for other heading variations
-        const levelMatch = styleNormalized.match(/(\d)/);
-        const level = levelMatch ? parseInt(levelMatch[1]) : 1;
+      // Enhanced heading detection for DocxRenderer
+      const isHeading = (
+        styleNormalized === 'title' ||
+        styleNormalized === 'heading' ||
+        styleNormalized.startsWith('heading') ||
+        styleNormalized.startsWith('head') ||
+        styleNormalized.includes('title') ||
+        // Common DOCX heading style variations
+        /^h[1-6]$/.test(styleNormalized) ||
+        /^heading[1-6]$/.test(styleNormalized) ||
+        /^title\d*$/.test(styleNormalized)
+      );
+      
+      if (isHeading) {
+        let level: 1 | 2 | 3 | 4 | 5 | 6 = 1;
         
+        // Extract level from various patterns
+        const levelMatches = [
+          styleNormalized.match(/heading\s*(\d)/),
+          styleNormalized.match(/head\s*(\d)/),
+          styleNormalized.match(/h(\d)/),
+          styleNormalized.match(/title(\d)/),
+          // Look for digit at the end
+          styleNormalized.match(/(\d)$/),
+        ];
+        
+        for (const match of levelMatches) {
+          if (match && match[1]) {
+            const parsedLevel = parseInt(match[1]);
+            if (parsedLevel >= 1 && parsedLevel <= 6) {
+              level = parsedLevel as 1 | 2 | 3 | 4 | 5 | 6;
+              break;
+            }
+          }
+        }
+        
+        // Special case for 'title'
+        if (styleNormalized === 'title') {
+          level = 1;
+        }
+        
+        // Set tag and let App.css handle the styling
         switch (level) {
           case 1:
             Tag = 'h1';
-            className = 'text-2xl font-bold mb-3';
             break;
           case 2:
             Tag = 'h2';
-            className = 'text-xl font-bold mb-2';
             break;
           case 3:
             Tag = 'h3';
-            className = 'text-lg font-bold mb-2';
             break;
           case 4:
             Tag = 'h4';
-            className = 'text-base font-bold mb-2';
             break;
           case 5:
             Tag = 'h5';
-            className = 'text-sm font-bold mb-2';
             break;
           case 6:
             Tag = 'h6';
-            className = 'text-xs font-bold mb-2';
             break;
-          default:
-            Tag = 'h1';
-            className = 'text-2xl font-bold mb-3';
         }
       } else {
         className = 'mb-2';
