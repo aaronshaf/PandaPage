@@ -349,10 +349,10 @@ test("renderToHtml handles tables", () => {
   const result = renderToHtml(doc);
   expect(result).toContain('<table class="border-collapse mb-4">');
   expect(result).toContain('<tr>');
-  expect(result).toContain('<th class="border px-4 py-2 font-semibold bg-gray-100"><p class="mb-4"><span>Header 1</span></p></th>');
-  expect(result).toContain('<th class="border px-4 py-2 font-semibold bg-gray-100"><p class="mb-4"><span>Header 2</span></p></th>');
-  expect(result).toContain('<td class="border px-4 py-2"><p class="mb-4"><span>Cell 1</span></p></td>');
-  expect(result).toContain('<td class="border px-4 py-2"><p class="mb-4"><span>Cell 2</span></p></td>');
+  expect(result).toContain('<th class="border px-2 py-1 font-semibold bg-gray-100"><p><span>Header 1</span></p></th>');
+  expect(result).toContain('<th class="border px-2 py-1 font-semibold bg-gray-100"><p><span>Header 2</span></p></th>');
+  expect(result).toContain('<td class="border px-2 py-1"><p><span>Cell 1</span></p></td>');
+  expect(result).toContain('<td class="border px-2 py-1"><p><span>Cell 2</span></p></td>');
   expect(result).toContain("</tr>");
   expect(result).toContain("</table>");
 });
@@ -376,8 +376,8 @@ test("renderToHtml handles empty table cells", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<th class="border px-4 py-2 font-semibold bg-gray-100"></th>');
-  expect(result).toContain('<th class="border px-4 py-2 font-semibold bg-gray-100"><p class="mb-4"><span>Content</span></p></th>');
+  expect(result).toContain('<th class="border px-2 py-1 font-semibold bg-gray-100">&nbsp;</th>');
+  expect(result).toContain('<th class="border px-2 py-1 font-semibold bg-gray-100"><p><span>Content</span></p></th>');
 });
 
 test("renderToHtml handles table cell spans", () => {
@@ -430,7 +430,7 @@ test("renderToHtml handles multiple paragraphs in table cells", () => {
   };
   
   const result = renderToHtml(doc);
-  expect(result).toContain('<th class="border px-4 py-2 font-semibold bg-gray-100"><p class="mb-4"><span>Line 1</span></p><p class="mb-4"><span>Line 2</span></p></th>');
+  expect(result).toContain('<th class="border px-2 py-1 font-semibold bg-gray-100"><p><span>Line 1</span></p><p><span>Line 2</span></p></th>');
 });
 
 test("renderToHtml escapes HTML entities", () => {

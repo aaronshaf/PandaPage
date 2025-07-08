@@ -122,9 +122,12 @@ export class DOMRenderer {
     }
   }
   
-  private renderParagraph(paragraph: Paragraph): HTMLElement {
+  private renderParagraph(paragraph: Paragraph, context?: { inTableCell?: boolean }): HTMLElement {
     const p = this.doc.createElement('p');
-    p.className = 'mb-4';
+    // Only add margin if not in a table cell
+    if (!context?.inTableCell) {
+      p.className = 'mb-4';
+    }
     
     // Add alignment
     if (paragraph.alignment) {
@@ -245,8 +248,8 @@ export class DOMRenderer {
         const isHeader = rowIndex === 0;
         const td = this.doc.createElement(isHeader ? 'th' : 'td');
         
-        // Base classes
-        let classes = 'border px-4 py-2';
+        // Base classes - reduced padding
+        let classes = 'border px-2 py-1';
         if (isHeader) {
           classes += ' font-semibold';
           
@@ -269,10 +272,18 @@ export class DOMRenderer {
         if (cell.rowspan) td.setAttribute('rowspan', cell.rowspan.toString());
         
         // Render cell content
-        cell.paragraphs.forEach(paragraph => {
-          const p = this.renderParagraph(paragraph);
-          td.appendChild(p);
-        });
+        if (cell.paragraphs.length === 0 || 
+            (cell.paragraphs.length === 1 && 
+             cell.paragraphs[0] && 
+             cell.paragraphs[0].runs.length === 0)) {
+          // Empty cell - don't create empty paragraph
+          td.innerHTML = '&nbsp;';
+        } else {
+          cell.paragraphs.forEach(paragraph => {
+            const p = this.renderParagraph(paragraph, { inTableCell: true });
+            td.appendChild(p);
+          });
+        }
         
         tr.appendChild(td);
       });
@@ -295,7 +306,7 @@ export class DOMRenderer {
     
     header.elements.forEach((el: any) => {
       if (el.type === 'paragraph') {
-        headerEl.appendChild(this.renderParagraph(el));
+        headerEl.appendChild(this.renderParagraph(el, { inTableCell: false }));
       } else if (el.type === 'table') {
         headerEl.appendChild(this.renderTable(el));
       }
@@ -348,7 +359,7 @@ export class DOMRenderer {
     
     footnote.elements.forEach((el: any) => {
       if (el.type === 'paragraph') {
-        contentDiv.appendChild(this.renderParagraph(el));
+        contentDiv.appendChild(this.renderParagraph(el, { inTableCell: false }));
       } else if (el.type === 'table') {
         contentDiv.appendChild(this.renderTable(el));
       }
@@ -597,10 +608,10 @@ export class DOMRenderer {
             footerEl.appendChild(flexDiv);
           } else {
             // No tab found, render normally
-            footerEl.appendChild(this.renderParagraph(el));
+            footerEl.appendChild(this.renderParagraph(el, { inTableCell: false }));
           }
         } else {
-          footerEl.appendChild(this.renderParagraph(el));
+          footerEl.appendChild(this.renderParagraph(el, { inTableCell: false }));
         }
       } else if (el.type === 'table') {
         footerEl.appendChild(this.renderTable(el));
