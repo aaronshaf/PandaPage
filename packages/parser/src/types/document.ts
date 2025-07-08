@@ -34,6 +34,7 @@ export interface Paragraph {
     type: 'bullet' | 'number';
     text?: string;
   };
+  images?: Image[];
 }
 
 export interface Heading {
@@ -41,6 +42,7 @@ export interface Heading {
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: TextRun[];
   alignment?: 'left' | 'center' | 'right' | 'justify';
+  images?: Image[];
 }
 
 export interface Table {

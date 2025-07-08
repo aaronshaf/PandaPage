@@ -128,6 +128,14 @@ function renderParagraph(paragraph: Paragraph, doc: Document): HTMLElement {
     }
   });
   
+  // Render images if present
+  if (paragraph.images) {
+    paragraph.images.forEach(image => {
+      const imgElement = renderImage(image, doc);
+      element.appendChild(imgElement);
+    });
+  }
+  
   return element;
 }
 
@@ -163,6 +171,14 @@ function renderHeading(heading: Heading, doc: Document): HTMLElement {
       element.appendChild(node);
     }
   });
+  
+  // Render images if present
+  if (heading.images) {
+    heading.images.forEach(image => {
+      const imgElement = renderImage(image, doc);
+      element.appendChild(imgElement);
+    });
+  }
   
   return element;
 }

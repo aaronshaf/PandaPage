@@ -35,20 +35,41 @@ function renderTextRun(run: TextRun): string {
 
 function renderParagraph(paragraph: Paragraph): string {
   const text = paragraph.runs.map(renderTextRun).join('').trim();
+  let result = '';
   
   if (paragraph.listInfo) {
     const indent = '  '.repeat(paragraph.listInfo.level);
     const marker = paragraph.listInfo.type === 'bullet' ? '-' : '1.';
-    return `${indent}${marker} ${text}`;
+    result = `${indent}${marker} ${text}`;
+  } else {
+    result = text;
   }
   
-  return text;
+  // Add images if present
+  if (paragraph.images && paragraph.images.length > 0) {
+    const imageMarkdown = paragraph.images.map(image => 
+      `\n![${image.alt || 'Image'}](data:${image.mimeType};base64,${btoa(String.fromCharCode(...new Uint8Array(image.data)))})`
+    ).join('\n');
+    result += imageMarkdown;
+  }
+  
+  return result;
 }
 
 function renderHeading(heading: Heading): string {
   const text = heading.runs.map(renderTextRun).join('').trim();
   const hashes = '#'.repeat(heading.level);
-  return `${hashes} ${text}`;
+  let result = `${hashes} ${text}`;
+  
+  // Add images if present
+  if (heading.images && heading.images.length > 0) {
+    const imageMarkdown = heading.images.map(image => 
+      `\n![${image.alt || 'Image'}](data:${image.mimeType};base64,${btoa(String.fromCharCode(...new Uint8Array(image.data)))})`
+    ).join('\n');
+    result += imageMarkdown;
+  }
+  
+  return result;
 }
 
 function renderTable(table: Table): string {

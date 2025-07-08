@@ -415,6 +415,9 @@ const App: React.FC = () => {
         try {
           // Try new parser first
           const parsed = await parseDocxDocument(arrayBuffer);
+          console.log('Parsed document:', parsed);
+          console.log('Document elements:', parsed.elements);
+          console.log('Image elements:', parsed.elements.filter(el => el.type === 'image'));
           setParsedDocument(parsed);
           markdown = await renderToMarkdown(parsed, { includeFrontmatter: true });
           

@@ -1,5 +1,5 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Heading, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image } from "../../types/document";
 import { parseDrawing, parseRelationships, extractImageData, createImageElement } from "./image-parser";
 
 // Helper function to get MIME type from file extension
@@ -260,7 +260,7 @@ function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | 
   };
 }
 
-function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
+function convertToDocumentElement(paragraph: DocxParagraph, processedImages?: Image[]): DocumentElement {
   const runs: TextRun[] = paragraph.runs.map(run => ({
     text: run.text,
     bold: run.bold,
@@ -321,12 +321,19 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
         level = 1;
       }
       
-      return {
+      const heading: Heading = {
         type: 'heading',
         level,
         runs,
         alignment: paragraph.alignment
       };
+      
+      // Add images if present
+      if (processedImages && processedImages.length > 0) {
+        heading.images = processedImages;
+      }
+      
+      return heading;
     }
   }
   
@@ -337,6 +344,11 @@ function convertToDocumentElement(paragraph: DocxParagraph): DocumentElement {
     style: paragraph.style,
     alignment: paragraph.alignment
   };
+  
+  // Add images if present
+  if (processedImages && processedImages.length > 0) {
+    element.images = processedImages;
+  }
   
   // Add list info if present
   if (paragraph.numId && paragraph.ilvl !== undefined) {
@@ -779,8 +791,8 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     const bookmarks = parseBookmarks(body, ns);
     elements.push(...bookmarks);
     
-    // Collect all images that need async processing
-    const pendingImages: Array<{ image: any; paragraph: DocxParagraph }> = [];
+    // Store paragraphs with pending images for later processing
+    const paragraphsWithImages = new Map<number, { paragraph: DocxParagraph; elementIndex: number }>();
     
     // Parse all direct children of the body in order
     for (let i = 0; i < body.childNodes.length; i++) {
@@ -794,14 +806,13 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         // Parse paragraph with relationships for hyperlink resolution
         const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip);
         if (paragraph) {
+          const elementIndex = elements.length;
           const docElement = convertToDocumentElement(paragraph);
           elements.push(docElement);
           
-          // Collect images for async processing
-          if (paragraph.images) {
-            for (const image of paragraph.images) {
-              pendingImages.push({ image, paragraph });
-            }
+          // Track paragraphs with images for async processing
+          if (paragraph.images && paragraph.images.length > 0) {
+            paragraphsWithImages.set(elementIndex, { paragraph, elementIndex });
           }
         }
       } else if (tagName === "w:tbl") {
@@ -819,18 +830,32 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       // We'll handle them in the paragraph parsing
     }
     
-    // Process all pending images
-    for (const { image, paragraph } of pendingImages) {
-      if (image._imageRel && image._drawingInfo) {
-        try {
-          // Extract image data
-          const imageData = yield* extractImageData(zip, image._imageRel.target);
-          
-          // Create proper image element
-          const properImage = createImageElement(image._drawingInfo, imageData);
-          elements.push(properImage);
-        } catch (error) {
-          console.warn('Failed to extract image:', error);
+    // Process all paragraphs with pending images
+    for (const [elementIndex, { paragraph }] of paragraphsWithImages) {
+      const processedImages: Image[] = [];
+      
+      if (paragraph.images) {
+        for (const image of paragraph.images) {
+          if ((image as any)._imageRel && (image as any)._drawingInfo) {
+            try {
+              // Extract image data
+              const imageData = yield* extractImageData(zip, (image as any)._imageRel.target);
+              
+              // Create proper image element
+              const properImage = createImageElement((image as any)._drawingInfo, imageData);
+              processedImages.push(properImage);
+            } catch (error) {
+              console.warn('Failed to extract image:', error);
+            }
+          }
+        }
+      }
+      
+      // Update the paragraph element with processed images
+      if (processedImages.length > 0 && elements[elementIndex]) {
+        const element = elements[elementIndex];
+        if (element && (element.type === 'paragraph' || element.type === 'heading')) {
+          (element as Paragraph).images = processedImages;
         }
       }
     }
