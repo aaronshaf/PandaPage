@@ -1,5 +1,23 @@
 import { Effect } from "effect";
-import type { ParsedDocument, DocumentElement, Paragraph, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark } from "../../types/document";
+import type { ParsedDocument, DocumentElement, Paragraph, Table, TableRow, TableCell, TextRun, DocumentMetadata, Header, Footer, Bookmark, Image } from "../../types/document";
+import { parseDrawing, parseRelationships, extractImageData, createImageElement } from "./image-parser";
+
+// Helper function to get MIME type from file extension
+function getMimeType(extension?: string): string {
+  const mimeTypes: Record<string, string> = {
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'gif': 'image/gif',
+    'bmp': 'image/bmp',
+    'tiff': 'image/tiff',
+    'tif': 'image/tiff',
+    'svg': 'image/svg+xml',
+    'webp': 'image/webp'
+  };
+  
+  return mimeTypes[extension || ''] || 'image/png';
+}
 
 export class DocxParseError {
   readonly _tag = "DocxParseError";
@@ -27,10 +45,12 @@ interface DocxParagraph {
   numId?: string;
   ilvl?: number;
   alignment?: 'left' | 'center' | 'right' | 'justify';
+  images?: Image[];
 }
 
-function parseParagraph(paragraphElement: Element, relationships?: Map<string, string>): DocxParagraph | null {
+function parseParagraph(paragraphElement: Element, relationships?: Map<string, string>, imageRelationships?: Map<string, any>, zip?: any): DocxParagraph | null {
   const runs: DocxRun[] = [];
+  const images: Image[] = [];
   const ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
   
   // Get paragraph style
@@ -82,6 +102,32 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
       if (run && run.text) {
         runs.push(run);
       }
+      
+      // Check for drawing elements (images) in the run
+      const drawingElements = element.getElementsByTagNameNS(ns, "drawing");
+      for (let j = 0; j < drawingElements.length; j++) {
+        const drawingElement = drawingElements[j];
+        if (!drawingElement) continue;
+        const drawingInfo = parseDrawing(drawingElement);
+        
+        if (drawingInfo && imageRelationships && zip) {
+          const imageRel = imageRelationships.get(drawingInfo.relationshipId);
+          if (imageRel) {
+            // Store drawing info and relationship for later async processing
+            images.push({
+              type: 'image',
+              data: new ArrayBuffer(0), // Placeholder - will be populated later
+              mimeType: 'image/png', // Placeholder
+              width: drawingInfo.width,
+              height: drawingInfo.height,
+              alt: drawingInfo.description || drawingInfo.name || 'Image',
+              // Store metadata for later processing
+              _drawingInfo: drawingInfo,
+              _imageRel: imageRel
+            } as any);
+          }
+        }
+      }
     } else if (element.tagName === "w:hyperlink") {
       // Hyperlink element containing runs
       const rId = element.getAttribute("r:id");
@@ -104,7 +150,7 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
     }
   }
   
-  return runs.length > 0 ? { runs, style, numId, ilvl, alignment } : null;
+  return runs.length > 0 || images.length > 0 ? { runs, style, numId, ilvl, alignment, ...(images.length > 0 && { images }) } : null;
 }
 
 function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | null {
@@ -329,7 +375,7 @@ function parseTable(tableElement: Element, relationships?: Map<string, string>):
       for (let k = 0; k < cellParagraphs.length; k++) {
         const pElement = cellParagraphs[k];
         if (!pElement) continue;
-        const paragraph = parseParagraph(pElement, relationships);
+        const paragraph = parseParagraph(pElement, relationships, undefined, undefined);
         if (paragraph) {
           // Convert to Paragraph type (without list info for table cells)
           const cellParagraph: Paragraph = {
@@ -469,7 +515,7 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships
     
     if (tagName === "w:p") {
       // Parse paragraph with relationships for hyperlink resolution
-      const paragraph = parseParagraph(element, relationships);
+      const paragraph = parseParagraph(element, relationships, undefined, undefined);
       if (paragraph) {
         const docElement = convertToDocumentElement(paragraph);
         if (docElement.type === 'paragraph') {
@@ -626,6 +672,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     let headers: Header[] = [];
     let footers: Footer[] = [];
     let relationshipsMap = new Map<string, string>();
+    let imageRelationships = new Map<string, { id: string; target: string; type: string }>();
     
     if (relsFile) {
       const relsXml = yield* Effect.tryPromise({
@@ -661,6 +708,11 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
           if (id && type && target) {
             // Store all relationships for potential hyperlink resolution
             relationshipsMap.set(id, target);
+            
+            // Store image relationships
+            if (type.includes("image")) {
+              imageRelationships.set(id, { id, target, type });
+            }
             
             if (type.includes("header")) {
               // Parse header
@@ -727,6 +779,9 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     const bookmarks = parseBookmarks(body, ns);
     elements.push(...bookmarks);
     
+    // Collect all images that need async processing
+    const pendingImages: Array<{ image: any; paragraph: DocxParagraph }> = [];
+    
     // Parse all direct children of the body in order
     for (let i = 0; i < body.childNodes.length; i++) {
       const child = body.childNodes[i];
@@ -737,10 +792,17 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       
       if (tagName === "w:p") {
         // Parse paragraph with relationships for hyperlink resolution
-        const paragraph = parseParagraph(element, relationshipsMap);
+        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip);
         if (paragraph) {
           const docElement = convertToDocumentElement(paragraph);
           elements.push(docElement);
+          
+          // Collect images for async processing
+          if (paragraph.images) {
+            for (const image of paragraph.images) {
+              pendingImages.push({ image, paragraph });
+            }
+          }
         }
       } else if (tagName === "w:tbl") {
         // Parse table with relationships for hyperlink resolution
@@ -755,6 +817,22 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
       // Note: Images are typically inside paragraphs as w:drawing elements
       // We'll handle them in the paragraph parsing
+    }
+    
+    // Process all pending images
+    for (const { image, paragraph } of pendingImages) {
+      if (image._imageRel && image._drawingInfo) {
+        try {
+          // Extract image data
+          const imageData = yield* extractImageData(zip, image._imageRel.target);
+          
+          // Create proper image element
+          const properImage = createImageElement(image._drawingInfo, imageData);
+          elements.push(properImage);
+        } catch (error) {
+          console.warn('Failed to extract image:', error);
+        }
+      }
     }
     
     // Add footers at the end

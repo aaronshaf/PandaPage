@@ -29,6 +29,7 @@ export function parseRelationships(relsXml: string): Effect.Effect<Map<string, I
     
     for (let i = 0; i < relationshipElements.length; i++) {
       const rel = relationshipElements[i];
+      if (!rel) continue;
       const id = rel.getAttribute("Id");
       const type = rel.getAttribute("Type");
       const target = rel.getAttribute("Target");
@@ -58,6 +59,7 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
   if (blipElements.length === 0) return null;
   
   const blip = blipElements[0];
+  if (!blip) return null;
   const relationshipId = blip.getAttributeNS(ns.r, "embed") || blip.getAttribute("r:embed");
   if (!relationshipId) return null;
   
@@ -68,13 +70,15 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
   
   if (extentElements.length > 0) {
     const extent = extentElements[0];
-    const cx = extent.getAttribute("cx");
-    const cy = extent.getAttribute("cy");
-    
-    // Convert EMUs (English Metric Units) to pixels
-    // 1 pixel = 9525 EMUs
-    if (cx) width = Math.round(parseInt(cx) / 9525);
-    if (cy) height = Math.round(parseInt(cy) / 9525);
+    if (extent) {
+      const cx = extent.getAttribute("cx");
+      const cy = extent.getAttribute("cy");
+      
+      // Convert EMUs (English Metric Units) to pixels
+      // 1 pixel = 9525 EMUs
+      if (cx) width = Math.round(parseInt(cx) / 9525);
+      if (cy) height = Math.round(parseInt(cy) / 9525);
+    }
   }
   
   // Extract name and description
@@ -84,8 +88,10 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
   
   if (docPrElements.length > 0) {
     const docPr = docPrElements[0];
-    name = docPr.getAttribute("name") || undefined;
-    description = docPr.getAttribute("descr") || undefined;
+    if (docPr) {
+      name = docPr.getAttribute("name") || undefined;
+      description = docPr.getAttribute("descr") || undefined;
+    }
   }
   
   return {
