@@ -178,25 +178,23 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
           const bold = /<w:b(\s|\/|>)/.test(runContent);
           const italic = /<w:i(\s|\/|>)/.test(runContent);
           
-          // Check for underline - must have explicit underline and not be "none"
+          // Check for underline - need to verify the w:val attribute
           const underlineMatch = runContent.match(/<w:u(\s+([^>]*))?/);
           let underline = false;
           if (underlineMatch) {
             const attrs = underlineMatch[2] || "";
-            // If there are attributes, check the w:val
-            if (attrs.trim()) {
-              const valMatch = attrs.match(/w:val="([^"]+)"/);
-              if (valMatch) {
-                // Only underline if w:val is not "none" or "0"
-                underline = valMatch[1] !== "none" && valMatch[1] !== "0";
-              } else {
-                // No w:val attribute but has other attributes - assume underline
-                underline = true;
-              }
-            } else {
-              // No attributes on <w:u> tag - assume single underline
+            // Look for w:val and w:color attributes
+            const valMatch = attrs.match(/w:val="([^"]+)"/);
+            const colorMatch = attrs.match(/w:color="([^"]+)"/);
+            
+            if (valMatch) {
+              // If w:val is present, only apply underline if it's not "none" or "0"
+              underline = valMatch[1] !== "none" && valMatch[1] !== "0";
+            } else if (!colorMatch) {
+              // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
               underline = true;
             }
+            // If w:color but no w:val, it's likely for color styling only, not underline
           }
 
           runs.push({
