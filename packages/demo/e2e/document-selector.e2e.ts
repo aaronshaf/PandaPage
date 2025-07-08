@@ -23,7 +23,7 @@ test.describe('Document Selector', () => {
     expect(await desktopSelector?.isVisible()).toBe(true);
   });
 
-  test('should have max width of 150px on all screen sizes', async ({ page }) => {
+  test('should have max width of 300px on all screen sizes', async ({ page }) => {
     const screenSizes = [
       { width: 375, height: 667, name: 'mobile' },
       { width: 640, height: 768, name: 'small' },
@@ -37,7 +37,7 @@ test.describe('Document Selector', () => {
       await page.setViewportSize({ width: size.width, height: size.height });
       const select = await page.$('#document-select');
       const classes = await select?.getAttribute('class');
-      expect(classes).toContain('max-w-[150px]');
+      expect(classes).toContain('max-w-[300px]');
     }
   });
 
