@@ -54,15 +54,16 @@ test.describe('Document Title Tests', () => {
     // Wait for content to load
     await page.waitForSelector('text=Heading 1', { timeout: 10000 });
     
-    // Check if "Heading 1" (the first heading in the doc) might be used as title
-    const pageContent = await page.content();
+    // Check the document title element directly
+    const titleElement = await page.locator('[data-testid="app-title"]');
+    const titleText = await titleElement.textContent();
     
-    // Log what we find for debugging
-    console.log('Page contains "Heading 1":', pageContent.includes('Heading 1'));
+    // Title should be meaningful - either from metadata or extracted from content
+    expect(titleText).toBeTruthy();
+    expect(titleText?.trim().length).toBeGreaterThan(0);
     
-    // At minimum, we should see some meaningful title
-    const titleElement = await page.locator('nav').first();
-    const navText = await titleElement.textContent();
-    expect(navText).toBeTruthy();
+    // Should not be just the filename
+    expect(titleText).not.toBe('001.docx');
+    expect(titleText).not.toBe('001');
   });
 });
