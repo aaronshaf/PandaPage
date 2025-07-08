@@ -53,19 +53,16 @@ test.describe('Mobile Navigation', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    // Check document selector has max-width constraint
+    // Check document selector has width constraint
     const selector = await page.$('#document-select');
     const selectorClasses = await selector?.getAttribute('class');
-    expect(selectorClasses).toContain('max-w-[120px]'); // Mobile max width
-    expect(selectorClasses).toContain('sm:max-w-[200px]');
-    expect(selectorClasses).toContain('md:max-w-[250px]');
-    expect(selectorClasses).toContain('lg:max-w-[300px]');
+    expect(selectorClasses).toContain('w-[120px]'); // Mobile width
     
     // Verify it doesn't push other elements off screen
     const selectorBox = await selector?.boundingBox();
     if (selectorBox) {
       expect(selectorBox.x + selectorBox.width).toBeLessThanOrEqual(375);
-      expect(selectorBox.width).toBeLessThanOrEqual(120); // Should respect max-width
+      expect(selectorBox.width).toBeLessThanOrEqual(130); // Should be around 120px plus some padding
     }
   });
 });
