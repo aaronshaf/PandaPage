@@ -42,9 +42,9 @@ test.describe('Document Title Tests', () => {
       console.warn(`Title '${titleText}' is not one of the expected values`);
     }
     
-    // It should definitely not be '--' or 'pandapage'
+    // It should definitely not be '--' or 'Browser Document Viewer'
     expect(titleText).not.toBe('--');
-    expect(titleText).not.toBe('pandapage');
+    expect(titleText).not.toBe('Browser Document Viewer');
   });
 
   test('should show first heading as title if no metadata', async ({ page }) => {

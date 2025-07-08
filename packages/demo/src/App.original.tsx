@@ -11,7 +11,7 @@ marked.setOptions({
 
 // Get base path for GitHub Pages deployment
 const getBasePath = () => {
-  return process.env.NODE_ENV === 'production' ? '/pandapage' : '';
+  return process.env.NODE_ENV === 'production' ? '/browser-document-viewer' : '';
 };
 
 // Remove YAML frontmatter from markdown for rendering
@@ -495,7 +495,7 @@ const App = () => {
           <div className="px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center flex-shrink-0">
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">pandapage</h1>
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900">Browser Document Viewer</h1>
             </div>
             
             {/* Document controls */}
@@ -575,7 +575,7 @@ const App = () => {
               </label>
               
               <a
-                href="https://github.com/aaronshaf/pandapage"
+                href="https://github.com/aaronshaf/browser-document-viewer"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500 transition-colors"

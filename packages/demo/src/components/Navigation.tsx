@@ -358,7 +358,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             {/* GitHub link */}
             <div className="flex items-center">
               <a
-                href="https://github.com/aaronshaf/pandapage"
+                href="https://github.com/aaronshaf/browser-document-viewer"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-gray-500 transition-colors"

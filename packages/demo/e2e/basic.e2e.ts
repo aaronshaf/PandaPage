@@ -8,7 +8,7 @@ test.describe('Basic App Functionality', () => {
     // Wait for the app to load
     await page.waitForSelector('[data-testid="app-header"]');
     
-    // Check that the document title is visible (not "pandapage" but extracted title)
+    // Check that the document title is visible (not "Browser Document Viewer" but extracted title)
     await expect(page.locator('[data-testid="app-title"]')).toBeVisible();
     await expect(page.locator('[data-testid="app-title"]')).not.toBeEmpty();
   });

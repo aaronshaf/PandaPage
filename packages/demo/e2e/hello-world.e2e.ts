@@ -12,12 +12,12 @@ test.describe('Hello World Test', () => {
     await expect(page.locator('[data-testid="document-content"] h1:has-text("Heading 1")')).toBeVisible();
   });
 
-  test('should have pandapage in the page', async ({ page }) => {
+  test('should have browser-document-viewer in the page', async ({ page }) => {
     await page.goto('/');
     
-    // Check that pandapage appears in the GitHub link or elsewhere
-    // Since the title shows the document title now, not "pandapage"
-    await expect(page.locator('a[href*="pandapage"]')).toBeVisible();
+    // Check that browser-document-viewer appears in the GitHub link or elsewhere
+    // Since the title shows the document title now, not "Browser Document Viewer"
+    await expect(page.locator('a[href*="browser-document-viewer"]')).toBeVisible();
   });
 
   test('should switch between read and print view', async ({ page }) => {
