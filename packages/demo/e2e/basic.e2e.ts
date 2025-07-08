@@ -40,7 +40,7 @@ test.describe('Basic App Functionality', () => {
     await expect(page.locator('#document-select')).toBeAttached();
     
     // Check that sample documents are listed in dropdown options
-    await expect(page.locator('option:has-text("Service Agreement Template")')).toBeAttached();
+    await expect(page.locator('option:has-text("Test Document")')).toBeAttached();
     await expect(page.locator('option:has-text("Employee Handbook")')).toBeAttached();
   });
 

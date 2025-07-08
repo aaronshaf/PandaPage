@@ -32,7 +32,7 @@ marked.setOptions({
 
 // Sample documents data
 const sampleDocuments = [
-  { id: '001.docx', title: 'Service Agreement Template' },
+  { id: '001.docx', title: 'Test Document' },
   { id: '002.docx', title: 'Employee Handbook' },
   { id: '003.docx', title: 'Open Source Policy Template' },
   { id: '004.docx', title: 'Performance Review Template' },
@@ -119,6 +119,11 @@ const App: React.FC = () => {
 
   // Extract document title from metadata, first heading, or filename
   const getDocumentTitle = () => {
+    // While loading, show nothing to prevent flickering
+    if (loading) {
+      return '';
+    }
+    
     // Try parsed document first (clean structure)
     if (parsedDocument?.metadata?.title) {
       return parsedDocument.metadata.title;
@@ -275,9 +280,10 @@ const App: React.FC = () => {
       return uploadedFile.name.replace(/\.(docx|pages)$/i, '');
     }
     
+    // Don't show sample doc title as fallback to prevent flickering
+    // Just show the filename without extension
     const docId = selectedDocument.split('/').pop()?.replace(/\.(docx|pages)$/i, '');
-    const sampleDoc = sampleDocuments.find(doc => doc.id === docId?.split('.')[0]);
-    return sampleDoc ? sampleDoc.title : docId || 'pandapage';
+    return docId || 'pandapage';
   };
 
   // Get initial document from URL hash or default
