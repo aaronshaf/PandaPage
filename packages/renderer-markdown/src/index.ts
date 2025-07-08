@@ -5,7 +5,8 @@ import type {
   Heading,
   Table,
   TextRun,
-  DocumentMetadata
+  DocumentMetadata,
+  Image
 } from '@pandapage/parser';
 
 export interface MarkdownRenderOptions {

@@ -4,7 +4,8 @@ import type {
   Paragraph,
   Heading,
   Table,
-  TextRun
+  TextRun,
+  Image
 } from '@pandapage/parser';
 
 export interface HtmlRenderOptions {
@@ -246,13 +247,18 @@ function renderElement(element: DocumentElement): string {
       return renderBookmark(element);
     case 'image':
       const imgData = btoa(String.fromCharCode(...new Uint8Array(element.data)));
-      return `<img src="data:${element.mimeType};base64,${imgData}" alt="${escapeHtml(element.alt || '')}" class="max-w-full h-auto mb-4" />`;
+      const widthAttr = element.width ? ` width="${element.width}"` : '';
+      const heightAttr = element.height ? ` height="${element.height}"` : '';
+      return `<img src="data:${element.mimeType};base64,${imgData}"${widthAttr}${heightAttr} alt="${escapeHtml(element.alt || '')}" class="max-w-full h-auto mb-4" />`;
     case 'pageBreak':
       return '<div class="page-break" style="page-break-after: always;"></div>';
     default:
       return '';
   }
 }
+
+// Export DOM-based renderer
+export { renderToDOM, renderToDOMString, type DomRenderOptions } from './dom-builder';
 
 export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
   const elements = document.elements.map(renderElement).join('\n');
