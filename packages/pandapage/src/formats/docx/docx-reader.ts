@@ -175,8 +175,8 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
 
         if (runText) {
           // Check for formatting
-          const bold = /<w:b\s+w:val="1"/.test(runContent);
-          const italic = /<w:i\s+w:val="1"/.test(runContent);
+          const bold = /<w:b(\s|\/|>)/.test(runContent);
+          const italic = /<w:i(\s|\/|>)/.test(runContent);
           
           // Check for underline - must have explicit underline and not be "none"
           const underlineMatch = runContent.match(/<w:u(\s+([^>]*))?/);
