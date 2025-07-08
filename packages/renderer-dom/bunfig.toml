@@ -1,6 +1,7 @@
 [test]
-# Enable coverage reporting - thresholds disabled due to bun bug
+# Enable coverage reporting with thresholds
 # Renderer DOM package: 78.57% functions, 77.05% lines  
 coverage = true
-# coverageThreshold = { lines = 75, functions = 75 }
+# TODO: Re-enable when bun fixes coverage threshold feature
+# coverageThreshold = 75
 coverageSkipTestFiles = true

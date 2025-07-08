@@ -1,10 +1,9 @@
 [test]
 # Coverage is enabled for --coverage flag and test:coverage script
 coverage = true
-
-# Coverage thresholds disabled due to bun test runner bug
 # Pandapage package: 47.44% functions, 38.84% lines (lowest coverage - needs improvement)
-# coverageThreshold = { lines = 35, functions = 45 }
+# TODO: Re-enable when bun fixes coverage threshold feature
+# coverageThreshold = 35
 
 # Exclude test files and types from coverage
 coverageSkipTestFiles = true
