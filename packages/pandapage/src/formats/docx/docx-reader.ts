@@ -178,14 +178,23 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
           const bold = /<w:b\s+w:val="1"/.test(runContent);
           const italic = /<w:i\s+w:val="1"/.test(runContent);
           
-          // Check for underline - must not have w:val="none"
-          const underlineMatch = runContent.match(/<w:u\s+([^>]*)/);
+          // Check for underline - must have explicit underline and not be "none"
+          const underlineMatch = runContent.match(/<w:u(\s+([^>]*))?/);
           let underline = false;
-          if (underlineMatch && underlineMatch[1]) {
-            const attrs = underlineMatch[1];
-            // Check if w:val is present and not "none"
-            const valMatch = attrs.match(/w:val="([^"]+)"/);
-            if (!valMatch || (valMatch[1] !== "none" && valMatch[1] !== "0")) {
+          if (underlineMatch) {
+            const attrs = underlineMatch[2] || "";
+            // If there are attributes, check the w:val
+            if (attrs.trim()) {
+              const valMatch = attrs.match(/w:val="([^"]+)"/);
+              if (valMatch) {
+                // Only underline if w:val is not "none" or "0"
+                underline = valMatch[1] !== "none" && valMatch[1] !== "0";
+              } else {
+                // No w:val attribute but has other attributes - assume underline
+                underline = true;
+              }
+            } else {
+              // No attributes on <w:u> tag - assume single underline
               underline = true;
             }
           }

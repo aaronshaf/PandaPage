@@ -121,7 +121,27 @@ const extractRunsFromXml = (xmlFragment: string): DocxRun[] => {
       // Check formatting
       const bold = /<w:b\s*\/>/.test(runContent) || /<w:b\s+w:val="1"/.test(runContent);
       const italic = /<w:i\s*\/>/.test(runContent) || /<w:i\s+w:val="1"/.test(runContent);
-      const underline = /<w:u\s+/.test(runContent);
+      
+      // Check for underline - must have explicit underline and not be "none"
+      const underlineMatch = runContent.match(/<w:u(\s+([^>]*))?/);
+      let underline = false;
+      if (underlineMatch) {
+        const attrs = underlineMatch[2] || "";
+        // If there are attributes, check the w:val
+        if (attrs.trim()) {
+          const valMatch = attrs.match(/w:val="([^"]+)"/);
+          if (valMatch) {
+            // Only underline if w:val is not "none" or "0"
+            underline = valMatch[1] !== "none" && valMatch[1] !== "0";
+          } else {
+            // No w:val attribute but has other attributes - assume underline
+            underline = true;
+          }
+        } else {
+          // No attributes on <w:u> tag - assume single underline
+          underline = true;
+        }
+      }
       
       runs.push({
         text,
