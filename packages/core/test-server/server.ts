@@ -13,7 +13,7 @@ const server = serve({
         `<!DOCTYPE html>
         <html>
           <head>
-            <title>pandapage Test</title>
+            <title>Browser Document Viewer Test</title>
             <meta charset="utf-8">
             <style>
               body { font-family: sans-serif; padding: 20px; }
@@ -44,7 +44,7 @@ const server = serve({
             </style>
           </head>
           <body>
-            <h1>pandapage Test Page</h1>
+            <h1>Browser Document Viewer Test Page</h1>
             
             <div id="drop-zone">
               Drop DOCX/PPTX files here or
@@ -61,7 +61,7 @@ const server = serve({
             
             <div id="output" class="hidden"></div>
             
-            <script type="module" src="/pandapage.js"></script>
+            <script type="module" src="/browser-document-viewer.js"></script>
             <script type="module" src="/test-app.js"></script>
           </body>
         </html>`,
@@ -71,8 +71,8 @@ const server = serve({
       );
     }
 
-    // Serve pandapage library
-    if (url.pathname === "/pandapage.js") {
+    // Serve browser document viewer library
+    if (url.pathname === "/browser-document-viewer.js") {
       const bundled = await Bun.build({
         entrypoints: [join(import.meta.dir, "../index.ts")],
         target: "browser",
@@ -95,7 +95,7 @@ const server = serve({
           parseDocumentInWorker,
           streamDocumentParse,
           shouldUseWorker 
-        } from '/pandapage.js';
+        } from '/browser-document-viewer.js';
         
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
@@ -202,7 +202,7 @@ const server = serve({
         });
         
         // Expose for testing
-        window.pandapage = {
+        window.browserDocumentViewer = {
           renderDocx,
           renderPptx,
           parseDocumentInWorker,

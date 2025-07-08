@@ -15,7 +15,7 @@ test.describe("DOCX Rendering in Browser", () => {
 
   test("should detect when to use worker", async ({ page }) => {
     // Test that the app has worker functionality available
-    // Since we don't have direct access to window.pandapage, we'll test through file upload
+    // Since we don't have direct access to window.browserDocumentViewer, we'll test through file upload
     await page.waitForSelector('[data-testid="app-header"]');
     
     // Check that upload functionality exists
