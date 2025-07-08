@@ -100,18 +100,29 @@ function renderParagraph(paragraph: Paragraph): string {
     }
   }
   
+  // Render images if present
+  let imageHtml = '';
+  if (paragraph.images) {
+    imageHtml = paragraph.images.map(image => {
+      const imgData = btoa(String.fromCharCode(...new Uint8Array(image.data)));
+      const widthAttr = image.width ? ` width="${image.width}"` : '';
+      const heightAttr = image.height ? ` height="${image.height}"` : '';
+      return `<img src="data:${image.mimeType};base64,${imgData}"${widthAttr}${heightAttr} alt="${escapeHtml(image.alt || '')}" class="max-w-full h-auto inline-block" />`;
+    }).join('');
+  }
+  
   if (paragraph.listInfo) {
     const indent = paragraph.listInfo.level * 2;
     classes.push(`ml-${indent * 4}`);
     
     if (paragraph.listInfo.type === 'bullet') {
-      return `<li class="${classes.join(' ')}">${content}</li>`;
+      return `<li class="${classes.join(' ')}">${content}${imageHtml}</li>`;
     } else {
-      return `<li class="${classes.join(' ')}" value="${paragraph.listInfo.text || ''}">${content}</li>`;
+      return `<li class="${classes.join(' ')}" value="${paragraph.listInfo.text || ''}">${content}${imageHtml}</li>`;
     }
   }
   
-  return `<p class="${classes.join(' ')}">${content}</p>`;
+  return `<p class="${classes.join(' ')}">${content}${imageHtml}</p>`;
 }
 
 // Helper function to trim whitespace-only runs from start and end
@@ -174,7 +185,18 @@ function renderHeading(heading: Heading): string {
     }
   }
   
-  return `<${tag} class="${classes.join(' ')}">${content}</${tag}>`;
+  // Render images if present
+  let imageHtml = '';
+  if (heading.images) {
+    imageHtml = heading.images.map(image => {
+      const imgData = btoa(String.fromCharCode(...new Uint8Array(image.data)));
+      const widthAttr = image.width ? ` width="${image.width}"` : '';
+      const heightAttr = image.height ? ` height="${image.height}"` : '';
+      return `<img src="data:${image.mimeType};base64,${imgData}"${widthAttr}${heightAttr} alt="${escapeHtml(image.alt || '')}" class="max-w-full h-auto inline-block" />`;
+    }).join('');
+  }
+  
+  return `<${tag} class="${classes.join(' ')}">${content}${imageHtml}</${tag}>`;
 }
 
 function renderTable(table: Table): string {

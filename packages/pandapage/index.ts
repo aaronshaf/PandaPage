@@ -141,6 +141,7 @@ export type {
   Heading,
   Table,
   TextRun,
+  Image,
   DocumentMetadata,
   ParseOptions as ParserOptions
 } from "@pandapage/parser";
