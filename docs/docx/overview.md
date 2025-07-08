@@ -2,7 +2,9 @@
 
 ## Introduction
 
-DOCX is the primary file format used by Microsoft Word since 2007. It's a ZIP-compressed archive containing XML files that define document structure, content, styles, and relationships. Understanding DOCX internals is crucial for parsing and rendering these documents accurately.
+DOCX is the primary file format used by Microsoft Word since 2007. It's built on the OOXML (Office Open XML) standard and represents the WordprocessingML variant. This document covers DOCX-specific implementation details and considerations for browser-based parsing.
+
+For foundational OOXML concepts, see the [OOXML Overview](../ooxml/overview.md).
 
 ## File Structure
 

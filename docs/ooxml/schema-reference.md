@@ -1,4 +1,4 @@
-# Official OOXML Schema Reference
+# OOXML Schema Reference
 
 ## Overview
 

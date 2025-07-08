@@ -1,8 +1,8 @@
-# DOCX Measurement Units and Coordinates
+# OOXML Measurement Units and Coordinates
 
 ## Overview
 
-OOXML uses multiple coordinate systems and units depending on the context. Understanding these is crucial for accurate document rendering.
+OOXML uses multiple coordinate systems and units depending on the context and format (DOCX, XLSX, PPTX). Understanding these is crucial for accurate document rendering across all OOXML-based formats.
 
 ## Core Unit Systems
 
