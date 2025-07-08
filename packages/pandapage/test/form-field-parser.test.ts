@@ -22,22 +22,22 @@ beforeAll(() => {
 
 describe("form-field-parser", () => {
   describe("FieldCode enum", () => {
-    test("should define all field codes", () => {
-      expect(FieldCode.FORMTEXT).toBe(FieldCode.FORMTEXT);
-      expect(FieldCode.FORMCHECKBOX).toBe(FieldCode.FORMCHECKBOX);
-      expect(FieldCode.FORMDROPDOWN).toBe(FieldCode.FORMDROPDOWN);
-      expect(FieldCode.PAGE).toBe(FieldCode.PAGE);
-      expect(FieldCode.NUMPAGES).toBe(FieldCode.NUMPAGES);
-      expect(FieldCode.DATE).toBe(FieldCode.DATE);
-      expect(FieldCode.TIME).toBe(FieldCode.TIME);
-      expect(FieldCode.FILENAME).toBe(FieldCode.FILENAME);
-      expect(FieldCode.AUTHOR).toBe(FieldCode.AUTHOR);
-      expect(FieldCode.TITLE).toBe(FieldCode.TITLE);
-      expect(FieldCode.SUBJECT).toBe(FieldCode.SUBJECT);
-      expect(FieldCode.KEYWORDS).toBe(FieldCode.KEYWORDS);
-      expect(FieldCode.REF).toBe(FieldCode.REF);
-      expect(FieldCode.HYPERLINK).toBe(FieldCode.HYPERLINK);
-      expect(FieldCode.TOC).toBe(FieldCode.TOC);
+    test("should define all field codes with correct string values", () => {
+      expect(FieldCode.FORMTEXT as string).toBe("FORMTEXT");
+      expect(FieldCode.FORMCHECKBOX as string).toBe("FORMCHECKBOX");
+      expect(FieldCode.FORMDROPDOWN as string).toBe("FORMDROPDOWN");
+      expect(FieldCode.PAGE as string).toBe("PAGE");
+      expect(FieldCode.NUMPAGES as string).toBe("NUMPAGES");
+      expect(FieldCode.DATE as string).toBe("DATE");
+      expect(FieldCode.TIME as string).toBe("TIME");
+      expect(FieldCode.FILENAME as string).toBe("FILENAME");
+      expect(FieldCode.AUTHOR as string).toBe("AUTHOR");
+      expect(FieldCode.TITLE as string).toBe("TITLE");
+      expect(FieldCode.SUBJECT as string).toBe("SUBJECT");
+      expect(FieldCode.KEYWORDS as string).toBe("KEYWORDS");
+      expect(FieldCode.REF as string).toBe("REF");
+      expect(FieldCode.HYPERLINK as string).toBe("HYPERLINK");
+      expect(FieldCode.TOC as string).toBe("TOC");
     });
   });
 
