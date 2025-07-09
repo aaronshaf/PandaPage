@@ -48,6 +48,7 @@
         "@xmldom/xmldom": "^0.9.8",
         "happy-dom": "^18.0.1",
         "jsdom": "^26.1.0",
+        "jszip": "^3.10.1",
         "marked": "^16.0.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

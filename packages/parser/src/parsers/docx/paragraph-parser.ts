@@ -30,10 +30,18 @@ export function parseParagraph(
   let numId: string | undefined;
   let ilvl: number | undefined;
   let alignment: 'left' | 'center' | 'right' | 'justify' | undefined;
+  let outlineLevel: number | undefined;
   
   if (pPrElement) {
     const styleElement = getElementByTagNameNSFallback(pPrElement, ns, "pStyle");
     style = styleElement?.getAttribute("w:val") || undefined;
+    
+    // Get outline level (w:outlineLvl) - this is key for heading detection
+    const outlineLvlElement = getElementByTagNameNSFallback(pPrElement, ns, "outlineLvl");
+    const outlineLvlStr = outlineLvlElement?.getAttribute("w:val");
+    if (outlineLvlStr) {
+      outlineLevel = parseInt(outlineLvlStr, 10);
+    }
     
     // Get alignment
     const jcElement = getElementByTagNameNSFallback(pPrElement, ns, "jc");
@@ -101,7 +109,7 @@ export function parseParagraph(
   }
   
   // Always return paragraph data, even if empty (for headers/footers with field codes)
-  return { runs, style, numId, ilvl, alignment, ...(images.length > 0 && { images }) };
+  return { runs, style, numId, ilvl, alignment, outlineLevel, ...(images.length > 0 && { images }) };
 }
 
 // Helper type for field parsing state

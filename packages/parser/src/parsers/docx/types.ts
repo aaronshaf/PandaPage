@@ -23,6 +23,7 @@ export interface DocxParagraph {
   numId?: string;
   ilvl?: number;
   alignment?: 'left' | 'center' | 'right' | 'justify';
+  outlineLevel?: number; // w:outlineLvl for heading detection
   images?: any[]; // Temporary, will be processed to Image[]
 }
 

@@ -225,7 +225,8 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip);
         if (paragraph) {
           const elementIndex = elements.length;
-          const docElement = convertToDocumentElement(paragraph);
+          // Pass paragraph index and outline level for better heading detection
+          const docElement = convertToDocumentElement(paragraph, undefined, elementIndex, paragraph.outlineLevel);
           elements.push(docElement);
           
           // Track paragraphs with images for async processing
