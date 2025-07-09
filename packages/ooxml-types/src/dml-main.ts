@@ -1,6 +1,14 @@
 // dml-main.ts
 import type { ST_RelationshipId, ST_Guid, ST_String, ST_HexColorRGB, ST_UniversalMeasure, ST_PositiveUniversalMeasure, ST_Percentage, ST_FixedPercentage, ST_PositiveFixedPercentage } from './shared-types';
 
+// Re-export all types from modular files
+export * from './dml-media';
+export * from './dml-fonts';
+export * from './dml-colors';
+export * from './dml-shapes';
+export * from './dml-effects';
+export * from './dml-animation';
+
 // Types are defined later in this file - removing forward declarations to avoid conflicts
 
 export interface CT_AudioFile {
