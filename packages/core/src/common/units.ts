@@ -3,6 +3,17 @@
  * Based on official OOXML specification units
  */
 
+import type { 
+  ST_OnOff, 
+  ST_String, 
+  ST_TwipsMeasure, 
+  ST_UnsignedDecimalNumber,
+  ST_DecimalNumber,
+  ST_UniversalMeasure,
+  ST_PositiveUniversalMeasure,
+  ST_Lang
+} from '@browser-document-viewer/ooxml-types';
+
 // Core unit constants from official OOXML schema
 export const TWIPS_PER_INCH = 1440;
 export const TWIPS_PER_POINT = 20;
@@ -28,7 +39,7 @@ export type TargetUnit = 'twips' | 'emus' | 'points' | 'inches' | 'cm' | 'mm';
  * Pattern: -?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)
  */
 export function parseUniversalMeasure(
-  value: string | number,
+  value: ST_UniversalMeasure | number,
   targetUnit: TargetUnit = 'twips'
 ): number {
   // Handle raw numbers (already in base unit)
@@ -305,7 +316,7 @@ export function centimetersToCss(cm: number): string {
  * Parse OOXML boolean properties (ST_OnOff)
  * Handles: true/1/on = true, false/0/off = false, empty = true
  */
-export function parseOnOff(value: string | boolean | null | undefined, defaultValue: boolean = false): boolean {
+export function parseOnOff(value: ST_OnOff | string | null | undefined, defaultValue: boolean = false): boolean {
   if (value === null || value === undefined) {
     return defaultValue;
   }

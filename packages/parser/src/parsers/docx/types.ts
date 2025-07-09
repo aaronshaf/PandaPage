@@ -1,18 +1,29 @@
 // Internal types for DOCX parsing
+import type { 
+  ST_Underline, 
+  ST_HighlightColor, 
+  ST_VerticalAlignRun,
+  ST_Lang,
+  BorderStyleString,
+  ShadingPatternString,
+  EmphasisMarkString,
+  ParagraphAlignmentString
+} from '@browser-document-viewer/ooxml-types';
 
 export interface DocxRun {
   text: string;
   bold?: boolean;
   italic?: boolean;
-  underline?: boolean;
+  underline?: boolean | ST_Underline; // Support both boolean and specific underline styles
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
   fontSize?: string; // Regular font size in half-points (w:sz)
   fontSizeCs?: string; // Complex script font size in half-points (w:szCs)
   fontFamily?: string;
-  color?: string;
-  backgroundColor?: string;
+  color?: string; // Hex color (ST_HexColorRGB format)
+  backgroundColor?: string; // Background color from highlighting
+  highlightColor?: ST_HighlightColor; // Text highlighting
   link?: string;
   _footnoteRef?: string;
   _fieldCode?: string; // For PAGE, NUMPAGES, etc. fields
@@ -32,12 +43,13 @@ export interface DocxRun {
   doubleStrikethrough?: boolean; // w:dstrike
   kerning?: number; // Minimum font size for kerning (half-points)
   textScale?: number; // Horizontal scaling percentage (w:w)
-  emphasis?: 'dot' | 'comma' | 'circle' | 'underDot'; // w:em
-  lang?: string; // Language code (w:lang)
+  emphasis?: EmphasisMarkString; // w:em - East Asian emphasis marks
+  lang?: ST_Lang; // Language code (w:lang)
+  verticalAlign?: ST_VerticalAlignRun; // Vertical alignment (superscript/subscript/baseline)
 }
 
 export interface DocxBorder {
-  style?: 'single' | 'double' | 'thick' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot' | 'triple' | 'thickThinSmall' | 'thinThickSmall' | 'thinThickThinSmall' | 'thickThinMedium' | 'thinThickMedium' | 'thinThickThinMedium' | 'thickThinLarge' | 'thinThickLarge' | 'thinThickThinLarge' | 'wave' | 'doubleWave' | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' | 'outset' | 'inset' | 'none';
+  style?: BorderStyleString;
   color?: string; // Hex color or 'auto'
   size?: number; // Border width in eighth-points (1/8 of a point)
   space?: number; // Space from text in points
@@ -46,7 +58,7 @@ export interface DocxBorder {
 export interface DocxShading {
   fill?: string; // Background fill color (hex or 'auto')
   color?: string; // Pattern color (hex or 'auto')
-  val?: 'clear' | 'solid' | 'horzStripe' | 'vertStripe' | 'reverseDiagStripe' | 'diagStripe' | 'horzCross' | 'diagCross' | 'thinHorzStripe' | 'thinVertStripe' | 'thinReverseDiagStripe' | 'thinDiagStripe' | 'thinHorzCross' | 'thinDiagCross' | 'pct5' | 'pct10' | 'pct12' | 'pct15' | 'pct20' | 'pct25' | 'pct30' | 'pct35' | 'pct37' | 'pct40' | 'pct45' | 'pct50' | 'pct55' | 'pct60' | 'pct62' | 'pct65' | 'pct70' | 'pct75' | 'pct80' | 'pct85' | 'pct87' | 'pct90' | 'pct95';
+  val?: ShadingPatternString;
 }
 
 export interface DocxParagraphBorders {
@@ -62,7 +74,7 @@ export interface DocxParagraph {
   style?: string;
   numId?: string;
   ilvl?: number;
-  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
+  alignment?: ParagraphAlignmentString;
   outlineLevel?: number; // w:outlineLvl for heading detection
   images?: any[]; // Temporary, will be processed to Image[]
   spacing?: {
@@ -90,7 +102,7 @@ export class DocxParseError {
 
 // Table-specific types for DOCX parsing
 export interface DocxTableBorder {
-  style?: 'single' | 'double' | 'thick' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot' | 'triple' | 'thickThinSmall' | 'thinThickSmall' | 'thinThickThinSmall' | 'thickThinMedium' | 'thinThickMedium' | 'thinThickThinMedium' | 'thickThinLarge' | 'thinThickLarge' | 'thinThickThinLarge' | 'wave' | 'doubleWave' | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' | 'outset' | 'inset' | 'none';
+  style?: BorderStyleString;
   color?: string; // Hex color or 'auto'
   size?: number; // Border width in eighth-points (1/8 of a point)
   space?: number; // Space from text in points

@@ -1,6 +1,7 @@
 // Style parsing functions for DOCX
 import { WORD_NAMESPACE } from './types';
 import type { DocxBorder, DocxShading, DocxParagraphBorders } from './types';
+import type { ParagraphAlignmentString, TextDirectionString, VerticalAlignmentString, LineSpacingRuleString } from '@browser-document-viewer/ooxml-types';
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from './xml-utils';
 
 export interface DocxStyle {
@@ -14,7 +15,7 @@ export interface DocxStyle {
 }
 
 export interface DocxParagraphProperties {
-  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
+  alignment?: ParagraphAlignmentString;
   indent?: {
     left?: number;
     right?: number;
@@ -25,13 +26,13 @@ export interface DocxParagraphProperties {
     before?: number;
     after?: number;
     line?: number;
-    lineRule?: 'auto' | 'exact' | 'atLeast';
+    lineRule?: LineSpacingRuleString;
   };
   keepNext?: boolean;
   keepLines?: boolean;
   outlineLevel?: number;
-  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
-  verticalAlignment?: 'top' | 'center' | 'bottom' | 'auto';
+  textDirection?: TextDirectionString;
+  verticalAlignment?: VerticalAlignmentString | 'auto';
   borders?: DocxParagraphBorders;
   shading?: DocxShading;
 }
@@ -194,14 +195,14 @@ function parseParagraphProperties(pPr: Element, ns: string): DocxParagraphProper
   if (jcVal) {
     switch (jcVal) {
       case 'center': props.alignment = 'center'; break;
-      case 'right': props.alignment = 'right'; break;
-      case 'both': case 'justify': props.alignment = 'justify'; break;
+      case 'right': case 'end': props.alignment = 'end'; break;
+      case 'both': case 'justify': props.alignment = 'both'; break;
       case 'distribute': props.alignment = 'distribute'; break;
       case 'highKashida': props.alignment = 'highKashida'; break;
       case 'lowKashida': props.alignment = 'lowKashida'; break;
       case 'mediumKashida': props.alignment = 'mediumKashida'; break;
       case 'thaiDistribute': props.alignment = 'thaiDistribute'; break;
-      case 'left': default: props.alignment = 'left'; break;
+      case 'left': case 'start': default: props.alignment = 'start'; break;
     }
   }
   

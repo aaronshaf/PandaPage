@@ -21,6 +21,7 @@
       "name": "@browser-document-viewer/core",
       "version": "1.0.0",
       "dependencies": {
+        "@browser-document-viewer/ooxml-types": "workspace:*",
         "@browser-document-viewer/parser": "workspace:*",
         "@browser-document-viewer/renderer-dom": "workspace:*",
         "@browser-document-viewer/renderer-markdown": "workspace:*",
@@ -68,11 +69,20 @@
         "vite": "^7.0.2",
       },
     },
+    "packages/ooxml-types": {
+      "name": "@browser-document-viewer/ooxml-types",
+      "version": "1.0.0",
+      "devDependencies": {
+        "@biomejs/biome": "^2.0.6",
+        "@types/bun": "latest",
+        "typescript": "^5",
+      },
+    },
     "packages/parser": {
       "name": "@browser-document-viewer/parser",
       "version": "0.1.0",
       "dependencies": {
-        "@browser-document-viewer/core": "workspace:*",
+        "@browser-document-viewer/ooxml-types": "workspace:*",
         "@types/jszip": "^3.4.1",
         "@xmldom/xmldom": "^0.9.8",
         "effect": "^3.12.3",
@@ -170,6 +180,8 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.1.1", "", { "os": "win32", "cpu": "x64" }, "sha512-i2PKdn70kY++KEF/zkQFvQfX1e8SkA8hq4BgC+yE9dZqyLzB/XStY2MvwI3qswlRgnGpgncgqe0QYKVS1blksg=="],
 
     "@browser-document-viewer/core": ["@browser-document-viewer/core@workspace:packages/core"],
+
+    "@browser-document-viewer/ooxml-types": ["@browser-document-viewer/ooxml-types@workspace:packages/ooxml-types"],
 
     "@browser-document-viewer/parser": ["@browser-document-viewer/parser@workspace:packages/parser"],
 

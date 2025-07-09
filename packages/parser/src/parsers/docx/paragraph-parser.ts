@@ -68,14 +68,14 @@ export function parseParagraph(
     if (jcVal) {
       switch (jcVal) {
         case 'center': alignment = 'center'; break;
-        case 'right': alignment = 'right'; break;
-        case 'both': case 'justify': alignment = 'justify'; break;
+        case 'right': case 'end': alignment = 'end'; break;
+        case 'both': case 'justify': alignment = 'both'; break;
         case 'distribute': alignment = 'distribute'; break;
         case 'highKashida': alignment = 'highKashida'; break;
         case 'lowKashida': alignment = 'lowKashida'; break;
         case 'mediumKashida': alignment = 'mediumKashida'; break;
         case 'thaiDistribute': alignment = 'thaiDistribute'; break;
-        case 'left': default: alignment = 'left'; break;
+        case 'left': case 'start': default: alignment = 'start'; break;
       }
     }
     

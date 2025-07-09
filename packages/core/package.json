@@ -49,6 +49,7 @@
   "dependencies": {
     "@effect/platform-browser": "^0.67.7",
     "@effect/schema": "^0.75.5",
+    "@browser-document-viewer/ooxml-types": "workspace:*",
     "@browser-document-viewer/parser": "workspace:*",
     "@browser-document-viewer/renderer-markdown": "workspace:*",
     "@browser-document-viewer/renderer-dom": "workspace:*",

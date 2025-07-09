@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@browser-document-viewer/ooxml-types": "workspace:*",
     "@types/jszip": "^3.4.1",
     "@xmldom/xmldom": "^0.9.8",
     "effect": "^3.12.3",

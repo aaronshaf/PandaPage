@@ -1,3 +1,11 @@
+import type { 
+  BorderStyleString, 
+  ShadingPatternString,
+  ParagraphAlignmentString,
+  ST_HighlightColor,
+  ST_Underline
+} from '@browser-document-viewer/ooxml-types';
+
 export interface DocumentMetadata {
   title?: string;
   author?: string;
@@ -12,7 +20,7 @@ export interface TextRun {
   text: string;
   bold?: boolean;
   italic?: boolean;
-  underline?: boolean;
+  underline?: boolean | ST_Underline; // Support both boolean and specific underline styles
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
@@ -21,6 +29,7 @@ export interface TextRun {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
+  highlightColor?: ST_HighlightColor; // OOXML highlight color
   link?: string;
   _footnoteRef?: string;
   _fieldCode?: string;
@@ -45,7 +54,7 @@ export interface Paragraph {
   type: 'paragraph';
   runs: TextRun[];
   style?: string;
-  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
+  alignment?: ParagraphAlignmentString;
   indentLevel?: number;
   listInfo?: {
     level: number;
@@ -71,7 +80,7 @@ export interface Heading {
   type: 'heading';
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: TextRun[];
-  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
+  alignment?: ParagraphAlignmentString;
   images?: Image[];
   spacing?: {
     before?: number; // Twips
@@ -88,7 +97,7 @@ export interface Heading {
 }
 
 export interface TableBorder {
-  style?: 'single' | 'double' | 'thick' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot' | 'triple' | 'thickThinSmall' | 'thinThickSmall' | 'thinThickThinSmall' | 'thickThinMedium' | 'thinThickMedium' | 'thinThickThinMedium' | 'thickThinLarge' | 'thinThickLarge' | 'thinThickThinLarge' | 'wave' | 'doubleWave' | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' | 'outset' | 'inset' | 'none';
+  style?: BorderStyleString;
   color?: string; // Hex color
   width?: number; // Border width in points (converted from eighth-points)
 }
@@ -105,7 +114,7 @@ export interface TableBorders {
 export interface TableShading {
   fill?: string; // Background fill color (hex)
   color?: string; // Pattern color (hex)
-  pattern?: 'clear' | 'solid' | 'horzStripe' | 'vertStripe' | 'reverseDiagStripe' | 'diagStripe' | 'horzCross' | 'diagCross' | 'thinHorzStripe' | 'thinVertStripe' | 'thinReverseDiagStripe' | 'thinDiagStripe' | 'thinHorzCross' | 'thinDiagCross' | 'pct5' | 'pct10' | 'pct12' | 'pct15' | 'pct20' | 'pct25' | 'pct30' | 'pct35' | 'pct37' | 'pct40' | 'pct45' | 'pct50' | 'pct55' | 'pct60' | 'pct62' | 'pct65' | 'pct70' | 'pct75' | 'pct80' | 'pct85' | 'pct87' | 'pct90' | 'pct95';
+  pattern?: ShadingPatternString;
 }
 
 export interface Table {
