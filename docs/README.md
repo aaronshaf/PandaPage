@@ -43,9 +43,7 @@ Documentation focused on DOCX-specific implementation details and browser consid
 - [Installation Guide](../README.md#installation)
 - [Quick Start Example](../README.md#quick-start)
 
-### API Documentation
-- Parser API (Coming soon)
-- Renderer API (Coming soon)
+
 
 ### Examples
 - [Demo Application](../packages/demo)

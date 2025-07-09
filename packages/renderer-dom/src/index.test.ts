@@ -115,7 +115,7 @@ test("renderToHtml handles combined formatting", () => {
   
   const result = renderToHtml(doc);
   expect(result).toContain('<span style="font-weight: bold; font-style: italic;">bold+italic</span>');
-  expect(result).toContain('<span style="font-weight: bold; font-style: italic; text-decoration: line-through;">all</span>');
+  expect(result).toContain('<span style="font-weight: bold; font-style: italic; text-decoration: underline line-through;">all</span>');
 });
 
 test("renderToHtml handles links", () => {

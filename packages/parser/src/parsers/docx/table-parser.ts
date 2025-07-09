@@ -69,6 +69,8 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
       const tcPr = cellElement ? cellElement.getElementsByTagNameNS(ns, "tcPr")[0] : undefined;
       let colspan: number | undefined;
       let rowspan: number | undefined;
+      let verticalAlignment: TableCell['verticalAlignment'];
+      let textDirection: TableCell['textDirection'];
       
       if (tcPr) {
         const gridSpan = tcPr.getElementsByTagNameNS(ns, "gridSpan")[0];
@@ -83,12 +85,39 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
           const val = vMerge.getAttribute("w:val");
           if (val === "restart") rowspan = 1; // This is a simplification
         }
+        
+        // Vertical alignment
+        const vAlign = tcPr.getElementsByTagNameNS(ns, "vAlign")[0];
+        if (vAlign) {
+          const val = vAlign.getAttribute("w:val");
+          switch (val) {
+            case 'top': verticalAlignment = 'top'; break;
+            case 'center': verticalAlignment = 'center'; break;
+            case 'bottom': verticalAlignment = 'bottom'; break;
+          }
+        }
+        
+        // Text direction
+        const textDirectionEl = tcPr.getElementsByTagNameNS(ns, "textDirection")[0];
+        if (textDirectionEl) {
+          const val = textDirectionEl.getAttribute("w:val");
+          switch (val) {
+            case 'lr': textDirection = 'ltr'; break;
+            case 'rl': textDirection = 'rtl'; break;
+            case 'lrV': textDirection = 'lrV'; break;
+            case 'tbV': textDirection = 'tbV'; break;
+            case 'lrTbV': textDirection = 'lrTbV'; break;
+            case 'tbLrV': textDirection = 'tbLrV'; break;
+          }
+        }
       }
       
       const cell: TableCell = {
         paragraphs,
-        colspan,
-        rowspan
+        ...(colspan && { colspan }),
+        ...(rowspan && { rowspan }),
+        ...(verticalAlignment && { verticalAlignment }),
+        ...(textDirection && { textDirection })
       };
       
       cells.push(cell);

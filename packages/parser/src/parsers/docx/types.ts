@@ -37,7 +37,7 @@ export interface DocxParagraph {
   style?: string;
   numId?: string;
   ilvl?: number;
-  alignment?: 'left' | 'center' | 'right' | 'justify';
+  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
   outlineLevel?: number; // w:outlineLvl for heading detection
   images?: any[]; // Temporary, will be processed to Image[]
   spacing?: {
@@ -52,6 +52,8 @@ export interface DocxParagraph {
     firstLine?: number; // Twips
     hanging?: number; // Twips
   };
+  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+  verticalAlignment?: 'top' | 'center' | 'bottom' | 'auto';
 }
 
 export class DocxParseError {

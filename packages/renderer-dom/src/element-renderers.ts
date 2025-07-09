@@ -46,7 +46,51 @@ export function renderParagraph(
   
   // Add alignment
   if (paragraph.alignment) {
-    p.style.textAlign = paragraph.alignment;
+    switch (paragraph.alignment) {
+      case 'distribute':
+        p.style.textAlign = 'justify';
+        (p.style as any).textJustify = 'distribute';
+        break;
+      case 'highKashida':
+      case 'lowKashida':
+      case 'mediumKashida':
+        p.style.textAlign = 'justify';
+        (p.style as any).textJustify = 'kashida';
+        break;
+      case 'thaiDistribute':
+        p.style.textAlign = 'justify';
+        (p.style as any).textJustify = 'distribute';
+        break;
+      default:
+        p.style.textAlign = paragraph.alignment;
+    }
+  }
+  
+  // Add text direction
+  if ('textDirection' in paragraph && paragraph.textDirection) {
+    switch (paragraph.textDirection) {
+      case 'rtl':
+        p.style.direction = 'rtl';
+        break;
+      case 'ltr':
+        p.style.direction = 'ltr';
+        break;
+      case 'lrV':
+      case 'tbV':
+      case 'lrTbV':
+      case 'tbLrV':
+        // Vertical text requires writing-mode CSS
+        p.style.writingMode = 'vertical-rl';
+        if (paragraph.textDirection === 'tbLrV') {
+          p.style.writingMode = 'vertical-lr';
+        }
+        break;
+    }
+  }
+  
+  // Add vertical alignment (for inline content)
+  if ('verticalAlignment' in paragraph && paragraph.verticalAlignment && paragraph.verticalAlignment !== 'auto') {
+    p.style.verticalAlign = paragraph.verticalAlignment;
   }
   
   // Render runs
@@ -73,9 +117,8 @@ export function renderHeading(
   totalPages: number
 ): HTMLElement {
   const h = doc.createElement(`h${heading.level}`);
-  h.style.fontWeight = 'bold';
   
-  // Apply spacing
+  // Apply spacing first (to match test expectations)
   if (heading.spacing) {
     if (heading.spacing.before !== undefined) {
       h.style.marginTop = twipsToPt(heading.spacing.before);
@@ -108,6 +151,8 @@ export function renderHeading(
     }
   }
   
+  h.style.fontWeight = 'bold';
+  
   // Add size styles based on level (using points for document consistency)
   const fontSizes = {
     1: '24pt',  // Heading 1
@@ -121,7 +166,51 @@ export function renderHeading(
   
   // Add alignment
   if (heading.alignment) {
-    h.style.textAlign = heading.alignment;
+    switch (heading.alignment) {
+      case 'distribute':
+        h.style.textAlign = 'justify';
+        (h.style as any).textJustify = 'distribute';
+        break;
+      case 'highKashida':
+      case 'lowKashida':
+      case 'mediumKashida':
+        h.style.textAlign = 'justify';
+        (h.style as any).textJustify = 'kashida';
+        break;
+      case 'thaiDistribute':
+        h.style.textAlign = 'justify';
+        (h.style as any).textJustify = 'distribute';
+        break;
+      default:
+        h.style.textAlign = heading.alignment;
+    }
+  }
+  
+  // Add text direction
+  if ('textDirection' in heading && heading.textDirection) {
+    switch (heading.textDirection) {
+      case 'rtl':
+        h.style.direction = 'rtl';
+        break;
+      case 'ltr':
+        h.style.direction = 'ltr';
+        break;
+      case 'lrV':
+      case 'tbV':
+      case 'lrTbV':
+      case 'tbLrV':
+        // Vertical text requires writing-mode CSS
+        h.style.writingMode = 'vertical-rl';
+        if (heading.textDirection === 'tbLrV') {
+          h.style.writingMode = 'vertical-lr';
+        }
+        break;
+    }
+  }
+  
+  // Add vertical alignment (for inline content)
+  if ('verticalAlignment' in heading && heading.verticalAlignment && heading.verticalAlignment !== 'auto') {
+    h.style.verticalAlign = heading.verticalAlignment;
   }
   
   // Render runs
@@ -172,6 +261,33 @@ export function renderTable(
       // Add cell attributes
       if (cell.colspan) td.setAttribute('colspan', cell.colspan.toString());
       if (cell.rowspan) td.setAttribute('rowspan', cell.rowspan.toString());
+      
+      // Add vertical alignment
+      if (cell.verticalAlignment) {
+        td.style.verticalAlign = cell.verticalAlignment;
+      }
+      
+      // Add text direction
+      if (cell.textDirection) {
+        switch (cell.textDirection) {
+          case 'rtl':
+            td.style.direction = 'rtl';
+            break;
+          case 'ltr':
+            td.style.direction = 'ltr';
+            break;
+          case 'lrV':
+          case 'tbV':
+          case 'lrTbV':
+          case 'tbLrV':
+            // Vertical text requires writing-mode CSS
+            td.style.writingMode = 'vertical-rl';
+            if (cell.textDirection === 'tbLrV') {
+              td.style.writingMode = 'vertical-lr';
+            }
+            break;
+        }
+      }
       
       // Render cell content
       if (cell.paragraphs.length === 0 || 

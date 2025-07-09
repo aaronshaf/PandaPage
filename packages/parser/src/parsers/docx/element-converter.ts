@@ -58,7 +58,9 @@ export function convertToDocumentElement(
       runs,
       alignment: paragraph.alignment,
       spacing: paragraph.spacing,
-      indentation: paragraph.indentation
+      indentation: paragraph.indentation,
+      ...(paragraph.textDirection && { textDirection: paragraph.textDirection }),
+      ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment })
     };
     
     // Add images if present
@@ -77,7 +79,9 @@ export function convertToDocumentElement(
     runs,
     alignment: paragraph.alignment,
     spacing: paragraph.spacing,
-    indentation: paragraph.indentation
+    indentation: paragraph.indentation,
+    ...(paragraph.textDirection && { textDirection: paragraph.textDirection }),
+    ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment })
   };
   
   // Add list info if present

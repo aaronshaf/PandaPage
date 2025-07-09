@@ -36,10 +36,12 @@ export function parseParagraph(
   let style: string | undefined;
   let numId: string | undefined;
   let ilvl: number | undefined;
-  let alignment: 'left' | 'center' | 'right' | 'justify' | undefined;
+  let alignment: DocxParagraph['alignment'];
   let outlineLevel: number | undefined;
   let spacing: DocxParagraph['spacing'] | undefined;
   let indentation: DocxParagraph['indentation'] | undefined;
+  let textDirection: DocxParagraph['textDirection'];
+  let verticalAlignment: DocxParagraph['verticalAlignment'];
   
   if (pPrElement) {
     const styleElement = getElementByTagNameNSFallback(pPrElement, ns, "pStyle");
@@ -60,6 +62,11 @@ export function parseParagraph(
         case 'center': alignment = 'center'; break;
         case 'right': alignment = 'right'; break;
         case 'both': case 'justify': alignment = 'justify'; break;
+        case 'distribute': alignment = 'distribute'; break;
+        case 'highKashida': alignment = 'highKashida'; break;
+        case 'lowKashida': alignment = 'lowKashida'; break;
+        case 'mediumKashida': alignment = 'mediumKashida'; break;
+        case 'thaiDistribute': alignment = 'thaiDistribute'; break;
         case 'left': default: alignment = 'left'; break;
       }
     }
@@ -102,6 +109,36 @@ export function parseParagraph(
       if (right) indentation.right = parseInt(right, 10);
       if (firstLine) indentation.firstLine = parseInt(firstLine, 10);
       if (hanging) indentation.hanging = parseInt(hanging, 10);
+    }
+    
+    // Get text direction (bidi)
+    const bidiElement = getElementByTagNameNSFallback(pPrElement, ns, "bidi");
+    if (bidiElement && bidiElement.getAttribute("w:val") !== "0") {
+      textDirection = 'rtl';
+    }
+    
+    // Get text flow/vertical text
+    const textFlowElement = getElementByTagNameNSFallback(pPrElement, ns, "textFlow");
+    const textFlowVal = textFlowElement?.getAttribute("w:val");
+    if (textFlowVal) {
+      switch (textFlowVal) {
+        case 'lrV': textDirection = 'lrV'; break;
+        case 'tbV': textDirection = 'tbV'; break;
+        case 'lrTbV': textDirection = 'lrTbV'; break;
+        case 'tbLrV': textDirection = 'tbLrV'; break;
+      }
+    }
+    
+    // Get vertical alignment (for text within the paragraph)
+    const textAlignmentElement = getElementByTagNameNSFallback(pPrElement, ns, "textAlignment");
+    const textAlignmentVal = textAlignmentElement?.getAttribute("w:val");
+    if (textAlignmentVal) {
+      switch (textAlignmentVal) {
+        case 'top': verticalAlignment = 'top'; break;
+        case 'center': verticalAlignment = 'center'; break;
+        case 'bottom': verticalAlignment = 'bottom'; break;
+        case 'auto': case 'baseline': verticalAlignment = 'auto'; break;
+      }
     }
   }
   
@@ -196,6 +233,8 @@ export function parseParagraph(
     outlineLevel,
     spacing: resolvedSpacing,
     indentation: resolvedIndentation,
+    ...(textDirection && { textDirection }),
+    ...(verticalAlignment && { verticalAlignment }),
     ...(images.length > 0 && { images }) 
   };
 }

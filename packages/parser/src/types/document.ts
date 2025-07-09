@@ -44,7 +44,7 @@ export interface Paragraph {
   type: 'paragraph';
   runs: TextRun[];
   style?: string;
-  alignment?: 'left' | 'center' | 'right' | 'justify';
+  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
   indentLevel?: number;
   listInfo?: {
     level: number;
@@ -70,7 +70,7 @@ export interface Heading {
   type: 'heading';
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: TextRun[];
-  alignment?: 'left' | 'center' | 'right' | 'justify';
+  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
   images?: Image[];
   spacing?: {
     before?: number; // Twips
@@ -101,6 +101,8 @@ export interface TableCell {
   colspan?: number;
   rowspan?: number;
   width?: number;
+  verticalAlignment?: 'top' | 'center' | 'bottom';
+  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
 }
 
 export interface Image {

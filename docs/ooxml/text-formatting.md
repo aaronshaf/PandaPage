@@ -53,52 +53,68 @@ These properties define the formatting for an entire paragraph.
 | --- | --- |
 | `<w:numPr>` | Numbering properties, linking the paragraph to a numbering definition in `numbering.xml`. |
 
-## Run Properties (`<w:rPr>`)
+## Run Properties (Formatting)
 
-These properties apply to a specific run of text within a paragraph.
+### Official Run Properties (EG_RPrBase)
 
-### Font and Appearance
+From the schema, these are the complete set of base run properties:
 
-| Element | Description | Attribute | Values |
-| --- | --- | --- | --- |
-| `<w:rFonts>` | Specifies the font family to use. | `w:ascii`, `w:hAnsi`, `w:cs`, `w:eastAsia` | Font name |
-| `<w:sz>` | Font size. | `w:val` | Half-points |
-| `<w:color>` | Text color. | `w:val` | Hex color or `auto` |
-| `<w:highlight>` | Text highlight color. | `w:val` | `yellow`, `green`, etc. |
-| `<w:b>` | Bold. | `w:val` | `on` / `off` (Toggle) |
-| `<w:i>` | Italic. | `w:val` | `on` / `off` (Toggle) |
-| `<w:u>` | Underline. | `w:val` | `single`, `double`, `wave`, etc. |
-| `<w:strike>` | Strikethrough. | `w:val` | `on` / `off` (Toggle) |
-| `<w:dstrike>` | Double strikethrough. | `w:val` | `on` / `off` (Toggle) |
-| `<w:caps>` | Display text as all capital letters. | `w:val` | `on` / `off` (Toggle) |
-| `<w:smallCaps>` | Display text as small capital letters. | `w:val` | `on` / `off` (Toggle) |
+```xml
+<w:rStyle/>         <!-- Run style reference -->
+<w:rFonts/>         <!-- Font family definitions -->
+<w:b/>              <!-- Bold -->
+<w:bCs/>            <!-- Bold complex script -->
+<w:i/>              <!-- Italic -->
+<w:iCs/>            <!-- Italic complex script -->
+<w:caps/>           <!-- All capitals -->
+<w:smallCaps/>      <!-- Small capitals -->
+<w:strike/>         <!-- Strikethrough -->
+<w:dstrike/>        <!-- Double strikethrough -->
+<w:outline/>        <!-- Outline -->
+<w:shadow/>         <!-- Shadow -->
+<w:emboss/>         <!-- Emboss -->
+<w:imprint/>        <!-- Imprint -->
+<w:noProof/>        <!-- No spell/grammar check -->
+<w:snapToGrid/>     <!-- Snap to document grid -->
+<w:vanish/>         <!-- Hidden text -->
+<w:webHidden/>      <!-- Hidden in web view -->
+<w:color/>          <!-- Text color -->
+<w:spacing/>        <!-- Character spacing in twips -->
+<w:w/>              <!-- Text scale percentage -->
+<w:kern/>           <!-- Kerning point size threshold -->
+<w:position/>       <!-- Text position (raised/lowered) -->
+<w:sz/>             <!-- Font size in half-points -->
+<w:szCs/>           <!-- Complex script font size -->
+<w:highlight/>      <!-- Highlight color -->
+<w:u/>              <!-- Underline -->
+<w:effect/>         <!-- Text effects -->
+<w:bdr/>            <!-- Text border -->
+<w:shd/>            <!-- Text shading -->
+<w:fitText/>        <!-- Fit text in specified width -->
+<w:vertAlign/>      <!-- Vertical alignment (superscript/subscript) -->
+<w:rtl/>            <!-- Right-to-left text -->
+<w:cs/>             <!-- Complex script text -->
+<w:em/>             <!-- East Asian emphasis -->
+<w:lang/>           <!-- Language -->
+<w:eastAsianLayout/> <!-- East Asian typography -->
+<w:specVanish/>     <!-- Special hidden text -->
+<w:oMath/>          <!-- Office Math -->
+```
 
-### Spacing and Position
+### Typography Units
 
-| Element | Description | Attribute | Values |
-| --- | --- | --- | --- |
-| `<w:spacing>` | Character spacing. | `w:val` | Twips (positive expands, negative condenses) |
-| `<w:kern>` | Kerning threshold. | `w:val` | Half-points |
-| `<w:position>` | Raise or lower text relative to the baseline. | `w:val` | Half-points |
-| `<w:vertAlign>` | Vertical alignment. | `w:val` | `superscript`, `subscript` |
+**Font Size**: `sz` and `szCs` use half-points
+- Value of 24 = 12 points
+- Value of 28 = 14 points
 
-### Borders and Shading
+**Character Spacing**: `spacing` uses signed twips
+- Positive values expand spacing
+- Negative values condense spacing
+- 20 twips = 1 point spacing adjustment
 
-| Element | Description |
-| --- | --- |
-| `<w:bdr>` | Defines a border around the run of text. |
-| `<w:shd>` | Defines shading for the run of text. |
-
-### Language and Scripts
-
-| Element | Description | Notes |
-| --- | --- | --- |
-| `<w:lang>` | Specifies the language of the text for proofing. | e.g., `en-US` |
-| `<w:rtl>` | Specifies that the text is right-to-left. | Toggle property |
-| `<w:cs>` | Marks the run as a complex script. | Toggle property |
-| `<w:bCs>` | Bold for complex scripts. | Toggle property |
-| `<w:iCs>` | Italic for complex scripts. | Toggle property |
-| `<w:szCs>` | Font size for complex scripts. | Half-points |
+**Position**: `position` uses signed half-points
+- Positive values raise text
+- Negative values lower text
 
 ## TypeScript Interfaces
 

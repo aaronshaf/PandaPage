@@ -13,7 +13,7 @@ export interface DocxStyle {
 }
 
 export interface DocxParagraphProperties {
-  alignment?: 'left' | 'center' | 'right' | 'justify';
+  alignment?: 'left' | 'center' | 'right' | 'justify' | 'distribute' | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
   indent?: {
     left?: number;
     right?: number;
@@ -29,6 +29,8 @@ export interface DocxParagraphProperties {
   keepNext?: boolean;
   keepLines?: boolean;
   outlineLevel?: number;
+  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+  verticalAlignment?: 'top' | 'center' | 'bottom' | 'auto';
 }
 
 export interface DocxRunProperties {
@@ -190,6 +192,11 @@ function parseParagraphProperties(pPr: Element, ns: string): DocxParagraphProper
       case 'center': props.alignment = 'center'; break;
       case 'right': props.alignment = 'right'; break;
       case 'both': case 'justify': props.alignment = 'justify'; break;
+      case 'distribute': props.alignment = 'distribute'; break;
+      case 'highKashida': props.alignment = 'highKashida'; break;
+      case 'lowKashida': props.alignment = 'lowKashida'; break;
+      case 'mediumKashida': props.alignment = 'mediumKashida'; break;
+      case 'thaiDistribute': props.alignment = 'thaiDistribute'; break;
       case 'left': default: props.alignment = 'left'; break;
     }
   }
@@ -236,6 +243,36 @@ function parseParagraphProperties(pPr: Element, ns: string): DocxParagraphProper
   if (outlineLvl) {
     const level = outlineLvl.getAttribute('w:val');
     if (level) props.outlineLevel = parseInt(level, 10);
+  }
+  
+  // Text direction (bidi)
+  const bidi = getElementByTagNameNSFallback(pPr, ns, 'bidi');
+  if (bidi && bidi.getAttribute('w:val') !== '0') {
+    props.textDirection = 'rtl';
+  }
+  
+  // Text flow/vertical text
+  const textFlow = getElementByTagNameNSFallback(pPr, ns, 'textFlow');
+  const textFlowVal = textFlow?.getAttribute('w:val');
+  if (textFlowVal) {
+    switch (textFlowVal) {
+      case 'lrV': props.textDirection = 'lrV'; break;
+      case 'tbV': props.textDirection = 'tbV'; break;
+      case 'lrTbV': props.textDirection = 'lrTbV'; break;
+      case 'tbLrV': props.textDirection = 'tbLrV'; break;
+    }
+  }
+  
+  // Vertical alignment
+  const textAlignment = getElementByTagNameNSFallback(pPr, ns, 'textAlignment');
+  const textAlignmentVal = textAlignment?.getAttribute('w:val');
+  if (textAlignmentVal) {
+    switch (textAlignmentVal) {
+      case 'top': props.verticalAlignment = 'top'; break;
+      case 'center': props.verticalAlignment = 'center'; break;
+      case 'bottom': props.verticalAlignment = 'bottom'; break;
+      case 'auto': case 'baseline': props.verticalAlignment = 'auto'; break;
+    }
   }
   
   return props;
