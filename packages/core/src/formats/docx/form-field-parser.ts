@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import { DocxParseError } from "./types";
+import { parseXmlString } from "../../common/xml-parser";
 
 /**
  * Field codes commonly found in DOCX files
@@ -96,13 +97,13 @@ export const parseFieldInstruction = (instruction: string): DocxField => {
 };
 
 /**
- * Parse field elements from paragraph XML
+ * Parse field elements from paragraph XML using DOM parsing
  */
 export const parseFieldsFromParagraph = (
   paragraphXml: string
 ): Effect.Effect<DocxField[], DocxParseError> =>
   Effect.gen(function* () {
-    debug.log("Parsing fields from paragraph");
+    debug.log("Parsing fields from paragraph with DOM parsing");
     
     const fields: DocxField[] = [];
     const state: FieldParsingState = {
@@ -115,73 +116,96 @@ export const parseFieldsFromParagraph = (
       nestedLevel: 0
     };
     
-    // Match all runs in the paragraph
-    const runPattern = /<w:r[^>]*>([\s\S]*?)<\/w:r>/g;
-    let runMatch;
+    // Add namespace declarations if missing to ensure proper XML parsing
+    let xmlContent = paragraphXml;
+    if (!xmlContent.includes('xmlns:w=')) {
+      xmlContent = xmlContent.replace(
+        /<w:p([^>]*)>/,
+        '<w:p$1 xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+      );
+    }
     
-    while ((runMatch = runPattern.exec(paragraphXml)) !== null) {
-      const runContent = runMatch[1];
-      if (!runContent) continue;
-      
+    // Parse XML with DOM parser
+    const doc = yield* parseXmlString(xmlContent).pipe(
+      Effect.mapError(error => new DocxParseError(`Failed to parse paragraph XML: ${error.message}`))
+    );
+    
+    // Get all run elements using DOM traversal with namespace fallback
+    const wordNamespaceURI = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+    let runElements = doc.getElementsByTagNameNS(wordNamespaceURI, 'r');
+    
+    // Fallback to getElementsByTagName if namespace approach doesn't work
+    if (runElements.length === 0) {
+      runElements = doc.getElementsByTagName('w:r');
+    }
+    
+    // Process each run element
+    for (const runElement of runElements) {
       // Check for field characters
-      const fldCharMatch = runContent.match(/<w:fldChar\s+w:fldCharType="(\w+)"/);
-      if (fldCharMatch?.[1]) {
-        const fldCharType = fldCharMatch[1];
+      const fldCharElements = runElement.getElementsByTagName('w:fldChar');
+      if (fldCharElements.length > 0) {
+        const fldCharType = fldCharElements[0]?.getAttribute('w:fldCharType');
         
-        switch (fldCharType) {
-          case "begin":
-            if (state.isInField) {
-              state.nestedLevel++;
-            } else {
-              state.isInField = true;
-              state.fieldStart = true;
-              state.instruction = "";
-              state.result = "";
-            }
-            break;
-            
-          case "separate":
-            if (state.isInField && state.nestedLevel === 0) {
-              state.fieldSeparator = true;
-            }
-            break;
-            
-          case "end":
-            if (state.nestedLevel > 0) {
-              state.nestedLevel--;
-            } else if (state.isInField) {
-              state.fieldEnd = true;
-              
-              // Parse and store the field
-              const field = parseFieldInstruction(state.instruction);
-              if (state.result) {
-                field.result = state.result;
+        if (fldCharType) {
+          switch (fldCharType) {
+            case "begin":
+              if (state.isInField) {
+                state.nestedLevel++;
+              } else {
+                state.isInField = true;
+                state.fieldStart = true;
+                state.instruction = "";
+                state.result = "";
               }
-              fields.push(field);
+              break;
               
-              // Reset state
-              state.isInField = false;
-              state.fieldStart = false;
-              state.fieldSeparator = false;
-              state.fieldEnd = false;
-              state.instruction = "";
-              state.result = "";
-            }
-            break;
+            case "separate":
+              if (state.isInField && state.nestedLevel === 0) {
+                state.fieldSeparator = true;
+              }
+              break;
+              
+            case "end":
+              if (state.nestedLevel > 0) {
+                state.nestedLevel--;
+              } else if (state.isInField) {
+                state.fieldEnd = true;
+                
+                // Parse and store the field
+                const field = parseFieldInstruction(state.instruction);
+                if (state.result) {
+                  field.result = state.result;
+                }
+                fields.push(field);
+                
+                // Reset state
+                state.isInField = false;
+                state.fieldStart = false;
+                state.fieldSeparator = false;
+                state.fieldEnd = false;
+                state.instruction = "";
+                state.result = "";
+              }
+              break;
+          }
         }
       }
       
       // Extract instruction text
-      if (runContent) {
-        const instrMatch = runContent.match(/<w:instrText[^>]*>([^<]*)<\/w:instrText>/);
-        if (instrMatch?.[1] && state.isInField && !state.fieldSeparator) {
-          state.instruction += instrMatch[1];
+      const instrTextElements = runElement.getElementsByTagName('w:instrText');
+      if (instrTextElements.length > 0 && state.isInField && !state.fieldSeparator) {
+        for (const instrElement of instrTextElements) {
+          const instrText = instrElement.textContent || "";
+          state.instruction += instrText;
         }
-        
-        // Extract field result text
-        const textMatch = runContent.match(/<w:t[^>]*>([^<]*)<\/w:t>/);
-        if (textMatch?.[1] && state.isInField && state.fieldSeparator && !state.fieldEnd) {
-          state.result += textMatch[1];
+      }
+      
+      // Extract field result text
+      const textElements = runElement.getElementsByTagName('w:t');
+      if (textElements.length > 0 && state.isInField && state.fieldSeparator && !state.fieldEnd) {
+        for (const textElement of textElements) {
+          const text = textElement.textContent || "";
+          state.result += text;
         }
       }
     }
