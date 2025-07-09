@@ -40,7 +40,8 @@ export interface DocxRunProperties {
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
-  fontSize?: string; // half-points
+  fontSize?: string; // half-points (w:sz)
+  fontSizeCs?: string; // complex script font size in half-points (w:szCs)
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
@@ -311,6 +312,10 @@ function parseRunProperties(rPr: Element, ns: string): DocxRunProperties {
   // Font size
   const sz = getElementByTagNameNSFallback(rPr, ns, 'sz');
   if (sz) props.fontSize = sz.getAttribute('w:val') || undefined;
+  
+  // Complex script font size
+  const szCs = getElementByTagNameNSFallback(rPr, ns, 'szCs');
+  if (szCs) props.fontSizeCs = szCs.getAttribute('w:val') || undefined;
   
   // Font family
   const rFonts = getElementByTagNameNSFallback(rPr, ns, 'rFonts');

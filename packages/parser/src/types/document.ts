@@ -16,7 +16,8 @@ export interface TextRun {
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
-  fontSize?: number;
+  fontSize?: number; // Font size in points
+  fontSizeCs?: number; // Complex script font size in points (for non-Latin scripts)
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;

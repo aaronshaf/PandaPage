@@ -453,6 +453,7 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
   let superscript = false;
   let subscript = false;
   let fontSize: string | undefined;
+  let fontSizeCs: string | undefined;
   let fontFamily: string | undefined;
   let color: string | undefined;
   let backgroundColor: string | undefined;
@@ -502,6 +503,10 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     // Font size (half-points)
     const szElement = getElementByTagNameNSFallback(runProps, ns, "sz");
     fontSize = szElement?.getAttribute("w:val") || undefined;
+    
+    // Complex script font size (half-points)
+    const szCsElement = getElementByTagNameNSFallback(runProps, ns, "szCs");
+    fontSizeCs = szCsElement?.getAttribute("w:val") || undefined;
     
     // Font family
     const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
@@ -623,6 +628,7 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
       superscript,
       subscript,
       fontSize,
+      fontSizeCs,
       fontFamily,
       color,
       backgroundColor,
@@ -660,6 +666,7 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
       superscript: resolvedRunProps.superscript ?? false,
       subscript: resolvedRunProps.subscript ?? false,
       fontSize: resolvedRunProps.fontSize,
+      fontSizeCs: resolvedRunProps.fontSizeCs,
       fontFamily: resolvedRunProps.fontFamily,
       color: resolvedRunProps.color,
       backgroundColor: resolvedRunProps.backgroundColor,
@@ -690,6 +697,7 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     superscript,
     subscript,
     fontSize,
+    fontSizeCs,
     fontFamily,
     color,
     backgroundColor,

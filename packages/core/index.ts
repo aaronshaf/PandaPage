@@ -130,6 +130,44 @@ export {
 // Re-export other utilities
 export { debug } from "./src/common/debug";
 
+// Re-export unit conversion utilities
+export {
+  parseUniversalMeasure,
+  twipsToInches,
+  twipsToPoints,
+  twipsToCentimeters,
+  emusToInches,
+  emusToPoints,
+  emusToCentimeters,
+  twipsToEmus,
+  emusToTwips,
+  pointsToTwips,
+  pointsToEmus,
+  pointsToInches,
+  inchesToTwips,
+  inchesToEmus,
+  inchesToPoints,
+  halfPointsToPoints,
+  pointsToHalfPoints,
+  twipsToCss,
+  emusToCss,
+  pointsToCss,
+  inchesToCss,
+  centimetersToCss,
+  parseOnOff,
+  parseFontSize,
+  validateEmuCoordinate,
+  validateTwipsCoordinate,
+  PAGE_SIZES,
+  DEFAULT_MARGINS,
+  TYPOGRAPHY_DEFAULTS,
+  TWIPS_PER_INCH,
+  TWIPS_PER_POINT,
+  EMUS_PER_INCH,
+  EMUS_PER_POINT,
+  EMUS_PER_TWIP
+} from "./src/common/units";
+
 // Export wrapper functions for bundling compatibility
 export { parseDocxDocument, renderToMarkdown, renderToHtml } from "./src/wrappers";
 

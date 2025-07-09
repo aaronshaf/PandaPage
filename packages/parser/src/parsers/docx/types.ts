@@ -8,7 +8,8 @@ export interface DocxRun {
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
-  fontSize?: string;
+  fontSize?: string; // Regular font size in half-points (w:sz)
+  fontSizeCs?: string; // Complex script font size in half-points (w:szCs)
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;

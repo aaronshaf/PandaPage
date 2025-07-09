@@ -1,6 +1,7 @@
 // Element conversion functions
 import type { DocumentElement, Paragraph, Heading, TextRun, Image } from '../../types/document';
 import type { DocxParagraph } from './types';
+import { halfPointsToPoints } from './unit-utils';
 
 /**
  * Convert a DOCX paragraph to a document element (paragraph or heading)
@@ -24,7 +25,8 @@ export function convertToDocumentElement(
     strikethrough: run.strikethrough,
     superscript: run.superscript,
     subscript: run.subscript,
-    fontSize: run.fontSize ? Math.round(parseInt(run.fontSize) / 2) : undefined,
+    fontSize: halfPointsToPoints(run.fontSize),
+    fontSizeCs: halfPointsToPoints(run.fontSizeCs),
     fontFamily: run.fontFamily,
     color: run.color ? `#${run.color}` : undefined,
     backgroundColor: run.backgroundColor,

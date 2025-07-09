@@ -72,6 +72,7 @@
       "name": "@browser-document-viewer/parser",
       "version": "0.1.0",
       "dependencies": {
+        "@browser-document-viewer/core": "workspace:*",
         "@types/jszip": "^3.4.1",
         "@xmldom/xmldom": "^0.9.8",
         "effect": "^3.12.3",

@@ -1,5 +1,43 @@
 import type { TextRun } from '@browser-document-viewer/parser';
 
+/**
+ * Check if a language code represents a complex script
+ * Complex scripts include: Arabic, Hebrew, Thai, Devanagari, etc.
+ */
+function isComplexScript(lang: string): boolean {
+  // Extract the primary language code (e.g., 'ar' from 'ar-SA')
+  const primaryLang = lang.split('-')[0]?.toLowerCase() || '';
+  
+  // List of language codes for complex scripts
+  const complexScriptLangs = [
+    'ar', // Arabic
+    'he', // Hebrew
+    'fa', // Persian/Farsi
+    'ur', // Urdu
+    'th', // Thai
+    'hi', // Hindi
+    'bn', // Bengali
+    'ta', // Tamil
+    'te', // Telugu
+    'mr', // Marathi
+    'gu', // Gujarati
+    'kn', // Kannada
+    'ml', // Malayalam
+    'pa', // Punjabi
+    'ne', // Nepali
+    'si', // Sinhala
+    'my', // Burmese
+    'km', // Khmer
+    'lo', // Lao
+    'bo', // Tibetan
+    'dz', // Dzongkha
+    'am', // Amharic
+    'ti', // Tigrinya
+  ];
+  
+  return complexScriptLangs.includes(primaryLang);
+}
+
 export function renderTextRun(
   run: TextRun, 
   doc: Document, 
@@ -73,6 +111,10 @@ export function renderTextRun(
   // Apply inline styles
   const styles: string[] = [];
   if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
+  // Use complex script font size if available and appropriate (for non-Latin scripts)
+  if (run.fontSizeCs && run.lang && isComplexScript(run.lang)) {
+    styles.push(`font-size: ${run.fontSizeCs}pt`);
+  }
   if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
   if (run.color) styles.push(`color: ${run.color}`);
   if (run.backgroundColor) styles.push(`background-color: ${run.backgroundColor}`);
