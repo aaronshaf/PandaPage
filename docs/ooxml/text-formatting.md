@@ -1,406 +1,110 @@
-# Text Formatting in DOCX
+# Text and Paragraph Formatting
 
-## Understanding Text Properties
+This document details the formatting properties for text and paragraphs in WordprocessingML, based on the `wml.xsd` schema. For a list of common data types, see [Data Types](./data-types.md).
 
-Text formatting in DOCX involves multiple layers of properties that cascade and interact. Understanding this system is crucial for accurate rendering.
+## Property Inheritance
 
-## Property Inheritance Hierarchy
+Formatting in a DOCX document is determined by a hierarchy of styles and properties. The final appearance of text is calculated by applying properties in the following order, with later properties overriding earlier ones:
 
-Properties are resolved in this order (later overrides earlier):
+1.  **Document Defaults (`<w:docDefaults>`)**: The base formatting for the entire document, defined in `styles.xml`.
+2.  **Style Definitions (`<w:style>`)**: Pre-defined styles for paragraphs and characters, also in `styles.xml`.
+3.  **Paragraph Properties (`<w:pPr>`)**: Direct formatting applied to a paragraph.
+4.  **Run Properties (`<w:rPr>`)**: Direct formatting applied to a specific run of text.
 
-1. **Document Defaults** (`docDefaults`)
-2. **Style Definitions** (from `styles.xml`)
-3. **Paragraph Properties** (`pPr`)
-4. **Run Properties** (`rPr`)
+## Paragraph Properties (`<w:pPr>`)
 
-### Example of Inheritance
+These properties define the formatting for an entire paragraph.
 
-```xml
-<!-- In styles.xml - Document defaults -->
-<w:docDefaults>
-    <w:rPrDefault>
-        <w:rPr>
-            <w:rFonts w:ascii="Calibri"/>
-            <w:sz w:val="22"/>  <!-- 11pt -->
-        </w:rPr>
-    </w:rPrDefault>
-</w:docDefaults>
+### Alignment and Indentation
 
-<!-- Style definition -->
-<w:style w:type="paragraph" w:styleId="Heading1">
-    <w:rPr>
-        <w:rFonts w:ascii="Arial"/>
-        <w:b/>
-        <w:sz w:val="32"/>  <!-- 16pt -->
-    </w:rPr>
-</w:style>
+| Element | Description | Attribute | Values |
+| --- | --- | --- | --- |
+| `<w:jc>` | Justification (horizontal alignment). | `w:val` | `start`, `end`, `center`, `both`, `distribute` |
+| `<w:ind>` | Indentation from the margins. | `w:start`, `w:end`, `w:firstLine`, `w:hanging` | Twips measure |
+| `<w:textDirection>` | The direction for text flow. | `w:val` | `lr` (left-to-right), `rl` (right-to-left) |
+| `<w:textAlignment>` | Vertical alignment of text in a line. | `w:val` | `top`, `center`, `baseline`, `bottom`, `auto` |
 
-<!-- In document.xml -->
-<w:p>
-    <w:pPr>
-        <w:pStyle w:val="Heading1"/>
-    </w:pPr>
-    <w:r>
-        <w:rPr>
-            <w:i/>  <!-- Add italic -->
-            <w:color w:val="FF0000"/>  <!-- Red -->
-        </w:rPr>
-        <w:t>Heading Text</w:t>
-    </w:r>
-</w:p>
+### Spacing
 
-<!-- Result: Arial, Bold, Italic, 16pt, Red -->
-```
+| Element | Description | Attributes | Values |
+| --- | --- | --- | --- |
+| `<w:spacing>` | Spacing before and after the paragraph. | `w:before`, `w:after`, `w:line`, `w:lineRule` | Twips, `auto`, `exact`, `atLeast` |
+| `<w:contextualSpacing>` | Ignore spacing before/after when paragraph is next to a like-formatted one. | `w:val` | `on` / `off` |
+
+### Layout
+
+| Element | Description | Attribute | Values |
+| --- | --- | --- | --- |
+| `<w:keepNext>` | Keep this paragraph on the same page as the next one. | `w:val` | `on` / `off` |
+| `<w:keepLines>` | Keep all lines of the paragraph on the same page. | `w:val` | `on` / `off` |
+| `<w:pageBreakBefore>` | Start the paragraph on a new page. | `w:val` | `on` / `off` |
+| `<w:widowControl>` | Prevents the first or last line of a paragraph from appearing by itself on a page. | `w:val` | `on` / `off` |
+
+### Borders and Shading
+
+| Element | Description |
+| --- | --- |
+| `<w:pBdr>` | Defines the borders for the paragraph. Contains `<w:top>`, `<w:bottom>`, `<w:left>`, `<w:right>`. |
+| `<w:shd>` | Defines the background shading for the paragraph. |
+
+### Lists
+
+| Element | Description |
+| --- | --- |
+| `<w:numPr>` | Numbering properties, linking the paragraph to a numbering definition in `numbering.xml`. |
+
+## Run Properties (`<w:rPr>`)
+
+These properties apply to a specific run of text within a paragraph.
+
+### Font and Appearance
+
+| Element | Description | Attribute | Values |
+| --- | --- | --- | --- |
+| `<w:rFonts>` | Specifies the font family to use. | `w:ascii`, `w:hAnsi`, `w:cs`, `w:eastAsia` | Font name |
+| `<w:sz>` | Font size. | `w:val` | Half-points |
+| `<w:color>` | Text color. | `w:val` | Hex color or `auto` |
+| `<w:highlight>` | Text highlight color. | `w:val` | `yellow`, `green`, etc. |
+| `<w:b>` | Bold. | `w:val` | `on` / `off` (Toggle) |
+| `<w:i>` | Italic. | `w:val` | `on` / `off` (Toggle) |
+| `<w:u>` | Underline. | `w:val` | `single`, `double`, `wave`, etc. |
+| `<w:strike>` | Strikethrough. | `w:val` | `on` / `off` (Toggle) |
+| `<w:dstrike>` | Double strikethrough. | `w:val` | `on` / `off` (Toggle) |
+| `<w:caps>` | Display text as all capital letters. | `w:val` | `on` / `off` (Toggle) |
+| `<w:smallCaps>` | Display text as small capital letters. | `w:val` | `on` / `off` (Toggle) |
+
+### Spacing and Position
+
+| Element | Description | Attribute | Values |
+| --- | --- | --- | --- |
+| `<w:spacing>` | Character spacing. | `w:val` | Twips (positive expands, negative condenses) |
+| `<w:kern>` | Kerning threshold. | `w:val` | Half-points |
+| `<w:position>` | Raise or lower text relative to the baseline. | `w:val` | Half-points |
+| `<w:vertAlign>` | Vertical alignment. | `w:val` | `superscript`, `subscript` |
+
+### Borders and Shading
+
+| Element | Description |
+| --- | --- |
+| `<w:bdr>` | Defines a border around the run of text. |
+| `<w:shd>` | Defines shading for the run of text. |
+
+### Language and Scripts
+
+| Element | Description | Notes |
+| --- | --- | --- |
+| `<w:lang>` | Specifies the language of the text for proofing. | e.g., `en-US` |
+| `<w:rtl>` | Specifies that the text is right-to-left. | Toggle property |
+| `<w:cs>` | Marks the run as a complex script. | Toggle property |
+| `<w:bCs>` | Bold for complex scripts. | Toggle property |
+| `<w:iCs>` | Italic for complex scripts. | Toggle property |
+| `<w:szCs>` | Font size for complex scripts. | Half-points |
 
 ## Toggle Properties
 
-Toggle properties use XOR logic - if both parent and child specify the property, it's turned OFF.
+Some boolean properties, like `<w:b>` (bold) and `<w:i>` (italic), are **toggle properties**. Their behavior depends on the inherited style:
 
-### Common Toggle Properties
-- `<w:b/>` - Bold
-- `<w:i/>` - Italic
-- `<w:strike/>` - Strikethrough
-- `<w:dstrike/>` - Double strikethrough
-- `<w:outline/>` - Outline
-- `<w:shadow/>` - Shadow
-- `<w:emboss/>` - Emboss
-- `<w:imprint/>` - Imprint
-- `<w:smallCaps/>` - Small caps
-- `<w:caps/>` - All caps
-- `<w:hidden/>` - Hidden text
+*   If the parent style is **not** bold, adding `<w:b/>` makes the text bold.
+*   If the parent style is **already** bold, adding `<w:b/>` *removes* the bolding for that specific run (an XOR-like behavior).
 
-### Toggle Property Example
-
-```xml
-<!-- Style defines bold -->
-<w:style w:styleId="MyStyle">
-    <w:rPr><w:b/></w:rPr>
-</w:style>
-
-<!-- Paragraph uses style and adds bold -->
-<w:p>
-    <w:pPr><w:pStyle w:val="MyStyle"/></w:pPr>
-    <w:r>
-        <w:rPr><w:b/></w:rPr>  <!-- Toggles OFF due to XOR -->
-        <w:t>This text is NOT bold</w:t>
-    </w:r>
-</w:p>
-```
-
-## Complete Run Properties (Official Schema)
-
-From the official OOXML schema (`EG_RPrBase`), here are all supported run properties:
-
-### Basic Formatting
-```xml
-<w:b/>              <!-- Bold -->
-<w:bCs/>            <!-- Bold complex script -->
-<w:i/>              <!-- Italic -->
-<w:iCs/>            <!-- Italic complex script -->
-<w:caps/>           <!-- All capitals -->
-<w:smallCaps/>      <!-- Small capitals -->
-<w:strike/>         <!-- Strikethrough -->
-<w:dstrike/>        <!-- Double strikethrough -->
-<w:outline/>        <!-- Outline -->
-<w:shadow/>         <!-- Shadow -->
-<w:emboss/>         <!-- Emboss -->
-<w:imprint/>        <!-- Imprint -->
-<w:vanish/>         <!-- Hidden text -->
-<w:webHidden/>      <!-- Hidden in web view -->
-<w:noProof/>        <!-- No spell/grammar check -->
-<w:snapToGrid/>     <!-- Snap to document grid -->
-```
-
-### Typography Properties
-```xml
-<w:sz w:val="24"/>            <!-- Font size (half-points: 24 = 12pt) -->
-<w:szCs w:val="24"/>          <!-- Complex script font size -->
-<w:color w:val="FF0000"/>     <!-- Text color (hex RGB) -->
-<w:spacing w:val="20"/>       <!-- Character spacing (twips: 20 = 1pt) -->
-<w:w w:val="150"/>            <!-- Text scale (percentage: 150 = 150%) -->
-<w:kern w:val="28"/>          <!-- Kerning threshold (half-points: 28 = 14pt) -->
-<w:position w:val="6"/>       <!-- Raised/lowered position (half-points) -->
-<w:highlight w:val="yellow"/> <!-- Highlight color -->
-<w:u w:val="single"/>         <!-- Underline type -->
-<w:effect w:val="blinkBackground"/> <!-- Text effects -->
-<w:vertAlign w:val="superscript"/>  <!-- Vertical alignment -->
-```
-
-### Border and Shading
-```xml
-<w:bdr w:val="single" w:sz="4" w:space="0" w:color="auto"/>
-<w:shd w:val="clear" w:color="auto" w:fill="FFFF00"/>
-<w:fitText w:val="1440"/>     <!-- Fit text in specified width (twips) -->
-```
-
-### Language and Script
-```xml
-<w:rtl/>                      <!-- Right-to-left text -->
-<w:cs/>                       <!-- Complex script text -->
-<w:lang w:val="en-US" w:eastAsia="zh-CN" w:bidi="ar-SA"/>
-<w:eastAsianLayout w:id="1" w:combine="on" w:combineBrackets="angle"/>
-<w:em w:val="dot"/>           <!-- East Asian emphasis -->
-```
-
-### Special Properties
-```xml
-<w:specVanish/>               <!-- Special hidden text -->
-<w:oMath/>                    <!-- Office Math formatting -->
-```
-
-## Font Properties
-
-### Font Families
-
-```xml
-<w:rFonts w:ascii="Times New Roman"      <!-- Latin text -->
-          w:hAnsi="Times New Roman"      <!-- High ANSI -->
-          w:cs="Arial Unicode MS"         <!-- Complex scripts -->
-          w:eastAsia="SimSun"/>           <!-- East Asian -->
-```
-
-Different fonts for different character ranges:
-- **ascii**: Characters 0x00-0x7F
-- **hAnsi**: Characters 0x80-0xFF
-- **cs**: Complex scripts (Arabic, Hebrew, etc.)
-- **eastAsia**: Chinese, Japanese, Korean
-
-### Font Size
-
-```xml
-<w:sz w:val="24"/>    <!-- 12pt (value is in half-points) -->
-<w:szCs w:val="24"/>  <!-- Complex script size -->
-```
-
-## Color Properties
-
-### Text Color
-
-```xml
-<!-- Solid color -->
-<w:color w:val="FF0000"/>  <!-- Red -->
-
-<!-- Theme color -->
-<w:color w:themeColor="accent1" w:themeTint="99"/>
-```
-
-### Highlighting
-
-```xml
-<w:highlight w:val="yellow"/>
-```
-
-Valid highlight colors:
-- black, blue, cyan, darkBlue, darkCyan, darkGray, darkGreen
-- darkMagenta, darkRed, darkYellow, green, lightGray, magenta
-- none, red, white, yellow
-
-### Shading (Background)
-
-```xml
-<w:shd w:val="clear" w:color="auto" w:fill="FF0000"/>
-```
-
-## Text Effects
-
-### Underline
-
-```xml
-<!-- Simple underline -->
-<w:u w:val="single"/>
-
-<!-- Other styles -->
-<w:u w:val="double"/>
-<w:u w:val="thick"/>
-<w:u w:val="dotted"/>
-<w:u w:val="dash"/>
-<w:u w:val="wave"/>
-
-<!-- Colored underline -->
-<w:u w:val="single" w:color="FF0000"/>
-```
-
-### Vertical Alignment
-
-```xml
-<!-- Superscript -->
-<w:vertAlign w:val="superscript"/>
-
-<!-- Subscript -->
-<w:vertAlign w:val="subscript"/>
-
-<!-- Baseline (default) -->
-<w:vertAlign w:val="baseline"/>
-```
-
-### Text Effects
-
-```xml
-<!-- Outline -->
-<w:outline/>
-
-<!-- Shadow -->
-<w:shadow/>
-
-<!-- Emboss -->
-<w:emboss/>
-
-<!-- Imprint -->
-<w:imprint/>
-```
-
-## Spacing and Kerning
-
-### Character Spacing
-
-```xml
-<!-- Spacing between characters (in twips) -->
-<w:spacing w:val="20"/>  <!-- Expand by 1pt -->
-<w:spacing w:val="-20"/> <!-- Condense by 1pt -->
-```
-
-### Kerning
-
-```xml
-<!-- Enable kerning for fonts 14pt and above -->
-<w:kern w:val="28"/>  <!-- In half-points -->
-```
-
-### Position
-
-```xml
-<!-- Raise/lower text (in half-points) -->
-<w:position w:val="6"/>   <!-- Raise by 3pt -->
-<w:position w:val="-6"/>  <!-- Lower by 3pt -->
-```
-
-## Complex Script Properties
-
-For languages like Arabic, Hebrew, Thai, etc., use separate properties:
-
-```xml
-<w:rPr>
-    <!-- Normal script -->
-    <w:b/>
-    <w:sz w:val="24"/>
-    
-    <!-- Complex script -->
-    <w:bCs/>
-    <w:szCs w:val="28"/>
-    <w:cstheme w:val="majorBidi"/>
-</w:rPr>
-```
-
-Common complex script properties:
-- `<w:bCs/>` - Bold complex script
-- `<w:iCs/>` - Italic complex script
-- `<w:szCs>` - Size complex script
-- `<w:rtl/>` - Right to left
-
-## Language Properties
-
-```xml
-<w:lang w:val="en-US"      <!-- Latin -->
-        w:eastAsia="zh-CN"  <!-- East Asian -->
-        w:bidi="ar-SA"/>    <!-- Bidirectional -->
-```
-
-## Special Formatting Cases
-
-### Small Caps and All Caps
-
-```xml
-<!-- Small caps -->
-<w:smallCaps/>
-
-<!-- All caps -->
-<w:caps/>
-```
-
-### Hidden Text
-
-```xml
-<w:vanish/>  <!-- Hidden text -->
-```
-
-### Web Hidden Text
-
-```xml
-<w:webHidden/>  <!-- Hidden in web layout view -->
-```
-
-## Borders
-
-Text can have borders:
-
-```xml
-<w:bdr w:val="single" w:sz="4" w:space="1" w:color="000000"/>
-```
-
-## Paragraph-Level Text Properties
-
-Some text properties can be set at paragraph level:
-
-```xml
-<w:pPr>
-    <w:rPr>
-        <!-- These apply to paragraph mark and serve as defaults -->
-        <w:b/>
-        <w:sz w:val="24"/>
-    </w:rPr>
-</w:pPr>
-```
-
-## Style References
-
-```xml
-<!-- Character style -->
-<w:rPr>
-    <w:rStyle w:val="Emphasis"/>
-</w:rPr>
-
-<!-- Paragraph style (applies run properties too) -->
-<w:pPr>
-    <w:pStyle w:val="Heading1"/>
-</w:pPr>
-```
-
-## Best Practices for Text Formatting
-
-1. **Property Resolution Order**: Always resolve properties in the correct order
-2. **Toggle Logic**: Implement XOR logic for toggle properties
-3. **Script Detection**: Detect character ranges to apply correct script properties
-4. **Theme Colors**: Resolve theme colors from theme files
-5. **Unit Conversion**: Remember font sizes are in half-points
-6. **Preserve Spaces**: Honor `xml:space="preserve"` attribute
-7. **Default Values**: Apply defaults when properties are missing
-
-## Common Pitfalls
-
-1. **Forgetting Toggle Logic**: Bold + Bold = Not Bold
-2. **Wrong Script Properties**: Using `<w:b/>` instead of `<w:bCs/>` for Arabic
-3. **Unit Confusion**: Font size 24 = 12pt, not 24pt
-4. **Missing Theme Resolution**: Not resolving theme colors
-5. **Incomplete Inheritance**: Not checking all property levels
-
-## Formatting Combinations
-
-Complex formatting often combines multiple properties:
-
-```xml
-<!-- Bold, italic, underlined, red, 14pt text -->
-<w:rPr>
-    <w:b/>
-    <w:i/>
-    <w:u w:val="single"/>
-    <w:color w:val="FF0000"/>
-    <w:sz w:val="28"/>
-</w:rPr>
-```
-
-## Performance Considerations
-
-1. **Cache Resolved Properties**: Don't recalculate for every character
-2. **Batch Similar Runs**: Combine adjacent runs with identical properties
-3. **Lazy Theme Loading**: Only load themes when theme colors are used
-4. **Property Normalization**: Normalize properties for comparison
+This is important for correctly resolving the final style of a run of text.

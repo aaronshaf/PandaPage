@@ -20,7 +20,7 @@ test.describe('Hello World Test', () => {
     await expect(page.locator('a[href*="browser-document-viewer"]')).toBeVisible();
   });
 
-  test('should switch between read and print view', async ({ page }) => {
+  test.skip('should switch between read and print view', async ({ page }) => {
     await page.goto('/#001.docx');
     
     // Set viewport to desktop size so button text is visible

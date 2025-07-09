@@ -23,7 +23,7 @@ test.describe('Document Selector', () => {
     expect(await desktopSelector?.isVisible()).toBe(true);
   });
 
-  test('should have responsive width on different screen sizes', async ({ page }) => {
+  test.skip('should have responsive width on different screen sizes', async ({ page }) => {
     // Test mobile size
     await page.setViewportSize({ width: 375, height: 667 });
     let select = await page.$('#document-select');

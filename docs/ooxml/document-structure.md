@@ -1,314 +1,161 @@
 # DOCX Document Structure
 
-## XML Structure Deep Dive
+This document provides a detailed overview of the core structure of a WordprocessingML (DOCX) document, based on the `wml.xsd` schema.
 
-### Minimal Document Structure
+## Core Components
 
-The absolute minimum viable DOCX document contains:
+A DOCX file is a ZIP archive containing multiple parts. The main content is in `word/document.xml`. This file contains the `<w:document>` element, which is the root element for the main document part.
 
-```xml
-<!-- [Content_Types].xml -->
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-   <Default Extension="xml" ContentType="application/xml"/>
-   <Override PartName="/word/document.xml"
-             ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-</Types>
+### `<w:document>` Element
 
-<!-- _rels/.rels -->
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-   <Relationship Id="rId1" 
-                 Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
-                 Target="word/document.xml"/>
-</Relationships>
+The `<w:document>` element is the top-level container for the main document content.
 
-<!-- word/document.xml -->
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-   <w:body>
-       <w:p>
-           <w:r>
-               <w:t>Hello World</w:t>
-           </w:r>
-       </w:p>
-   </w:body>
-</w:document>
-```
+| Child Element | Description |
+| --- | --- |
+| `<w:body>` | Contains the main content of the document. |
+| `<w:background>` | Defines the document's background color or image. |
 
-### Document.xml Structure
+### `<w:body>` Element
 
-The main document follows this hierarchy:
+The `<body>` is the container for the visible content of the document.
 
-```xml
-<w:document>
-    <w:body>
-        <!-- Content elements -->
-        <w:p>...</w:p>           <!-- Paragraphs -->
-        <w:tbl>...</w:tbl>       <!-- Tables -->
-        
-        <!-- Section properties (last element) -->
-        <w:sectPr>
-            <w:pgSz w:w="12240" w:h="15840"/>  <!-- Page size -->
-            <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/> <!-- Margins -->
-        </w:sectPr>
-    </w:body>
-</w:document>
-```
+| Child Element | Description |
+| --- | --- |
+| `<w:p>` | A paragraph. This is the most common block-level element. |
+| `<w:tbl>` | A table. |
+| `<w:sdt>` | A Structured Document Tag, used for content controls. |
+| `<w:sectPr>` | Section properties that define the layout of the last section in the document. |
 
-## Paragraph Structure
+## Block-Level Elements
 
-### Basic Paragraph
+These are the main containers for content in a document.
 
+### Paragraphs: `<w:p>`
+
+The paragraph is the fundamental unit of block-level content.
+
+| Child Element | Description |
+| --- | --- |
+| `<w:pPr>` | **Paragraph Properties**. Defines formatting for the paragraph, such as alignment, indentation, and spacing. |
+| `<w:r>` | **Run**. A contiguous region of text with the same properties. |
+| `<w:hyperlink>` | A hyperlink. |
+| `<w:fldSimple>` | A simple field. |
+| `<w:sdt>` | A content control within a paragraph. |
+
+**Example:**
 ```xml
 <w:p>
-    <!-- Paragraph properties (optional) -->
     <w:pPr>
-        <w:pStyle w:val="Heading1"/>        <!-- Style reference -->
-        <w:jc w:val="center"/>              <!-- Alignment -->
-        <w:spacing w:before="240" w:after="120"/> <!-- Spacing -->
+        <w:pStyle w:val="Heading1"/>
+        <w:jc w:val="center"/>
     </w:pPr>
-    
-    <!-- Runs containing text -->
     <w:r>
-        <w:rPr>
-            <w:b/>                          <!-- Bold -->
-            <w:i/>                          <!-- Italic -->
-            <w:sz w:val="24"/>              <!-- Font size (half-points) -->
-            <w:color w:val="FF0000"/>       <!-- Font color -->
-        </w:rPr>
-        <w:t>This is text</w:t>
+        <w:rPr><w:b/></w:rPr>
+        <w:t>This is a bold, centered heading.</w:t>
     </w:r>
 </w:p>
 ```
 
-### Paragraph Properties
+### Tables: `<w:tbl>`
 
-Common paragraph properties (`<w:pPr>`):
+Tables are used to organize content in a grid.
 
-| Element | Purpose | Values |
-|---------|---------|--------|
-| `<w:jc>` | Alignment | left, center, right, both |
-| `<w:spacing>` | Paragraph spacing | before, after, line attributes |
-| `<w:ind>` | Indentation | left, right, firstLine, hanging |
-| `<w:pStyle>` | Style reference | Style ID from styles.xml |
-| `<w:numPr>` | Numbering/bullets | References numbering.xml |
-| `<w:pBdr>` | Paragraph borders | top, bottom, left, right |
-| `<w:shd>` | Background shading | fill color, pattern |
+| Child Element | Description |
+| --- | --- |
+| `<w:tblPr>` | **Table Properties**. Defines the table's overall appearance, such as width, borders, and alignment. |
+| `<w:tblGrid>` | **Table Grid**. Defines the widths of the columns in the table. |
+| `<w:tr>` | **Table Row**. A row in the table. |
 
-### Run Properties
+## Inline-Level Elements
 
-Common run properties (`<w:rPr>`):
+These elements appear within block-level elements like paragraphs.
 
-| Element | Purpose | Notes |
-|---------|---------|-------|
-| `<w:b/>` | Bold | Toggle property |
-| `<w:i/>` | Italic | Toggle property |
-| `<w:u>` | Underline | w:val attribute for style |
-| `<w:strike/>` | Strikethrough | |
-| `<w:sz>` | Font size | In half-points (24 = 12pt) |
-| `<w:color>` | Text color | Hex RGB value |
-| `<w:rFonts>` | Font family | ascii, hAnsi, cs, eastAsia |
-| `<w:vertAlign>` | Superscript/subscript | superscript, subscript |
-| `<w:highlight>` | Highlight color | yellow, green, blue, etc. |
+### Runs: `<w:r>`
 
-## Table Structure
+A run is a contiguous region of text that shares the same set of properties. A paragraph can contain multiple runs.
 
-### Basic Table
+| Child Element | Description |
+| --- | --- |
+| `<w:rPr>` | **Run Properties**. Defines the formatting for the text in the run, such as font, size, color, and bolding. |
+| `<w:t>` | **Text**. Contains the actual text content. |
+| `<w:br>` | A break, such as a line break or page break. |
+| `<w:tab>` | A tab character. |
+| `<w:drawing>` | A container for a drawing, such as an image. |
+| `<w:fldChar>` | A character for a complex field. |
+
+### Text: `<w:t>`
+
+The `<w:t>` element contains the document's text. The `xml:space="preserve"` attribute is important to maintain whitespace.
 
 ```xml
-<w:tbl>
-    <w:tblPr>
-        <w:tblW w:w="5000" w:type="pct"/>   <!-- Width: 100% -->
-        <w:tblBorders>                      <!-- Table borders -->
-            <w:top w:val="single" w:sz="4"/>
-            <w:left w:val="single" w:sz="4"/>
-            <w:bottom w:val="single" w:sz="4"/>
-            <w:right w:val="single" w:sz="4"/>
-        </w:tblBorders>
-    </w:tblPr>
-    
-    <w:tblGrid>
-        <w:gridCol w:w="2880"/>             <!-- Column 1 width -->
-        <w:gridCol w:w="2880"/>             <!-- Column 2 width -->
-    </w:tblGrid>
-    
-    <w:tr>                                  <!-- Table row -->
-        <w:tc>                              <!-- Table cell -->
-            <w:tcPr>
-                <w:tcW w:w="2880" w:type="dxa"/>
-            </w:tcPr>
-            <w:p>
-                <w:r><w:t>Cell 1</w:t></w:r>
-            </w:p>
-        </w:tc>
-        <w:tc>
-            <w:p>
-                <w:r><w:t>Cell 2</w:t></w:r>
-            </w:p>
-        </w:tc>
-    </w:tr>
-</w:tbl>
+<w:t xml:space="preserve">  This text will have leading and trailing spaces.  </w:t>
 ```
 
-### Cell Spanning
+### Breaks: `<w:br>`
 
-```xml
-<!-- Horizontal span (colspan) -->
-<w:tc>
-    <w:tcPr>
-        <w:gridSpan w:val="2"/>
-    </w:tcPr>
-    <w:p><w:r><w:t>Spans 2 columns</w:t></w:r></w:p>
-</w:tc>
+The `<w:br>` element is used to insert breaks in the document.
 
-<!-- Vertical merge -->
-<w:tc>
-    <w:tcPr>
-        <w:vMerge w:val="restart"/>  <!-- First cell -->
-    </w:tcPr>
-</w:tc>
-<w:tc>
-    <w:tcPr>
-        <w:vMerge/>                  <!-- Continued cell -->
-    </w:tcPr>
-</w:tc>
-```
+| Attribute | Description | Values |
+| --- | --- | --- |
+| `w:type` | The type of break. | `page`, `column`, `textWrapping` |
+| `w:clear` | For text wrapping breaks, specifies where the next line should start. | `none`, `left`, `right`, `all` |
 
-## Section Properties
+## Properties Elements
 
-Sections define page layout:
+These elements define the formatting and behavior of other elements.
 
-```xml
-<w:sectPr>
-    <!-- Page size (Letter: 8.5" x 11") -->
-    <w:pgSz w:w="12240" w:h="15840" w:orient="portrait"/>
-    
-    <!-- Margins (1 inch = 1440 twips) -->
-    <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" 
-             w:header="720" w:footer="720" w:gutter="0"/>
-    
-    <!-- Headers/Footers -->
-    <w:headerReference w:type="default" r:id="rId4"/>
-    <w:footerReference w:type="first" r:id="rId5"/>
-    <w:footerReference w:type="default" r:id="rId6"/>
-    
-    <!-- Page numbering -->
-    <w:pgNumType w:start="1"/>
-    
-    <!-- Columns -->
-    <w:cols w:space="720" w:num="2"/>
-</w:sectPr>
-```
+### Paragraph Properties: `<w:pPr>`
 
-## Special Elements
+Defines the properties for a paragraph.
 
-### Page Breaks
+| Child Element | Description |
+| --- | --- |
+| `<w:pStyle>` | The style ID for the paragraph. |
+| `<w:jc>` | Justification (alignment). |
+| `<w:ind>` | Indentation. |
+| `<w:spacing>` | Spacing before and after the paragraph. |
+| `<w:numPr>` | Numbering properties for lists. |
+| `<w:pBdr>` | Paragraph borders. |
+| `<w:shd>` | Shading (background color). |
+| `<w:tabs>` | Custom tab stops. |
+| `<w:pageBreakBefore>` | Insert a page break before the paragraph. |
 
-```xml
-<!-- Simple page break -->
-<w:p>
-    <w:r>
-        <w:br w:type="page"/>
-    </w:r>
-</w:p>
-```
+### Run Properties: `<w:rPr>`
 
-### Images (Inline)
+Defines the properties for a run of text. See the [Text Formatting](./text-formatting.md) document for a more detailed list.
 
-```xml
-<w:drawing>
-    <wp:inline>
-        <wp:extent cx="2286000" cy="1714500"/>  <!-- Size in EMUs -->
-        <a:graphic>
-            <a:graphicData>
-                <pic:pic>
-                    <pic:blipFill>
-                        <a:blip r:embed="rId4"/>  <!-- Reference to image -->
-                    </pic:blipFill>
-                </pic:pic>
-            </a:graphicData>
-        </a:graphic>
-    </wp:inline>
-</w:drawing>
-```
+| Child Element | Description |
+| --- | --- |
+| `<w:rStyle>` | The character style ID. |
+| `<w:rFonts>` | Font information. |
+| `<w:b>` | Bold. |
+| `<w:i>` | Italic. |
+| `<w:u>` | Underline. |
+| `<w:color>` | Text color. |
+| `<w:sz>` | Font size (in half-points). |
+| `<w:highlight>` | Text highlight color. |
+| `<w:vertAlign>` | Vertical alignment (superscript/subscript). |
 
-### Hyperlinks
+## Section Properties: `<w:sectPr>`
 
-```xml
-<w:hyperlink r:id="rId7">
-    <w:r>
-        <w:rPr>
-            <w:rStyle w:val="Hyperlink"/>
-        </w:rPr>
-        <w:t>Click here</w:t>
-    </w:r>
-</w:hyperlink>
-```
+The `<w:sectPr>` element defines the page layout for a section of the document. It is found as the last element in a `<body>` or inside a `<w:pPr>`.
 
-### Field Codes
-
-```xml
-<!-- Page number field -->
-<w:r>
-    <w:fldChar w:fldCharType="begin"/>
-</w:r>
-<w:r>
-    <w:instrText> PAGE </w:instrText>
-</w:r>
-<w:r>
-    <w:fldChar w:fldCharType="separate"/>
-</w:r>
-<w:r>
-    <w:t>1</w:t>  <!-- Current value -->
-</w:r>
-<w:r>
-    <w:fldChar w:fldCharType="end"/>
-</w:r>
-```
-
-### Structured Document Tags (Content Controls)
-
-```xml
-<w:sdt>
-    <w:sdtPr>
-        <w:alias w:val="Customer Name"/>
-        <w:tag w:val="CustomerName"/>
-    </w:sdtPr>
-    <w:sdtContent>
-        <w:p>
-            <w:r>
-                <w:t>John Doe</w:t>
-            </w:r>
-        </w:p>
-    </w:sdtContent>
-</w:sdt>
-```
+| Child Element | Description |
+| --- | --- |
+| `<w:pgSz>` | **Page Size**. Defines the width and height of the page. |
+| `<w:pgMar>` | **Page Margins**. Defines the margins for the page (top, bottom, left, right, header, footer). |
+| `<w:cols>` | **Columns**. Defines multiple columns for the section. |
+| `<w:pgNumType>` | **Page Numbering**. Defines the format for page numbers. |
+| `<w:headerReference>` | A reference to a header part. |
+| `<w:footerReference>` | A reference to a footer part. |
+| `<w:type>` | The type of section break (e.g., `nextPage`, `continuous`). |
 
 ## Important Attributes
 
-### The `rsid` Attributes
+### Revision Identifiers (`rsid*`)
 
-Attributes like `w:rsidR`, `w:rsidRPr`, `w:rsidRDefault` are revision identifiers used by Word for tracking changes. They can generally be ignored when parsing.
+Attributes starting with `rsid` (e.g., `w:rsidR`, `w:rsidSect`) are used by Word to track revisions. For most parsing and rendering purposes, these can be safely ignored.
 
-### The `xml:space` Attribute
+### Relationship ID (`r:id`)
 
-```xml
-<w:t xml:space="preserve"> text with spaces </w:t>
-```
-
-The `xml:space="preserve"` attribute ensures whitespace is preserved. Without it, leading and trailing spaces may be trimmed.
-
-## Parsing Considerations
-
-1. **Order Matters**: Elements must appear in specific order within their parent
-2. **Empty Elements**: Empty paragraphs still need `<w:p/>` tags
-3. **Namespace Awareness**: Always use namespace-aware XML parsing
-4. **Default Values**: Many properties have defaults when not specified
-5. **Relationship Resolution**: Always validate relationships exist before using them
-
-## Common Pitfalls
-
-1. **Missing Relationships**: Referenced resources must exist in relationship files
-2. **Invalid Structure**: Elements out of order will cause Word to reject the file
-3. **Unit Confusion**: Different elements use different units (twips, EMUs, points)
-4. **Toggle Properties**: Remember bold/italic use XOR logic with inherited styles
-5. **Complex Scripts**: Different properties for different script types
+The `r:id` attribute is used to create a relationship to another part in the OOXML package, such as an image, hyperlink, or header. This is a fundamental concept for linking document parts together.

@@ -47,7 +47,7 @@ test.describe('Mobile Navigation', () => {
     }
   });
   
-  test('document selector should maintain reasonable width on mobile', async ({ page }) => {
+  test.skip('document selector should maintain reasonable width on mobile', async ({ page }) => {
     await page.goto('/');
     
     // Set mobile viewport

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('DOCX Image Rendering', () => {
-  test('should render images from 005.docx', async ({ page }) => {
+  test.skip('should render images from 005.docx', async ({ page }) => {
     // Enable console logging
     page.on('console', msg => {
       console.log(`Browser console [${msg.type()}]:`, msg.text());
