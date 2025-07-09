@@ -253,24 +253,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             data-testid="reading-mode-container"
             className="bg-white p-6"
           >
-            {parsedDocument ? (
-              <div 
-                data-testid="parsed-content"
-                className="rendered-markdown prose prose-gray prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderToHtml(parsedDocument, { includeStyles: false }) }}
-              />
-            ) : structuredDocument?.elements ? (
-              <DocxRenderer 
-                elements={structuredDocument.elements} 
-                viewMode={viewMode}
-              />
-            ) : (
-              <div 
-                data-testid="markdown-content"
-                className="rendered-markdown prose prose-gray prose-lg max-w-none"
-                dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
-              />
-            )}
+            {/* Read mode should always use markdown for simplified rendering */}
+            <div 
+              data-testid="markdown-content"
+              className="rendered-markdown prose prose-gray prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
+            />
           </div>
         </div>
       ) : (
@@ -360,25 +348,40 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 ));
               })()
             ) : structuredDocument?.elements ? (
-              // For structured documents, split elements into pages and render each page
+              // For structured documents, split by page breaks if available
               (() => {
-                // Use DOM renderer to get HTML and split into pages
-                const domRenderer = new DOMRenderer();
-                // Create a ParsedDocument-like object for the renderer
-                const parsedDoc = {
-                  metadata: structuredDocument.metadata || {},
-                  elements: structuredDocument.elements,
-                  headers: structuredDocument.headers,
-                  footers: structuredDocument.footers
-                };
-                const htmlContent = domRenderer.renderToHTML(parsedDoc, { includeContainer: false });
-                const pages = splitIntoPages(htmlContent);
+                const allElements = structuredDocument.elements;
+                const pages: any[][] = [];
+                let currentPage: any[] = [];
+                
+                // Split elements by page breaks
+                for (const element of allElements) {
+                  if (element.type === 'pageBreak') {
+                    // Found a page break - finish current page
+                    if (currentPage.length > 0) {
+                      pages.push(currentPage);
+                      currentPage = [];
+                    }
+                  } else {
+                    currentPage.push(element);
+                  }
+                }
+                
+                // Add the last page if it has content
+                if (currentPage.length > 0) {
+                  pages.push(currentPage);
+                }
+                
+                // If no pages or page breaks found, treat as single page
+                if (pages.length === 0) {
+                  pages.push(allElements);
+                }
                 
                 if (pages.length !== totalPages) {
                   setTimeout(() => setTotalPages(pages.length), 0);
                 }
                 
-                return pages.map((pageContent, index) => (
+                return pages.map((pageElements, index) => (
                   <div 
                     key={index} 
                     data-testid={`print-page-${index}`}
@@ -401,8 +404,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                       lineHeight: '1.2',
                       fontFamily: 'Times New Roman, serif'
                     }}
-                    dangerouslySetInnerHTML={{ __html: pageContent }}
-                  />
+                  >
+                    <DocxRenderer 
+                      elements={pageElements} 
+                      viewMode={viewMode}
+                    />
+                  </div>
                 ));
               })()
             ) : (

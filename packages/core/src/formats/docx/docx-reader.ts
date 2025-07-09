@@ -168,8 +168,14 @@ export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagrap
             // Add tab character
             runText += "\t";
           } else if (fullMatch.includes('<w:br')) {
-            // Add line break
-            runText += "\n";
+            // Check if it's a page break
+            if (fullMatch.includes('w:type="page"')) {
+              // This is a page break - add a special marker
+              runText += "\u000C"; // Form feed character (page break)
+            } else {
+              // Regular line break
+              runText += "\n";
+            }
           }
         }
 

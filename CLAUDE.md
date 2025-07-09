@@ -1,5 +1,21 @@
 # Project Guidelines for Claude
 
+## View Modes
+
+### Read Mode
+- Converts documents to Markdown format
+- Renders using `marked` library for simplified, continuous reading experience
+- No pagination - content flows naturally
+- Optimized for reading comprehension and accessibility
+- Should always use markdown conversion regardless of document type
+
+### View Mode (Print Preview)
+- Shows paginated view with visual fidelity
+- Maintains original document formatting and styling
+- Splits content into pages that match print output
+- Shows page indicators and allows page-by-page navigation
+- Uses DOM rendering for DOCX files to preserve formatting
+
 ## Test Coverage Policy
 
 **IMPORTANT: Never disable coverage testing or threshold checking.**

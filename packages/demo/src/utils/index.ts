@@ -110,6 +110,7 @@ export const splitIntoPages = (html: string): string[] => {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
   
+  
   const pages: string[] = [];
   let currentPageElements: Element[] = [];
   let currentPageHeight = 0;

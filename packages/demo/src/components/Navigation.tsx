@@ -315,7 +315,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     handleDocumentLoad(value);
                   }
                 }}
-                className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-2 sm:px-3 py-1.5 sm:py-2 pr-8 sm:pr-10 bg-white shadow-sm font-medium w-[140px] sm:w-[220px] md:w-[320px] lg:w-[380px]"
+                className="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 px-2 sm:px-3 py-1.5 sm:py-2 pr-8 sm:pr-10 bg-white shadow-sm font-medium w-36 sm:w-64 md:w-80"
               >
               {uploadedFile && (
                 <option value="uploaded">{uploadedFile.name}</option>

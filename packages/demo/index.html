@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browser Document Viewer Demo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 
+    IMPORTANT: Tailwind CSS is now built into the app via PostCSS
+    DO NOT add the Tailwind CDN script tag as it causes inconsistent 
+    rendering between development and production environments
+  -->
 </head>
 <body>
   <div id="root"></div>
