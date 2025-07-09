@@ -44,6 +44,8 @@ const sampleDocuments = [
   { id: '009.docx', title: 'Vendor Evaluation Criteria' },
   { id: '010.docx', title: 'Change Management Process' },
   { id: '011.docx', title: 'Chicago Sample Paper' },
+  { id: '012.docx', title: 'XMLmind XSL-FO Converter' },
+  { id: '013.docx', title: 'NIST CFReDS Project' },
 ];
 
 // Parse URL hash for document and view mode (moved outside component)

@@ -2,6 +2,28 @@ import type { Paragraph, Heading, Table, Image } from '@browser-document-viewer/
 import { renderTextRun } from './text-renderer';
 import { twipsToPt, convertLineSpacing } from './units';
 
+// Safe base64 encoding to prevent stack overflow with large images
+function safeBase64Encode(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  const maxSize = 10 * 1024 * 1024; // 10MB limit
+  
+  if (bytes.length > maxSize) {
+    console.warn(`Image too large (${bytes.length} bytes), truncating to ${maxSize} bytes`);
+    return btoa(String.fromCharCode(...Array.from(bytes.slice(0, maxSize))));
+  }
+  
+  // Process in chunks to avoid stack overflow
+  const chunkSize = 65536; // 64KB chunks
+  let result = '';
+  
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.slice(i, i + chunkSize);
+    result += String.fromCharCode(...Array.from(chunk));
+  }
+  
+  return btoa(result);
+}
+
 export function renderParagraph(
   paragraph: Paragraph, 
   doc: Document, 
@@ -315,9 +337,16 @@ export function renderTable(
 export function renderImage(image: Image, doc: Document): HTMLElement {
   const img = doc.createElement('img');
   
-  // Convert ArrayBuffer to base64
-  const imgData = btoa(String.fromCharCode(...new Uint8Array(image.data)));
-  img.src = `data:${image.mimeType};base64,${imgData}`;
+  try {
+    // Convert ArrayBuffer to base64 safely
+    const imgData = safeBase64Encode(image.data);
+    img.src = `data:${image.mimeType};base64,${imgData}`;
+  } catch (error) {
+    console.error('Error encoding image data:', error);
+    // Create a placeholder for failed images
+    img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIgc3Ryb2tlPSIjZGRkIi8+PHRleHQgeD0iMTAwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4=';
+    img.alt = image.alt || 'Image failed to load';
+  }
   
   if (image.width) img.width = image.width;
   if (image.height) img.height = image.height;

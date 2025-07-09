@@ -188,7 +188,7 @@ describe("reader-enhanced", () => {
     test("should fail when document.xml is missing", async () => {
       const buffer = createMinimalDocx({ hasDocument: false });
       
-      await expect(Effect.runPromise(readEnhancedDocx(buffer))).rejects.toThrow("No word/document.xml found");
+      await expect(Effect.runPromise(readEnhancedDocx(buffer))).rejects.toThrow("No document.xml found");
     });
 
     test("should fail with corrupted ZIP", async () => {

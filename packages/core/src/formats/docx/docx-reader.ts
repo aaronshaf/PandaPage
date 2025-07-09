@@ -77,10 +77,14 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       const unzipped = unzipSync(uint8Array);
 
       // Get the main document content
-      const documentXml = unzipped["word/document.xml"];
+      // Try standard location first, then fallback to root level for non-standard files
+      let documentXml = unzipped["word/document.xml"];
+      if (!documentXml) {
+        documentXml = unzipped["document.xml"];
+      }
       if (!documentXml) {
         return yield* Effect.fail(
-          new DocxParseError("No word/document.xml found in DOCX file"),
+          new DocxParseError("No document.xml found in DOCX file"),
         );
       }
 
@@ -90,7 +94,10 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
 
       // Try to get numbering definitions
       let numbering: DocxNumbering | undefined;
-      const numberingXml = unzipped["word/numbering.xml"];
+      let numberingXml = unzipped["word/numbering.xml"];
+      if (!numberingXml) {
+        numberingXml = unzipped["numbering.xml"];
+      }
       if (numberingXml) {
         const numberingContent = strFromU8(numberingXml);
         numbering = yield* parseNumberingXmlWithDom(numberingContent);

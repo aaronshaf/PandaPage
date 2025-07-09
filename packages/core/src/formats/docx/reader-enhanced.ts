@@ -34,9 +34,13 @@ export const readEnhancedDocx = (buffer: ArrayBuffer): Effect.Effect<EnhancedDoc
       const unzipped = unzipSync(uint8Array);
       
       // Get the main document content
-      const documentXml = unzipped["word/document.xml"];
+      // Try standard location first, then fallback to root level for non-standard files
+      let documentXml = unzipped["word/document.xml"];
       if (!documentXml) {
-        throw new Error("No word/document.xml found in DOCX file");
+        documentXml = unzipped["document.xml"];
+      }
+      if (!documentXml) {
+        throw new Error("No document.xml found in DOCX file");
       }
       
       // Convert to string

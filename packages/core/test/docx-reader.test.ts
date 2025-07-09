@@ -57,7 +57,7 @@ describe("docx-reader", () => {
         expect(error._tag).toBe("Fail");
         const errorValue = error.error;
         expect(errorValue).toBeInstanceOf(DocxParseError);
-        expect(errorValue.message).toBe("No word/document.xml found in DOCX file");
+        expect(errorValue.message).toBe("No document.xml found in DOCX file");
       }
     });
   });
