@@ -39,14 +39,19 @@ export function addStyles(): void {
     }
     
     .footnote {
-      margin-top: 20pt;
+      margin-top: 6pt;
       padding: 0;
       background-color: transparent;
       border: none;
-      border-top: 1px solid #ccc;
-      padding-top: 8pt;
+      padding-top: 4pt;
       font-size: 10pt;
       line-height: 14pt;
+    }
+    
+    .footnote:first-of-type {
+      margin-top: 20pt;
+      border-top: 1px solid #ccc;
+      padding-top: 8pt;
     }
     
     .footnote-content {
