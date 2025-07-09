@@ -53,3 +53,21 @@ export function hasChildElementNS(
 ): boolean {
   return getElementsByTagNameNSFallback(element, namespace, localName).length > 0;
 }
+
+/**
+ * Parse CT_OnOff value from an element
+ * CT_OnOff elements can have w:val="true"/"false"/"1"/"0" or be self-closing (defaults to true)
+ */
+export function parseOnOffValue(
+  element: Element,
+  namespace: string,
+  localName: string
+): boolean {
+  const childElement = getElementByTagNameNSFallback(element, namespace, localName);
+  if (!childElement) return false;
+  
+  const val = childElement.getAttribute('w:val');
+  if (!val) return true; // Self-closing element defaults to true
+  
+  return val === 'true' || val === '1';
+}
