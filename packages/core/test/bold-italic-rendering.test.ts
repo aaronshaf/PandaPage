@@ -9,7 +9,7 @@ import { resolve } from 'path';
  * with the 001.docx document after the OR logic fix for b/bCs and i/iCs
  */
 describe('Bold and Italic Rendering Tests', () => {
-  const testDocPath = resolve(process.cwd(), '../../documents', '001.docx');
+  const testDocPath = resolve(__dirname, '../../..', 'documents', '001.docx');
 
   async function loadTestDocument() {
     const buffer = readFileSync(testDocPath);
