@@ -30,6 +30,7 @@ export interface DocxRun {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  hyperlink?: string;
 }
 
 export interface DocxDocument {

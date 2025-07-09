@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import type { DocxRun } from "./types";
 import { DocxParseError } from "./types";
+import { parseXmlString } from "../../common/xml-parser";
 
 /**
  * Hyperlink relationship data from document.xml.rels
@@ -13,36 +14,38 @@ export interface HyperlinkRelationship {
 }
 
 /**
- * Parse hyperlink relationships from document.xml.rels
+ * Parse hyperlink relationships from document.xml.rels using DOM parsing
  */
 export const parseHyperlinkRelationships = (
   relsXml: string
 ): Effect.Effect<Map<string, HyperlinkRelationship>, DocxParseError> =>
   Effect.gen(function* () {
-    debug.log("Parsing hyperlink relationships");
+    debug.log("Parsing hyperlink relationships with DOM parsing");
     
     const relationships = new Map<string, HyperlinkRelationship>();
     
-    // Parse all Relationship elements
-    const relMatches = relsXml.matchAll(
-      /<Relationship\s+([^>]*?)\/>/g
+    // Parse XML with DOM parser
+    const doc = yield* parseXmlString(relsXml).pipe(
+      Effect.mapError(error => new DocxParseError(`Failed to parse relationships XML: ${error.message}`))
     );
     
-    for (const match of relMatches) {
-      const attrs = match[1];
-      if (!attrs) continue;
+    // Get all Relationship elements
+    const relationshipElements = doc.getElementsByTagName('Relationship');
+    
+    for (const element of relationshipElements) {
+      const type = element.getAttribute('Type');
       
       // Check if it's a hyperlink relationship
-      if (attrs.includes('Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink"')) {
-        const idMatch = attrs.match(/Id="([^"]+)"/);
-        const targetMatch = attrs.match(/Target="([^"]+)"/);
-        const targetModeMatch = attrs.match(/TargetMode="([^"]+)"/);
+      if (type === 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink') {
+        const id = element.getAttribute('Id');
+        const target = element.getAttribute('Target');
+        const targetMode = element.getAttribute('TargetMode');
         
-        if (idMatch?.[1] && targetMatch?.[1]) {
-          relationships.set(idMatch[1], {
-            id: idMatch[1],
-            target: targetMatch[1],
-            targetMode: targetModeMatch?.[1]
+        if (id && target) {
+          relationships.set(id, {
+            id,
+            target,
+            ...(targetMode && { targetMode })
           });
         }
       }
@@ -53,60 +56,108 @@ export const parseHyperlinkRelationships = (
   });
 
 /**
- * Parse a hyperlink element and extract its runs
+ * Parse a hyperlink element and extract its runs using DOM parsing
  */
 export const parseHyperlink = (
-  hyperlinkElement: string,
+  hyperlinkXml: string,
   relationships: Map<string, HyperlinkRelationship>
-): { runs: DocxRun[], url?: string } => {
-  const runs: DocxRun[] = [];
-  let url: string | undefined;
-  
-  // Extract relationship ID
-  const rIdMatch = hyperlinkElement.match(/r:id="([^"]+)"/);
-  if (rIdMatch?.[1]) {
-    const relationship = relationships.get(rIdMatch[1]);
-    if (relationship) {
-      url = relationship.target;
-    }
-  }
-  
-  // Extract anchor (for internal links)
-  const anchorMatch = hyperlinkElement.match(/w:anchor="([^"]+)"/);
-  if (anchorMatch && !url) {
-    url = `#${anchorMatch[1]}`;
-  }
-  
-  // Parse all runs within the hyperlink
-  const runRegex = /<w:r[^>]*>([\s\S]*?)<\/w:r>/g;
-  let runMatch;
-  
-  while ((runMatch = runRegex.exec(hyperlinkElement)) !== null) {
-    const runContent = runMatch[1];
-    if (!runContent) continue;
+): Effect.Effect<{ runs: DocxRun[], url?: string }, DocxParseError> =>
+  Effect.gen(function* () {
+    const runs: DocxRun[] = [];
+    let url: string | undefined;
     
-    // Extract text from the run
-    const textMatch = runContent.match(/<w:t[^>]*>([^<]*)<\/w:t>/);
-    if (textMatch && textMatch[1]) {
-      const text = textMatch[1];
-      
-      // Check for formatting
-      const bold = /<w:b\s*\/>/.test(runContent) || /<w:b\s+w:val="1"/.test(runContent);
-      const italic = /<w:i\s*\/>/.test(runContent) || /<w:i\s+w:val="1"/.test(runContent);
-      const underline = /<w:u\s+/.test(runContent);
-      
-      runs.push({
-        text,
-        ...(bold && { bold }),
-        ...(italic && { italic }),
-        ...(underline && { underline }),
-        ...(url && { hyperlink: url })
-      });
+    // Add namespace declarations if missing
+    let xmlContent = hyperlinkXml;
+    if (!xmlContent.includes('xmlns:w=')) {
+      xmlContent = xmlContent.replace(
+        /<w:hyperlink([^>]*)>/,
+        '<w:hyperlink$1 xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      );
     }
-  }
-  
-  return { runs, url };
-};
+    
+    // Parse XML with DOM parser
+    const doc = yield* parseXmlString(xmlContent).pipe(
+      Effect.mapError(error => new DocxParseError(`Failed to parse hyperlink XML: ${error.message}`))
+    );
+    
+    // Get the hyperlink element
+    const wordNamespaceURI = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+    const relNamespaceURI = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    
+    let hyperlinkElement = doc.getElementsByTagNameNS(wordNamespaceURI, 'hyperlink')[0];
+    if (!hyperlinkElement) {
+      hyperlinkElement = doc.getElementsByTagName('w:hyperlink')[0];
+    }
+    
+    if (!hyperlinkElement) {
+      return { runs, url };
+    }
+    
+    // Extract relationship ID
+    const rId = hyperlinkElement.getAttributeNS(relNamespaceURI, 'id') || 
+                hyperlinkElement.getAttribute('r:id');
+    if (rId) {
+      const relationship = relationships.get(rId);
+      if (relationship) {
+        url = relationship.target;
+      }
+    }
+    
+    // Extract anchor (for internal links)
+    const anchor = hyperlinkElement.getAttributeNS(wordNamespaceURI, 'anchor') || 
+                   hyperlinkElement.getAttribute('w:anchor');
+    if (anchor && !url) {
+      url = `#${anchor}`;
+    }
+    
+    // Get all run elements within the hyperlink
+    let runElements = hyperlinkElement.getElementsByTagNameNS(wordNamespaceURI, 'r');
+    if (runElements.length === 0) {
+      runElements = hyperlinkElement.getElementsByTagName('w:r');
+    }
+    
+    // Process each run element
+    for (const runElement of runElements) {
+      // Get text elements
+      let textElements = runElement.getElementsByTagNameNS(wordNamespaceURI, 't');
+      if (textElements.length === 0) {
+        textElements = runElement.getElementsByTagName('w:t');
+      }
+      
+      if (textElements.length > 0) {
+        const text = Array.from(textElements).map(el => el.textContent || '').join('');
+        
+        if (text) {
+          // Check for formatting elements
+          const boldElements = runElement.getElementsByTagName('w:b');
+          const italicElements = runElement.getElementsByTagName('w:i');
+          const underlineElements = runElement.getElementsByTagName('w:u');
+          
+          const bold = boldElements.length > 0 && 
+                      (boldElements[0]?.getAttribute('w:val') !== '0' && 
+                       boldElements[0]?.getAttribute('w:val') !== 'false');
+          
+          const italic = italicElements.length > 0 && 
+                        (italicElements[0]?.getAttribute('w:val') !== '0' && 
+                         italicElements[0]?.getAttribute('w:val') !== 'false');
+          
+          const underline = underlineElements.length > 0 && 
+                           (underlineElements[0]?.getAttribute('w:val') !== 'none' && 
+                            underlineElements[0]?.getAttribute('w:val') !== '0');
+          
+          runs.push({
+            text,
+            ...(bold && { bold }),
+            ...(italic && { italic }),
+            ...(underline && { underline }),
+            ...(url && { hyperlink: url })
+          });
+        }
+      }
+    }
+    
+    return { runs, url };
+  });
 
 /**
  * Convert hyperlink runs to markdown link format
