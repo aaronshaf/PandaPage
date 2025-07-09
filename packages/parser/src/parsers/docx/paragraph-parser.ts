@@ -5,6 +5,7 @@ import { parseFieldRun } from './field-parser';
 import { parseDrawing } from './image-parser';
 import type { Image } from '../../types/document';
 import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChildElementNS } from './xml-utils';
+import { applyStyleCascade, type DocxStylesheet } from './style-parser';
 
 /**
  * Parse a paragraph element
@@ -12,13 +13,15 @@ import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChild
  * @param relationships - Map of relationship IDs to URLs (for hyperlinks)
  * @param imageRelationships - Map of image relationship IDs
  * @param zip - JSZip instance for image extraction
+ * @param stylesheet - Document stylesheet for style resolution
  * @returns Parsed paragraph or null
  */
 export function parseParagraph(
   paragraphElement: Element, 
   relationships?: Map<string, string>, 
   imageRelationships?: Map<string, any>, 
-  zip?: any
+  zip?: any,
+  stylesheet?: DocxStylesheet
 ): DocxParagraph | null {
   const runs: DocxRun[] = [];
   const images: Image[] = [];
@@ -91,10 +94,11 @@ export function parseParagraph(
           fieldInstruction = state.fieldInstruction;
           fieldRunProperties = state.fieldRunProperties;
           skipFieldValue = state.skipFieldValue;
-        }
+        },
+        stylesheet
       );
     } else if (localName === "hyperlink") {
-      parseHyperlink(element, ns, runs, relationships);
+      parseHyperlink(element, ns, runs, relationships, stylesheet);
     } else if (localName === "sdt") {
       parseStructuredDocumentTag(element, ns, runs, 
         { inField, fieldInstruction, fieldRunProperties, skipFieldValue },
@@ -103,13 +107,38 @@ export function parseParagraph(
           fieldInstruction = state.fieldInstruction;
           fieldRunProperties = state.fieldRunProperties;
           skipFieldValue = state.skipFieldValue;
-        }
+        },
+        stylesheet
       );
     }
   }
   
+  // Apply style cascade for paragraph-level properties
+  let resolvedAlignment = alignment;
+  if (stylesheet) {
+    const paragraphProps = pPrElement ? {
+      alignment,
+      outlineLevel
+    } : undefined;
+    
+    const { paragraph: resolvedParagraphProps } = applyStyleCascade(
+      style,
+      paragraphProps,
+      undefined,
+      stylesheet
+    );
+    
+    // Update paragraph properties with resolved values
+    if (resolvedParagraphProps.alignment) {
+      resolvedAlignment = resolvedParagraphProps.alignment;
+    }
+    if (resolvedParagraphProps.outlineLevel !== undefined) {
+      outlineLevel = resolvedParagraphProps.outlineLevel;
+    }
+  }
+  
   // Always return paragraph data, even if empty (for headers/footers with field codes)
-  return { runs, style, numId, ilvl, alignment, outlineLevel, ...(images.length > 0 && { images }) };
+  return { runs, style, numId, ilvl, alignment: resolvedAlignment, outlineLevel, ...(images.length > 0 && { images }) };
 }
 
 // Helper type for field parsing state
@@ -131,7 +160,8 @@ function parseRunElement(
   imageRelationships: Map<string, any> | undefined,
   zip: any,
   fieldState: FieldParsingState,
-  updateFieldState: (state: FieldParsingState) => void
+  updateFieldState: (state: FieldParsingState) => void,
+  stylesheet?: DocxStylesheet
 ): void {
   // Check for footnote references first
   const footnoteRefElements = getElementsByTagNameNSFallback(element, ns, "footnoteReference");
@@ -193,7 +223,7 @@ function parseRunElement(
       }
     } else if (!fieldState.inField && !fieldState.skipFieldValue) {
       // Direct run element (not part of a field)
-      const run = parseRun(element, ns);
+      const run = parseRun(element, ns, undefined, stylesheet);
       if (run && run.text) {
         runs.push(run);
       }
@@ -234,7 +264,8 @@ function parseHyperlink(
   element: Element,
   ns: string,
   runs: DocxRun[],
-  relationships?: Map<string, string>
+  relationships?: Map<string, string>,
+  stylesheet?: DocxStylesheet
 ): void {
   const rId = element.getAttribute("r:id");
   let linkUrl: string | undefined;
@@ -248,7 +279,7 @@ function parseHyperlink(
   for (let j = 0; j < hyperlinkRuns.length; j++) {
     const runElement = hyperlinkRuns[j];
     if (!runElement) continue;
-    const run = parseRun(runElement, ns, linkUrl);
+    const run = parseRun(runElement, ns, linkUrl, stylesheet);
     if (run && run.text) {
       runs.push(run);
     }
@@ -263,7 +294,8 @@ function parseStructuredDocumentTag(
   ns: string,
   runs: DocxRun[],
   fieldState: FieldParsingState,
-  updateFieldState: (state: FieldParsingState) => void
+  updateFieldState: (state: FieldParsingState) => void,
+  stylesheet?: DocxStylesheet
 ): void {
   const sdtContent = getElementByTagNameNSFallback(element, ns, "sdtContent");
   if (sdtContent) {
@@ -275,7 +307,7 @@ function parseStructuredDocumentTag(
         const sdtLocalName = sdtElement.localName || sdtElement.tagName.split(':').pop() || sdtElement.tagName;
         if (sdtLocalName === "r") {
           // Recursively parse run element inside SDT
-          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState);
+          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState, stylesheet);
         }
       }
     }
@@ -287,9 +319,10 @@ function parseStructuredDocumentTag(
  * @param runElement - The run element to parse
  * @param ns - The namespace string
  * @param linkUrl - Optional URL if this run is inside a hyperlink
+ * @param stylesheet - Document stylesheet for style resolution
  * @returns Parsed run or null
  */
-export function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | null {
+export function parseRun(runElement: Element, ns: string, linkUrl?: string, stylesheet?: DocxStylesheet): DocxRun | null {
   // Parse all text content including tabs
   let text = "";
   const textElements = getElementsByTagNameNSFallback(runElement, ns, "t");
@@ -384,6 +417,46 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string): Doc
     if (shadingFill && shadingFill !== "auto" && !backgroundColor) {
       backgroundColor = `#${shadingFill}`;
     }
+  }
+  
+  // Apply style cascade if stylesheet is available
+  if (stylesheet) {
+    const runProps = {
+      bold,
+      italic,
+      underline,
+      strikethrough,
+      superscript,
+      subscript,
+      fontSize,
+      fontFamily,
+      color,
+      backgroundColor
+    };
+    
+    // Apply style cascade (no paragraph style ID here, just run properties)
+    const { run: resolvedRunProps } = applyStyleCascade(
+      undefined, // No paragraph style ID at run level
+      undefined, // No paragraph properties at run level
+      runProps,
+      stylesheet
+    );
+    
+    // Update run properties with resolved values
+    return {
+      text,
+      bold: resolvedRunProps.bold ?? false,
+      italic: resolvedRunProps.italic ?? false,
+      underline: resolvedRunProps.underline ?? false,
+      strikethrough: resolvedRunProps.strikethrough ?? false,
+      superscript: resolvedRunProps.superscript ?? false,
+      subscript: resolvedRunProps.subscript ?? false,
+      fontSize: resolvedRunProps.fontSize,
+      fontFamily: resolvedRunProps.fontFamily,
+      color: resolvedRunProps.color,
+      backgroundColor: resolvedRunProps.backgroundColor,
+      link: linkUrl
+    };
   }
   
   return {

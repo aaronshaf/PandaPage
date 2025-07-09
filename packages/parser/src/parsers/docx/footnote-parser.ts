@@ -9,9 +9,10 @@ import { WORD_NAMESPACE } from './types';
  * Parse footnotes from footnotes.xml
  * @param xml - Footnotes XML string
  * @param relationships - Map of relationship IDs to URLs
+ * @param stylesheet - Document stylesheet for style resolution
  * @returns Array of parsed footnotes
  */
-export function parseFootnotes(xml: string, relationships?: Map<string, string>): Footnote[] {
+export function parseFootnotes(xml: string, relationships?: Map<string, string>, stylesheet?: any): Footnote[] {
   let doc: Document;
   if (typeof DOMParser === 'undefined') {
     // @ts-ignore
@@ -21,6 +22,13 @@ export function parseFootnotes(xml: string, relationships?: Map<string, string>)
   } else {
     const parser = new DOMParser();
     doc = parser.parseFromString(xml, "text/xml");
+  }
+  
+  // Check for parsing errors
+  const parserError = doc.getElementsByTagName('parsererror');
+  if (parserError.length > 0) {
+    console.error('XML parsing error in footnotes:', parserError[0]?.textContent);
+    return [];
   }
   
   const footnotes: Footnote[] = [];
@@ -52,7 +60,7 @@ export function parseFootnotes(xml: string, relationships?: Map<string, string>)
         const tagName = element.tagName;
         
         if (tagName === "w:p") {
-          const paragraph = parseParagraph(element, relationships);
+          const paragraph = parseParagraph(element, relationships, undefined, undefined, stylesheet);
           if (paragraph) {
             const docElement = convertToDocumentElement(paragraph);
             if (docElement.type === 'paragraph' || docElement.type === 'heading') {

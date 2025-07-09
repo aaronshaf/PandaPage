@@ -14,6 +14,7 @@ import { parseFootnotes } from './footnote-parser';
 import { parseBookmarks } from './bookmark-parser';
 import { convertToDocumentElement } from './element-converter';
 import { extractImageData, createImageElement } from './image-parser';
+import { parseStylesheet, type DocxStylesheet } from './style-parser';
 
 /**
  * Parse a DOCX file
@@ -162,6 +163,20 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
     
+    // Parse styles
+    let stylesheet: DocxStylesheet | undefined;
+    const stylesFile = zip.file("word/styles.xml");
+    if (stylesFile) {
+      const stylesXml = yield* Effect.tryPromise({
+        try: () => stylesFile.async("text"),
+        catch: () => ""
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+      
+      if (stylesXml) {
+        stylesheet = parseStylesheet(stylesXml);
+      }
+    }
+    
     // Parse footnotes
     const footnotes: Footnote[] = [];
     const footnotesFile = zip.file("word/footnotes.xml");
@@ -172,7 +187,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }).pipe(Effect.orElse(() => Effect.succeed("")));
       
       if (footnotesXml) {
-        const parsedFootnotes = parseFootnotes(footnotesXml, relationshipsMap);
+        const parsedFootnotes = parseFootnotes(footnotesXml, relationshipsMap, stylesheet);
         footnotes.push(...parsedFootnotes);
       }
     }
@@ -222,7 +237,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       
       if (localName === "p") {
         // Parse paragraph with relationships for hyperlink resolution
-        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip);
+        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip, stylesheet);
         if (paragraph) {
           const elementIndex = elements.length;
           // Pass paragraph index and outline level for better heading detection
