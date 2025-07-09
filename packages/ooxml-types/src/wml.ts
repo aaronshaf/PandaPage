@@ -353,9 +353,7 @@ export interface CT_HdrFtrRef extends CT_Rel {
  * Header/footer.
  * @see ECMA-376 Part 1, §17.10.5 CT_HdrFtr
  */
-export interface CT_HdrFtr {
-  // EG_BlockLevelElts: any[];
-}
+export type CT_HdrFtr = Record<string, never>
 
 // ========================================
 // Position Tab Types
@@ -449,9 +447,4 @@ export interface CT_Charset {
   characterSet?: ST_String;
 }
 
-/**
- * GUID string.
- * Pattern: \{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\}
- * @see ECMA-376 Part 1, §22.9.2.5 ST_Guid  
- */
-export type ST_Guid = string;
+// ST_Guid is imported from shared/common-types in basic-types module

@@ -18,11 +18,5 @@ export * from './relationship-types';
 // Document properties
 export * from './document-properties';
 
-// Re-export variant types (already split)
-export * from '../variant-types';
-
-// Re-export bibliography types (already split)
-export * from '../bibliography-types';
-
-// Re-export math types (already split)
-export * from '../math-types';
+// Note: variant-types, bibliography-types, and math-types are exported directly from main index.ts
+// to avoid conflicts with other modules that define similar types

@@ -113,8 +113,8 @@ function renderParagraph(paragraph: Paragraph, doc: Document): HTMLElement {
   if (paragraph.alignment) {
     switch (paragraph.alignment) {
       case 'center': element.classList.add('text-center'); break;
-      case 'right': element.classList.add('text-right'); break;
-      case 'justify': element.classList.add('text-justify'); break;
+      case 'end': element.classList.add('text-right'); break;
+      case 'both': element.classList.add('text-justify'); break;
     }
   }
   
@@ -156,7 +156,7 @@ function renderHeading(heading: Heading, doc: Document): HTMLElement {
   if (heading.alignment) {
     switch (heading.alignment) {
       case 'center': classes.push('text-center'); break;
-      case 'right': classes.push('text-right'); break;
+      case 'end': classes.push('text-right'); break;
     }
   }
   

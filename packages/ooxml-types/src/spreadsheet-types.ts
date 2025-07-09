@@ -429,5 +429,5 @@ export type ST_ConditionalFormattingOperator = string; // Comparison operators
 export type ST_TimePeriod = string; // Time period for conditional formatting
 
 // Placeholder interfaces for complex types
-export interface CT_Cell {} // Defined in cell-types
-export interface CT_CellFormula {} // Defined in cell-types
+export type CT_Cell = Record<string, never> // Defined in cell-types
+export type CT_CellFormula = Record<string, never> // Defined in cell-types

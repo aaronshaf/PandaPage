@@ -48,7 +48,7 @@ export enum ST_ArrayBaseType {
 export type ST_Cy = string; // pattern "\\s*[0-9]*\\.[0-9]{4}\\s*"
 export type ST_Error = string; // pattern "\\s*0x[0-9A-Za-z]{8}\\s*"
 
-export interface CT_Null {}
+export type CT_Null = Record<string, never>
 
 // Primitive types as elements
 export type VT_I1 = number; // xsd:byte

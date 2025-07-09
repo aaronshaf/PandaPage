@@ -215,7 +215,7 @@ export function eighthPointsToPoints(eighthPoints: number): number {
  */
 export function parsePercentage(percentage: string): number {
   const match = percentage.match(/^(-?\d+(?:\.\d+)?)%?$/);
-  return match ? parseFloat(match[1]) : 0;
+  return match ? parseFloat(match[1]!) : 0;
 }
 
 /**

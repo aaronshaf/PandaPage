@@ -1,9 +1,7 @@
 // dml-main.ts
 import type { ST_RelationshipId, ST_Guid, ST_String, ST_HexColorRGB, ST_UniversalMeasure, ST_PositiveUniversalMeasure, ST_Percentage, ST_FixedPercentage, ST_PositiveFixedPercentage } from './shared-types';
 
-// Forward declarations for types that might be referenced before they are fully defined
-export interface CT_OfficeArtExtensionList {}
-export interface CT_Color {}
+// Types are defined later in this file - removing forward declarations to avoid conflicts
 
 export interface CT_AudioFile {
   extLst?: CT_OfficeArtExtensionList;
@@ -215,11 +213,11 @@ export interface CT_PositiveSize2D {
   cy: ST_PositiveCoordinate;
 }
 
-export interface CT_ComplementTransform {}
-export interface CT_InverseTransform {}
-export interface CT_GrayscaleTransform {}
-export interface CT_GammaTransform {}
-export interface CT_InverseGammaTransform {}
+export type CT_ComplementTransform = Record<string, never>
+export type CT_InverseTransform = Record<string, never>
+export type CT_GrayscaleTransform = Record<string, never>
+export type CT_GammaTransform = Record<string, never>
+export type CT_InverseGammaTransform = Record<string, never>
 
 export type EG_ColorTransform = 
   | { tint: CT_PositiveFixedPercentage }
@@ -836,7 +834,7 @@ export interface CT_WholeE2oFormatting {
   effectProperties?: any; // Placeholder for EG_EffectProperties
 }
 
-export interface CT_GvmlUseShapeRectangle {}
+export type CT_GvmlUseShapeRectangle = Record<string, never>
 
 export interface CT_TextBody {
   // This type is referenced but not defined in dml-main.xsd, assuming it's a complex type for text body
@@ -1140,9 +1138,9 @@ export interface CT_AlphaBiLevelEffect {
   thresh: ST_PositiveFixedPercentage;
 }
 
-export interface CT_AlphaCeilingEffect {}
+export type CT_AlphaCeilingEffect = Record<string, never>
 
-export interface CT_AlphaFloorEffect {}
+export type CT_AlphaFloorEffect = Record<string, never>
 
 export interface CT_AlphaInverseEffect {
   colorChoice?: EG_ColorChoice;
@@ -1188,7 +1186,7 @@ export interface CT_GlowEffect {
   rad?: ST_PositiveCoordinate;
 }
 
-export interface CT_GrayscaleEffect {}
+export type CT_GrayscaleEffect = Record<string, never>
 
 export interface CT_HSLEffect {
   hue?: ST_PositiveFixedAngle;
@@ -1290,7 +1288,7 @@ export interface CT_TransformEffect {
   ty?: ST_Coordinate;
 }
 
-export interface CT_NoFillProperties {}
+export type CT_NoFillProperties = Record<string, never>
 
 export interface CT_SolidColorFillProperties {
   colorChoice?: EG_ColorChoice;
@@ -1460,7 +1458,7 @@ export interface CT_PatternFillProperties {
   prst?: ST_PresetPatternVal;
 }
 
-export interface CT_GroupFillProperties {}
+export type CT_GroupFillProperties = Record<string, never>
 
 export type EG_FillProperties = 
   | { noFill: CT_NoFillProperties }
@@ -1903,7 +1901,7 @@ export interface CT_Path2DCubicBezierTo {
   pt: CT_AdjPoint2D[];
 }
 
-export interface CT_Path2DClose {}
+export type CT_Path2DClose = Record<string, never>
 
 export interface CT_PresetGeometry2D {
   avLst?: CT_GeomGuideList;
@@ -2123,7 +2121,7 @@ export interface CT_Char {
   char: string;
 }
 
-export interface CT_Empty {}
+export type CT_Empty = Record<string, never>
 
 
 export interface CT_ColorMapping {
@@ -2358,9 +2356,9 @@ export interface CT_DashStop {
   sp: ST_PositiveFixedPercentage;
 }
 
-export interface CT_RoundLineCapProperties {}
+export type CT_RoundLineCapProperties = Record<string, never>
 
-export interface CT_BevelLineCapProperties {}
+export type CT_BevelLineCapProperties = Record<string, never>
 
 export interface CT_MiterLimitProperties {
   val?: ST_PositiveFixedPercentage;

@@ -3,20 +3,13 @@ import type { ST_String, ST_Lang, ST_PositiveUniversalMeasure, ST_Xstring } from
 import type { CT_ShapeProperties, CT_TextBody, CT_Color } from './dml-main';
 
 // Forward declarations for types that might be referenced before they are fully defined
-export interface CT_EmbeddedWAVAudioFile {}
-export interface CT_Connection {}
+export type CT_EmbeddedWAVAudioFile = Record<string, never>
+export type CT_Connection = Record<string, never>
 
-// Define missing types that were being imported from dml-main
-export interface CT_Layout {}
-export interface CT_Tx {}
-export interface CT_Marker {}
-export interface CT_DLbl {}
+// Define missing types that were being imported from dml-main  
+// Note: Some of these are later redefined with proper interfaces
 export interface CT_UnsignedInt { val: number; }
-export interface CT_ExtensionList {}
 export interface CT_Double { val: number; }
-export interface CT_NumFmt {}
-export interface CT_ChartLines {}
-export interface CT_PictureOptions {}
 
 export interface CT_Boolean {
   val?: boolean;

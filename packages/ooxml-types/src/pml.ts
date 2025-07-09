@@ -1,2 +1,2 @@
 // pml.ts
-export interface PML_Placeholder {}
+export type PML_Placeholder = Record<string, never>

@@ -168,9 +168,9 @@ export interface CT_TextScale {
  */
 
 /**
- * Universal measure (imported from basic-types).
+ * Universal measure (imported from shared).
  */
-export type { ST_UniversalMeasure } from './basic-types';
+export type { ST_UniversalMeasure } from '../shared/measurement-types';
 
 /**
  * Twips measure (imported from shared).

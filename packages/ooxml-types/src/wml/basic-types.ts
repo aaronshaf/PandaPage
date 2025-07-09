@@ -3,9 +3,8 @@
  * @see ECMA-376 Part 1, §17.18 (Simple Types)
  */
 
-import type { ST_OnOff, ST_String, ST_Lang } from '../shared/common-types';
-import type { ST_DecimalNumber, ST_UnsignedDecimalNumber } from '../shared/measurement-types';
-import type { ST_TwipsMeasure } from '../shared/measurement-types';
+import type { ST_OnOff, ST_String, ST_Lang, ST_Guid } from '../shared/common-types';
+import type { ST_DecimalNumber, ST_UnsignedDecimalNumber, ST_TwipsMeasure, ST_UniversalMeasure, ST_PositiveUniversalMeasure } from '../shared/measurement-types';
 
 /**
  * Empty element.
@@ -69,12 +68,7 @@ export interface CT_SignedTwipsMeasure {
  */
 export type ST_SignedTwipsMeasure = number | ST_UniversalMeasure;
 
-/**
- * Universal measure.
- * Pattern: -?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)
- * @see ECMA-376 Part 1, §22.9.2.15 ST_UniversalMeasure
- */
-export type ST_UniversalMeasure = string;
+// ST_UniversalMeasure imported from shared/measurement-types
 
 /**
  * Pixel measure.
@@ -98,11 +92,7 @@ export interface CT_HpsMeasure {
  */
 export type ST_HpsMeasure = ST_UnsignedDecimalNumber | ST_PositiveUniversalMeasure;
 
-/**
- * Positive universal measure.
- * @see ECMA-376 Part 1, §22.9.2.12 ST_PositiveUniversalMeasure
- */
-export type ST_PositiveUniversalMeasure = string;
+// ST_PositiveUniversalMeasure imported from shared/measurement-types
 
 /**
  * Signed half-point measurement.
@@ -146,12 +136,7 @@ export interface CT_Guid {
   val: ST_Guid;
 }
 
-/**
- * GUID string.
- * Pattern: \{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\}
- * @see ECMA-376 Part 1, §22.9.2.5 ST_Guid  
- */
-export type ST_Guid = string;
+// ST_Guid imported from shared/common-types
 
 /**
  * String value.

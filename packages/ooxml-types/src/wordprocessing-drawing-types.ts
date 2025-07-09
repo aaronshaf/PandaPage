@@ -38,7 +38,7 @@ export interface CT_WrapPath {
   edited?: boolean;
 }
 
-export interface CT_WrapNone {}
+export type CT_WrapNone = Record<string, never>
 
 export interface CT_WrapSquare {
   effectExtent?: CT_EffectExtent;
@@ -230,5 +230,5 @@ export interface CT_WordprocessingCanvas {
 
 
 // Missing types that are imported by wml.ts
-export interface CT_GvmlGroupShape {}
-export interface CT_GvmlGraphicalObjectFrame {}
+export type CT_GvmlGroupShape = Record<string, never>
+export type CT_GvmlGraphicalObjectFrame = Record<string, never>

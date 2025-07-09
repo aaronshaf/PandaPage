@@ -1,2 +1,2 @@
 // sml.ts
-export interface SML_Placeholder {}
+export type SML_Placeholder = Record<string, never>
