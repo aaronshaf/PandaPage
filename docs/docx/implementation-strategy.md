@@ -40,6 +40,7 @@ Add features that cover 80% of documents:
    - Handle document defaults
 
 2. **Font Substitution**
+   - For detailed browser-specific challenges and solutions related to font handling, refer to [Browser-Specific Challenges for DOCX Rendering - Font Handling](../browser-challenges.md#font-handling).
    ```typescript
    class FontSubstitution {
        constructor() {

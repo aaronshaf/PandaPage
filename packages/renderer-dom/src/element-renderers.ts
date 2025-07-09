@@ -89,7 +89,7 @@ export function renderParagraph(
   }
   
   // Add vertical alignment (for inline content)
-  if ('verticalAlignment' in paragraph && paragraph.verticalAlignment && paragraph.verticalAlignment !== 'auto') {
+  if ('verticalAlignment' in paragraph && paragraph.verticalAlignment && paragraph.verticalAlignment !== 'auto' && typeof paragraph.verticalAlignment === 'string') {
     p.style.verticalAlign = paragraph.verticalAlignment;
   }
   
@@ -209,7 +209,7 @@ export function renderHeading(
   }
   
   // Add vertical alignment (for inline content)
-  if ('verticalAlignment' in heading && heading.verticalAlignment && heading.verticalAlignment !== 'auto') {
+  if ('verticalAlignment' in heading && heading.verticalAlignment && heading.verticalAlignment !== 'auto' && typeof heading.verticalAlignment === 'string') {
     h.style.verticalAlign = heading.verticalAlignment;
   }
   

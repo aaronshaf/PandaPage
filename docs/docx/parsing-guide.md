@@ -66,7 +66,8 @@ function parseUniversalMeasure(value: string | number): number {
 
 ### Boolean Property Handling (ST_OnOff)
 
-OOXML uses flexible boolean properties:
+OOXML uses flexible boolean properties.
+For a comprehensive overview of common simple types, including `ST_OnOff`, refer to [Common Simple Types](../../ooxml/common-simple-types.md):
 
 ```typescript
 function parseOnOff(element: Element, attrName: string, defaultValue: boolean = false): boolean {
@@ -278,6 +279,7 @@ class DocxFieldParser implements FieldParser {
 ```
 
 ### 5. Table Layout
+For detailed browser-specific challenges and solutions related to table rendering, refer to [Browser-Specific Challenges for DOCX Rendering - Table Rendering Challenges](../browser-challenges.md#table-rendering-challenges).
 
 ```typescript
 class TableLayoutEngine {
@@ -537,7 +539,7 @@ for (const file of edgeCases) {
 7. **Field Updates**: Cached field values may be outdated
 8. **Character Encoding**: Ensure proper UTF-8 handling
 
-## Next Steps
+## Implementation Checklist
 
 1. Start with basic text extraction
 2. Add style support incrementally
