@@ -435,11 +435,15 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
   let lang: string | undefined;
   
   if (runProps) {
-    // Bold
-    bold = hasChildElementNS(runProps, ns, "b");
+    // Bold - check both b and bCs with XOR logic
+    const hasB = hasChildElementNS(runProps, ns, "b");
+    const hasBCs = hasChildElementNS(runProps, ns, "bCs");
+    bold = hasB !== hasBCs; // XOR logic: bold is true if only one is present
     
-    // Italic
-    italic = hasChildElementNS(runProps, ns, "i");
+    // Italic - check both i and iCs with XOR logic
+    const hasI = hasChildElementNS(runProps, ns, "i");
+    const hasICs = hasChildElementNS(runProps, ns, "iCs");
+    italic = hasI !== hasICs; // XOR logic: italic is true if only one is present
     
     // Underline
     underline = hasChildElementNS(runProps, ns, "u");
@@ -476,7 +480,7 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     // Color
     const colorElement = getElementByTagNameNSFallback(runProps, ns, "color");
     const colorVal = colorElement?.getAttribute("w:val");
-    if (colorVal) {
+    if (colorVal && colorElement) {
       // Check if it's a theme color reference
       const themeColor = colorElement.getAttribute("w:themeColor");
       if (themeColor && theme) {

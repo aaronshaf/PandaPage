@@ -208,10 +208,12 @@ export function resolveThemeFont(fontRef: string, theme: DocxTheme): string | un
   if (parts.length !== 2) return undefined;
   
   const [type, script] = parts;
+  if (!script) return undefined;
+  
   if (type === 'mj') {
-    return theme.fonts.major.get(script === 'lt' ? 'latin' : script);
+    return theme.fonts.major.get(script === 'lt' ? 'latin' : script) || undefined;
   } else if (type === 'mn') {
-    return theme.fonts.minor.get(script === 'lt' ? 'latin' : script);
+    return theme.fonts.minor.get(script === 'lt' ? 'latin' : script) || undefined;
   }
   
   return undefined;
