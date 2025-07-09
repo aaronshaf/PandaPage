@@ -2,7 +2,7 @@ name: Deploy Demo to GitHub Pages
 
 on:
   workflow_run:
-    workflows: ["CI", "Tests"]
+    workflows: ["CI (Parallel)"]
     types: [completed]
     branches: [ main ]
 
