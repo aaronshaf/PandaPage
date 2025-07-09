@@ -4,9 +4,22 @@ import { renderTextRun } from './text-renderer';
 
 export function renderHeader(header: any, doc: Document, currentPageNumber: number, totalPages: number): HTMLElement {
   const headerEl = doc.createElement('header');
-  headerEl.style.marginBottom = '12pt';
-  headerEl.style.paddingBottom = '8pt';
-  headerEl.style.borderBottom = '1px solid #d1d5db';
+  
+  // Check if header has any actual content
+  const hasContent = header.elements && header.elements.length > 0 && 
+    header.elements.some((el: any) => {
+      if (el.type === 'paragraph') {
+        return el.runs && el.runs.length > 0 && el.runs.some((run: any) => run.text && run.text.trim().length > 0);
+      }
+      return true; // Tables or other elements count as content
+    });
+  
+  // Only add spacing and border if there's actual content
+  if (hasContent) {
+    headerEl.style.marginBottom = '12pt';
+    headerEl.style.paddingBottom = '8pt';
+    headerEl.style.borderBottom = '1px solid #d1d5db';
+  }
   
   header.elements.forEach((el: any) => {
     if (el.type === 'paragraph') {
@@ -61,9 +74,22 @@ export function renderFooter(footer: any, doc: Document, currentPageNumber: numb
 export function renderFooterWithPageNumber(footer: Footer, pageNumber: number, totalPages: number, doc: Document): HTMLElement {
   const footerEl = doc.createElement('footer');
   footerEl.className = 'footer'; // Keep footer class for positioning
-  footerEl.style.marginTop = '12pt';
-  footerEl.style.paddingTop = '8pt';
-  footerEl.style.borderTop = '1px solid #d1d5db';
+  
+  // Check if footer has any actual content
+  const hasContent = footer.elements && footer.elements.length > 0 && 
+    footer.elements.some(el => {
+      if (el.type === 'paragraph') {
+        return el.runs && el.runs.length > 0 && el.runs.some(run => run.text && run.text.trim().length > 0);
+      }
+      return true; // Tables or other elements count as content
+    });
+  
+  // Only add spacing and border if there's actual content
+  if (hasContent) {
+    footerEl.style.marginTop = '12pt';
+    footerEl.style.paddingTop = '8pt';
+    footerEl.style.borderTop = '1px solid #d1d5db';
+  }
   
   footer.elements.forEach((el: any) => {
     if (el.type === 'paragraph') {
