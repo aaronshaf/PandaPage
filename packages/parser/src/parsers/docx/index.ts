@@ -81,10 +81,10 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     
     // Parse relationships for headers, footers, and hyperlinks
     const relsFile = zip.file("word/_rels/document.xml.rels");
-    let headerMap = new Map<string, Header>(); // Map rId to header
-    let footerMap = new Map<string, Footer>(); // Map rId to footer
     let relationshipsMap = new Map<string, string>();
     let imageRelationships = new Map<string, { id: string; target: string; type: string }>();
+    const headerFiles = new Map<string, string>(); // Map rId to header file path
+    const footerFiles = new Map<string, string>(); // Map rId to footer file path
     
     if (relsFile) {
       const relsXml = yield* Effect.tryPromise({
@@ -127,37 +127,11 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
             }
             
             if (type.includes("header")) {
-              // Parse header
-              const headerFile = zip.file(`word/${target}`);
-              if (headerFile) {
-                const headerXml = yield* Effect.tryPromise({
-                  try: () => headerFile.async("text"),
-                  catch: () => ""
-                }).pipe(Effect.orElse(() => Effect.succeed("")));
-                
-                if (headerXml) {
-                  const header = parseHeaderFooter(headerXml, 'header', relationshipsMap, stylesheet, theme);
-                  if (header && header.type === 'header') {
-                    headerMap.set(id, header);
-                  }
-                }
-              }
+              // Store header file path for later parsing
+              headerFiles.set(id, target);
             } else if (type.includes("footer")) {
-              // Parse footer
-              const footerFile = zip.file(`word/${target}`);
-              if (footerFile) {
-                const footerXml = yield* Effect.tryPromise({
-                  try: () => footerFile.async("text"),
-                  catch: () => ""
-                }).pipe(Effect.orElse(() => Effect.succeed("")));
-                
-                if (footerXml) {
-                  const footer = parseHeaderFooter(footerXml, 'footer', relationshipsMap, stylesheet, theme);
-                  if (footer && footer.type === 'footer') {
-                    footerMap.set(id, footer);
-                  }
-                }
-              }
+              // Store footer file path for later parsing
+              footerFiles.set(id, target);
             }
           }
         }
@@ -191,6 +165,44 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         theme = yield* parseTheme(themeXml).pipe(
           Effect.orElse(() => Effect.succeed(undefined))
         );
+      }
+    }
+    
+    // Now parse headers with styles and theme available
+    const headerMap = new Map<string, Header>();
+    for (const [id, target] of headerFiles) {
+      const headerFile = zip.file(`word/${target}`);
+      if (headerFile) {
+        const headerXml = yield* Effect.tryPromise({
+          try: () => headerFile.async("text"),
+          catch: () => ""
+        }).pipe(Effect.orElse(() => Effect.succeed("")));
+        
+        if (headerXml) {
+          const header = parseHeaderFooter(headerXml, 'header', relationshipsMap, stylesheet, theme);
+          if (header && header.type === 'header') {
+            headerMap.set(id, header);
+          }
+        }
+      }
+    }
+    
+    // Now parse footers with styles and theme available
+    const footerMap = new Map<string, Footer>();
+    for (const [id, target] of footerFiles) {
+      const footerFile = zip.file(`word/${target}`);
+      if (footerFile) {
+        const footerXml = yield* Effect.tryPromise({
+          try: () => footerFile.async("text"),
+          catch: () => ""
+        }).pipe(Effect.orElse(() => Effect.succeed("")));
+        
+        if (footerXml) {
+          const footer = parseHeaderFooter(footerXml, 'footer', relationshipsMap, stylesheet, theme);
+          if (footer && footer.type === 'footer') {
+            footerMap.set(id, footer);
+          }
+        }
       }
     }
     
