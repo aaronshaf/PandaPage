@@ -4,15 +4,18 @@ import { parseParagraph } from './paragraph-parser';
 import { parseTable } from './table-parser';
 import { convertToDocumentElement } from './element-converter';
 import { WORD_NAMESPACE } from './types';
+import type { DocxStylesheet } from './style-parser';
+import type { DocxTheme } from './theme-parser';
 
 /**
  * Parse footnotes from footnotes.xml
  * @param xml - Footnotes XML string
  * @param relationships - Map of relationship IDs to URLs
  * @param stylesheet - Document stylesheet for style resolution
+ * @param theme - Document theme for color and font resolution
  * @returns Array of parsed footnotes
  */
-export function parseFootnotes(xml: string, relationships?: Map<string, string>, stylesheet?: any): Footnote[] {
+export function parseFootnotes(xml: string, relationships?: Map<string, string>, stylesheet?: DocxStylesheet, theme?: DocxTheme): Footnote[] {
   let doc: Document;
   if (typeof DOMParser === 'undefined') {
     // @ts-ignore
@@ -60,7 +63,7 @@ export function parseFootnotes(xml: string, relationships?: Map<string, string>,
         const tagName = element.tagName;
         
         if (tagName === "w:p") {
-          const paragraph = parseParagraph(element, relationships, undefined, undefined, stylesheet);
+          const paragraph = parseParagraph(element, relationships, undefined, undefined, stylesheet, theme);
           if (paragraph) {
             const docElement = convertToDocumentElement(paragraph);
             if (docElement.type === 'paragraph' || docElement.type === 'heading') {
@@ -68,7 +71,7 @@ export function parseFootnotes(xml: string, relationships?: Map<string, string>,
             }
           }
         } else if (tagName === "w:tbl") {
-          const table = parseTable(element, relationships);
+          const table = parseTable(element, relationships, theme, stylesheet);
           if (table) {
             elements.push(table);
           }

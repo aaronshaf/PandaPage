@@ -15,6 +15,7 @@ import { parseBookmarks } from './bookmark-parser';
 import { convertToDocumentElement } from './element-converter';
 import { extractImageData, createImageElement } from './image-parser';
 import { parseStylesheet, type DocxStylesheet } from './style-parser';
+import { parseTheme, type DocxTheme } from './theme-parser';
 
 /**
  * Parse a DOCX file
@@ -135,7 +136,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
                 }).pipe(Effect.orElse(() => Effect.succeed("")));
                 
                 if (headerXml) {
-                  const header = parseHeaderFooter(headerXml, 'header', relationshipsMap);
+                  const header = parseHeaderFooter(headerXml, 'header', relationshipsMap, stylesheet, theme);
                   if (header && header.type === 'header') {
                     headerMap.set(id, header);
                   }
@@ -151,7 +152,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
                 }).pipe(Effect.orElse(() => Effect.succeed("")));
                 
                 if (footerXml) {
-                  const footer = parseHeaderFooter(footerXml, 'footer', relationshipsMap);
+                  const footer = parseHeaderFooter(footerXml, 'footer', relationshipsMap, stylesheet, theme);
                   if (footer && footer.type === 'footer') {
                     footerMap.set(id, footer);
                   }
@@ -177,6 +178,22 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
     
+    // Parse theme
+    let theme: DocxTheme | undefined;
+    const themeFile = zip.file("word/theme/theme1.xml");
+    if (themeFile) {
+      const themeXml = yield* Effect.tryPromise({
+        try: () => themeFile.async("text"),
+        catch: () => ""
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+      
+      if (themeXml) {
+        theme = yield* parseTheme(themeXml).pipe(
+          Effect.orElse(() => Effect.succeed(undefined))
+        );
+      }
+    }
+    
     // Parse footnotes
     const footnotes: Footnote[] = [];
     const footnotesFile = zip.file("word/footnotes.xml");
@@ -187,7 +204,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }).pipe(Effect.orElse(() => Effect.succeed("")));
       
       if (footnotesXml) {
-        const parsedFootnotes = parseFootnotes(footnotesXml, relationshipsMap, stylesheet);
+        const parsedFootnotes = parseFootnotes(footnotesXml, relationshipsMap, stylesheet, theme);
         footnotes.push(...parsedFootnotes);
       }
     }
@@ -237,7 +254,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       
       if (localName === "p") {
         // Parse paragraph with relationships for hyperlink resolution
-        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip, stylesheet);
+        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip, stylesheet, theme);
         if (paragraph) {
           const elementIndex = elements.length;
           // Pass paragraph index and outline level for better heading detection
@@ -251,7 +268,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         }
       } else if (localName === "tbl") {
         // Parse table with relationships for hyperlink resolution
-        const table = parseTable(element, relationshipsMap);
+        const table = parseTable(element, relationshipsMap, theme);
         if (table) {
           elements.push(table);
         }

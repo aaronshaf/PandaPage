@@ -2,14 +2,18 @@
 import type { Table, TableRow, TableCell, Paragraph } from '../../types/document';
 import { parseParagraph } from './paragraph-parser';
 import { WORD_NAMESPACE } from './types';
+import type { DocxTheme } from './theme-parser';
+import type { DocxStylesheet } from './style-parser';
 
 /**
  * Parse a table element
  * @param tableElement - The table element to parse
  * @param relationships - Map of relationship IDs to URLs
+ * @param theme - Document theme for color and font resolution
+ * @param stylesheet - Document stylesheet for style resolution
  * @returns Parsed table or null
  */
-export function parseTable(tableElement: Element, relationships?: Map<string, string>): Table | null {
+export function parseTable(tableElement: Element, relationships?: Map<string, string>, theme?: DocxTheme, stylesheet?: DocxStylesheet): Table | null {
   const ns = WORD_NAMESPACE;
   const rows: TableRow[] = [];
   
@@ -35,7 +39,7 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
       for (let k = 0; k < cellParagraphs.length; k++) {
         const pElement = cellParagraphs[k];
         if (!pElement) continue;
-        const paragraph = parseParagraph(pElement, relationships, undefined, undefined);
+        const paragraph = parseParagraph(pElement, relationships, undefined, undefined, stylesheet, theme);
         if (paragraph) {
           // Convert to Paragraph type (without list info for table cells)
           const cellParagraph: Paragraph = {

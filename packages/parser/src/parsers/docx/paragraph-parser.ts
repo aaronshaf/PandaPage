@@ -6,6 +6,8 @@ import { parseDrawing } from './image-parser';
 import type { Image } from '../../types/document';
 import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChildElementNS } from './xml-utils';
 import { applyStyleCascade, type DocxStylesheet } from './style-parser';
+import type { DocxTheme } from './theme-parser';
+import { resolveThemeColor, resolveThemeFont } from './theme-parser';
 
 /**
  * Parse a paragraph element
@@ -14,6 +16,7 @@ import { applyStyleCascade, type DocxStylesheet } from './style-parser';
  * @param imageRelationships - Map of image relationship IDs
  * @param zip - JSZip instance for image extraction
  * @param stylesheet - Document stylesheet for style resolution
+ * @param theme - Document theme for color and font resolution
  * @returns Parsed paragraph or null
  */
 export function parseParagraph(
@@ -21,7 +24,8 @@ export function parseParagraph(
   relationships?: Map<string, string>, 
   imageRelationships?: Map<string, any>, 
   zip?: any,
-  stylesheet?: DocxStylesheet
+  stylesheet?: DocxStylesheet,
+  theme?: DocxTheme
 ): DocxParagraph | null {
   const runs: DocxRun[] = [];
   const images: Image[] = [];
@@ -127,10 +131,11 @@ export function parseParagraph(
           fieldRunProperties = state.fieldRunProperties;
           skipFieldValue = state.skipFieldValue;
         },
-        stylesheet
+        stylesheet,
+        theme
       );
     } else if (localName === "hyperlink") {
-      parseHyperlink(element, ns, runs, relationships, stylesheet);
+      parseHyperlink(element, ns, runs, relationships, stylesheet, theme);
     } else if (localName === "sdt") {
       parseStructuredDocumentTag(element, ns, runs, 
         { inField, fieldInstruction, fieldRunProperties, skipFieldValue },
@@ -140,7 +145,8 @@ export function parseParagraph(
           fieldRunProperties = state.fieldRunProperties;
           skipFieldValue = state.skipFieldValue;
         },
-        stylesheet
+        stylesheet,
+        theme
       );
     }
   }
@@ -214,7 +220,8 @@ function parseRunElement(
   zip: any,
   fieldState: FieldParsingState,
   updateFieldState: (state: FieldParsingState) => void,
-  stylesheet?: DocxStylesheet
+  stylesheet?: DocxStylesheet,
+  theme?: DocxTheme
 ): void {
   // Check for footnote references first
   const footnoteRefElements = getElementsByTagNameNSFallback(element, ns, "footnoteReference");
@@ -276,7 +283,7 @@ function parseRunElement(
       }
     } else if (!fieldState.inField && !fieldState.skipFieldValue) {
       // Direct run element (not part of a field)
-      const run = parseRun(element, ns, undefined, stylesheet);
+      const run = parseRun(element, ns, undefined, stylesheet, theme);
       if (run && run.text) {
         runs.push(run);
       }
@@ -318,7 +325,8 @@ function parseHyperlink(
   ns: string,
   runs: DocxRun[],
   relationships?: Map<string, string>,
-  stylesheet?: DocxStylesheet
+  stylesheet?: DocxStylesheet,
+  theme?: DocxTheme
 ): void {
   const rId = element.getAttribute("r:id");
   let linkUrl: string | undefined;
@@ -332,7 +340,7 @@ function parseHyperlink(
   for (let j = 0; j < hyperlinkRuns.length; j++) {
     const runElement = hyperlinkRuns[j];
     if (!runElement) continue;
-    const run = parseRun(runElement, ns, linkUrl, stylesheet);
+    const run = parseRun(runElement, ns, linkUrl, stylesheet, theme);
     if (run && run.text) {
       runs.push(run);
     }
@@ -348,7 +356,8 @@ function parseStructuredDocumentTag(
   runs: DocxRun[],
   fieldState: FieldParsingState,
   updateFieldState: (state: FieldParsingState) => void,
-  stylesheet?: DocxStylesheet
+  stylesheet?: DocxStylesheet,
+  theme?: DocxTheme
 ): void {
   const sdtContent = getElementByTagNameNSFallback(element, ns, "sdtContent");
   if (sdtContent) {
@@ -360,7 +369,7 @@ function parseStructuredDocumentTag(
         const sdtLocalName = sdtElement.localName || sdtElement.tagName.split(':').pop() || sdtElement.tagName;
         if (sdtLocalName === "r") {
           // Recursively parse run element inside SDT
-          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState, stylesheet);
+          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState, stylesheet, theme);
         }
       }
     }
@@ -373,9 +382,10 @@ function parseStructuredDocumentTag(
  * @param ns - The namespace string
  * @param linkUrl - Optional URL if this run is inside a hyperlink
  * @param stylesheet - Document stylesheet for style resolution
+ * @param theme - Document theme for color and font resolution
  * @returns Parsed run or null
  */
-export function parseRun(runElement: Element, ns: string, linkUrl?: string, stylesheet?: DocxStylesheet): DocxRun | null {
+export function parseRun(runElement: Element, ns: string, linkUrl?: string, stylesheet?: DocxStylesheet, theme?: DocxTheme): DocxRun | null {
   // Parse all text content including tabs
   let text = "";
   const textElements = getElementsByTagNameNSFallback(runElement, ns, "t");
@@ -452,11 +462,30 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     
     // Font family
     const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
-    fontFamily = fontElement?.getAttribute("w:ascii") || undefined;
+    const fontAscii = fontElement?.getAttribute("w:ascii");
+    if (fontAscii) {
+      // Check if it's a theme font reference (starts with +)
+      if (fontAscii.startsWith('+') && theme) {
+        const resolvedFont = resolveThemeFont(fontAscii, theme);
+        fontFamily = resolvedFont || fontAscii;
+      } else {
+        fontFamily = fontAscii;
+      }
+    }
     
     // Color
     const colorElement = getElementByTagNameNSFallback(runProps, ns, "color");
-    color = colorElement?.getAttribute("w:val") || undefined;
+    const colorVal = colorElement?.getAttribute("w:val");
+    if (colorVal) {
+      // Check if it's a theme color reference
+      const themeColor = colorElement.getAttribute("w:themeColor");
+      if (themeColor && theme) {
+        const resolvedColor = resolveThemeColor(themeColor, theme);
+        color = resolvedColor || colorVal;
+      } else {
+        color = colorVal;
+      }
+    }
     
     // Background color (highlighting)
     const highlightElement = getElementByTagNameNSFallback(runProps, ns, "highlight");
