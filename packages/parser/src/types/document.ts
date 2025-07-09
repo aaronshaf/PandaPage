@@ -159,6 +159,185 @@ export interface Image {
   width?: number;
   height?: number;
   alt?: string;
+  // Advanced image properties
+  crop?: ImageCrop;
+  transform?: DrawingTransform;
+  effects?: ImageEffects;
+  border?: ImageBorder;
+}
+
+export interface ImageCrop {
+  top?: number; // Percentage (0-100)
+  bottom?: number; // Percentage (0-100)
+  left?: number; // Percentage (0-100)
+  right?: number; // Percentage (0-100)
+}
+
+export interface DrawingTransform {
+  rotation?: number; // Degrees
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
+  scaleX?: number; // Scale factor (1.0 = 100%)
+  scaleY?: number; // Scale factor (1.0 = 100%)
+  skewX?: number; // Degrees
+  skewY?: number; // Degrees
+}
+
+export interface ImageEffects {
+  brightness?: number; // -100 to 100
+  contrast?: number; // -100 to 100
+  saturation?: number; // 0 to 200
+  blur?: number; // Radius in pixels
+  shadow?: ShadowEffect;
+  reflection?: ReflectionEffect;
+  glow?: GlowEffect;
+  softEdges?: number; // Radius in pixels
+  preset3D?: string; // Preset 3D effect name
+}
+
+export interface ShadowEffect {
+  color?: string;
+  transparency?: number; // 0-100
+  size?: number; // Percentage
+  blur?: number; // Points
+  angle?: number; // Degrees
+  distance?: number; // Points
+}
+
+export interface ReflectionEffect {
+  transparency?: number; // 0-100
+  size?: number; // Percentage
+  distance?: number; // Points
+  blur?: number; // Points
+}
+
+export interface GlowEffect {
+  color?: string;
+  transparency?: number; // 0-100
+  radius?: number; // Points
+}
+
+export interface ImageBorder {
+  color?: string;
+  width?: number; // Points
+  style?: 'solid' | 'dashed' | 'dotted' | 'double';
+}
+
+export interface Shape {
+  type: 'shape';
+  shapeType: string; // e.g., 'rect', 'ellipse', 'triangle', 'arrow'
+  width?: number;
+  height?: number;
+  transform?: DrawingTransform;
+  fill?: ShapeFill;
+  outline?: ShapeOutline;
+  effects?: ImageEffects;
+  textBox?: TextBox;
+}
+
+export interface ShapeFill {
+  type: 'solid' | 'gradient' | 'pattern' | 'picture';
+  color?: string;
+  transparency?: number; // 0-100
+  gradient?: GradientFill;
+  picture?: {
+    data: ArrayBuffer;
+    mimeType: string;
+  };
+}
+
+export interface GradientFill {
+  type: 'linear' | 'radial' | 'rectangular' | 'path';
+  stops: GradientStop[];
+  angle?: number; // Degrees (for linear)
+}
+
+export interface GradientStop {
+  position: number; // 0-100
+  color: string;
+  transparency?: number; // 0-100
+}
+
+export interface ShapeOutline {
+  color?: string;
+  width?: number; // Points
+  style?: 'solid' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot';
+  transparency?: number; // 0-100
+}
+
+export interface TextBox {
+  paragraphs: Paragraph[];
+  verticalAlignment?: 'top' | 'middle' | 'bottom';
+  margins?: {
+    top?: number;
+    bottom?: number;
+    left?: number;
+    right?: number;
+  };
+  autoFit?: 'none' | 'shrinkText' | 'resizeShape';
+  wordWrap?: boolean;
+}
+
+export interface DrawingObject {
+  type: 'drawing';
+  drawingType: 'inline' | 'anchor';
+  content: Image | Shape | Chart | SmartArt | Group;
+  // Positioning for anchored drawings
+  position?: DrawingPosition;
+  wrapType?: 'none' | 'square' | 'tight' | 'through' | 'topAndBottom';
+  wrapSide?: 'both' | 'left' | 'right' | 'largest';
+  allowOverlap?: boolean;
+  behindText?: boolean;
+  locked?: boolean;
+  layoutInCell?: boolean; // For table cells
+  distanceFromText?: {
+    top?: number;
+    bottom?: number;
+    left?: number;
+    right?: number;
+  };
+}
+
+export interface DrawingPosition {
+  horizontal?: {
+    relativeTo: 'character' | 'column' | 'insideMargin' | 'leftMargin' | 'margin' | 'outsideMargin' | 'page' | 'rightMargin';
+    offset?: number; // EMUs
+    align?: 'left' | 'center' | 'right' | 'inside' | 'outside';
+  };
+  vertical?: {
+    relativeTo: 'line' | 'paragraph' | 'margin' | 'page' | 'topMargin' | 'bottomMargin' | 'insideMargin' | 'outsideMargin';
+    offset?: number; // EMUs
+    align?: 'top' | 'center' | 'bottom' | 'inside' | 'outside';
+  };
+}
+
+export interface Chart {
+  type: 'chart';
+  chartType: string; // e.g., 'bar', 'line', 'pie', 'scatter'
+  width?: number;
+  height?: number;
+  title?: string;
+  data?: any; // Chart data structure (simplified for now)
+}
+
+export interface SmartArt {
+  type: 'smartArt';
+  layout: string; // SmartArt layout type
+  width?: number;
+  height?: number;
+  nodes?: SmartArtNode[];
+}
+
+export interface SmartArtNode {
+  text: string;
+  level: number;
+  children?: SmartArtNode[];
+}
+
+export interface Group {
+  type: 'group';
+  children: (Image | Shape | Chart | SmartArt | Group)[];
+  transform?: DrawingTransform;
 }
 
 export interface PageBreak {
@@ -201,7 +380,7 @@ export interface Footnote {
   elements: (Paragraph | Table)[];
 }
 
-export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer | Bookmark | FootnoteReference | Footnote;
+export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer | Bookmark | FootnoteReference | Footnote | DrawingObject | Shape | Chart | SmartArt | Group;
 
 export interface ParsedDocument {
   metadata: DocumentMetadata;
