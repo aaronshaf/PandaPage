@@ -203,10 +203,11 @@ function detectHeading(
   // Text characteristics
   const isShort = text.length <= 100; // Headings are usually short
   const isAllCaps = text === text.toUpperCase() && /[A-Z]/.test(text);
-  const isTitleCase = /^[A-Z]/.test(text) && !/[.!?]$/.test(text); // Starts with capital, no ending punctuation
-  const hasNoEndPunctuation = !/[.!?]$/.test(text);
+  const isTitleCase = /^[A-Z]/.test(text) && !/[.!?:]$/.test(text); // Starts with capital, no ending punctuation (including colon)
+  const hasNoEndPunctuation = !/[.!?:]$/.test(text); // Include colon as ending punctuation
   const wordCount = text.split(/\s+/).length;
   const isReasonableLength = wordCount >= 1 && wordCount <= 15; // 1-15 words
+  const endsWithColon = text.endsWith(':'); // Text ending with colon is usually introducing content
   
   // Position-based scoring
   const isEarlyInDocument = typeof paragraphIndex === 'number' && paragraphIndex < 20;
@@ -234,6 +235,7 @@ function detectHeading(
   if (hasLargeFont) score += 2;
   if (isCenter) score += 2;
   if (looksLikeTitle) score += 3;
+  if (endsWithColon) score -= 3; // Text ending with colon is usually introducing content, not a heading
   
   // Specific detection for known patterns
   const titlePatterns = [
