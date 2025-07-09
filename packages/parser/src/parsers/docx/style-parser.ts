@@ -42,6 +42,21 @@ export interface DocxRunProperties {
   fontFamily?: string;
   color?: string;
   backgroundColor?: string;
+  // Advanced text formatting
+  characterSpacing?: number; // Twips (w:spacing)
+  position?: number; // Twips (w:position)
+  emboss?: boolean;
+  imprint?: boolean;
+  outline?: boolean;
+  shadow?: boolean;
+  smallCaps?: boolean;
+  caps?: boolean;
+  hidden?: boolean;
+  doubleStrikethrough?: boolean;
+  kerning?: number; // Minimum font size for kerning (half-points)
+  textScale?: number; // Horizontal scaling percentage
+  emphasis?: 'dot' | 'comma' | 'circle' | 'underDot';
+  lang?: string;
 }
 
 export interface DocxStylesheet {
@@ -298,6 +313,75 @@ function parseRunProperties(rPr: Element, ns: string): DocxRunProperties {
       props.backgroundColor = highlightMap[highlightColor] || `#${highlightColor}`;
     }
   }
+  
+  // Advanced formatting properties
+  
+  // Double strikethrough
+  const dstrike = getElementByTagNameNSFallback(rPr, ns, 'dstrike');
+  if (dstrike) props.doubleStrikethrough = dstrike.getAttribute('w:val') !== '0';
+  
+  // Character spacing
+  const spacing = getElementByTagNameNSFallback(rPr, ns, 'spacing');
+  if (spacing) {
+    const val = spacing.getAttribute('w:val');
+    if (val) props.characterSpacing = parseInt(val, 10);
+  }
+  
+  // Position (vertical)
+  const position = getElementByTagNameNSFallback(rPr, ns, 'position');
+  if (position) {
+    const val = position.getAttribute('w:val');
+    if (val) props.position = parseInt(val, 10);
+  }
+  
+  // Text effects
+  const emboss = getElementByTagNameNSFallback(rPr, ns, 'emboss');
+  if (emboss) props.emboss = emboss.getAttribute('w:val') !== '0';
+  
+  const imprint = getElementByTagNameNSFallback(rPr, ns, 'imprint');
+  if (imprint) props.imprint = imprint.getAttribute('w:val') !== '0';
+  
+  const outline = getElementByTagNameNSFallback(rPr, ns, 'outline');
+  if (outline) props.outline = outline.getAttribute('w:val') !== '0';
+  
+  const shadow = getElementByTagNameNSFallback(rPr, ns, 'shadow');
+  if (shadow) props.shadow = shadow.getAttribute('w:val') !== '0';
+  
+  const smallCaps = getElementByTagNameNSFallback(rPr, ns, 'smallCaps');
+  if (smallCaps) props.smallCaps = smallCaps.getAttribute('w:val') !== '0';
+  
+  const caps = getElementByTagNameNSFallback(rPr, ns, 'caps');
+  if (caps) props.caps = caps.getAttribute('w:val') !== '0';
+  
+  const vanish = getElementByTagNameNSFallback(rPr, ns, 'vanish');
+  if (vanish) props.hidden = vanish.getAttribute('w:val') !== '0';
+  
+  // Kerning
+  const kern = getElementByTagNameNSFallback(rPr, ns, 'kern');
+  if (kern) {
+    const val = kern.getAttribute('w:val');
+    if (val) props.kerning = parseInt(val, 10);
+  }
+  
+  // Text scale
+  const w = getElementByTagNameNSFallback(rPr, ns, 'w');
+  if (w) {
+    const val = w.getAttribute('w:val');
+    if (val) props.textScale = parseInt(val, 10);
+  }
+  
+  // Emphasis mark
+  const em = getElementByTagNameNSFallback(rPr, ns, 'em');
+  if (em) {
+    const val = em.getAttribute('w:val');
+    if (val && ['dot', 'comma', 'circle', 'underDot'].includes(val)) {
+      props.emphasis = val as 'dot' | 'comma' | 'circle' | 'underDot';
+    }
+  }
+  
+  // Language
+  const lang = getElementByTagNameNSFallback(rPr, ns, 'lang');
+  if (lang) props.lang = lang.getAttribute('w:val') || undefined;
   
   return props;
 }

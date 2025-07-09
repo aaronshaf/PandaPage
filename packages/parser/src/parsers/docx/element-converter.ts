@@ -30,7 +30,22 @@ export function convertToDocumentElement(
     backgroundColor: run.backgroundColor,
     link: run.link,
     _footnoteRef: run._footnoteRef,
-    _fieldCode: run._fieldCode
+    _fieldCode: run._fieldCode,
+    // Advanced text formatting
+    characterSpacing: run.characterSpacing,
+    position: run.position,
+    emboss: run.emboss,
+    imprint: run.imprint,
+    outline: run.outline,
+    shadow: run.shadow,
+    smallCaps: run.smallCaps,
+    caps: run.caps,
+    hidden: run.hidden,
+    doubleStrikethrough: run.doubleStrikethrough,
+    kerning: run.kerning,
+    textScale: run.textScale,
+    emphasis: run.emphasis,
+    lang: run.lang
   }));
   
   // Check if it's a heading using multiple methods
@@ -41,7 +56,9 @@ export function convertToDocumentElement(
       type: 'heading',
       level: headingDetection.level,
       runs,
-      alignment: paragraph.alignment
+      alignment: paragraph.alignment,
+      spacing: paragraph.spacing,
+      indentation: paragraph.indentation
     };
     
     // Add images if present
@@ -58,7 +75,9 @@ export function convertToDocumentElement(
   const para: Paragraph = {
     type: 'paragraph',
     runs,
-    alignment: paragraph.alignment
+    alignment: paragraph.alignment,
+    spacing: paragraph.spacing,
+    indentation: paragraph.indentation
   };
   
   // Add list info if present

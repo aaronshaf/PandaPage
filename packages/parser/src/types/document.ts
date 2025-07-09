@@ -23,6 +23,21 @@ export interface TextRun {
   link?: string;
   _footnoteRef?: string;
   _fieldCode?: string;
+  // Advanced text formatting
+  characterSpacing?: number; // Twips
+  position?: number; // Twips
+  emboss?: boolean;
+  imprint?: boolean;
+  outline?: boolean;
+  shadow?: boolean;
+  smallCaps?: boolean;
+  caps?: boolean;
+  hidden?: boolean;
+  doubleStrikethrough?: boolean;
+  kerning?: number; // Half-points
+  textScale?: number; // Percentage
+  emphasis?: 'dot' | 'comma' | 'circle' | 'underDot';
+  lang?: string;
 }
 
 export interface Paragraph {
@@ -37,6 +52,18 @@ export interface Paragraph {
     text?: string;
   };
   images?: Image[];
+  spacing?: {
+    before?: number; // Twips
+    after?: number; // Twips
+    line?: number; // Twips
+    lineRule?: 'auto' | 'exact' | 'atLeast';
+  };
+  indentation?: {
+    left?: number; // Twips
+    right?: number; // Twips
+    firstLine?: number; // Twips
+    hanging?: number; // Twips
+  };
 }
 
 export interface Heading {
@@ -45,6 +72,18 @@ export interface Heading {
   runs: TextRun[];
   alignment?: 'left' | 'center' | 'right' | 'justify';
   images?: Image[];
+  spacing?: {
+    before?: number; // Twips
+    after?: number; // Twips
+    line?: number; // Twips
+    lineRule?: 'auto' | 'exact' | 'atLeast';
+  };
+  indentation?: {
+    left?: number; // Twips
+    right?: number; // Twips
+    firstLine?: number; // Twips
+    hanging?: number; // Twips
+  };
 }
 
 export interface Table {

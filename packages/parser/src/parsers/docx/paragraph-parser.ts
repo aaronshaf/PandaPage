@@ -34,6 +34,8 @@ export function parseParagraph(
   let ilvl: number | undefined;
   let alignment: 'left' | 'center' | 'right' | 'justify' | undefined;
   let outlineLevel: number | undefined;
+  let spacing: DocxParagraph['spacing'] | undefined;
+  let indentation: DocxParagraph['indentation'] | undefined;
   
   if (pPrElement) {
     const styleElement = getElementByTagNameNSFallback(pPrElement, ns, "pStyle");
@@ -66,6 +68,36 @@ export function parseParagraph(
       const ilvlElement = getElementByTagNameNSFallback(numPrElement, ns, "ilvl");
       const ilvlStr = ilvlElement?.getAttribute("w:val");
       ilvl = ilvlStr ? parseInt(ilvlStr, 10) : undefined;
+    }
+    
+    // Get spacing
+    const spacingElement = getElementByTagNameNSFallback(pPrElement, ns, "spacing");
+    if (spacingElement) {
+      spacing = {};
+      const before = spacingElement.getAttribute("w:before");
+      const after = spacingElement.getAttribute("w:after");
+      const line = spacingElement.getAttribute("w:line");
+      const lineRule = spacingElement.getAttribute("w:lineRule");
+      
+      if (before) spacing.before = parseInt(before, 10);
+      if (after) spacing.after = parseInt(after, 10);
+      if (line) spacing.line = parseInt(line, 10);
+      if (lineRule) spacing.lineRule = lineRule as 'auto' | 'exact' | 'atLeast';
+    }
+    
+    // Get indentation
+    const indElement = getElementByTagNameNSFallback(pPrElement, ns, "ind");
+    if (indElement) {
+      indentation = {};
+      const left = indElement.getAttribute("w:left");
+      const right = indElement.getAttribute("w:right");
+      const firstLine = indElement.getAttribute("w:firstLine");
+      const hanging = indElement.getAttribute("w:hanging");
+      
+      if (left) indentation.left = parseInt(left, 10);
+      if (right) indentation.right = parseInt(right, 10);
+      if (firstLine) indentation.firstLine = parseInt(firstLine, 10);
+      if (hanging) indentation.hanging = parseInt(hanging, 10);
     }
   }
   
@@ -115,10 +147,15 @@ export function parseParagraph(
   
   // Apply style cascade for paragraph-level properties
   let resolvedAlignment = alignment;
+  let resolvedSpacing = spacing;
+  let resolvedIndentation = indentation;
+  
   if (stylesheet) {
     const paragraphProps = pPrElement ? {
       alignment,
-      outlineLevel
+      outlineLevel,
+      spacing,
+      indent: indentation
     } : undefined;
     
     const { paragraph: resolvedParagraphProps } = applyStyleCascade(
@@ -135,10 +172,26 @@ export function parseParagraph(
     if (resolvedParagraphProps.outlineLevel !== undefined) {
       outlineLevel = resolvedParagraphProps.outlineLevel;
     }
+    if (resolvedParagraphProps.spacing) {
+      resolvedSpacing = resolvedParagraphProps.spacing;
+    }
+    if (resolvedParagraphProps.indent) {
+      resolvedIndentation = resolvedParagraphProps.indent;
+    }
   }
   
   // Always return paragraph data, even if empty (for headers/footers with field codes)
-  return { runs, style, numId, ilvl, alignment: resolvedAlignment, outlineLevel, ...(images.length > 0 && { images }) };
+  return { 
+    runs, 
+    style, 
+    numId, 
+    ilvl, 
+    alignment: resolvedAlignment, 
+    outlineLevel,
+    spacing: resolvedSpacing,
+    indentation: resolvedIndentation,
+    ...(images.length > 0 && { images }) 
+  };
 }
 
 // Helper type for field parsing state
@@ -355,6 +408,22 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
   let color: string | undefined;
   let backgroundColor: string | undefined;
   
+  // Advanced formatting properties
+  let characterSpacing: number | undefined;
+  let position: number | undefined;
+  let emboss = false;
+  let imprint = false;
+  let outline = false;
+  let shadow = false;
+  let smallCaps = false;
+  let caps = false;
+  let hidden = false;
+  let doubleStrikethrough = false;
+  let kerning: number | undefined;
+  let textScale: number | undefined;
+  let emphasis: 'dot' | 'comma' | 'circle' | 'underDot' | undefined;
+  let lang: string | undefined;
+  
   if (runProps) {
     // Bold
     bold = hasChildElementNS(runProps, ns, "b");
@@ -367,6 +436,9 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     
     // Strikethrough
     strikethrough = hasChildElementNS(runProps, ns, "strike");
+    
+    // Double strikethrough
+    doubleStrikethrough = hasChildElementNS(runProps, ns, "dstrike");
     
     // Superscript/subscript from vertAlign
     const vertAlignElement = getElementByTagNameNSFallback(runProps, ns, "vertAlign");
@@ -417,6 +489,56 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     if (shadingFill && shadingFill !== "auto" && !backgroundColor) {
       backgroundColor = `#${shadingFill}`;
     }
+    
+    // Advanced formatting properties
+    
+    // Character spacing (w:spacing in twips)
+    const spacingElement = getElementByTagNameNSFallback(runProps, ns, "spacing");
+    const spacingVal = spacingElement?.getAttribute("w:val");
+    if (spacingVal) {
+      characterSpacing = parseInt(spacingVal, 10);
+    }
+    
+    // Position (w:position in twips - vertical adjustment)
+    const positionElement = getElementByTagNameNSFallback(runProps, ns, "position");
+    const positionVal = positionElement?.getAttribute("w:val");
+    if (positionVal) {
+      position = parseInt(positionVal, 10);
+    }
+    
+    // Text effects
+    emboss = hasChildElementNS(runProps, ns, "emboss");
+    imprint = hasChildElementNS(runProps, ns, "imprint");
+    outline = hasChildElementNS(runProps, ns, "outline");
+    shadow = hasChildElementNS(runProps, ns, "shadow");
+    smallCaps = hasChildElementNS(runProps, ns, "smallCaps");
+    caps = hasChildElementNS(runProps, ns, "caps");
+    hidden = hasChildElementNS(runProps, ns, "vanish");
+    
+    // Kerning (minimum font size for kerning in half-points)
+    const kernElement = getElementByTagNameNSFallback(runProps, ns, "kern");
+    const kernVal = kernElement?.getAttribute("w:val");
+    if (kernVal) {
+      kerning = parseInt(kernVal, 10);
+    }
+    
+    // Text scale (horizontal scaling percentage)
+    const wElement = getElementByTagNameNSFallback(runProps, ns, "w");
+    const wVal = wElement?.getAttribute("w:val");
+    if (wVal) {
+      textScale = parseInt(wVal, 10);
+    }
+    
+    // Emphasis mark
+    const emElement = getElementByTagNameNSFallback(runProps, ns, "em");
+    const emVal = emElement?.getAttribute("w:val");
+    if (emVal && ['dot', 'comma', 'circle', 'underDot'].includes(emVal)) {
+      emphasis = emVal as 'dot' | 'comma' | 'circle' | 'underDot';
+    }
+    
+    // Language
+    const langElement = getElementByTagNameNSFallback(runProps, ns, "lang");
+    lang = langElement?.getAttribute("w:val") || undefined;
   }
   
   // Apply style cascade if stylesheet is available
@@ -431,7 +553,21 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
       fontSize,
       fontFamily,
       color,
-      backgroundColor
+      backgroundColor,
+      characterSpacing,
+      position,
+      emboss,
+      imprint,
+      outline,
+      shadow,
+      smallCaps,
+      caps,
+      hidden,
+      doubleStrikethrough,
+      kerning,
+      textScale,
+      emphasis,
+      lang
     };
     
     // Apply style cascade (no paragraph style ID here, just run properties)
@@ -455,7 +591,21 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
       fontFamily: resolvedRunProps.fontFamily,
       color: resolvedRunProps.color,
       backgroundColor: resolvedRunProps.backgroundColor,
-      link: linkUrl
+      link: linkUrl,
+      characterSpacing: resolvedRunProps.characterSpacing,
+      position: resolvedRunProps.position,
+      emboss: resolvedRunProps.emboss ?? false,
+      imprint: resolvedRunProps.imprint ?? false,
+      outline: resolvedRunProps.outline ?? false,
+      shadow: resolvedRunProps.shadow ?? false,
+      smallCaps: resolvedRunProps.smallCaps ?? false,
+      caps: resolvedRunProps.caps ?? false,
+      hidden: resolvedRunProps.hidden ?? false,
+      doubleStrikethrough: resolvedRunProps.doubleStrikethrough ?? false,
+      kerning: resolvedRunProps.kerning,
+      textScale: resolvedRunProps.textScale,
+      emphasis: resolvedRunProps.emphasis,
+      lang: resolvedRunProps.lang
     };
   }
   
@@ -471,6 +621,20 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     fontFamily,
     color,
     backgroundColor,
-    link: linkUrl
+    link: linkUrl,
+    characterSpacing,
+    position,
+    emboss,
+    imprint,
+    outline,
+    shadow,
+    smallCaps,
+    caps,
+    hidden,
+    doubleStrikethrough,
+    kerning,
+    textScale,
+    emphasis,
+    lang
   };
 }

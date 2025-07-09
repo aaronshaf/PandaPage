@@ -57,8 +57,18 @@ export function renderTextRun(
   // Apply formatting styles
   if (run.bold) element.style.fontWeight = 'bold';
   if (run.italic) element.style.fontStyle = 'italic';
-  if (run.underline) element.style.textDecoration = 'underline';
-  if (run.strikethrough) element.style.textDecoration = 'line-through';
+  
+  // Handle text decoration (underline, strikethrough, double strikethrough)
+  const textDecorations: string[] = [];
+  if (run.underline) textDecorations.push('underline');
+  if (run.strikethrough || run.doubleStrikethrough) textDecorations.push('line-through');
+  if (textDecorations.length > 0) {
+    element.style.textDecoration = textDecorations.join(' ');
+    // Double strikethrough using text-decoration-style
+    if (run.doubleStrikethrough) {
+      element.style.textDecorationStyle = 'double';
+    }
+  }
   
   // Apply inline styles
   const styles: string[] = [];
@@ -66,6 +76,66 @@ export function renderTextRun(
   if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
   if (run.color) styles.push(`color: ${run.color}`);
   if (run.backgroundColor) styles.push(`background-color: ${run.backgroundColor}`);
+  
+  // Advanced text formatting
+  if (run.characterSpacing !== undefined) {
+    // Convert twips to points for letter-spacing
+    const spacingPt = run.characterSpacing / 20;
+    styles.push(`letter-spacing: ${spacingPt}pt`);
+  }
+  
+  if (run.position !== undefined) {
+    // Convert twips to points for vertical position
+    const positionPt = run.position / 20;
+    // Negative values move text up, positive down
+    styles.push(`vertical-align: ${-positionPt}pt`);
+    styles.push('position: relative');
+  }
+  
+  // Text effects
+  const textShadows: string[] = [];
+  if (run.emboss) {
+    textShadows.push('1px 1px 0 rgba(255,255,255,0.8), -1px -1px 0 rgba(0,0,0,0.2)');
+  }
+  if (run.imprint) {
+    textShadows.push('-1px -1px 0 rgba(255,255,255,0.8), 1px 1px 0 rgba(0,0,0,0.2)');
+  }
+  if (run.outline) {
+    styles.push('-webkit-text-stroke: 1px currentColor');
+    styles.push('text-stroke: 1px currentColor');
+    styles.push('-webkit-text-fill-color: transparent');
+    styles.push('text-fill-color: transparent');
+  }
+  if (run.shadow) {
+    textShadows.push('2px 2px 2px rgba(0,0,0,0.3)');
+  }
+  if (textShadows.length > 0) {
+    styles.push(`text-shadow: ${textShadows.join(', ')}`);
+  }
+  
+  // Text transformations
+  if (run.caps) {
+    styles.push('text-transform: uppercase');
+  } else if (run.smallCaps) {
+    styles.push('font-variant: small-caps');
+  }
+  
+  // Hidden text
+  if (run.hidden) {
+    styles.push('visibility: hidden');
+  }
+  
+  // Text scale (horizontal stretching)
+  if (run.textScale !== undefined && run.textScale !== 100) {
+    const scaleX = run.textScale / 100;
+    styles.push(`transform: scaleX(${scaleX})`);
+    styles.push('display: inline-block'); // Required for transform
+  }
+  
+  // Language
+  if (run.lang) {
+    element.setAttribute('lang', run.lang);
+  }
   
   if (styles.length > 0) {
     element.style.cssText = styles.join('; ');

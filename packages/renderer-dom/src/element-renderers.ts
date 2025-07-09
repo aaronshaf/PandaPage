@@ -1,5 +1,6 @@
 import type { Paragraph, Heading, Table, Image } from '@browser-document-viewer/parser';
 import { renderTextRun } from './text-renderer';
+import { twipsToPt, convertLineSpacing } from './units';
 
 export function renderParagraph(
   paragraph: Paragraph, 
@@ -9,9 +10,38 @@ export function renderParagraph(
   context?: { inTableCell?: boolean }
 ): HTMLElement {
   const p = doc.createElement('p');
-  // Only add margin if not in a table cell
-  if (!context?.inTableCell) {
-    p.style.marginBottom = '12pt'; // Standard paragraph spacing
+  
+  // Apply spacing
+  if (paragraph.spacing) {
+    if (paragraph.spacing.before !== undefined) {
+      p.style.marginTop = twipsToPt(paragraph.spacing.before);
+    }
+    if (paragraph.spacing.after !== undefined) {
+      p.style.marginBottom = twipsToPt(paragraph.spacing.after);
+    }
+    if (paragraph.spacing.line !== undefined) {
+      p.style.lineHeight = convertLineSpacing(paragraph.spacing.line, paragraph.spacing.lineRule);
+    }
+  } else if (!context?.inTableCell) {
+    // Default spacing if not specified and not in table
+    p.style.marginBottom = '12pt';
+  }
+  
+  // Apply indentation
+  if (paragraph.indentation) {
+    if (paragraph.indentation.left !== undefined) {
+      p.style.marginLeft = twipsToPt(paragraph.indentation.left);
+    }
+    if (paragraph.indentation.right !== undefined) {
+      p.style.marginRight = twipsToPt(paragraph.indentation.right);
+    }
+    if (paragraph.indentation.firstLine !== undefined) {
+      p.style.textIndent = twipsToPt(paragraph.indentation.firstLine);
+    } else if (paragraph.indentation.hanging !== undefined) {
+      // Hanging indent: negative text-indent with positive padding-left
+      p.style.textIndent = `-${twipsToPt(paragraph.indentation.hanging)}`;
+      p.style.paddingLeft = twipsToPt(paragraph.indentation.hanging);
+    }
   }
   
   // Add alignment
@@ -43,8 +73,40 @@ export function renderHeading(
   totalPages: number
 ): HTMLElement {
   const h = doc.createElement(`h${heading.level}`);
-  h.style.marginBottom = '12pt'; // Standard heading spacing
   h.style.fontWeight = 'bold';
+  
+  // Apply spacing
+  if (heading.spacing) {
+    if (heading.spacing.before !== undefined) {
+      h.style.marginTop = twipsToPt(heading.spacing.before);
+    }
+    if (heading.spacing.after !== undefined) {
+      h.style.marginBottom = twipsToPt(heading.spacing.after);
+    }
+    if (heading.spacing.line !== undefined) {
+      h.style.lineHeight = convertLineSpacing(heading.spacing.line, heading.spacing.lineRule);
+    }
+  } else {
+    // Default heading spacing
+    h.style.marginBottom = '12pt';
+  }
+  
+  // Apply indentation
+  if (heading.indentation) {
+    if (heading.indentation.left !== undefined) {
+      h.style.marginLeft = twipsToPt(heading.indentation.left);
+    }
+    if (heading.indentation.right !== undefined) {
+      h.style.marginRight = twipsToPt(heading.indentation.right);
+    }
+    if (heading.indentation.firstLine !== undefined) {
+      h.style.textIndent = twipsToPt(heading.indentation.firstLine);
+    } else if (heading.indentation.hanging !== undefined) {
+      // Hanging indent: negative text-indent with positive padding-left
+      h.style.textIndent = `-${twipsToPt(heading.indentation.hanging)}`;
+      h.style.paddingLeft = twipsToPt(heading.indentation.hanging);
+    }
+  }
   
   // Add size styles based on level (using points for document consistency)
   const fontSizes = {
