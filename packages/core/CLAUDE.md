@@ -118,6 +118,8 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 - **Markdown files**: max 1000 lines
 - **Other text files**: max 300 lines
 
+**Try to keep files under 500 lines** - break into smaller, focused modules when approaching this limit.
+
 ### Best Practices for Large Files
 - Break files into smaller, focused modules with single responsibilities
 - Extract utility functions to separate files
@@ -131,6 +133,30 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 3. **Create types files** for interface definitions
 4. **Use index files** to maintain clean import paths
 5. **Maintain functionality** while improving structure
+
+## XML Parsing Guidelines
+
+**NEVER use regex-based XML parsing** - it's unreliable and causes parsing failures.
+
+### Correct XML Parsing Approach
+- Use `DOMParser` with proper namespace support
+- Use `getElementsByTagNameNS()` for namespaced elements
+- Handle XML namespaces properly (e.g., `w:`, `a:`, `pic:`)
+- Parse XML structure hierarchically, not with regex patterns
+
+### Example (BAD - Don't do this):
+```typescript
+// BAD: Regex-based parsing
+const paragraphRegex = /<w:p[^>]*>(.*?)<\/w:p>/gs;
+```
+
+### Example (GOOD - Do this):
+```typescript
+// GOOD: DOMParser with namespace support
+const parser = new DOMParser();
+const doc = parser.parseFromString(xmlContent, 'application/xml');
+const paragraphs = doc.getElementsByTagNameNS('http://schemas.openxmlformats.org/wordprocessingml/2006/main', 'p');
+```
 
 ## Project Context: Browser Document Viewer
 
