@@ -1,0 +1,395 @@
+// Paragraph and run parsing functions
+import type { DocxParagraph, DocxRun } from './types';
+import { WORD_NAMESPACE } from './types';
+import { parseFieldRun } from './field-parser';
+import { parseDrawing } from './image-parser';
+import type { Image } from '../../types/document';
+import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChildElementNS } from './xml-utils';
+
+/**
+ * Parse a paragraph element
+ * @param paragraphElement - The paragraph element to parse
+ * @param relationships - Map of relationship IDs to URLs (for hyperlinks)
+ * @param imageRelationships - Map of image relationship IDs
+ * @param zip - JSZip instance for image extraction
+ * @returns Parsed paragraph or null
+ */
+export function parseParagraph(
+  paragraphElement: Element, 
+  relationships?: Map<string, string>, 
+  imageRelationships?: Map<string, any>, 
+  zip?: any
+): DocxParagraph | null {
+  const runs: DocxRun[] = [];
+  const images: Image[] = [];
+  const ns = WORD_NAMESPACE;
+  
+  // Get paragraph style
+  const pPrElement = getElementByTagNameNSFallback(paragraphElement, ns, "pPr");
+  let style: string | undefined;
+  let numId: string | undefined;
+  let ilvl: number | undefined;
+  let alignment: 'left' | 'center' | 'right' | 'justify' | undefined;
+  
+  if (pPrElement) {
+    const styleElement = getElementByTagNameNSFallback(pPrElement, ns, "pStyle");
+    style = styleElement?.getAttribute("w:val") || undefined;
+    
+    // Get alignment
+    const jcElement = getElementByTagNameNSFallback(pPrElement, ns, "jc");
+    const jcVal = jcElement?.getAttribute("w:val");
+    if (jcVal) {
+      switch (jcVal) {
+        case 'center': alignment = 'center'; break;
+        case 'right': alignment = 'right'; break;
+        case 'both': case 'justify': alignment = 'justify'; break;
+        case 'left': default: alignment = 'left'; break;
+      }
+    }
+    
+    // Get numbering info
+    const numPrElement = getElementByTagNameNSFallback(pPrElement, ns, "numPr");
+    if (numPrElement) {
+      const numIdElement = getElementByTagNameNSFallback(numPrElement, ns, "numId");
+      numId = numIdElement?.getAttribute("w:val") || undefined;
+      const ilvlElement = getElementByTagNameNSFallback(numPrElement, ns, "ilvl");
+      const ilvlStr = ilvlElement?.getAttribute("w:val");
+      ilvl = ilvlStr ? parseInt(ilvlStr, 10) : undefined;
+    }
+  }
+  
+  // Parse runs - both direct runs and runs inside hyperlinks
+  const allChildren = Array.from(paragraphElement.childNodes);
+  
+  // Track field parsing state
+  let inField = false;
+  let fieldInstruction = "";
+  let fieldRunProperties: any = null;
+  let skipFieldValue = false; // Track when to skip the field value between separate and end
+  
+  for (let i = 0; i < allChildren.length; i++) {
+    const child = allChildren[i];
+    if (!child || child.nodeType !== 1) continue; // Skip non-element nodes
+    
+    const element = child as Element;
+    
+    const localName = element.localName || element.tagName.split(':').pop() || element.tagName;
+    
+    if (localName === "r") {
+      parseRunElement(element, ns, runs, images, imageRelationships, zip, 
+        { inField, fieldInstruction, fieldRunProperties, skipFieldValue },
+        (state) => {
+          inField = state.inField;
+          fieldInstruction = state.fieldInstruction;
+          fieldRunProperties = state.fieldRunProperties;
+          skipFieldValue = state.skipFieldValue;
+        }
+      );
+    } else if (localName === "hyperlink") {
+      parseHyperlink(element, ns, runs, relationships);
+    } else if (localName === "sdt") {
+      parseStructuredDocumentTag(element, ns, runs, 
+        { inField, fieldInstruction, fieldRunProperties, skipFieldValue },
+        (state) => {
+          inField = state.inField;
+          fieldInstruction = state.fieldInstruction;
+          fieldRunProperties = state.fieldRunProperties;
+          skipFieldValue = state.skipFieldValue;
+        }
+      );
+    }
+  }
+  
+  // Always return paragraph data, even if empty (for headers/footers with field codes)
+  return { runs, style, numId, ilvl, alignment, ...(images.length > 0 && { images }) };
+}
+
+// Helper type for field parsing state
+interface FieldParsingState {
+  inField: boolean;
+  fieldInstruction: string;
+  fieldRunProperties: any;
+  skipFieldValue: boolean;
+}
+
+/**
+ * Parse a run element
+ */
+function parseRunElement(
+  element: Element,
+  ns: string,
+  runs: DocxRun[],
+  images: Image[],
+  imageRelationships: Map<string, any> | undefined,
+  zip: any,
+  fieldState: FieldParsingState,
+  updateFieldState: (state: FieldParsingState) => void
+): void {
+  // Check for footnote references first
+  const footnoteRefElements = getElementsByTagNameNSFallback(element, ns, "footnoteReference");
+  if (footnoteRefElements.length > 0) {
+    const footnoteRef = footnoteRefElements[0];
+    if (footnoteRef) {
+      const footnoteId = footnoteRef.getAttribute("w:id");
+      if (footnoteId) {
+        // Add a superscript run for the footnote reference
+        runs.push({
+          text: footnoteId, // Use the footnote ID as the reference text
+          superscript: true,
+          _footnoteRef: footnoteId // Mark this as a footnote reference
+        });
+      }
+    }
+  } else {
+    // Check for field codes
+    const fldCharElements = getElementsByTagNameNSFallback(element, ns, "fldChar");
+    const instrTextElements = getElementsByTagNameNSFallback(element, ns, "instrText");
+    
+    if (fldCharElements.length > 0) {
+      const fldChar = fldCharElements[0];
+      const fldCharType = fldChar?.getAttribute("w:fldCharType");
+      
+      if (fldCharType === "begin") {
+        updateFieldState({
+          inField: true,
+          fieldInstruction: "",
+          skipFieldValue: false,
+          fieldRunProperties: getElementByTagNameNSFallback(element, ns, "rPr")?.cloneNode(true) || null
+        });
+      } else if (fldCharType === "separate") {
+        // After separator, skip the field value runs until we hit end
+        updateFieldState({ ...fieldState, skipFieldValue: true });
+      } else if (fldCharType === "end" && fieldState.inField) {
+        // Field complete - create a run with the field code
+        if (fieldState.fieldInstruction.trim()) {
+          const fieldRun = parseFieldRun(fieldState.fieldInstruction, fieldState.fieldRunProperties, ns);
+          if (fieldRun) {
+            runs.push(fieldRun);
+          }
+        }
+        updateFieldState({
+          inField: false,
+          skipFieldValue: false,
+          fieldInstruction: "",
+          fieldRunProperties: null
+        });
+      }
+    } else if (instrTextElements.length > 0 && fieldState.inField && !fieldState.skipFieldValue) {
+      // Collect field instruction text
+      const instrText = instrTextElements[0];
+      if (instrText) {
+        updateFieldState({
+          ...fieldState,
+          fieldInstruction: fieldState.fieldInstruction + (instrText.textContent || "")
+        });
+      }
+    } else if (!fieldState.inField && !fieldState.skipFieldValue) {
+      // Direct run element (not part of a field)
+      const run = parseRun(element, ns);
+      if (run && run.text) {
+        runs.push(run);
+      }
+    }
+  }
+  
+  // Check for drawing elements (images) in the run
+  const drawingElements = getElementsByTagNameNSFallback(element, ns, "drawing");
+  for (let j = 0; j < drawingElements.length; j++) {
+    const drawingElement = drawingElements[j];
+    if (!drawingElement) continue;
+    const drawingInfo = parseDrawing(drawingElement);
+    
+    if (drawingInfo && imageRelationships && zip) {
+      const imageRel = imageRelationships.get(drawingInfo.relationshipId);
+      if (imageRel) {
+        // Store drawing info and relationship for later async processing
+        images.push({
+          type: 'image',
+          data: new ArrayBuffer(0), // Placeholder - will be populated later
+          mimeType: 'image/png', // Placeholder
+          width: drawingInfo.width,
+          height: drawingInfo.height,
+          alt: drawingInfo.description || drawingInfo.name || 'Image',
+          // Store metadata for later processing
+          _drawingInfo: drawingInfo,
+          _imageRel: imageRel
+        } as any);
+      }
+    }
+  }
+}
+
+/**
+ * Parse a hyperlink element
+ */
+function parseHyperlink(
+  element: Element,
+  ns: string,
+  runs: DocxRun[],
+  relationships?: Map<string, string>
+): void {
+  const rId = element.getAttribute("r:id");
+  let linkUrl: string | undefined;
+  
+  // Resolve rId to actual URL using relationships
+  if (rId && relationships) {
+    linkUrl = relationships.get(rId);
+  }
+  
+  const hyperlinkRuns = getElementsByTagNameNSFallback(element, ns, "r");
+  for (let j = 0; j < hyperlinkRuns.length; j++) {
+    const runElement = hyperlinkRuns[j];
+    if (!runElement) continue;
+    const run = parseRun(runElement, ns, linkUrl);
+    if (run && run.text) {
+      runs.push(run);
+    }
+  }
+}
+
+/**
+ * Parse a structured document tag (content control)
+ */
+function parseStructuredDocumentTag(
+  element: Element,
+  ns: string,
+  runs: DocxRun[],
+  fieldState: FieldParsingState,
+  updateFieldState: (state: FieldParsingState) => void
+): void {
+  const sdtContent = getElementByTagNameNSFallback(element, ns, "sdtContent");
+  if (sdtContent) {
+    // Parse all runs inside the SDT content
+    const sdtChildren = Array.from(sdtContent.childNodes);
+    for (const sdtChild of sdtChildren) {
+      if (sdtChild.nodeType === 1) {
+        const sdtElement = sdtChild as Element;
+        const sdtLocalName = sdtElement.localName || sdtElement.tagName.split(':').pop() || sdtElement.tagName;
+        if (sdtLocalName === "r") {
+          // Recursively parse run element inside SDT
+          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Parse a run element
+ * @param runElement - The run element to parse
+ * @param ns - The namespace string
+ * @param linkUrl - Optional URL if this run is inside a hyperlink
+ * @returns Parsed run or null
+ */
+export function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | null {
+  // Parse all text content including tabs
+  let text = "";
+  const textElements = getElementsByTagNameNSFallback(runElement, ns, "t");
+  
+  for (let i = 0; i < textElements.length; i++) {
+    const textElement = textElements[i];
+    if (!textElement) continue;
+    text += textElement.textContent || "";
+  }
+  
+  // Also check for tab elements
+  const tabElements = getElementsByTagNameNSFallback(runElement, ns, "tab");
+  if (tabElements.length > 0) {
+    text += "\t".repeat(tabElements.length);
+  }
+  
+  if (!text) return null;
+  
+  // Parse run properties
+  const runProps = getElementByTagNameNSFallback(runElement, ns, "rPr");
+  
+  let bold = false;
+  let italic = false;
+  let underline = false;
+  let strikethrough = false;
+  let superscript = false;
+  let subscript = false;
+  let fontSize: string | undefined;
+  let fontFamily: string | undefined;
+  let color: string | undefined;
+  let backgroundColor: string | undefined;
+  
+  if (runProps) {
+    // Bold
+    bold = hasChildElementNS(runProps, ns, "b");
+    
+    // Italic
+    italic = hasChildElementNS(runProps, ns, "i");
+    
+    // Underline
+    underline = hasChildElementNS(runProps, ns, "u");
+    
+    // Strikethrough
+    strikethrough = hasChildElementNS(runProps, ns, "strike");
+    
+    // Superscript/subscript from vertAlign
+    const vertAlignElement = getElementByTagNameNSFallback(runProps, ns, "vertAlign");
+    const vertAlign = vertAlignElement?.getAttribute("w:val");
+    if (vertAlign === "superscript") superscript = true;
+    if (vertAlign === "subscript") subscript = true;
+    
+    // Font size (half-points)
+    const szElement = getElementByTagNameNSFallback(runProps, ns, "sz");
+    fontSize = szElement?.getAttribute("w:val") || undefined;
+    
+    // Font family
+    const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
+    fontFamily = fontElement?.getAttribute("w:ascii") || undefined;
+    
+    // Color
+    const colorElement = getElementByTagNameNSFallback(runProps, ns, "color");
+    color = colorElement?.getAttribute("w:val") || undefined;
+    
+    // Background color (highlighting)
+    const highlightElement = getElementByTagNameNSFallback(runProps, ns, "highlight");
+    const highlightColor = highlightElement?.getAttribute("w:val");
+    if (highlightColor && highlightColor !== "none") {
+      // Map Word highlight colors to hex
+      const highlightMap: Record<string, string> = {
+        'yellow': '#FFFF00',
+        'green': '#00FF00',
+        'cyan': '#00FFFF',
+        'magenta': '#FF00FF',
+        'blue': '#0000FF',
+        'red': '#FF0000',
+        'darkBlue': '#000080',
+        'darkCyan': '#008080',
+        'darkGreen': '#008000',
+        'darkMagenta': '#800080',
+        'darkRed': '#800000',
+        'darkYellow': '#808000',
+        'darkGray': '#808080',
+        'lightGray': '#C0C0C0',
+        'black': '#000000',
+      };
+      backgroundColor = highlightMap[highlightColor] || `#${highlightColor}`;
+    }
+    
+    // Also check for shading background
+    const shadingElement = getElementByTagNameNSFallback(runProps, ns, "shd");
+    const shadingFill = shadingElement?.getAttribute("w:fill");
+    if (shadingFill && shadingFill !== "auto" && !backgroundColor) {
+      backgroundColor = `#${shadingFill}`;
+    }
+  }
+  
+  return {
+    text,
+    bold,
+    italic,
+    underline,
+    strikethrough,
+    superscript,
+    subscript,
+    fontSize,
+    fontFamily,
+    color,
+    backgroundColor,
+    link: linkUrl
+  };
+}

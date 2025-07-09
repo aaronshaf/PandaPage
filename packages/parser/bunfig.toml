@@ -6,3 +6,6 @@ coverageThreshold = { line = 80, function = 70, statement = 80, branch = 60 }
 
 # Exclude test files and dist directory from coverage
 coverageSkipTestFiles = true
+
+# Load test setup file
+preload = ["./src/test-setup.ts"]

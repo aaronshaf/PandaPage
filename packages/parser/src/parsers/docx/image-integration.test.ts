@@ -77,8 +77,6 @@ describe('Image Integration Tests', () => {
   it('should parse document with image in paragraph', async () => {
     const result = await parseDocxDocument(docxWithImage);
     
-    console.log('Parsed document:', JSON.stringify(result, null, 2));
-    
     expect(result.elements).toBeDefined();
     expect(result.elements.length).toBeGreaterThan(0);
     
