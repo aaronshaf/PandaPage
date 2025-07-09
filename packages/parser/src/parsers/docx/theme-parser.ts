@@ -1,5 +1,4 @@
 import { Effect } from 'effect';
-import { parseXmlString } from '../../common/xml-parser';
 import { DocxParseError } from './types';
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from './xml-utils';
 
@@ -124,9 +123,20 @@ function parseFontScheme(fontScheme: Element, ns: string): DocxTheme['fonts'] {
  */
 export function parseTheme(xml: string): Effect.Effect<DocxTheme, DocxParseError> {
   return Effect.gen(function* () {
-    const doc = yield* parseXmlString(xml).pipe(
-      Effect.mapError(error => new DocxParseError(`Theme parsing error: ${error.message}`))
-    );
+    let doc: Document;
+    try {
+      if (typeof DOMParser === 'undefined') {
+        // @ts-ignore
+        const { DOMParser: XMLDOMParser } = require('@xmldom/xmldom');
+        const parser = new XMLDOMParser();
+        doc = parser.parseFromString(xml, "text/xml");
+      } else {
+        const parser = new DOMParser();
+        doc = parser.parseFromString(xml, "text/xml");
+      }
+    } catch (error) {
+      return yield* Effect.fail(new DocxParseError(`Theme parsing error: ${error}`));
+    }
     
     const ns = DRAWINGML_NAMESPACE;
     
