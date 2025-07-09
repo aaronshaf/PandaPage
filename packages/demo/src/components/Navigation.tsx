@@ -297,14 +297,15 @@ export const Navigation: React.FC<NavigationProps> = ({
           </div>
           
           {/* Document controls */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0" data-testid="document-controls">
             {/* Document dropdown */}
-            <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 shadow-sm border border-gray-200">
-              <label htmlFor="document-select" className="hidden sm:inline text-sm font-medium text-gray-700 whitespace-nowrap">
+            <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-2 sm:px-3 py-2 shadow-sm border border-gray-200" data-testid="document-selector-wrapper">
+              <label htmlFor="document-select" className="hidden sm:inline text-sm font-medium text-gray-700 whitespace-nowrap" data-testid="document-selector-label">
                 Document:
               </label>
               <select
                 id="document-select"
+                data-testid="document-selector"
                 value={uploadedFile ? 'uploaded' : selectedDocument}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -331,10 +332,11 @@ export const Navigation: React.FC<NavigationProps> = ({
             </div>
             
             {/* Upload button */}
-            <div className="relative">
+            <div className="relative" data-testid="upload-button-wrapper">
               <input
                 type="file"
                 accept=".docx,.pages"
+                data-testid="file-upload-input"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -346,21 +348,23 @@ export const Navigation: React.FC<NavigationProps> = ({
               />
               <label
                 htmlFor="file-upload"
+                data-testid="upload-button-label"
                 className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 cursor-pointer whitespace-nowrap"
               >
                 <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <span className="hidden sm:inline">Upload</span>
+                <span className="hidden sm:inline" data-testid="upload-button-text">Upload</span>
               </label>
             </div>
             
             {/* GitHub link */}
-            <div className="flex items-center">
+            <div className="flex items-center" data-testid="github-link-wrapper">
               <a
                 href="https://github.com/aaronshaf/browser-document-viewer"
                 target="_blank"
                 rel="noopener noreferrer"
+                data-testid="github-link"
                 className="text-gray-400 hover:text-gray-500 transition-colors"
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -379,9 +383,10 @@ export const Navigation: React.FC<NavigationProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto">
             {/* View mode buttons */}
-            <div className="flex items-center bg-white rounded-md shadow-sm">
+            <div className="flex items-center bg-white rounded-md shadow-sm" data-testid="view-mode-buttons">
               <button
                 onClick={() => setViewMode('print')}
+                data-testid="view-mode-print"
                 className={`px-2 sm:px-3 lg:px-4 py-1.5 text-sm font-medium rounded-l-md border whitespace-nowrap ${
                   viewMode === 'print' 
                     ? 'bg-blue-50 text-blue-700 border-blue-300' 
@@ -397,6 +402,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               </button>
               <button
                 onClick={() => setViewMode('read')}
+                data-testid="view-mode-read"
                 className={`px-2 sm:px-3 lg:px-4 py-1.5 text-sm font-medium rounded-r-md border-t border-r border-b whitespace-nowrap ${
                   viewMode === 'read' 
                     ? 'bg-blue-50 text-blue-700 border-blue-300' 

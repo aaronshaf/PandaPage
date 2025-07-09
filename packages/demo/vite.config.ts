@@ -15,11 +15,26 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    watch: {
+      // Force polling for better cross-platform compatibility
+      usePolling: true,
+      interval: 100,
+    },
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..'],
+    },
   },
   build: {
     outDir: 'dist',
   },
   optimizeDeps: {
-    include: ['@browser-document-viewer/core', '@browser-document-viewer/parser', '@browser-document-viewer/renderer-dom', '@browser-document-viewer/renderer-markdown'],
+    // Exclude workspace packages to ensure they're always fresh
+    exclude: [
+      '@browser-document-viewer/core',
+      '@browser-document-viewer/parser', 
+      '@browser-document-viewer/renderer-dom',
+      '@browser-document-viewer/renderer-markdown'
+    ],
   },
 });

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { DocxRenderer } from './DocxRenderer';
-import { renderToHtml } from '@browser-document-viewer/renderer-dom';
+import { renderToHtml, DOMRenderer } from '@browser-document-viewer/renderer-dom';
 import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/core';
 
 interface DocumentViewerProps {
@@ -360,25 +360,32 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 ));
               })()
             ) : structuredDocument?.elements ? (
-              // For structured documents, convert to HTML and split into pages
+              // For structured documents, split elements into pages and render each page
               (() => {
-                // Use the DocxRenderer to convert to HTML first
-                const tempDiv = document.createElement('div');
-                const tempRoot = document.createElement('div');
-                tempDiv.appendChild(tempRoot);
-                
-                // Render the DocxRenderer content to get HTML
-                // For now, fallback to single page until we can extract HTML from DocxRenderer
-                const pages = [''];
+                // Use DOM renderer to get HTML and split into pages
+                const domRenderer = new DOMRenderer();
+                // Create a ParsedDocument-like object for the renderer
+                const parsedDoc = {
+                  metadata: structuredDocument.metadata || {},
+                  elements: structuredDocument.elements,
+                  headers: structuredDocument.headers,
+                  footers: structuredDocument.footers
+                };
+                const htmlContent = domRenderer.renderToHTML(parsedDoc, { includeContainer: false });
+                const pages = splitIntoPages(htmlContent);
                 
                 if (pages.length !== totalPages) {
-                  setTimeout(() => setTotalPages(1), 0);
+                  setTimeout(() => setTotalPages(pages.length), 0);
                 }
                 
-                return (
-                  <DocxRenderer 
-                    elements={structuredDocument.elements} 
-                    viewMode={viewMode}
+                return pages.map((pageContent, index) => (
+                  <div 
+                    key={index} 
+                    data-testid={`print-page-${index}`}
+                    data-page-number={index + 1}
+                    data-page-type="structured-document"
+                    data-content-type="docx-rendered"
+                    data-total-pages={pages.length}
                     style={{
                       width: '8.5in',
                       minHeight: '11in',
@@ -394,9 +401,9 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                       lineHeight: '1.2',
                       fontFamily: 'Times New Roman, serif'
                     }}
-                    className=""
+                    dangerouslySetInnerHTML={{ __html: pageContent }}
                   />
-                );
+                ));
               })()
             ) : (
               // For markdown, use the existing pagination
