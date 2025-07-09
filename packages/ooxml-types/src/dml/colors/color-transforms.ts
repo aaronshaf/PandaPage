@@ -9,31 +9,31 @@ import type { CT_PositiveFixedPercentage, CT_FixedPercentage, CT_PositivePercent
  * Complement transform.
  * @see ECMA-376 Part 1, §20.1.2.3.7 CT_ComplementTransform
  */
-export interface CT_ComplementTransform {}
+export type CT_ComplementTransform = Record<string, never>;
 
 /**
  * Inverse transform.
  * @see ECMA-376 Part 1, §20.1.2.3.21 CT_InverseTransform
  */
-export interface CT_InverseTransform {}
+export type CT_InverseTransform = Record<string, never>;
 
 /**
  * Grayscale transform.
  * @see ECMA-376 Part 1, §20.1.2.3.19 CT_GrayscaleTransform
  */
-export interface CT_GrayscaleTransform {}
+export type CT_GrayscaleTransform = Record<string, never>;
 
 /**
  * Gamma transform.
  * @see ECMA-376 Part 1, §20.1.2.3.15 CT_GammaTransform
  */
-export interface CT_GammaTransform {}
+export type CT_GammaTransform = Record<string, never>;
 
 /**
  * Inverse gamma transform.
  * @see ECMA-376 Part 1, §20.1.2.3.20 CT_InverseGammaTransform
  */
-export interface CT_InverseGammaTransform {}
+export type CT_InverseGammaTransform = Record<string, never>;
 
 /**
  * Color transform group.
