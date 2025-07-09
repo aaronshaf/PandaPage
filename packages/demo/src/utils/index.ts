@@ -116,8 +116,8 @@ export const splitIntoPages = (html: string): string[] => {
   let currentPageHeight = 0;
   
   // Rough estimates based on 8.5x11" page with 1" margins (6.5x9" content area)
-  // At 12pt font, approximately 54 lines per page
-  const maxPageHeight = 54;
+  // At 12pt font, approximately 54 lines per page - but be more generous to avoid truncation
+  const maxPageHeight = 150; // Increased from 54 to prevent content truncation
   
   const getElementHeight = (element: Element): number => {
     const tagName = element.tagName;
@@ -157,8 +157,9 @@ export const splitIntoPages = (html: string): string[] => {
   const shouldPageBreakBefore = (element: Element, currentHeight: number): boolean => {
     const tagName = element.tagName;
     
-    // Only break before H1 if we have substantial content (more conservative)
-    if (tagName === 'H1' && currentHeight > maxPageHeight * 0.6) {
+    // Be much more conservative about page breaks to avoid truncation
+    // Only break before H1 if we have a lot of content (more conservative)
+    if (tagName === 'H1' && currentHeight > maxPageHeight * 0.8) {
       return true;
     }
     
@@ -167,18 +168,18 @@ export const splitIntoPages = (html: string): string[] => {
       return false;
     }
     
-    // Break before tables if they won't fit
+    // Break before tables only if they really won't fit
     if (tagName === 'TABLE') {
       const tableHeight = getElementHeight(element);
-      if (currentHeight + tableHeight > maxPageHeight) {
+      if (currentHeight + tableHeight > maxPageHeight * 1.2) {
         return true;
       }
     }
     
-    // Break before very large blocks if they won't fit
+    // Break before very large blocks only if they really won't fit
     if (['BLOCKQUOTE', 'PRE'].includes(tagName)) {
       const elementHeight = getElementHeight(element);
-      if (currentHeight + elementHeight > maxPageHeight && currentHeight > maxPageHeight * 0.3) {
+      if (currentHeight + elementHeight > maxPageHeight * 1.2 && currentHeight > maxPageHeight * 0.5) {
         return true;
       }
     }
@@ -213,25 +214,25 @@ export const splitIntoPages = (html: string): string[] => {
   for (const element of elements) {
     const elementHeight = getElementHeight(element);
     
-    // Check if we need a page break
+    // Check if we need a page break - be more lenient to avoid truncation
     if (shouldPageBreakBefore(element, currentPageHeight) || 
-        (currentPageHeight + elementHeight > maxPageHeight && currentPageElements.length > 0)) {
+        (currentPageHeight + elementHeight > maxPageHeight * 1.5 && currentPageElements.length > 0)) {
       
       // Only create a new page if current page has substantial content
-      if (currentPageHeight > maxPageHeight * 0.1) { // At least 10% of page height
+      if (currentPageHeight > maxPageHeight * 0.2) { // At least 20% of page height
         finishCurrentPage();
       }
     }
     
-    // Handle very large elements that might need to be split
-    if (elementHeight > maxPageHeight && element.tagName === 'DIV') {
+    // Handle very large elements that might need to be split - be more lenient
+    if (elementHeight > maxPageHeight * 2 && element.tagName === 'DIV') {
       // Try to split large div elements
       const children = Array.from(element.children);
       if (children.length > 1) {
         // Process children individually
         for (const child of children) {
           const childHeight = getElementHeight(child);
-          if (currentPageHeight + childHeight > maxPageHeight && currentPageElements.length > 0) {
+          if (currentPageHeight + childHeight > maxPageHeight * 1.5 && currentPageElements.length > 0) {
             finishCurrentPage();
           }
           addElementToPage(child);
