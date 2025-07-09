@@ -6,7 +6,13 @@ import type {
   Heading,
   Table,
   TextRun,
-  Image
+  Image,
+  Footnote,
+  FootnoteReference,
+  Header,
+  Footer,
+  Bookmark,
+  PageBreak
 } from '@browser-document-viewer/parser';
 
 export interface DOMRenderOptions {
