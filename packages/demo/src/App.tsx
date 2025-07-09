@@ -43,6 +43,7 @@ const sampleDocuments = [
   { id: '008.docx', title: 'Meeting Minutes Template' },
   { id: '009.docx', title: 'Vendor Evaluation Criteria' },
   { id: '010.docx', title: 'Change Management Process' },
+  { id: '011.docx', title: 'Document 011' },
 ];
 
 // Parse URL hash for document and view mode (moved outside component)
