@@ -401,14 +401,18 @@ export class DOMRenderer {
     numberSpan.textContent = footnote.id;
     contentDiv.appendChild(numberSpan);
     
+    const textDiv = this.doc.createElement('div');
+    textDiv.className = 'footnote-text';
+    
     footnote.elements.forEach((el: any) => {
       if (el.type === 'paragraph') {
-        contentDiv.appendChild(this.renderParagraph(el, { inTableCell: false }));
+        textDiv.appendChild(this.renderParagraph(el, { inTableCell: false }));
       } else if (el.type === 'table') {
-        contentDiv.appendChild(this.renderTable(el));
+        textDiv.appendChild(this.renderTable(el));
       }
     });
     
+    contentDiv.appendChild(textDiv);
     div.appendChild(contentDiv);
     return div;
   }
@@ -500,22 +504,32 @@ export class DOMRenderer {
       }
       
       .footnote {
-        margin-top: 16pt;
-        padding: 12pt;
-        background-color: #f9fafb;
-        border-left: 4px solid #e5e7eb;
-        border-radius: 0.375rem;
+        margin-top: 20pt;
+        padding: 0;
+        background-color: transparent;
+        border: none;
+        border-top: 1px solid #ccc;
+        padding-top: 8pt;
+        font-size: 10pt;
+        line-height: 14pt;
       }
       
       .footnote-content {
         font-size: 10pt;
-        line-height: 12pt;
+        line-height: 14pt;
+        display: flex;
+        gap: 0.5rem;
       }
       
       .footnote-number {
         font-weight: 600;
         color: #374151;
-        margin-right: 0.5rem;
+        min-width: 1.5rem;
+        flex-shrink: 0;
+      }
+      
+      .footnote-text {
+        flex: 1;
       }
       
       .bookmark-anchor {
