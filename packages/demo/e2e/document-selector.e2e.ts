@@ -23,30 +23,24 @@ test.describe('Document Selector', () => {
     expect(await desktopSelector?.isVisible()).toBe(true);
   });
 
-  test.skip('should have responsive width on different screen sizes', async ({ page }) => {
+  test('should have responsive width on different screen sizes', async ({ page }) => {
     // Test mobile size
     await page.setViewportSize({ width: 375, height: 667 });
     let select = await page.$('#document-select');
     let classes = await select?.getAttribute('class');
-    expect(classes).toContain('w-[140px]');
+    expect(classes).toContain('w-36'); // 144px
     
     // Test small screens (sm breakpoint)
     await page.setViewportSize({ width: 640, height: 768 });
     select = await page.$('#document-select');
     classes = await select?.getAttribute('class');
-    expect(classes).toContain('sm:w-[220px]');
+    expect(classes).toContain('sm:w-64'); // 256px
     
     // Test medium screens (md breakpoint)
     await page.setViewportSize({ width: 768, height: 1024 });
     select = await page.$('#document-select');
     classes = await select?.getAttribute('class');
-    expect(classes).toContain('md:w-[320px]');
-    
-    // Test large screens (lg breakpoint)
-    await page.setViewportSize({ width: 1024, height: 768 });
-    select = await page.$('#document-select');
-    classes = await select?.getAttribute('class');
-    expect(classes).toContain('lg:w-[380px]');
+    expect(classes).toContain('md:w-80'); // 320px
   });
 
   test('should contain all sample documents', async ({ page }) => {

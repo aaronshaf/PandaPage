@@ -159,3 +159,20 @@ Attributes starting with `rsid` (e.g., `w:rsidR`, `w:rsidSect`) are used by Word
 ### Relationship ID (`r:id`)
 
 The `r:id` attribute is used to create a relationship to another part in the OOXML package, such as an image, hyperlink, or header. This is a fundamental concept for linking document parts together.
+
+## Implementation Notes
+
+### Parsing Considerations
+
+1.  **Order Matters**: Elements must appear in a specific order within their parent element as defined by the schema.
+2.  **Empty Elements**: Empty paragraphs still require a `<w:p/>` tag to be present.
+3.  **Namespace Awareness**: Always use a namespace-aware XML parser to correctly handle the different XML namespaces (e.g., `w:`, `a:`, `pic:`).
+4.  **Default Values**: Many properties have default values that should be applied when the property is not explicitly specified in the markup.
+5.  **Relationship Resolution**: Always resolve `r:id` attributes against the corresponding `.rels` file to find the correct target part.
+
+### Common Pitfalls
+
+1.  **Missing Relationships**: Referencing a relationship ID that does not exist in the `.rels` file will result in a broken link (e.g., a missing image).
+2.  **Invalid Structure**: Elements that are out of order can cause a document to be rejected by Microsoft Word or other viewers.
+3.  **Unit Confusion**: Be mindful of the different units used for measurements (Twips, EMUs, half-points, etc.) and convert them correctly.
+4.  **Toggle Properties**: Incorrectly handling toggle properties (like bold and italic) can lead to the opposite of the intended formatting.

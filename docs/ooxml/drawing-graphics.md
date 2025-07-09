@@ -147,3 +147,36 @@ To render this image, a parser would:
 3.  Look up this relationship ID in the `word/_rels/document.xml.rels` file to find the path to the image file (e.g., `media/image1.png`).
 4.  Load the image from the specified path in the ZIP archive.
 5.  Render the image at the specified size.
+
+## Implementation Notes
+
+### Coordinate System
+
+All DrawingML positioning uses EMUs (English Metric Units). It is crucial to perform these conversions correctly.
+
+*   **1 inch = 914,400 EMUs**
+*   **1 point = 12,700 EMUs**
+*   **1 centimeter = 360,000 EMUs**
+
+### Implementation Strategy
+
+A good strategy for implementing a graphics renderer is to start simple and progressively add features.
+
+1.  **Basic Inline Images**: Start by rendering only inline images, as they are simpler and do not require complex positioning logic.
+2.  **Anchored Positioning**: Add support for anchored (floating) images, including parsing their horizontal and vertical positions.
+3.  **Text Wrapping**: Implement text wrapping around anchored objects. This can be complex and may require different strategies for different wrapping types (e.g., `wrapSquare` vs. `wrapTight`).
+
+### Best Practices
+
+*   **Progressive Enhancement**: Render a basic version of the graphic first (e.g., as an inline image), and then apply more complex positioning and wrapping rules. This ensures that something is always displayed, even if the more advanced features are not fully supported.
+*   **Fallback Strategies**: If a browser or rendering environment does not support advanced features like text wrapping around a polygon, have a fallback to a simpler representation (e.g., square wrapping or top-and-bottom wrapping).
+*   **Performance Optimization**: Image processing can be resource-intensive. Use a caching mechanism to avoid reloading the same image multiple times.
+
+### Text Wrapping
+
+Implementing text wrapping for anchored graphics is one of the most challenging parts of rendering a DOCX file.
+
+*   **`wrapSquare`**: The simplest form of wrapping, where text wraps around the bounding box of the object.
+*   **`wrapTight` and `wrapThrough`**: These require the renderer to calculate the shape of the wrapping polygon and flow text around it. This can be achieved in modern browsers using CSS `shape-outside`.
+*   **`wrapTopAndBottom`**: This is a simpler case where the graphic simply breaks the text, with content appearing above and below it.
+*   **`wrapNone`**: The graphic is rendered either in front of or behind the text, with no wrapping. This is controlled by the `behindDoc` attribute on the `<wp:anchor>` element.

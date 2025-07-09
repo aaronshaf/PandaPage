@@ -108,3 +108,29 @@ Some boolean properties, like `<w:b>` (bold) and `<w:i>` (italic), are **toggle 
 *   If the parent style is **already** bold, adding `<w:b/>` *removes* the bolding for that specific run (an XOR-like behavior).
 
 This is important for correctly resolving the final style of a run of text.
+
+## Implementation Notes
+
+### Best Practices
+
+1.  **Property Resolution Order**: Always resolve properties in the correct order (Defaults -> Styles -> Paragraph -> Run).
+2.  **Toggle Logic**: Correctly implement XOR logic for toggle properties.
+3.  **Script Detection**: Detect character ranges (e.g., Arabic, Hebrew) to apply the correct complex script properties (e.g., `<w:bCs>` instead of `<w:b>`).
+4.  **Theme Colors**: Resolve theme colors by reading the theme part from the package.
+5.  **Unit Conversion**: Remember that font sizes are in half-points and most other measurements are in twips.
+6.  **Preserve Spaces**: Always honor the `xml:space="preserve"` attribute on `<w:t>` elements.
+7.  **Default Values**: Apply default values for properties that are not specified.
+
+### Common Pitfalls
+
+1.  **Forgetting Toggle Logic**: The most common mistake is forgetting that `<b>` on top of a bold style makes the text *not* bold.
+2.  **Wrong Script Properties**: Using `<w:sz>` for a complex script font size instead of `<w:szCs>`.
+3.  **Unit Confusion**: Treating a font size of `24` as 24pt instead of 12pt.
+4.  **Missing Theme Resolution**: Failing to look up theme colors, resulting in incorrect color rendering.
+5.  **Incomplete Inheritance**: Not checking all levels of the property hierarchy, leading to incorrect style resolution.
+
+### Performance Considerations
+
+1.  **Cache Resolved Properties**: Style computation can be expensive. Cache the resolved properties for a given style or run to avoid recalculating.
+2.  **Batch Similar Runs**: When rendering, combine adjacent runs with identical properties into a single element to reduce the complexity of the render tree.
+3.  **Lazy Theme Loading**: Only load and parse the theme part of the document when theme colors are actually used.

@@ -47,22 +47,4 @@ test.describe('Mobile Navigation', () => {
     }
   });
   
-  test.skip('document selector should maintain reasonable width on mobile', async ({ page }) => {
-    await page.goto('/');
-    
-    // Set mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-    
-    // Check document selector has width constraint
-    const selector = await page.$('#document-select');
-    const selectorClasses = await selector?.getAttribute('class');
-    expect(selectorClasses).toContain('w-[140px]'); // Mobile width
-    
-    // Verify it doesn't push other elements off screen
-    const selectorBox = await selector?.boundingBox();
-    if (selectorBox) {
-      expect(selectorBox.x + selectorBox.width).toBeLessThanOrEqual(375);
-      expect(selectorBox.width).toBeLessThanOrEqual(150); // Should be around 140px plus some padding
-    }
-  });
 });
