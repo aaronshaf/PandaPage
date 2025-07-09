@@ -2,6 +2,7 @@
 import type { DocumentElement, Paragraph, Heading, TextRun, Image } from '../../types/document';
 import type { DocxParagraph } from './types';
 import { halfPointsToPoints } from './unit-utils';
+import { getListType, getListText, getNumberingFormat, type NumberingDefinition } from './numbering-parser';
 
 /**
  * Convert a DOCX paragraph to a document element (paragraph or heading)
@@ -9,13 +10,15 @@ import { halfPointsToPoints } from './unit-utils';
  * @param processedImages - Optional processed images to include
  * @param paragraphIndex - Index of this paragraph in the document (for position-based heading detection)
  * @param outlineLevel - Outline level from paragraph properties (w:outlineLvl)
+ * @param numberingDef - Numbering definition for list type determination
  * @returns Document element
  */
 export function convertToDocumentElement(
   paragraph: DocxParagraph, 
   processedImages?: Image[],
   paragraphIndex?: number,
-  outlineLevel?: number
+  outlineLevel?: number,
+  numberingDef?: NumberingDefinition
 ): DocumentElement {
   const runs: TextRun[] = paragraph.runs.map(run => ({
     text: run.text,
@@ -88,9 +91,15 @@ export function convertToDocumentElement(
   
   // Add list info if present
   if (paragraph.numId && paragraph.ilvl !== undefined) {
+    const listType = getListType(paragraph.numId, paragraph.ilvl, numberingDef);
+    const listText = getListText(paragraph.numId, paragraph.ilvl, numberingDef);
+    const numFmt = getNumberingFormat(paragraph.numId, paragraph.ilvl, numberingDef);
+    
     para.listInfo = {
       level: paragraph.ilvl,
-      type: 'number' // TODO: This should be determined from numbering.xml
+      type: listType,
+      text: listText,
+      numFmt: numFmt
     };
   }
   

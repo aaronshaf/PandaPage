@@ -21,6 +21,7 @@ import {
 import { splitIntoPages } from './page-splitter';
 import { renderHeader, renderHeaderWithPageNumber, renderFooter, renderFooterWithPageNumber } from './header-footer-renderer';
 import { addStyles } from './styles';
+import { groupListItems, renderList } from './list-renderer';
 
 export interface DOMRenderOptions {
   document?: Document;
@@ -68,8 +69,11 @@ export class DOMRenderer {
       addStyles();
     }
     
+    // Group consecutive list items into proper list structures
+    const elementsWithLists = groupListItems(parsedDoc.elements);
+    
     // Split content into pages based on page breaks
-    const pages = splitIntoPages(parsedDoc.elements);
+    const pages = splitIntoPages(elementsWithLists);
     this.totalPages = pages.length;
     
     // Render each page with appropriate footers
@@ -145,6 +149,8 @@ export class DOMRenderer {
         return renderImage(element, this.doc);
       case 'pageBreak':
         return renderPageBreak(this.doc);
+      case 'list' as any:
+        return renderList(element as any, this.doc, this.currentPageNumber, this.totalPages);
       default:
         return null;
     }

@@ -248,10 +248,12 @@ test("renderToHtml handles lists", () => {
   };
   
   const result = renderToHtml(doc);
-  // Lists are rendered as paragraphs in the current implementation
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Item 1</span></p>');
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Item 2</span></p>');
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Nested item</span></p>');
+  // Lists are now rendered as proper HTML lists
+  expect(result).toContain('<ul style="margin-bottom: 12pt; padding-left: 24pt; list-style-type: disc;">');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>Item 1</span></li>');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>Item 2</span></li>');
+  expect(result).toContain('<ul style="margin-left: 24pt; margin-bottom: 12pt; padding-left: 24pt; list-style-type: circle;">');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>Nested item</span></li>');
 });
 
 test("renderToHtml handles numbered lists", () => {
@@ -272,9 +274,10 @@ test("renderToHtml handles numbered lists", () => {
   };
   
   const result = renderToHtml(doc);
-  // Lists are rendered as paragraphs in the current implementation
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>First</span></p>');
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Second</span></p>');
+  // Lists are now rendered as proper HTML lists
+  expect(result).toContain('<ol style="margin-bottom: 12pt; padding-left: 24pt; list-style-type: decimal;">');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>First</span></li>');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>Second</span></li>');
 });
 
 test("renderToHtml handles mixed list types", () => {
@@ -295,9 +298,11 @@ test("renderToHtml handles mixed list types", () => {
   };
   
   const result = renderToHtml(doc);
-  // Lists are rendered as paragraphs in the current implementation
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Bullet 1</span></p>');
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Number 1</span></p>');
+  // Mixed list types are now rendered as separate list containers
+  expect(result).toContain('<ul style="margin-bottom: 12pt; padding-left: 24pt; list-style-type: disc;">');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>Bullet 1</span></li>');
+  expect(result).toContain('<ol style="margin-bottom: 12pt; padding-left: 24pt; list-style-type: decimal;">');
+  expect(result).toContain('<li style="margin-bottom: 4pt; margin-top: 0px;"><span>Number 1</span></li>');
 });
 
 test("renderToHtml handles page breaks", () => {
@@ -728,8 +733,8 @@ test("renderToHtml handles mixed content", () => {
   expect(result).not.toContain('<title>');
   expect(result).toContain('<h1 style="margin-bottom: 12pt; font-weight: bold; font-size: 24pt;"><span>Title</span></h1>');
   expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Intro paragraph</span></p>');
-  // Lists are rendered as paragraphs
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>List item</span></p>');
+  // Lists are now rendered as proper HTML lists
+  expect(result).toContain('<ul style="margin-bottom: 12pt; padding-left: 24pt; list-style-type: disc;"><li style="margin-bottom: 4pt; margin-top: 0px;"><span>List item</span></li></ul>');
   // Page breaks now split content into separate pages
   expect(result).toContain('data-page-number="1"');
   expect(result).toContain('data-page-number="2"');

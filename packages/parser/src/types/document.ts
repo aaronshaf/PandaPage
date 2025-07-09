@@ -60,6 +60,7 @@ export interface Paragraph {
     level: number;
     type: 'bullet' | 'number';
     text?: string;
+    numFmt?: string; // The numbering format (bullet, decimal, upperLetter, etc.)
   };
   images?: Image[];
   spacing?: {

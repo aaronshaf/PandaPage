@@ -17,6 +17,7 @@ import { convertToDocumentElement } from './element-converter';
 import { extractImageData, createImageElement } from './image-parser';
 import { parseStylesheet, type DocxStylesheet } from './style-parser';
 import { parseTheme, type DocxTheme } from './theme-parser';
+import { parseNumberingXml, type NumberingDefinition } from './numbering-parser';
 
 /**
  * Parse a DOCX file
@@ -169,6 +170,22 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
     
+    // Parse numbering definitions
+    let numberingDef: NumberingDefinition | undefined;
+    const numberingFile = zip.file("word/numbering.xml");
+    if (numberingFile) {
+      const numberingXml = yield* Effect.tryPromise({
+        try: () => numberingFile.async("text"),
+        catch: () => ""
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+      
+      if (numberingXml) {
+        numberingDef = yield* parseNumberingXml(numberingXml).pipe(
+          Effect.orElse(() => Effect.succeed(undefined))
+        );
+      }
+    }
+    
     // Now parse headers with styles and theme available
     const headerMap = new Map<string, Header>();
     for (const [id, target] of headerFiles) {
@@ -274,7 +291,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
         if (paragraph) {
           const elementIndex = elements.length;
           // Pass paragraph index and outline level for better heading detection
-          const docElement = convertToDocumentElement(paragraph, undefined, elementIndex, paragraph.outlineLevel);
+          const docElement = convertToDocumentElement(paragraph, undefined, elementIndex, paragraph.outlineLevel, numberingDef);
           elements.push(docElement);
           
           // Track paragraphs with images for async processing
