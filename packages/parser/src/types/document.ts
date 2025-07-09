@@ -87,14 +87,52 @@ export interface Heading {
   };
 }
 
+export interface TableBorder {
+  style?: 'single' | 'double' | 'thick' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot' | 'triple' | 'thickThinSmall' | 'thinThickSmall' | 'thinThickThinSmall' | 'thickThinMedium' | 'thinThickMedium' | 'thinThickThinMedium' | 'thickThinLarge' | 'thinThickLarge' | 'thinThickThinLarge' | 'wave' | 'doubleWave' | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' | 'outset' | 'inset' | 'none';
+  color?: string; // Hex color
+  width?: number; // Border width in points (converted from eighth-points)
+}
+
+export interface TableBorders {
+  top?: TableBorder;
+  bottom?: TableBorder;
+  left?: TableBorder;
+  right?: TableBorder;
+  insideH?: TableBorder; // Inside horizontal borders
+  insideV?: TableBorder; // Inside vertical borders
+}
+
+export interface TableShading {
+  fill?: string; // Background fill color (hex)
+  color?: string; // Pattern color (hex)
+  pattern?: 'clear' | 'solid' | 'horzStripe' | 'vertStripe' | 'reverseDiagStripe' | 'diagStripe' | 'horzCross' | 'diagCross' | 'thinHorzStripe' | 'thinVertStripe' | 'thinReverseDiagStripe' | 'thinDiagStripe' | 'thinHorzCross' | 'thinDiagCross' | 'pct5' | 'pct10' | 'pct12' | 'pct15' | 'pct20' | 'pct25' | 'pct30' | 'pct35' | 'pct37' | 'pct40' | 'pct45' | 'pct50' | 'pct55' | 'pct60' | 'pct62' | 'pct65' | 'pct70' | 'pct75' | 'pct80' | 'pct85' | 'pct87' | 'pct90' | 'pct95';
+}
+
 export interface Table {
   type: 'table';
   rows: TableRow[];
   width?: number;
+  borders?: TableBorders;
+  shading?: TableShading;
+  cellMargin?: {
+    top?: number; // Twips
+    bottom?: number; // Twips
+    left?: number; // Twips
+    right?: number; // Twips
+  };
 }
 
 export interface TableRow {
   cells: TableCell[];
+}
+
+export interface TableCellBorders {
+  top?: TableBorder;
+  bottom?: TableBorder;
+  left?: TableBorder;
+  right?: TableBorder;
+  tl2br?: TableBorder; // Top-left to bottom-right diagonal
+  tr2bl?: TableBorder; // Top-right to bottom-left diagonal
 }
 
 export interface TableCell {
@@ -104,6 +142,14 @@ export interface TableCell {
   width?: number;
   verticalAlignment?: 'top' | 'center' | 'bottom';
   textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+  borders?: TableCellBorders;
+  shading?: TableShading;
+  margin?: {
+    top?: number; // Twips
+    bottom?: number; // Twips
+    left?: number; // Twips
+    right?: number; // Twips
+  };
 }
 
 export interface Image {

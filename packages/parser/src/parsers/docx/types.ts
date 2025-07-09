@@ -85,6 +85,63 @@ export class DocxParseError {
   constructor(public readonly message: string) {}
 }
 
+// Table-specific types for DOCX parsing
+export interface DocxTableBorder {
+  style?: 'single' | 'double' | 'thick' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot' | 'triple' | 'thickThinSmall' | 'thinThickSmall' | 'thinThickThinSmall' | 'thickThinMedium' | 'thinThickMedium' | 'thinThickThinMedium' | 'thickThinLarge' | 'thinThickLarge' | 'thinThickThinLarge' | 'wave' | 'doubleWave' | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' | 'outset' | 'inset' | 'none';
+  color?: string; // Hex color or 'auto'
+  size?: number; // Border width in eighth-points (1/8 of a point)
+  space?: number; // Space from text in points
+}
+
+export interface DocxTableBorders {
+  top?: DocxTableBorder;
+  bottom?: DocxTableBorder;
+  left?: DocxTableBorder;
+  right?: DocxTableBorder;
+  insideH?: DocxTableBorder; // Inside horizontal borders
+  insideV?: DocxTableBorder; // Inside vertical borders
+}
+
+export interface DocxTableCellBorders {
+  top?: DocxTableBorder;
+  bottom?: DocxTableBorder;
+  left?: DocxTableBorder;
+  right?: DocxTableBorder;
+  tl2br?: DocxTableBorder; // Top-left to bottom-right diagonal
+  tr2bl?: DocxTableBorder; // Top-right to bottom-left diagonal
+}
+
+export interface DocxTableCellMargin {
+  top?: number; // Twips
+  bottom?: number; // Twips
+  left?: number; // Twips
+  right?: number; // Twips
+}
+
+export interface DocxTableProperties {
+  borders?: DocxTableBorders;
+  shading?: DocxShading;
+  cellMargin?: DocxTableCellMargin;
+  width?: {
+    value: number;
+    type: 'dxa' | 'pct' | 'auto'; // dxa = twips, pct = percentage
+  };
+}
+
+export interface DocxTableCellProperties {
+  borders?: DocxTableCellBorders;
+  shading?: DocxShading;
+  margin?: DocxTableCellMargin;
+  width?: {
+    value: number;
+    type: 'dxa' | 'pct' | 'auto';
+  };
+  gridSpan?: number;
+  vMerge?: 'restart' | 'continue';
+  vAlign?: 'top' | 'center' | 'bottom';
+  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+}
+
 // Namespace constants
 export const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 export const RELS_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
