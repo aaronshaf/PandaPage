@@ -193,7 +193,9 @@ export function parseFieldInstruction(instruction: string): ParsedFieldCode {
     case 'HYPERLINK':
       if (switches.has('\\l')) {
         // Internal link to bookmark
-        result.bookmarkRef = switches.get('\\l') as string;
+        const bookmarkValue = switches.get('\\l') as string;
+        // Remove quotes if present
+        result.bookmarkRef = bookmarkValue ? bookmarkValue.replace(/^"(.+)"$/, '$1') : bookmarkValue;
       } else if (fieldArgs.length > 0 && fieldArgs[0]) {
         // External hyperlink
         result.hyperlink = fieldArgs[0].replace(/^"(.+)"$/, '$1');
