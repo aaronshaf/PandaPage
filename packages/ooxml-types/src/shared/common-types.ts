@@ -46,6 +46,24 @@ export type ST_HexColorRGB = string;
 export type ST_Panose = string;
 
 /**
+ * Decimal number.
+ * @see ECMA-376 Part 1, §22.9.2.2 ST_DecimalNumber
+ */
+export type ST_DecimalNumber = number;
+
+/**
+ * Unsigned decimal number.
+ * @see ECMA-376 Part 1, §22.9.2.16 ST_UnsignedDecimalNumber
+ */
+export type ST_UnsignedDecimalNumber = number;
+
+/**
+ * Relationship identifier (for parts relationships).
+ * @see ECMA-376 Part 1, §22.8.2.1 ST_RelationshipId
+ */
+export type ST_RelationshipId = string;
+
+/**
  * XML name type (NCName with constraints).
  * @see ECMA-376 Part 1, §22.9.2.19 ST_XmlName
  */

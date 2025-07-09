@@ -129,7 +129,7 @@ export interface CT_PosV {
 }
 
 export interface CT_Anchor {
-  simplePos: CT_Point2D;
+  simplePos?: CT_Point2D;
   positionH: CT_PosH;
   positionV: CT_PosV;
   extent: CT_PositiveSize2D;
@@ -142,7 +142,7 @@ export interface CT_Anchor {
   distB?: ST_WrapDistance;
   distL?: ST_WrapDistance;
   distR?: ST_WrapDistance;
-  simplePos: boolean;
+  simplePosAttr?: boolean;
   relativeHeight: number; // xsd:unsignedInt
   behindDoc: boolean;
   locked: boolean;

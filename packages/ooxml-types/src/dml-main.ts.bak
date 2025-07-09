@@ -2012,6 +2012,7 @@ export interface CT_TextBodyProperties {
   bIns?: ST_Coordinate32;
   numCol?: number; // xsd:int
   spcCol?: ST_Coordinate32;
+  rtlCol?: boolean;
   flatLn?: boolean;
   wrap?: ST_TextWrappingType;
   leftToRight?: boolean;
@@ -2116,36 +2117,6 @@ export interface CT_TextPoint {
 export interface CT_TextAutonumberBullet {
   type: ST_TextAutonumberScheme;
   startAt?: number; // xsd:int
-}
-
-// Missing interfaces referenced in paragraph properties
-export interface CT_Char {
-  char: string;
-}
-
-export interface CT_Empty {
-  // Empty interface
-}
-
-export interface CT_ColorMapping {
-  bg1?: string;
-  tx1?: string;
-  bg2?: string;
-  tx2?: string;
-  accent1?: string;
-  accent2?: string;
-  accent3?: string;
-  accent4?: string;
-  accent5?: string;
-  accent6?: string;
-  hlink?: string;
-  folHlink?: string;
-  extLst?: CT_OfficeArtExtensionList;
-}
-
-export interface CT_ColorMappingOverride {
-  masterClrMapping?: CT_ColorMapping;
-  overrideClrMapping?: CT_ColorMapping;
 }
 
 export enum ST_TextAutonumberScheme {
@@ -2478,14 +2449,69 @@ export interface CT_TextBody {
   p: CT_TextParagraph[];
 }
 
-
-
-
+export interface CT_TextBodyProperties {
+  rot?: ST_Angle;
+  spcFirstLastPara?: boolean;
+  vert?: ST_TextVerticalType;
+  vertOverflow?: ST_TextVerticalOverflowType;
+  horzOverflow?: ST_TextHorizontalOverflowType;
+  rtlCol?: boolean;
+  fromWordArt?: boolean;
+  anchor?: ST_TextAnchoringType;
+  anchorCtr?: boolean;
+  forceAA?: boolean;
+  compatLnSpc?: boolean;
+  withAnchor?: boolean;
+  lIns?: ST_Coordinate32;
+  tIns?: ST_Coordinate32;
+  rIns?: ST_Coordinate32;
+  bIns?: ST_Coordinate32;
+  numCol?: number; // xsd:int
+  spcCol?: ST_Coordinate32;
+  rtlCol?: boolean;
+  flatLn?: boolean;
+  wrap?: ST_TextWrappingType;
+  leftToRight?: boolean;
+  rightToLeft?: boolean;
+  upright?: boolean;
+  extLst?: CT_OfficeArtExtensionList;
 }
 
+export enum ST_TextVerticalType {
+  Horz = "horz",
+  Vert = "vert",
+  Vert270 = "vert270",
+  WordArtVert = "wordArtVert",
+  EaVert = "eaVert",
+  MongolianVert = "mongolianVert",
+  WordArtVertRtl = "wordArtVertRtl",
+}
+
+export enum ST_TextVerticalOverflowType {
+  Overflow = "overflow",
+  Ellipsis = "ellipsis",
+  Clip = "clip",
+}
+
+export enum ST_TextHorizontalOverflowType {
+  Overflow = "overflow",
+  Clip = "clip",
+}
+
+export enum ST_TextAnchoringType {
+  T = "t",
+  Ctr = "ctr",
+  B = "b",
+  Just = "just",
+  JustLow = "justLow",
+  Dist = "dist",
   ThaiDist = "thaiDist",
 }
 
+export enum ST_TextWrappingType {
+  Square = "square",
+  None = "none",
+}
 
 export interface CT_TextListStyle {
   defPPr?: CT_TextParagraphProperties;
@@ -2497,6 +2523,7 @@ export interface CT_TextListStyle {
   lvl6pPr?: CT_TextParagraphProperties;
   lvl7pPr?: CT_TextParagraphProperties;
   lvl8pPr?: CT_TextParagraphProperties;
+  lvl9pPr?: CT_TextParagraphProperties;
   extLst?: CT_OfficeArtExtensionList;
 }
 
@@ -2548,16 +2575,73 @@ export interface CT_TextAutonumberBullet {
   startAt?: number; // xsd:int
 }
 
+export enum ST_TextAutonumberScheme {
+  AlphaLcParenthesis = "alphaLcParenthesis",
+  AlphaUcParenthesis = "alphaUcParenthesis",
+  AlphaLcPeriod = "alphaLcPeriod",
+  AlphaUcPeriod = "alphaUcPeriod",
+  ArabicPeriod = "arabicPeriod",
+  ArabicParenthesis = "arabicParenthesis",
+  RomanLcParenthesis = "romanLcParenthesis",
+  RomanUcParenthesis = "romanUcParenthesis",
+  RomanLcPeriod = "romanLcPeriod",
+  RomanUcPeriod = "romanUcPeriod",
+  CircleNum = "circleNum",
+  DblCircleNum = "dblCircleNum",
+  SquareNum = "squareNum",
+  ZeroDotNum = "zeroDotNum",
+  Bullet = "bullet",
+  Korean = "korean",
+  KoreanBracket = "koreanBracket",
+  KoreanPeriod = "koreanPeriod",
+  Arabic1 = "arabic1",
+  Arabic2 = "arabic2",
+  Hebrew1 = "hebrew1",
+  JpnChsDec = "jpnChsDec",
+  JpnBidi = "jpnBidi",
+  JpnTrad = "jpnTrad",
+  ChsAlpha = "chsAlpha",
+  ChsNew = "chsNew",
+  ChsBidi = "chsBidi",
+  Cns = "cns",
+  ChsCns = "chsCns",
+  JpnEa = "jpnEa",
+  JpnAp = "jpnAp",
+  JpnCs = "jpnCs",
 }
 
+export enum ST_TextAlignType {
+  L = "l",
+  Ctr = "ctr",
+  R = "r",
+  Just = "just",
+  JustLow = "justLow",
+  Dist = "dist",
+  ThaiDist = "thaiDist",
 }
 
+export enum ST_TextFontAlignType {
+  Auto = "auto",
+  T = "t",
+  Ctr = "ctr",
+  B = "b",
+  Base = "base",
+}
+
+export interface CT_TextTabStopList {
   tab?: CT_TextTabStop[];
 }
 
 export interface CT_TextTabStop {
   pos: ST_Coordinate32;
   algn: ST_TextTabAlignType;
+}
+
+export enum ST_TextTabAlignType {
+  L = "l",
+  Ctr = "ctr",
+  R = "r",
+  Dec = "dec",
 }
 
 export interface CT_TextRun {
@@ -2622,9 +2706,42 @@ export interface CT_TextUnderline {
   u?: ST_TextUnderlineType;
 }
 
+export enum ST_TextUnderlineType {
+  None = "none",
+  Words = "words",
+  Single = "single",
+  Double = "double",
+  Heavy = "heavy",
+  Dotted = "dotted",
+  DottedHeavy = "dottedHeavy",
+  Dash = "dash",
+  DashHeavy = "dashHeavy",
+  DashLong = "dashLong",
+  DashLongHeavy = "dashLongHeavy",
+  DotDash = "dotDash",
+  DotDashHeavy = "dotDashHeavy",
+  DotDotDash = "dotDotDash",
+  DotDotDashHeavy = "dotDotDashHeavy",
+  Wavy = "wavy",
+  WavyHeavy = "wavyHeavy",
+  DashDotDotHeavy = "dashDotDotHeavy",
+  WavyDouble = "wavyDouble",
 }
 
+export enum ST_TextStrikeType {
+  NoStrike = "noStrike",
+  SingleStrike = "singleStrike",
+  DoubleStrike = "doubleStrike",
+}
 
+export enum ST_TextCapsType {
+  None = "none",
+  Small = "small",
+  All = "all",
+}
+
+export interface CT_LineProperties {
+  noFill?: CT_NoFillProperties;
   solidFill?: CT_SolidColorFillProperties;
   gradFill?: CT_GradientFillProperties;
   pattFill?: CT_PatternFillProperties;
@@ -2646,13 +2763,77 @@ export interface CT_PresetLineDashProperties {
   val: ST_PresetLineDashVal;
 }
 
+export enum ST_PresetLineDashVal {
+  Solid = "solid",
+  Dot = "dot",
+  Dash = "dash",
+  LargeDash = "largeDash",
+  DashDot = "dashDot",
+  LargeDashDot = "largeDashDot",
+  LargeDashDotDot = "largeDashDotDot",
+  SystemDash = "sysDash",
+  SystemDot = "sysDot",
+  SystemDashDot = "sysDashDot",
+  SystemDashDotDot = "sysDashDotDot",
 }
 
+export interface CT_CustomDashProperties {
+  ds?: CT_DashStop[];
 }
 
+export interface CT_DashStop {
+  d: ST_PositiveFixedPercentage;
+  sp: ST_PositiveFixedPercentage;
+}
 
+export interface CT_RoundLineCapProperties {}
 
+export interface CT_BevelLineCapProperties {}
 
+export interface CT_MiterLimitProperties {
+  val?: ST_PositiveFixedPercentage;
+}
+
+export interface CT_LineEndProperties {
+  type?: ST_LineEndType;
+  w?: ST_LineEndWidth;
+  len?: ST_LineEndLength;
+}
+
+export enum ST_LineEndType {
+  None = "none",
+  Arrow = "arrow",
+  Oval = "oval",
+  StealthArrow = "stealthArrow",
+  Diamond = "diamond",
+  Triangle = "triangle",
+}
+
+export enum ST_LineEndWidth {
+  Sm = "sm",
+  Med = "med",
+  Lg = "lg",
+}
+
+export enum ST_LineEndLength {
+  Sm = "sm",
+  Med = "med",
+  Lg = "lg",
+}
+
+export enum ST_LineCap {
+  Rnd = "rnd",
+  Sq = "sq",
+  Flat = "flat",
+}
+
+export enum ST_CompoundLine {
+  Sng = "sng",
+  Dbl = "dbl",
+  ThickThin = "thickThin",
+  ThinThick = "thinThick",
+  Tri = "tri",
+}
 
 export enum ST_PenAlignment {
   Ctr = "ctr",

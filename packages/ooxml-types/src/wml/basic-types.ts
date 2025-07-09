@@ -151,3 +151,27 @@ export interface CT_Guid {
  * @see ECMA-376 Part 1, §22.9.2.5 ST_Guid  
  */
 export type ST_Guid = string;
+
+/**
+ * String value.
+ * @see ECMA-376 Part 1, §17.3.2.36 CT_String
+ */
+export interface CT_String {
+  val: ST_String;
+}
+
+/**
+ * Unsigned decimal number.
+ * @see ECMA-376 Part 1, §17.18.84 CT_UnsignedDecimalNumber
+ */
+export interface CT_UnsignedDecimalNumber {
+  val: ST_UnsignedDecimalNumber;
+}
+
+/**
+ * Macro name.
+ * @see ECMA-376 Part 1, §17.18.51 CT_MacroName
+ */
+export interface CT_MacroName {
+  val: ST_MacroName;
+}

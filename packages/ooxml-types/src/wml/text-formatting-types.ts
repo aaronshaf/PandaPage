@@ -192,6 +192,11 @@ export interface CT_SignedTwipsMeasure {
 export type { ST_UniversalMeasure } from './basic-types';
 
 /**
+ * Twips measure (imported from shared).
+ */
+export type { ST_TwipsMeasure } from '../shared/measurement-types';
+
+/**
  * Fit text.
  * @see ECMA-376 Part 1, §17.3.2.13 CT_FitText
  */
@@ -199,8 +204,3 @@ export interface CT_FitText {
   val?: ST_TwipsMeasure;
   id?: number; // xsd:unsignedInt
 }
-
-/**
- * Twips measure (imported from shared).
- */
-export type { ST_TwipsMeasure } from '../shared/measurement-types';

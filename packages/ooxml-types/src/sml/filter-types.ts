@@ -4,7 +4,7 @@
  */
 
 import type { ST_Xstring, ST_CalendarType } from '../shared/common-types';
-import type { CT_ExtensionList } from '../spreadsheet-drawing-types';
+import type { CT_ExtensionList } from '../chart-types';
 
 /**
  * Reference to a cell or range.

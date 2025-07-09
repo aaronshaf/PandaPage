@@ -193,9 +193,14 @@ export enum ST_ElementTypes {
   SibTrans = "sibTrans",
 }
 
-export enum ST_Booleans {
+export enum ST_BooleanValue {
   True = "true",
   False = "false",
+}
+
+export enum ST_ChildOrderType {
+  B = "b",
+  T = "t",
 }
 
 export interface AG_IteratorAttributes {
