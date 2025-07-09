@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { DocxRenderer } from './DocxRenderer';
-import { renderToHtml, DOMRenderer } from '@browser-document-viewer/renderer-dom';
+import { renderToHtml } from '@browser-document-viewer/renderer-dom';
 import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/core';
 
 interface DocumentViewerProps {
@@ -99,74 +99,94 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   useEffect(() => {
     if (viewMode !== 'print') return;
 
-    // Find the scrollable container (the document content area)
-    const scrollContainer = document.querySelector('.document-scroll-container');
-    if (!scrollContainer) return;
-
-    const handleScroll = (event: Event) => {
-      const container = event.target as HTMLElement;
-      const pages = container.querySelectorAll('.print-page');
-      let currentVisiblePage = 1;
-      
-      const containerRect = container.getBoundingClientRect();
-      const containerMiddle = containerRect.top + containerRect.height / 2;
-      
-      for (let i = 0; i < pages.length; i++) {
-        const page = pages[i];
-        const rect = page.getBoundingClientRect();
-        
-        // Consider a page "current" if its center is closest to container center
-        if (rect.top <= containerMiddle && rect.bottom > containerMiddle) {
-          currentVisiblePage = i + 1;
-          break;
-        }
-        
-        // If we're past the container middle, this is probably the current page
-        if (rect.top <= containerMiddle) {
-          currentVisiblePage = i + 1;
-        }
+    // Small delay to ensure DOM is updated after page elements are created
+    const setupScrollTracking = () => {
+      // Find the scrollable container (the document content area)
+      const scrollContainer = document.querySelector('.document-scroll-container');
+      if (!scrollContainer) {
+        console.warn('No .document-scroll-container found for page tracking');
+        return;
       }
+
+      const handleScroll = (event: Event) => {
+        const container = event.target as HTMLElement;
+        const pages = container.querySelectorAll('.print-page');
+        let currentVisiblePage = 1;
+        
+        // Debug logging
+        if (pages.length === 0) {
+          console.warn('No .print-page elements found for page tracking');
+          return;
+        }
+        
+        const containerRect = container.getBoundingClientRect();
+        const containerMiddle = containerRect.top + containerRect.height / 2;
+        
+        for (let i = 0; i < pages.length; i++) {
+          const page = pages[i];
+          if (!page) continue;
+          const rect = page.getBoundingClientRect();
+          
+          // Consider a page "current" if its center is closest to container center
+          if (rect.top <= containerMiddle && rect.bottom > containerMiddle) {
+            currentVisiblePage = i + 1;
+            break;
+          }
+          
+          // If we're past the container middle, this is probably the current page
+          if (rect.top <= containerMiddle) {
+            currentVisiblePage = i + 1;
+          }
+        }
+        
+        setCurrentPage(currentVisiblePage);
+        
+        // Update scroll progress for page indicator positioning
+        const scrollTop = container.scrollTop;
+        const scrollHeight = container.scrollHeight - container.clientHeight;
+        const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+        setScrollProgress(progress);
+        
+        // Show page indicator temporarily when manually scrolling (but not programmatic scroll)
+        const shouldShowIndicator = !isProgrammaticScroll;
+        setShowPageIndicator(shouldShowIndicator);
+        
+        if (shouldShowIndicator) {
+          clearTimeout(window.pageIndicatorTimeout);
+          window.pageIndicatorTimeout = window.setTimeout(() => {
+            setShowPageIndicator(false);
+          }, 2000);
+        }
+        
+        // Reset programmatic scroll flag after a short delay
+        if (isProgrammaticScroll) {
+          setTimeout(() => {
+            setIsProgrammaticScroll(false);
+          }, 100);
+        }
+      };
+
+      scrollContainer.addEventListener('scroll', handleScroll);
       
-      setCurrentPage(currentVisiblePage);
-      
-      // Update scroll progress for page indicator positioning
-      const scrollTop = container.scrollTop;
-      const scrollHeight = container.scrollHeight - container.clientHeight;
-      const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
-      setScrollProgress(progress);
-      
-      // Show page indicator temporarily when manually scrolling (but not programmatic scroll)
-      const shouldShowIndicator = !isProgrammaticScroll;
-      setShowPageIndicator(shouldShowIndicator);
-      
-      if (shouldShowIndicator) {
+      // Initial call with fake event - mark as programmatic to avoid showing page indicator
+      setIsProgrammaticScroll(true);
+      handleScroll({ target: scrollContainer } as any);
+      // Reset programmatic flag after initial setup
+      setTimeout(() => setIsProgrammaticScroll(false), 100);
+
+      return () => {
+        scrollContainer.removeEventListener('scroll', handleScroll);
         clearTimeout(window.pageIndicatorTimeout);
-        window.pageIndicatorTimeout = window.setTimeout(() => {
-          setShowPageIndicator(false);
-        }, 2000);
-      }
-      
-      // Reset programmatic scroll flag after a short delay
-      if (isProgrammaticScroll) {
-        setTimeout(() => {
-          setIsProgrammaticScroll(false);
-        }, 100);
-      }
+      };
     };
 
-    scrollContainer.addEventListener('scroll', handleScroll);
+    // Small delay to ensure DOM elements are rendered
+    const timeoutId = setTimeout(setupScrollTracking, 100);
     
-    // Initial call with fake event - mark as programmatic to avoid showing page indicator
-    setIsProgrammaticScroll(true);
-    handleScroll({ target: scrollContainer } as any);
-    // Reset programmatic flag after initial setup
-    setTimeout(() => setIsProgrammaticScroll(false), 100);
-
     return () => {
-      scrollContainer.removeEventListener('scroll', handleScroll);
-      clearTimeout(window.pageIndicatorTimeout);
+      clearTimeout(timeoutId);
     };
-  }, [viewMode, result]);
+  }, [viewMode, result, totalPages]);
 
   // Update nav height when primary nav visibility changes
   useEffect(() => {
@@ -327,26 +347,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 return Array.from(pageElements).map((pageElement, index) => (
                   <div 
                     key={index} 
+                    className="print-page"
                     data-testid={`parsed-document-page-${index + 1}`}
                     data-page-number={index + 1}
                     data-page-type="parsed-document"
                     data-content-type="dom-rendered"
                     data-total-pages={pageElements.length}
-                    style={{
-                      width: '8.5in',
-                      minHeight: '11in',
-                      margin: '0 auto 2rem auto',
-                      background: 'white',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
-                      padding: '1in',
-                      position: 'relative',
-                      breakAfter: 'page' as const,
-                      border: '1px solid #e5e7eb',
-                      boxSizing: 'border-box' as const,
-                      fontSize: '12pt',
-                      lineHeight: '1.2',
-                      fontFamily: 'Times New Roman, serif'
-                    }}
                     dangerouslySetInnerHTML={{ __html: pageElement.innerHTML }}
                   />
                 ));
@@ -388,26 +394,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 return pages.map((pageElements, index) => (
                   <div 
                     key={index} 
+                    className="print-page"
                     data-testid={`print-page-${index}`}
                     data-page-number={index + 1}
                     data-page-type="structured-document"
                     data-content-type="docx-rendered"
                     data-total-pages={pages.length}
-                    style={{
-                      width: '8.5in',
-                      minHeight: '11in',
-                      margin: '0 auto 2rem auto',
-                      background: 'white',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
-                      padding: '1in',
-                      position: 'relative',
-                      breakAfter: 'page' as const,
-                      border: '1px solid #e5e7eb',
-                      boxSizing: 'border-box' as const,
-                      fontSize: '12pt',
-                      lineHeight: '1.2',
-                      fontFamily: 'Times New Roman, serif'
-                    }}
                   >
                     <DocxRenderer 
                       elements={pageElements} 
@@ -430,26 +422,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                 return pages.map((pageContent, index) => (
                   <div key={index} data-testid={`markdown-page-container-${index + 1}`} style={{ position: 'relative' }}>
                     <div 
+                      className="print-page"
                       data-testid={`markdown-page-${index + 1}`}
                       data-page-number={index + 1}
                       data-page-type="markdown"
                       data-content-type="markdown-rendered"
                       data-total-pages={pages.length}
-                      style={{
-                        width: '8.5in',
-                        minHeight: '11in',
-                        margin: '0 auto 2rem auto',
-                        background: 'white',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
-                        padding: '1in',
-                        position: 'relative',
-                        breakAfter: 'page' as const,
-                        border: '1px solid #e5e7eb',
-                        boxSizing: 'border-box' as const,
-                        fontSize: '12pt',
-                        lineHeight: '1.2',
-                        fontFamily: 'Times New Roman, serif'
-                      }}
                       dangerouslySetInnerHTML={{ __html: pageContent }}
                     />
                     {/* Page number - only show in screen view */}

@@ -4,7 +4,7 @@ import { WORD_NAMESPACE } from './types';
 import { parseFieldRun } from './field-parser';
 import type { FieldParsingContext } from './field-context';
 import type { Image } from '../../types/document';
-import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback } from './xml-utils';
+import { getElementByTagNameNSFallback } from './xml-utils';
 import { applyStyleCascade, type DocxStylesheet } from './style-parser';
 import type { DocxTheme } from './theme-parser';
 import { parseRunElement, parseHyperlink, parseStructuredDocumentTag, parseRun, type FieldParsingState } from './run-parser';
