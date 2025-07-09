@@ -2,6 +2,7 @@
 import type { DocxParagraph, DocxRun, DocxParagraphBorders, DocxShading, DocxBorder } from './types';
 import { WORD_NAMESPACE } from './types';
 import { parseFieldRun } from './field-parser';
+import type { FieldParsingContext } from './field-context';
 import { parseDrawing } from './image-parser';
 import type { Image } from '../../types/document';
 import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChildElementNS } from './xml-utils';
@@ -17,6 +18,7 @@ import { resolveThemeColor, resolveThemeFont } from './theme-parser';
  * @param zip - JSZip instance for image extraction
  * @param stylesheet - Document stylesheet for style resolution
  * @param theme - Document theme for color and font resolution
+ * @param fieldContext - Context for field code resolution
  * @returns Parsed paragraph or null
  */
 export function parseParagraph(
@@ -25,7 +27,8 @@ export function parseParagraph(
   imageRelationships?: Map<string, any>, 
   zip?: any,
   stylesheet?: DocxStylesheet,
-  theme?: DocxTheme
+  theme?: DocxTheme,
+  fieldContext?: FieldParsingContext
 ): DocxParagraph | null {
   const runs: DocxRun[] = [];
   const images: Image[] = [];
@@ -183,8 +186,18 @@ export function parseParagraph(
           skipFieldValue = state.skipFieldValue;
         },
         stylesheet,
-        theme
+        theme,
+        fieldContext
       );
+    } else if (localName === "fldSimple") {
+      // Handle simple field codes (single element)
+      const instruction = element.getAttribute("w:instr");
+      if (instruction) {
+        const fieldRun = parseFieldRun(instruction, null, ns, fieldContext);
+        if (fieldRun) {
+          runs.push(fieldRun);
+        }
+      }
     } else if (localName === "hyperlink") {
       parseHyperlink(element, ns, runs, relationships, stylesheet, theme);
     } else if (localName === "sdt") {
@@ -197,7 +210,8 @@ export function parseParagraph(
           skipFieldValue = state.skipFieldValue;
         },
         stylesheet,
-        theme
+        theme,
+        fieldContext
       );
     }
   }
@@ -286,7 +300,8 @@ function parseRunElement(
   fieldState: FieldParsingState,
   updateFieldState: (state: FieldParsingState) => void,
   stylesheet?: DocxStylesheet,
-  theme?: DocxTheme
+  theme?: DocxTheme,
+  fieldContext?: FieldParsingContext
 ): void {
   // Check for footnote references first
   const footnoteRefElements = getElementsByTagNameNSFallback(element, ns, "footnoteReference");
@@ -325,7 +340,7 @@ function parseRunElement(
       } else if (fldCharType === "end" && fieldState.inField) {
         // Field complete - create a run with the field code
         if (fieldState.fieldInstruction.trim()) {
-          const fieldRun = parseFieldRun(fieldState.fieldInstruction, fieldState.fieldRunProperties, ns);
+          const fieldRun = parseFieldRun(fieldState.fieldInstruction, fieldState.fieldRunProperties, ns, fieldContext);
           if (fieldRun) {
             runs.push(fieldRun);
           }
@@ -422,7 +437,8 @@ function parseStructuredDocumentTag(
   fieldState: FieldParsingState,
   updateFieldState: (state: FieldParsingState) => void,
   stylesheet?: DocxStylesheet,
-  theme?: DocxTheme
+  theme?: DocxTheme,
+  fieldContext?: FieldParsingContext
 ): void {
   const sdtContent = getElementByTagNameNSFallback(element, ns, "sdtContent");
   if (sdtContent) {
@@ -434,7 +450,7 @@ function parseStructuredDocumentTag(
         const sdtLocalName = sdtElement.localName || sdtElement.tagName.split(':').pop() || sdtElement.tagName;
         if (sdtLocalName === "r") {
           // Recursively parse run element inside SDT
-          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState, stylesheet, theme);
+          parseRunElement(sdtElement, ns, runs, [], undefined, undefined, fieldState, updateFieldState, stylesheet, theme, fieldContext);
         }
       }
     }

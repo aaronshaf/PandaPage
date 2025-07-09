@@ -12,6 +12,7 @@ import { parseTable } from './table-parser';
 import { parseHeaderFooter } from './header-footer-parser';
 import { parseFootnotes } from './footnote-parser';
 import { parseBookmarks } from './bookmark-parser';
+import { createFieldContext } from './field-context';
 import { convertToDocumentElement } from './element-converter';
 import { extractImageData, createImageElement } from './image-parser';
 import { parseStylesheet, type DocxStylesheet } from './style-parser';
@@ -252,6 +253,9 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     const bookmarks = parseBookmarks(body, ns);
     elements.push(...bookmarks);
     
+    // Create field context with bookmarks and metadata
+    const fieldContext = createFieldContext(bookmarks, metadata);
+    
     // Store paragraphs with pending images for later processing
     const paragraphsWithImages = new Map<number, { paragraph: any; elementIndex: number }>();
     
@@ -266,7 +270,7 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       
       if (localName === "p") {
         // Parse paragraph with relationships for hyperlink resolution
-        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip, stylesheet, theme);
+        const paragraph = parseParagraph(element, relationshipsMap, imageRelationships, zip, stylesheet, theme, fieldContext);
         if (paragraph) {
           const elementIndex = elements.length;
           // Pass paragraph index and outline level for better heading detection

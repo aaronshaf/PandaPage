@@ -16,6 +16,9 @@ export interface DocxRun {
   link?: string;
   _footnoteRef?: string;
   _fieldCode?: string; // For PAGE, NUMPAGES, etc. fields
+  _fieldInstruction?: string; // Full field instruction
+  _internalLink?: boolean; // Indicates link is to internal bookmark
+  _bookmarkRef?: string; // Reference to bookmark ID
   // Advanced text formatting
   characterSpacing?: number; // Twips (w:spacing)
   position?: number; // Twips (w:position) - vertical position adjustment
