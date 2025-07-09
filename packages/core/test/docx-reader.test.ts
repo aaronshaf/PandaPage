@@ -1,4 +1,4 @@
-import { describe, test, expect, mock } from "bun:test";
+import { describe, test, expect, mock, beforeAll } from "bun:test";
 import { Effect } from "effect";
 import {
   readDocx,
@@ -7,6 +7,17 @@ import {
   parseParagraph,
   DocxParseError
 } from "../src/formats/docx/docx-reader";
+
+// Set up DOM environment for testing
+beforeAll(() => {
+  const { Window } = require("happy-dom");
+  const window = new Window();
+  (global as any).DOMParser = window.DOMParser;
+  (global as any).Document = window.Document;
+  (global as any).Element = window.Element;
+  (global as any).Node = window.Node;
+  (global as any).XMLSerializer = window.XMLSerializer;
+});
 
 describe("docx-reader", () => {
   describe("readDocx error handling", () => {
@@ -61,7 +72,7 @@ describe("docx-reader", () => {
       // Create minimal DOCX structure with numbering
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:document>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:body>
               <w:p>
                 <w:pPr>
@@ -75,7 +86,7 @@ describe("docx-reader", () => {
             </w:body>
           </w:document>`),
         "word/numbering.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:numbering>
+          <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:abstractNum w:abstractNumId="0">
               <w:lvl w:ilvl="0">
                 <w:numFmt w:val="decimal"/>
@@ -127,7 +138,7 @@ describe("docx-reader", () => {
       // Create DOCX with style links
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:document>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:body>
               <w:p>
                 <w:r><w:t>Test</w:t></w:r>
@@ -135,7 +146,7 @@ describe("docx-reader", () => {
             </w:body>
           </w:document>`),
         "word/numbering.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:numbering>
+          <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:abstractNum w:abstractNumId="0">
               <w:lvl w:ilvl="0">
                 <w:numFmt w:val="bullet"/>
@@ -173,7 +184,7 @@ describe("docx-reader", () => {
       
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:document>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:body>
               <w:p>
                 <w:r><w:t>Test</w:t></w:r>
@@ -181,7 +192,7 @@ describe("docx-reader", () => {
             </w:body>
           </w:document>`),
         "word/numbering.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:numbering>
+          <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:abstractNum w:abstractNumId="">
               <w:lvl w:ilvl="0">
                 <w:numFmt w:val="decimal"/>
@@ -210,7 +221,7 @@ describe("docx-reader", () => {
       
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:document>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:body>
               <w:p>
                 <w:r><w:t>Test</w:t></w:r>
@@ -218,7 +229,7 @@ describe("docx-reader", () => {
             </w:body>
           </w:document>`),
         "word/numbering.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:numbering>
+          <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:abstractNum w:abstractNumId="0">
               <w:lvl w:ilvl="0">
                 <!-- Missing numFmt, should default to bullet -->
@@ -256,7 +267,7 @@ describe("docx-reader", () => {
       
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:document>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:body>
               <w:p>
                 <w:r><w:t>Test</w:t></w:r>
@@ -264,7 +275,7 @@ describe("docx-reader", () => {
             </w:body>
           </w:document>`),
         "word/numbering.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:numbering>
+          <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:abstractNum w:abstractNumId="0">
               <w:styleLink w:val="ListStyle1"/>
               <w:lvl w:ilvl="0">
@@ -308,7 +319,7 @@ describe("docx-reader", () => {
       
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:document>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:body>
               <w:p>
                 <w:r><w:t>Test</w:t></w:r>
@@ -316,7 +327,7 @@ describe("docx-reader", () => {
             </w:body>
           </w:document>`),
         "word/numbering.xml": fflate.strToU8(`<?xml version="1.0"?>
-          <w:numbering>
+          <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
             <w:abstractNum w:abstractNumId="0">
               <w:lvl w:ilvl="0">
                 <w:numFmt w:val="decimal"/>

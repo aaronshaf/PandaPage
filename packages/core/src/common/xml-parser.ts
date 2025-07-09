@@ -130,6 +130,25 @@ export class EffectXmlParser implements XmlParser {
 }
 
 /**
+ * Get DOMParser for both browser and Node.js environments
+ */
+const getDOMParser = (): DOMParser => {
+  // Browser environment
+  if (typeof window !== 'undefined' && window.DOMParser) {
+    return new window.DOMParser();
+  }
+  
+  // Node.js environment - use happy-dom (more lenient than @xmldom/xmldom)
+  try {
+    const { Window } = require('happy-dom');
+    const window = new Window();
+    return new window.DOMParser();
+  } catch (error) {
+    throw new Error('DOMParser not available. Please install happy-dom for Node.js environments.');
+  }
+};
+
+/**
  * Parse XML string into DOM Document
  */
 export const parseXmlString = (xmlString: string): Effect.Effect<Document, XmlParseError> =>
@@ -140,9 +159,10 @@ export const parseXmlString = (xmlString: string): Effect.Effect<Document, XmlPa
       // Remove UTF-8 BOM if present
       const cleanXml = xmlString.charCodeAt(0) === 0xFEFF ? xmlString.substring(1) : xmlString;
       
-      // Parse using DOMParser
-      const parser = new DOMParser();
-      const document = parser.parseFromString(cleanXml, "application/xml");
+      // Parse using DOMParser (with environment detection)
+      // Use "text/xml" instead of "application/xml" for better compatibility with DOCX XML
+      const parser = getDOMParser();
+      const document = parser.parseFromString(cleanXml, "text/xml");
       
       // Check for parser errors
       const errorElement = document.getElementsByTagName("parsererror")[0];
