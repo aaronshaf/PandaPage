@@ -5,7 +5,7 @@ import { parseFieldRun } from './field-parser';
 import type { FieldParsingContext } from './field-context';
 import { parseDrawing } from './image-parser';
 import type { Image } from '../../types/document';
-import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChildElementNS } from './xml-utils';
+import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChildElementNS, parseOnOffValue } from './xml-utils';
 import { applyStyleCascade, type DocxStylesheet } from './style-parser';
 import type { DocxTheme } from './theme-parser';
 import { resolveThemeColor, resolveThemeFont } from './theme-parser';
@@ -248,24 +248,24 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
   let lang: string | undefined;
   
   if (runProps) {
-    // Bold - check both b and bCs with XOR logic
-    const hasB = hasChildElementNS(runProps, ns, "b");
-    const hasBCs = hasChildElementNS(runProps, ns, "bCs");
-    bold = hasB !== hasBCs; // XOR logic: bold is true if only one is present
+    // Bold - check both b and bCs, OR logic (either can make text bold)
+    const hasB = parseOnOffValue(runProps, ns, "b");
+    const hasBCs = parseOnOffValue(runProps, ns, "bCs");
+    bold = hasB || hasBCs; // OR logic: bold is true if either is present and enabled
     
-    // Italic - check both i and iCs with XOR logic
-    const hasI = hasChildElementNS(runProps, ns, "i");
-    const hasICs = hasChildElementNS(runProps, ns, "iCs");
-    italic = hasI !== hasICs; // XOR logic: italic is true if only one is present
+    // Italic - check both i and iCs, OR logic (either can make text italic)
+    const hasI = parseOnOffValue(runProps, ns, "i");
+    const hasICs = parseOnOffValue(runProps, ns, "iCs");
+    italic = hasI || hasICs; // OR logic: italic is true if either is present and enabled
     
-    // Underline
+    // Underline - check for u element (note: this is more complex than OnOff)
     underline = hasChildElementNS(runProps, ns, "u");
     
     // Strikethrough
-    strikethrough = hasChildElementNS(runProps, ns, "strike");
+    strikethrough = parseOnOffValue(runProps, ns, "strike");
     
     // Double strikethrough
-    doubleStrikethrough = hasChildElementNS(runProps, ns, "dstrike");
+    doubleStrikethrough = parseOnOffValue(runProps, ns, "dstrike");
     
     // Superscript/subscript from vertAlign
     const vertAlignElement = getElementByTagNameNSFallback(runProps, ns, "vertAlign");
@@ -357,13 +357,13 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     }
     
     // Text effects
-    emboss = hasChildElementNS(runProps, ns, "emboss");
-    imprint = hasChildElementNS(runProps, ns, "imprint");
-    outline = hasChildElementNS(runProps, ns, "outline");
-    shadow = hasChildElementNS(runProps, ns, "shadow");
-    smallCaps = hasChildElementNS(runProps, ns, "smallCaps");
-    caps = hasChildElementNS(runProps, ns, "caps");
-    hidden = hasChildElementNS(runProps, ns, "vanish");
+    emboss = parseOnOffValue(runProps, ns, "emboss");
+    imprint = parseOnOffValue(runProps, ns, "imprint");
+    outline = parseOnOffValue(runProps, ns, "outline");
+    shadow = parseOnOffValue(runProps, ns, "shadow");
+    smallCaps = parseOnOffValue(runProps, ns, "smallCaps");
+    caps = parseOnOffValue(runProps, ns, "caps");
+    hidden = parseOnOffValue(runProps, ns, "vanish");
     
     // Kerning (minimum font size for kerning in half-points)
     const kernElement = getElementByTagNameNSFallback(runProps, ns, "kern");
