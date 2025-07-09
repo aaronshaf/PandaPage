@@ -33,6 +33,27 @@ export interface DocxRun {
   lang?: string; // Language code (w:lang)
 }
 
+export interface DocxBorder {
+  style?: 'single' | 'double' | 'thick' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot' | 'triple' | 'thickThinSmall' | 'thinThickSmall' | 'thinThickThinSmall' | 'thickThinMedium' | 'thinThickMedium' | 'thinThickThinMedium' | 'thickThinLarge' | 'thinThickLarge' | 'thinThickThinLarge' | 'wave' | 'doubleWave' | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' | 'outset' | 'inset' | 'none';
+  color?: string; // Hex color or 'auto'
+  size?: number; // Border width in eighth-points (1/8 of a point)
+  space?: number; // Space from text in points
+}
+
+export interface DocxShading {
+  fill?: string; // Background fill color (hex or 'auto')
+  color?: string; // Pattern color (hex or 'auto')
+  val?: 'clear' | 'solid' | 'horzStripe' | 'vertStripe' | 'reverseDiagStripe' | 'diagStripe' | 'horzCross' | 'diagCross' | 'thinHorzStripe' | 'thinVertStripe' | 'thinReverseDiagStripe' | 'thinDiagStripe' | 'thinHorzCross' | 'thinDiagCross' | 'pct5' | 'pct10' | 'pct12' | 'pct15' | 'pct20' | 'pct25' | 'pct30' | 'pct35' | 'pct37' | 'pct40' | 'pct45' | 'pct50' | 'pct55' | 'pct60' | 'pct62' | 'pct65' | 'pct70' | 'pct75' | 'pct80' | 'pct85' | 'pct87' | 'pct90' | 'pct95';
+}
+
+export interface DocxParagraphBorders {
+  top?: DocxBorder;
+  bottom?: DocxBorder;
+  left?: DocxBorder;
+  right?: DocxBorder;
+  between?: DocxBorder; // Border between consecutive paragraphs
+}
+
 export interface DocxParagraph {
   runs: DocxRun[];
   style?: string;
@@ -55,6 +76,8 @@ export interface DocxParagraph {
   };
   textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
   verticalAlignment?: 'top' | 'center' | 'bottom' | 'auto';
+  borders?: DocxParagraphBorders;
+  shading?: DocxShading;
 }
 
 export class DocxParseError {

@@ -1,5 +1,6 @@
 // Style parsing functions for DOCX
 import { WORD_NAMESPACE } from './types';
+import type { DocxBorder, DocxShading, DocxParagraphBorders } from './types';
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from './xml-utils';
 
 export interface DocxStyle {
@@ -31,6 +32,8 @@ export interface DocxParagraphProperties {
   outlineLevel?: number;
   textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
   verticalAlignment?: 'top' | 'center' | 'bottom' | 'auto';
+  borders?: DocxParagraphBorders;
+  shading?: DocxShading;
 }
 
 export interface DocxRunProperties {
@@ -276,6 +279,18 @@ function parseParagraphProperties(pPr: Element, ns: string): DocxParagraphProper
     }
   }
   
+  // Borders
+  const pBdr = getElementByTagNameNSFallback(pPr, ns, 'pBdr');
+  if (pBdr) {
+    props.borders = parseParagraphBorders(pBdr, ns);
+  }
+  
+  // Shading
+  const shd = getElementByTagNameNSFallback(pPr, ns, 'shd');
+  if (shd) {
+    props.shading = parseShading(shd);
+  }
+  
   return props;
 }
 
@@ -478,6 +493,19 @@ export function applyStyleCascade(
     if (resolvedStyle) {
       if (resolvedStyle.paragraphProperties) {
         finalParagraphProps = { ...finalParagraphProps, ...resolvedStyle.paragraphProperties };
+        // Deep merge borders and shading from style
+        if (resolvedStyle.paragraphProperties.borders) {
+          finalParagraphProps.borders = {
+            ...finalParagraphProps.borders,
+            ...resolvedStyle.paragraphProperties.borders
+          };
+        }
+        if (resolvedStyle.paragraphProperties.shading) {
+          finalParagraphProps.shading = {
+            ...finalParagraphProps.shading,
+            ...resolvedStyle.paragraphProperties.shading
+          };
+        }
       }
       if (resolvedStyle.runProperties) {
         finalRunProps = { ...finalRunProps, ...resolvedStyle.runProperties };
@@ -487,7 +515,33 @@ export function applyStyleCascade(
   
   // Apply paragraph-level properties
   if (paragraphProps) {
+    // Save borders and shading before spread (which might overwrite with undefined)
+    const preservedBorders = finalParagraphProps.borders;
+    const preservedShading = finalParagraphProps.shading;
+    
     finalParagraphProps = { ...finalParagraphProps, ...paragraphProps };
+    
+    // Restore borders if they were overwritten with undefined
+    if (paragraphProps.borders === undefined && preservedBorders) {
+      finalParagraphProps.borders = preservedBorders;
+    } else if (paragraphProps.borders && preservedBorders) {
+      // Deep merge if both exist
+      finalParagraphProps.borders = {
+        ...preservedBorders,
+        ...paragraphProps.borders
+      };
+    }
+    
+    // Restore shading if it was overwritten with undefined
+    if (paragraphProps.shading === undefined && preservedShading) {
+      finalParagraphProps.shading = preservedShading;
+    } else if (paragraphProps.shading && preservedShading) {
+      // Deep merge if both exist
+      finalParagraphProps.shading = {
+        ...preservedShading,
+        ...paragraphProps.shading
+      };
+    }
   }
   
   // Apply run-level properties
@@ -499,4 +553,102 @@ export function applyStyleCascade(
     paragraph: finalParagraphProps,
     run: finalRunProps
   };
+}
+
+/**
+ * Parse a border element
+ */
+function parseBorder(borderElement: Element | null): DocxBorder | undefined {
+  if (!borderElement) return undefined;
+  
+  const border: DocxBorder = {};
+  
+  // Border style
+  const val = borderElement.getAttribute('w:val');
+  if (val && val !== 'nil' && val !== 'none') {
+    border.style = val as DocxBorder['style'];
+  } else if (val === 'nil' || val === 'none') {
+    border.style = 'none';
+  }
+  
+  // Border color
+  const color = borderElement.getAttribute('w:color');
+  if (color && color !== 'auto') {
+    border.color = color.startsWith('#') ? color : `#${color}`;
+  }
+  
+  // Border size (in eighth-points)
+  const sz = borderElement.getAttribute('w:sz');
+  if (sz) {
+    border.size = parseInt(sz, 10);
+  }
+  
+  // Space from text (in points)
+  const space = borderElement.getAttribute('w:space');
+  if (space) {
+    border.space = parseInt(space, 10);
+  }
+  
+  return Object.keys(border).length > 0 ? border : undefined;
+}
+
+/**
+ * Parse paragraph borders
+ */
+function parseParagraphBorders(pBdrElement: Element, ns: string): DocxParagraphBorders | undefined {
+  const borders: DocxParagraphBorders = {};
+  
+  // Top border
+  const top = getElementByTagNameNSFallback(pBdrElement, ns, 'top');
+  const topBorder = parseBorder(top);
+  if (topBorder) borders.top = topBorder;
+  
+  // Bottom border
+  const bottom = getElementByTagNameNSFallback(pBdrElement, ns, 'bottom');
+  const bottomBorder = parseBorder(bottom);
+  if (bottomBorder) borders.bottom = bottomBorder;
+  
+  // Left border
+  const left = getElementByTagNameNSFallback(pBdrElement, ns, 'left');
+  const leftBorder = parseBorder(left);
+  if (leftBorder) borders.left = leftBorder;
+  
+  // Right border
+  const right = getElementByTagNameNSFallback(pBdrElement, ns, 'right');
+  const rightBorder = parseBorder(right);
+  if (rightBorder) borders.right = rightBorder;
+  
+  // Between border (for consecutive paragraphs with same style)
+  const between = getElementByTagNameNSFallback(pBdrElement, ns, 'between');
+  const betweenBorder = parseBorder(between);
+  if (betweenBorder) borders.between = betweenBorder;
+  
+  return Object.keys(borders).length > 0 ? borders : undefined;
+}
+
+/**
+ * Parse shading element
+ */
+function parseShading(shdElement: Element): DocxShading | undefined {
+  const shading: DocxShading = {};
+  
+  // Shading pattern
+  const val = shdElement.getAttribute('w:val');
+  if (val && val !== 'nil') {
+    shading.val = val as DocxShading['val'];
+  }
+  
+  // Fill color (background)
+  const fill = shdElement.getAttribute('w:fill');
+  if (fill && fill !== 'auto') {
+    shading.fill = fill.startsWith('#') ? fill : `#${fill}`;
+  }
+  
+  // Pattern color
+  const color = shdElement.getAttribute('w:color');
+  if (color && color !== 'auto') {
+    shading.color = color.startsWith('#') ? color : `#${color}`;
+  }
+  
+  return Object.keys(shading).length > 0 ? shading : undefined;
 }
