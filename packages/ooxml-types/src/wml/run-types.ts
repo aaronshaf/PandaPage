@@ -3,7 +3,8 @@
  * @see ECMA-376 Part 1, §17.3.2 (Run)
  */
 
-import type { ST_OnOff, ST_String, ST_Lang, ST_RelationshipId } from '../shared/common-types';
+import type { ST_OnOff, ST_String, ST_Lang } from '../shared/common-types';
+import type { ST_RelationshipId } from '../shared/relationship-types';
 import type { 
   CT_OnOff, 
   CT_String,
@@ -306,4 +307,4 @@ export interface CT_ParaRPr {
 }
 
 // Import missing type
-import type { ST_DecimalNumber } from '../shared/common-types';
+import type { ST_DecimalNumber } from '../shared/measurement-types';

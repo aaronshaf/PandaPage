@@ -6,6 +6,7 @@
 import type { ST_Percentage, ST_PositivePercentage, ST_PositiveFixedPercentage } from '../../shared/measurement-types';
 import type { ST_Coordinate32, ST_PositiveCoordinate32, CT_Ratio } from '../core/coordinate-types';
 import type { CT_OfficeArtExtensionList } from '../core/extension-types';
+import type { CT_BlurEffect, CT_FillOverlayEffect, ST_RectAlignment } from './effect-types';
 
 /**
  * Fill style list.
@@ -194,17 +195,6 @@ export enum ST_TileFlipMode {
  * Rectangle alignment.
  * @see ECMA-376 Part 1, §20.1.10.53 ST_RectAlignment
  */
-export enum ST_RectAlignment {
-  Tl = "tl",
-  T = "t",
-  Tr = "tr",
-  L = "l",
-  Ctr = "ctr",
-  R = "r",
-  Bl = "bl",
-  B = "b",
-  Br = "br",
-}
 
 /**
  * Stretch info properties.
@@ -300,11 +290,9 @@ export type CT_AlphaModulateEffect = any;
 export type CT_AlphaModulateFixedEffect = any;
 export type CT_AlphaReplaceEffect = any;
 export type CT_BiLevelEffect = any;
-export type CT_BlurEffect = any;
 export type CT_ColorChangeEffect = any;
 export type CT_ColorReplaceEffect = any;
 export type CT_DuotoneEffect = any;
-export type CT_FillOverlayEffect = any;
 export type CT_GrayscaleEffect = any;
 export type CT_HSLEffect = any;
 export type CT_LuminanceEffect = any;

@@ -1,5 +1,10 @@
 // math-types.ts
 import type { ST_OnOff, ST_String, ST_TwipsMeasure, ST_XAlign, ST_YAlign } from './shared-types';
+import type { CT_OnOff, CT_String } from './wml/basic-types';
+
+// Re-export common types for backward compatibility
+export type { CT_OnOff, CT_String } from './wml/basic-types';
+export type { CT_Text } from './wml/run-types';
 
 export type ST_Integer255 = number; // xsd:integer, minInclusive 1, maxInclusive 255
 export interface CT_Integer255 {
@@ -26,14 +31,6 @@ export interface CT_Char {
   val: ST_Char;
 }
 
-// Redefinitions of shared types as complex types with 'val' attribute
-export interface CT_OnOff {
-  val?: ST_OnOff;
-}
-
-export interface CT_String {
-  val?: ST_String;
-}
 
 export interface CT_XAlign {
   val: ST_XAlign;
@@ -116,10 +113,6 @@ export interface CT_RPR {
   aln?: CT_OnOff;
 }
 
-export interface CT_Text {
-  _text: ST_String;
-  "xml:space"?: ST_String;
-}
 
 export interface CT_R {
   rPr?: CT_RPR;

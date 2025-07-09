@@ -1,5 +1,6 @@
 // variant-types.ts
 import type { ST_Guid } from './shared-types';
+import type { CT_Empty } from './dml-main';
 
 export enum ST_VectorBaseType {
   Variant = "variant",
@@ -47,7 +48,6 @@ export enum ST_ArrayBaseType {
 export type ST_Cy = string; // pattern "\\s*[0-9]*\\.[0-9]{4}\\s*"
 export type ST_Error = string; // pattern "\\s*0x[0-9A-Za-z]{8}\\s*"
 
-export interface CT_Empty {}
 export interface CT_Null {}
 
 // Primitive types as elements
@@ -121,7 +121,7 @@ export type VariantValue =
   | { vstream: CT_Vstream }
   | { clsid: VT_Clsid };
 
-export interface CT_Variant extends VariantValue {}
+export type CT_Variant = VariantValue & {};
 
 export type VectorValue = 
   | { variant: CT_Variant }

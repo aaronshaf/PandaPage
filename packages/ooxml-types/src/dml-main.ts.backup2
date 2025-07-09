@@ -2123,8 +2123,9 @@ export interface CT_Char {
   char: string;
 }
 
-export interface CT_Empty {}
-
+export interface CT_Empty {
+  // Empty interface
+}
 
 export interface CT_ColorMapping {
   bg1?: string;
@@ -2480,6 +2481,11 @@ export interface CT_TextBody {
 
 
 
+}
+
+  ThaiDist = "thaiDist",
+}
+
 
 export interface CT_TextListStyle {
   defPPr?: CT_TextParagraphProperties;
@@ -2542,7 +2548,10 @@ export interface CT_TextAutonumberBullet {
   startAt?: number; // xsd:int
 }
 
-export interface CT_TextTabStopList {
+}
+
+}
+
   tab?: CT_TextTabStop[];
 }
 
@@ -2613,6 +2622,39 @@ export interface CT_TextUnderline {
   u?: ST_TextUnderlineType;
 }
 
+}
+
+
+  solidFill?: CT_SolidColorFillProperties;
+  gradFill?: CT_GradientFillProperties;
+  pattFill?: CT_PatternFillProperties;
+  prstDash?: CT_PresetLineDashProperties;
+  custDash?: CT_CustomDashProperties;
+  round?: CT_RoundLineCapProperties;
+  bevel?: CT_BevelLineCapProperties;
+  miter?: CT_MiterLimitProperties;
+  headEnd?: CT_LineEndProperties;
+  tailEnd?: CT_LineEndProperties;
+  extLst?: CT_OfficeArtExtensionList;
+  w?: ST_PositiveCoordinate;
+  cap?: ST_LineCap;
+  cmpd?: ST_CompoundLine;
+  algn?: ST_PenAlignment;
+}
+
 export interface CT_PresetLineDashProperties {
   val: ST_PresetLineDashVal;
+}
+
+}
+
+}
+
+
+
+
+
+export enum ST_PenAlignment {
+  Ctr = "ctr",
+  In = "in",
 }

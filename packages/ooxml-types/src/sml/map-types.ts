@@ -4,7 +4,7 @@
  */
 
 import type { ST_Xstring } from '../shared/common-types';
-import type { CT_ExtensionList } from '../spreadsheet-drawing-types';
+import type { CT_ExtensionList } from '../chart-types';
 
 /**
  * Schema.

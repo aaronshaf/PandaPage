@@ -5,12 +5,8 @@
 
 import type { ST_Xstring, ST_CalendarType } from '../shared/common-types';
 import type { CT_ExtensionList } from '../chart-types';
+import type { ST_Ref } from './cell-types';
 
-/**
- * Reference to a cell or range.
- * @see ECMA-376 Part 1, §18.18.62 ST_Ref
- */
-export type ST_Ref = string; // pattern: [A-Z]+[1-9][0-9]*\:[A-Z]+[1-9][0-9]*
 
 /**
  * DXF identifier.

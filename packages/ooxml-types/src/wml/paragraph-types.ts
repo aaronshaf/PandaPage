@@ -3,7 +3,8 @@
  * @see ECMA-376 Part 1, §17.3 (Paragraphs)
  */
 
-import type { ST_OnOff, ST_String, ST_DecimalNumber } from '../shared/common-types';
+import type { ST_OnOff, ST_String } from '../shared/common-types';
+import type { ST_DecimalNumber } from '../shared/measurement-types';
 import type { ST_TwipsMeasure } from '../shared/measurement-types';
 import type { ST_HexColor, ST_ThemeColor } from './text-formatting-types';
 import type { CT_Border, CT_Shd } from './border-shading-types';

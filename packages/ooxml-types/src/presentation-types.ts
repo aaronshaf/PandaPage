@@ -1,8 +1,10 @@
 // presentation-types.ts
-import type { ST_Coordinate, CT_PositiveSize2D, CT_EmbeddedWAVAudioFile, CT_OfficeArtExtensionList, CT_Percentage, CT_PositiveFixedPercentage, ST_Angle, CT_Color, CT_Point2D, CT_TextListStyle, CT_TextFont, CT_NonVisualDrawingProps, CT_NonVisualDrawingShapeProps, CT_ShapeProperties, CT_ShapeStyle, CT_TextBody, CT_NonVisualConnectorProperties, CT_BlipFillProperties, CT_NonVisualGraphicFrameProperties, CT_GraphicalObject, CT_Transform2D, ST_BlackWhiteMode, CT_NonVisualGroupDrawingShapeProps, CT_GroupShapeProperties, CT_BackgroundFormatting, CT_WholeE2oFormatting, EG_Media } from './dml-main';
-import type { ST_RelationshipId, ST_Guid } from './shared-types';
+import type { ST_Coordinate, CT_PositiveSize2D, CT_EmbeddedWAVAudioFile, CT_OfficeArtExtensionList, CT_Percentage, CT_PositiveFixedPercentage, ST_Angle, CT_Color, CT_Point2D, CT_TextListStyle, CT_TextFont, CT_NonVisualDrawingProps, CT_NonVisualDrawingShapeProps, CT_ShapeProperties, CT_ShapeStyle, CT_TextBody, CT_NonVisualConnectorProperties, CT_BlipFillProperties, CT_NonVisualGraphicFrameProperties, CT_GraphicalObject, CT_Transform2D, ST_BlackWhiteMode, CT_NonVisualGroupDrawingShapeProps, CT_GroupShapeProperties, CT_BackgroundFormatting, CT_WholeE2oFormatting, EG_Media, CT_ColorMapping, CT_ColorMappingOverride, CT_AnimationElementChoice, CT_AnimationGraphicalObjectBuildProperties, CT_NonVisualPictureProperties, CT_Scale2D, CT_StyleMatrixReference, EG_FillProperties, EG_EffectProperties } from './dml-main';
+import type { ST_RelationshipId, ST_Guid, ST_Percentage, ST_PositivePercentage, ST_FixedPercentage, ST_PositiveFixedPercentage, ST_ConformanceClass } from './shared-types';
+import type { CT_Empty } from './dml-main';
 import type { CT_Picture } from './picture-types';
 import type { EG_BlockLevelElts } from './wml';
+
 
 export enum ST_TransitionSideDirectionType {
   L = "l",
@@ -68,7 +70,6 @@ export interface CT_TransitionStartSoundAction {
   loop?: boolean;
 }
 
-export interface CT_Empty {}
 
 export interface CT_TransitionSoundAction {
   stSnd?: CT_TransitionStartSoundAction;
@@ -759,13 +760,13 @@ export interface CT_OleObjectLink {
 export interface CT_OleObject extends AG_Ole {
   embed?: CT_OleObjectEmbed;
   link?: CT_OleObjectLink;
-  pic: CT_Picture;
+  pic: CT_PresentationPicture;
   progId?: string;
 }
 
 export interface CT_Control extends AG_Ole {
   extLst?: CT_ExtensionList;
-  pic?: CT_Picture;
+  pic?: CT_PresentationPicture;
 }
 
 export interface CT_ControlList {
@@ -1097,7 +1098,7 @@ export interface CT_PictureNonVisual {
   nvPr: CT_ApplicationNonVisualDrawingProps;
 }
 
-export interface CT_Picture {
+export interface CT_PresentationPicture {
   nvPicPr: CT_PictureNonVisual;
   blipFill: CT_BlipFillProperties;
   spPr: CT_ShapeProperties;

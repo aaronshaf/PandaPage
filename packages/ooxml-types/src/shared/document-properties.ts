@@ -74,12 +74,12 @@ export interface CT_SchemaLibrary {
  * Custom property definition.
  * @see ECMA-376 Part 1, §22.3.2.2 CT_Property
  */
-export interface CT_Property extends VariantValue {
+export type CT_Property = VariantValue & {
   fmtid: ST_Guid;
   pid: number; // xsd:int
   name?: ST_String;
   linkTarget?: ST_String;
-}
+};
 
 /**
  * Custom properties container.

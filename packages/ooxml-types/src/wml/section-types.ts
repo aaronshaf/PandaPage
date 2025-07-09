@@ -3,7 +3,9 @@
  * @see ECMA-376 Part 1, §17.6 (Sections)
  */
 
-import type { ST_OnOff, ST_String, ST_DecimalNumber, ST_RelationshipId } from '../shared/common-types';
+import type { ST_OnOff, ST_String } from '../shared/common-types';
+import type { ST_DecimalNumber } from '../shared/measurement-types';
+import type { ST_RelationshipId } from '../shared/relationship-types';
 import type { ST_TwipsMeasure } from '../shared/measurement-types';
 import type { 
   ST_SignedTwipsMeasure,

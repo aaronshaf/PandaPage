@@ -3,7 +3,8 @@
  * @see ECMA-376 Part 1, §20.1.2.3 (Color Models)
  */
 
-import type { ST_Percentage, ST_HexColorRGB, ST_PositiveFixedAngle } from '../../shared/index';
+import type { ST_Percentage, ST_HexColorRGB } from '../../shared/index';
+import type { ST_PositiveFixedAngle } from '../core/coordinate-types';
 import type { EG_ColorTransform } from './color-transforms';
 
 /**

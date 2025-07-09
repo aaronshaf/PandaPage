@@ -3,9 +3,16 @@
  * @see ECMA-376 Part 1, §20.1.8 (Lines)
  */
 
-import type { ST_Coordinate32, ST_Percentage } from '../core/coordinate-types';
+import type { ST_Coordinate32 } from '../core/coordinate-types';
+import type { ST_Percentage } from '../../shared/measurement-types';
 import type { CT_OfficeArtExtensionList } from '../core/extension-types';
-import type { CT_FillProperties } from './fill-types';
+import type { 
+  CT_FillProperties, 
+  CT_SolidColorFillProperties, 
+  CT_GradientFillProperties, 
+  CT_PatternFillProperties,
+  CT_NoFillProperties 
+} from './fill-types';
 
 /**
  * Line style list.
@@ -38,31 +45,6 @@ export interface CT_LineProperties {
   algn?: ST_PenAlignment;
 }
 
-/**
- * No fill properties (for lines).
- */
-export type CT_NoFillProperties = Record<string, never>;
-
-/**
- * Solid color fill properties (for lines).
- */
-export interface CT_SolidColorFillProperties {
-  color?: any; // Placeholder for EG_ColorChoice
-}
-
-/**
- * Gradient fill properties (for lines).
- */
-export interface CT_GradientFillProperties {
-  // Defined in fill-types.ts
-}
-
-/**
- * Pattern fill properties (for lines).
- */
-export interface CT_PatternFillProperties {
-  // Defined in fill-types.ts
-}
 
 /**
  * Preset line dash properties.

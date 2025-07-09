@@ -4,7 +4,10 @@
  */
 
 import type { ST_OnOff, ST_String, ST_HexColorRGB } from '../shared/common-types';
-import type { ST_UcharHexNumber, ST_HpsMeasure, CT_HpsMeasure } from './basic-types';
+import type { ST_UniversalMeasure } from '../shared/measurement-types';
+import type { ST_TwipsMeasure } from '../shared/measurement-types';
+import type { ST_UcharHexNumber, ST_HpsMeasure, CT_HpsMeasure, CT_SignedTwipsMeasure } from './basic-types';
+import type { ST_TextAlignment, CT_TextAlignment } from './paragraph-types';
 
 /**
  * Highlight colors.
@@ -138,25 +141,6 @@ export interface CT_TextEffect {
   val?: ST_TextEffect;
 }
 
-/**
- * Text alignment.
- * @see ECMA-376 Part 1, §17.18.93 ST_TextAlignment
- */
-export enum ST_TextAlignment {
-  Top = "top",
-  Center = "center",
-  Baseline = "baseline",
-  Bottom = "bottom",
-  Auto = "auto",
-}
-
-/**
- * Text alignment.
- * @see ECMA-376 Part 1, §17.3.2.41 CT_TextAlignment
- */
-export interface CT_TextAlignment {
-  val?: ST_TextAlignment;
-}
 
 /**
  * Font size in half-points.
@@ -182,9 +166,6 @@ export interface CT_TextScale {
  * Character spacing.
  * @see ECMA-376 Part 1, §17.3.2.35 CT_SignedTwipsMeasure
  */
-export interface CT_SignedTwipsMeasure {
-  val: number | ST_UniversalMeasure;
-}
 
 /**
  * Universal measure (imported from basic-types).
