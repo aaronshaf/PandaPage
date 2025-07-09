@@ -6,7 +6,7 @@ import { FieldCode } from "./form-field-parser";
 describe("DOCX Reader - Field Integration", () => {
   test("should parse paragraphs with form fields", async () => {
     const documentXml = `<?xml version="1.0"?>
-      <w:document>
+      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p>
             <w:r><w:t>Name: </w:t></w:r>
@@ -46,7 +46,7 @@ describe("DOCX Reader - Field Integration", () => {
 
   test("should parse paragraphs with multiple fields", async () => {
     const documentXml = `<?xml version="1.0"?>
-      <w:document>
+      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p>
             <w:r><w:t>Meeting Date: </w:t></w:r>
@@ -81,7 +81,7 @@ describe("DOCX Reader - Field Integration", () => {
 
   test("should handle paragraphs without fields", async () => {
     const documentXml = `<?xml version="1.0"?>
-      <w:document>
+      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p>
             <w:r><w:t>This is a regular paragraph without any fields.</w:t></w:r>
@@ -98,7 +98,7 @@ describe("DOCX Reader - Field Integration", () => {
 
   test("should parse complex field with formatting", async () => {
     const documentXml = `<?xml version="1.0"?>
-      <w:document>
+      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p>
             <w:pPr>
@@ -148,7 +148,7 @@ describe("DOCX Reader - Field Integration", () => {
 
   test("should handle page numbering fields", async () => {
     const documentXml = `<?xml version="1.0"?>
-      <w:document>
+      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p>
             <w:r><w:t>Page </w:t></w:r>
