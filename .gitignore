@@ -39,8 +39,8 @@ node_modules/
 pdf.js
 tmp
 *.tmp.*
-TODO.md
 
 # Playwright test results
 **/test-results/
 **/playwright-report/
+TODO.md

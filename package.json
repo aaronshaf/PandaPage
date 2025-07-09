@@ -19,7 +19,8 @@
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
-    "precommit": "bun run lint && bun run typecheck && bun run test:unit",
+    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun run test:unit",
+    "check-file-sizes": "node scripts/check-file-sizes.cjs",
     "prepare": "simple-git-hooks",
     "sync-docs": "bun scripts/sync-documents.js"
   },

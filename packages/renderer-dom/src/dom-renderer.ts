@@ -2,65 +2,30 @@
 import type {
   ParsedDocument,
   DocumentElement,
-  Paragraph,
-  Heading,
-  Table,
-  TextRun,
-  Image,
-  Footnote,
-  FootnoteReference,
   Header,
   Footer,
-  Bookmark,
-  PageBreak,
-  HeaderFooterInfo
 } from '@browser-document-viewer/parser';
+
+import { getHeaderForPage, getFooterForPage } from './utils';
+import { applyPageStyles, applyContentStyles } from './page-layout';
+import { 
+  renderParagraph, 
+  renderHeading, 
+  renderTable, 
+  renderImage, 
+  renderFootnote, 
+  renderFootnoteReference, 
+  renderBookmark, 
+  renderPageBreak 
+} from './element-renderers';
+import { splitIntoPages } from './page-splitter';
+import { renderHeader, renderHeaderWithPageNumber, renderFooter, renderFooterWithPageNumber } from './header-footer-renderer';
+import { addStyles } from './styles';
 
 export interface DOMRenderOptions {
   document?: Document;
   includeStyles?: boolean;
   pageSize?: 'letter' | 'a4';
-}
-
-// Pure functions for header/footer selection
-function getHeaderForPage(pageNumber: number, headers: HeaderFooterInfo): Header | undefined {
-  // For first page, use first page header if available
-  if (pageNumber === 1 && headers.first) {
-    return headers.first as Header;
-  }
-  
-  // For even pages, use even header if available
-  if (pageNumber % 2 === 0 && headers.even) {
-    return headers.even as Header;
-  }
-  
-  // For odd pages, use odd header if available
-  if (pageNumber % 2 === 1 && headers.odd) {
-    return headers.odd as Header;
-  }
-  
-  // Otherwise use default header
-  return headers.default as Header | undefined;
-}
-
-function getFooterForPage(pageNumber: number, footers: HeaderFooterInfo): Footer | undefined {
-  // For first page, use first page footer if available
-  if (pageNumber === 1 && footers.first) {
-    return footers.first as Footer;
-  }
-  
-  // For even pages, use even footer if available
-  if (pageNumber % 2 === 0 && footers.even) {
-    return footers.even as Footer;
-  }
-  
-  // For odd pages, use odd footer if available
-  if (pageNumber % 2 === 1 && footers.odd) {
-    return footers.odd as Footer;
-  }
-  
-  // Otherwise use default footer
-  return footers.default as Footer | undefined;
 }
 
 export class DOMRenderer {
@@ -100,11 +65,11 @@ export class DOMRenderer {
     
     // Add styles
     if (typeof document !== 'undefined') {
-      this.addStyles();
+      addStyles();
     }
     
     // Split content into pages based on page breaks
-    const pages = this.splitIntoPages(parsedDoc.elements);
+    const pages = splitIntoPages(parsedDoc.elements);
     this.totalPages = pages.length;
     
     // Render each page with appropriate footers
@@ -115,20 +80,20 @@ export class DOMRenderer {
       pageDiv.setAttribute('data-page-number', this.currentPageNumber.toString());
       
       // Apply page-specific dimensions and margins as inline styles
-      this.applyPageStyles(pageDiv, parsedDoc, pageIndex);
+      applyPageStyles(pageDiv, parsedDoc, pageIndex);
       
       // Create page content wrapper
       const contentDiv = this.doc.createElement('div');
       contentDiv.className = 'page-content';
       
       // Apply content-specific styles (no padding, extends to page margins)
-      this.applyContentStyles(contentDiv, parsedDoc, pageIndex);
+      applyContentStyles(contentDiv, parsedDoc, pageIndex);
       
       // Add header to page if available (skip first page for Chicago style)
       if (parsedDoc.headers && this.currentPageNumber > 1) {
         const header = getHeaderForPage(this.currentPageNumber, parsedDoc.headers);
         if (header) {
-          const headerEl = this.renderHeaderWithPageNumber(header, this.currentPageNumber, this.totalPages);
+          const headerEl = renderHeaderWithPageNumber(header, this.currentPageNumber, this.totalPages, this.doc);
           pageDiv.appendChild(headerEl);
         }
       }
@@ -147,7 +112,7 @@ export class DOMRenderer {
       if (parsedDoc.footers) {
         const footer = getFooterForPage(this.currentPageNumber, parsedDoc.footers);
         if (footer) {
-          const footerEl = this.renderFooterWithPageNumber(footer, this.currentPageNumber, this.totalPages);
+          const footerEl = renderFooterWithPageNumber(footer, this.currentPageNumber, this.totalPages, this.doc);
           pageDiv.appendChild(footerEl);
         }
       }
@@ -158,749 +123,31 @@ export class DOMRenderer {
     return container;
   }
   
-  private applyPageStyles(pageDiv: HTMLElement, parsedDoc: ParsedDocument, pageIndex: number): void {
-    // For now, apply default page styles until document sections are available
-    // TODO: Use parsedDoc.sections[pageIndex] when available
-    const defaultPageWidth = '8.5in';
-    const defaultPageHeight = '11in';
-    const defaultMargin = '1in';
-    
-    // Apply page container styles
-    pageDiv.style.width = defaultPageWidth;
-    pageDiv.style.minHeight = defaultPageHeight;
-    pageDiv.style.margin = '0 auto 2rem auto';
-    pageDiv.style.background = 'white';
-    pageDiv.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 1px 3px -1px rgba(0, 0, 0, 0.06)';
-    pageDiv.style.padding = defaultMargin;
-    pageDiv.style.position = 'relative';
-    pageDiv.style.pageBreakAfter = 'always';
-    pageDiv.style.border = '1px solid #e5e7eb';
-    pageDiv.style.boxSizing = 'border-box';
-  }
-  
-  private applyContentStyles(contentDiv: HTMLElement, parsedDoc: ParsedDocument, pageIndex: number): void {
-    // Remove padding from content - it should extend to the page margins
-    contentDiv.style.padding = '0';
-    contentDiv.style.paddingBottom = '0.5in'; // Space for footer
-    contentDiv.style.fontSize = '12pt';
-    contentDiv.style.lineHeight = '1.2';
-    contentDiv.style.position = 'relative';
-    
-    // Add top padding for header on pages after the first
-    if (pageIndex > 0) {
-      contentDiv.style.paddingTop = '0.75in'; // Space for header with page number
-    }
-    
-    // TODO: When document sections are available, calculate content area based on page dimensions
-    // const section = parsedDoc.sections?.[pageIndex];
-    // if (section?.properties?.pageSize && section.properties.margins) {
-    //   const pageWidth = section.properties.pageSize.width;
-    //   const pageHeight = section.properties.pageSize.height;
-    //   const margins = section.properties.margins;
-    //   // Calculate content area and apply styles
-    // }
-  }
-  
   renderElement(element: DocumentElement): HTMLElement | null {
     switch (element.type) {
       case 'paragraph':
-        return this.renderParagraph(element);
+        return renderParagraph(element, this.doc, this.currentPageNumber, this.totalPages);
       case 'heading':
-        return this.renderHeading(element);
+        return renderHeading(element, this.doc, this.currentPageNumber, this.totalPages);
       case 'table':
-        return this.renderTable(element);
+        return renderTable(element, this.doc, this.currentPageNumber, this.totalPages);
       case 'footer':
-        return this.renderFooter(element);
+        return renderFooter(element, this.doc, this.currentPageNumber, this.totalPages);
       case 'header':
-        return this.renderHeader(element);
+        return renderHeader(element, this.doc, this.currentPageNumber, this.totalPages);
       case 'footnote':
-        return this.renderFootnote(element);
+        return renderFootnote(element, this.doc, this.currentPageNumber, this.totalPages);
       case 'footnoteReference':
-        return this.renderFootnoteReference(element);
+        return renderFootnoteReference(element, this.doc);
       case 'bookmark':
-        return this.renderBookmark(element);
+        return renderBookmark(element, this.doc);
       case 'image':
-        return this.renderImage(element);
+        return renderImage(element, this.doc);
       case 'pageBreak':
-        return this.renderPageBreak();
+        return renderPageBreak(this.doc);
       default:
         return null;
     }
-  }
-  
-  private renderParagraph(paragraph: Paragraph, context?: { inTableCell?: boolean }): HTMLElement {
-    const p = this.doc.createElement('p');
-    // Only add margin if not in a table cell
-    if (!context?.inTableCell) {
-      p.style.marginBottom = '12pt'; // Standard paragraph spacing
-    }
-    
-    // Add alignment
-    if (paragraph.alignment) {
-      p.style.textAlign = paragraph.alignment;
-    }
-    
-    // Render runs
-    paragraph.runs.forEach(run => {
-      const span = this.renderTextRun(run);
-      p.appendChild(span);
-    });
-    
-    // Add images if present
-    if (paragraph.images) {
-      paragraph.images.forEach(image => {
-        const img = this.renderImage(image);
-        if (img) p.appendChild(img);
-      });
-    }
-    
-    return p;
-  }
-  
-  private renderTextRun(run: TextRun): HTMLElement {
-    // Handle field codes
-    if ((run as any)._fieldCode) {
-      const fieldCode = (run as any)._fieldCode;
-      let modifiedRun = { ...run };
-      
-      switch (fieldCode) {
-        case 'PAGE':
-          modifiedRun.text = this.currentPageNumber.toString();
-          break;
-        case 'NUMPAGES':
-          modifiedRun.text = this.totalPages.toString();
-          break;
-      }
-      
-      run = modifiedRun;
-    }
-    // Check for footnote reference first
-    if ((run as any)._footnoteRef) {
-      const footnoteId = (run as any)._footnoteRef;
-      const link = this.doc.createElement('a');
-      link.href = `#footnote-${footnoteId}`;
-      link.className = 'footnote-reference';
-      link.setAttribute('data-footnote-id', footnoteId);
-      
-      const sup = this.doc.createElement('sup');
-      sup.textContent = run.text;
-      link.appendChild(sup);
-      
-      return link;
-    }
-    
-    let element: HTMLElement;
-    
-    // Handle links
-    if (run.link) {
-      element = this.doc.createElement('a');
-      (element as HTMLAnchorElement).href = run.link;
-      element.setAttribute('target', '_blank');
-      element.setAttribute('rel', 'noopener noreferrer');
-      // Only add onclick in browser environment
-      if (typeof window !== 'undefined') {
-        element.setAttribute('onclick', 'return confirmDocumentLink(this.href)');
-      }
-    } else {
-      element = this.doc.createElement('span');
-    }
-    
-    // Apply formatting styles
-    if (run.bold) element.style.fontWeight = 'bold';
-    if (run.italic) element.style.fontStyle = 'italic';
-    if (run.underline) element.style.textDecoration = 'underline';
-    if (run.strikethrough) element.style.textDecoration = 'line-through';
-    
-    // Apply inline styles
-    const styles: string[] = [];
-    if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
-    if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
-    if (run.color) styles.push(`color: ${run.color}`);
-    if (run.backgroundColor) styles.push(`background-color: ${run.backgroundColor}`);
-    
-    if (styles.length > 0) {
-      element.style.cssText = styles.join('; ');
-    }
-    
-    // Handle superscript/subscript
-    if (run.superscript) {
-      const sup = this.doc.createElement('sup');
-      sup.textContent = run.text;
-      element.appendChild(sup);
-    } else if (run.subscript) {
-      const sub = this.doc.createElement('sub');
-      sub.textContent = run.text;
-      element.appendChild(sub);
-    } else {
-      element.textContent = run.text;
-    }
-    
-    return element;
-  }
-  
-  private renderTable(table: Table): HTMLElement {
-    const tableEl = this.doc.createElement('table');
-    tableEl.style.borderCollapse = 'collapse';
-    tableEl.style.marginBottom = '12pt';
-    
-    table.rows.forEach((row, rowIndex) => {
-      const tr = this.doc.createElement('tr');
-      
-      row.cells.forEach(cell => {
-        const isHeader = rowIndex === 0;
-        const td = this.doc.createElement(isHeader ? 'th' : 'td');
-        
-        // Add border and padding styles
-        td.style.border = '1px solid #ccc';
-        td.style.padding = '4pt'; // Standard cell padding
-        
-        if (isHeader) {
-          td.style.fontWeight = '600';
-          
-          // Check if content has white text and add dark background
-          const hasWhiteText = cell.paragraphs.some(p => 
-            p.runs.some(r => r.color === '#FFFFFF' || r.color === '#ffffff')
-          );
-          
-          if (hasWhiteText) {
-            td.style.backgroundColor = '#1f2937';
-            td.style.color = 'white';
-          } else {
-            td.style.backgroundColor = '#f3f4f6';
-          }
-        }
-        
-        // Add cell attributes
-        if (cell.colspan) td.setAttribute('colspan', cell.colspan.toString());
-        if (cell.rowspan) td.setAttribute('rowspan', cell.rowspan.toString());
-        
-        // Render cell content
-        if (cell.paragraphs.length === 0 || 
-            (cell.paragraphs.length === 1 && 
-             cell.paragraphs[0] && 
-             cell.paragraphs[0].runs.length === 0)) {
-          // Empty cell - don't create empty paragraph
-          td.innerHTML = '&nbsp;';
-        } else {
-          cell.paragraphs.forEach(paragraph => {
-            const p = this.renderParagraph(paragraph, { inTableCell: true });
-            td.appendChild(p);
-          });
-        }
-        
-        tr.appendChild(td);
-      });
-      
-      tableEl.appendChild(tr);
-    });
-    
-    return tableEl;
-  }
-  
-  private renderFooter(footer: any): HTMLElement {
-    // This is now only used for inline footers in the document
-    // For page footers, use renderFooterWithPageNumber
-    return this.renderFooterWithPageNumber(footer, this.currentPageNumber, this.totalPages);
-  }
-  
-  private renderHeader(header: any): HTMLElement {
-    const headerEl = this.doc.createElement('header');
-    headerEl.style.marginBottom = '12pt';
-    headerEl.style.paddingBottom = '8pt';
-    headerEl.style.borderBottom = '1px solid #d1d5db';
-    
-    header.elements.forEach((el: any) => {
-      if (el.type === 'paragraph') {
-        headerEl.appendChild(this.renderParagraph(el, { inTableCell: false }));
-      } else if (el.type === 'table') {
-        headerEl.appendChild(this.renderTable(el));
-      }
-    });
-    
-    return headerEl;
-  }
-  
-  private renderHeading(heading: Heading): HTMLElement {
-    const h = this.doc.createElement(`h${heading.level}`);
-    h.style.marginBottom = '12pt'; // Standard heading spacing
-    h.style.fontWeight = 'bold';
-    
-    // Add size styles based on level (using points for document consistency)
-    const fontSizes = {
-      1: '24pt',  // Heading 1
-      2: '20pt',  // Heading 2
-      3: '16pt',  // Heading 3
-      4: '14pt',  // Heading 4
-      5: '12pt',  // Heading 5
-      6: '11pt'   // Heading 6
-    };
-    h.style.fontSize = fontSizes[heading.level] || '12pt';
-    
-    // Add alignment
-    if (heading.alignment) {
-      h.style.textAlign = heading.alignment;
-    }
-    
-    // Render runs
-    heading.runs.forEach(run => {
-      h.appendChild(this.renderTextRun(run));
-    });
-    
-    return h;
-  }
-  
-  private renderFootnote(footnote: any): HTMLElement {
-    const div = this.doc.createElement('div');
-    div.className = 'footnote';
-    div.id = `footnote-${footnote.id}`;
-    div.setAttribute('data-footnote-id', footnote.id);
-    
-    const contentDiv = this.doc.createElement('div');
-    contentDiv.className = 'footnote-content';
-    
-    const numberSpan = this.doc.createElement('span');
-    numberSpan.className = 'footnote-number';
-    numberSpan.textContent = footnote.id;
-    contentDiv.appendChild(numberSpan);
-    
-    const textDiv = this.doc.createElement('div');
-    textDiv.className = 'footnote-text';
-    
-    footnote.elements.forEach((el: any) => {
-      if (el.type === 'paragraph') {
-        textDiv.appendChild(this.renderParagraph(el, { inTableCell: false }));
-      } else if (el.type === 'table') {
-        textDiv.appendChild(this.renderTable(el));
-      }
-    });
-    
-    contentDiv.appendChild(textDiv);
-    div.appendChild(contentDiv);
-    return div;
-  }
-  
-  private renderFootnoteReference(footnoteRef: any): HTMLElement {
-    const link = this.doc.createElement('a');
-    link.href = `#footnote-${footnoteRef.id}`;
-    link.className = 'footnote-reference';
-    link.setAttribute('data-footnote-id', footnoteRef.id);
-    
-    const sup = this.doc.createElement('sup');
-    sup.textContent = footnoteRef.text;
-    link.appendChild(sup);
-    
-    return link;
-  }
-  
-  private renderBookmark(bookmark: any): HTMLElement {
-    const span = this.doc.createElement('span');
-    span.id = bookmark.name;
-    span.className = 'bookmark-anchor';
-    span.setAttribute('data-bookmark-id', bookmark.id);
-    return span;
-  }
-  
-  private renderImage(image: Image): HTMLElement {
-    const img = this.doc.createElement('img');
-    
-    // Convert ArrayBuffer to base64
-    const imgData = btoa(String.fromCharCode(...new Uint8Array(image.data)));
-    img.src = `data:${image.mimeType};base64,${imgData}`;
-    
-    if (image.width) img.width = image.width;
-    if (image.height) img.height = image.height;
-    if (image.alt) img.alt = image.alt;
-    
-    img.style.maxWidth = '100%';
-    img.style.height = 'auto';
-    img.style.marginBottom = '12pt';
-    
-    return img;
-  }
-  
-  private renderPageBreak(): HTMLElement {
-    const div = this.doc.createElement('div');
-    div.className = 'page-break';
-    div.style.pageBreakAfter = 'always';
-    return div;
-  }
-  
-  private addStyles(): void {
-    // Add CSS styles to document head if they don't exist
-    const existingStyle = document.getElementById('browser-document-viewer-styles');
-    if (existingStyle) return;
-    
-    const style = document.createElement('style');
-    style.id = 'browser-document-viewer-styles';
-    style.textContent = `
-      .page {
-        /* Page styles are now applied inline for dynamic dimensions */
-        /* Only shared styles remain here */
-        position: relative;
-        box-sizing: border-box;
-      }
-      
-      .page-content {
-        /* Content styles are now applied inline for dynamic dimensions */
-        /* Only shared styles remain here */
-        position: relative;
-        box-sizing: border-box;
-      }
-      
-      .footer {
-        position: absolute;
-        bottom: 0;
-        left: 1in;
-        right: 1in;
-        padding-bottom: 0.5in;
-      }
-      
-      .footnote-reference {
-        color: #3b82f6;
-        text-decoration: none;
-        font-weight: 500;
-      }
-      
-      .footnote-reference:hover {
-        text-decoration: underline;
-      }
-      
-      .footnote {
-        margin-top: 20pt;
-        padding: 0;
-        background-color: transparent;
-        border: none;
-        border-top: 1px solid #ccc;
-        padding-top: 8pt;
-        font-size: 10pt;
-        line-height: 14pt;
-      }
-      
-      .footnote-content {
-        font-size: 10pt;
-        line-height: 14pt;
-        display: flex;
-        gap: 0.5rem;
-      }
-      
-      .footnote-number {
-        font-weight: 600;
-        color: #374151;
-        min-width: 1.5rem;
-        flex-shrink: 0;
-      }
-      
-      .footnote-text {
-        flex: 1;
-      }
-      
-      .bookmark-anchor {
-        display: inline-block;
-        width: 0;
-        height: 0;
-        overflow: hidden;
-      }
-      
-      @media print {
-        .page {
-          page-break-after: always;
-          margin: 0;
-          box-shadow: none;
-        }
-      }
-    `;
-    
-    document.head.appendChild(style);
-  }
-  
-  private splitIntoPages(elements: DocumentElement[]): DocumentElement[][] {
-    const pages: DocumentElement[][] = [];
-    const footnotesById = new Map<string, Footnote>();
-    
-    // First pass: collect all footnotes
-    elements.forEach(element => {
-      if (element.type === 'footnote') {
-        const footnote = element as Footnote;
-        footnotesById.set(footnote.id, footnote);
-      }
-    });
-    
-    // Constants for page layout (in approximate lines)
-    const MAX_LINES_PER_PAGE = 54; // ~9 inches at 6 lines per inch
-    const LINES_PER_FOOTNOTE = 2.5; // Average lines per footnote
-    const FOOTNOTE_SEPARATOR_LINES = 1; // Space for footnote separator line
-    
-    let currentPage: DocumentElement[] = [];
-    let currentPageHeight = 0;
-    let currentPageFootnotes = new Set<string>();
-    let pageFootnotesHeight = 0;
-    
-    // Helper to estimate element height in lines
-    const estimateElementHeight = (element: DocumentElement): number => {
-      switch (element.type) {
-        case 'paragraph': {
-          const text = element.runs.map(r => r.text).join('');
-          const lines = Math.max(1, Math.ceil(text.length / 80)); // ~80 chars per line
-          return lines * 1.5; // Add spacing
-        }
-        case 'heading':
-          return element.level <= 2 ? 3 : 2.5;
-        case 'table':
-          return element.rows.length * 1.5 + 1;
-        case 'pageBreak':
-          return 0;
-        default:
-          return 1;
-      }
-    };
-    
-    // Helper to finalize current page
-    const finalizePage = () => {
-      if (currentPage.length > 0 || currentPageFootnotes.size > 0) {
-        // Add footnotes to the current page
-        if (currentPageFootnotes.size > 0) {
-          // Sort footnotes numerically
-          const sortedIds = Array.from(currentPageFootnotes).sort((a, b) => {
-            const numA = parseInt(a, 10);
-            const numB = parseInt(b, 10);
-            return numA - numB;
-          });
-          
-          // Add each footnote
-          sortedIds.forEach(id => {
-            const footnote = footnotesById.get(id);
-            if (footnote) {
-              currentPage.push(footnote);
-            }
-          });
-        }
-        
-        pages.push(currentPage);
-        currentPage = [];
-        currentPageHeight = 0;
-        currentPageFootnotes = new Set<string>();
-        pageFootnotesHeight = 0;
-      }
-    };
-    
-    // Process each element
-    elements.forEach(element => {
-      // Skip footnotes as they're added at page end
-      if (element.type === 'footnote' || element.type === 'header' || element.type === 'footer') {
-        return;
-      }
-      
-      // Handle explicit page breaks
-      if (element.type === 'pageBreak') {
-        finalizePage();
-        return;
-      }
-      
-      // Find footnote references in this element
-      const elementFootnotes = new Set<string>();
-      this.findFootnoteReferences(element, elementFootnotes);
-      
-      // Calculate space needed for new footnotes
-      let newFootnotesHeight = 0;
-      elementFootnotes.forEach(id => {
-        if (!currentPageFootnotes.has(id)) {
-          newFootnotesHeight += LINES_PER_FOOTNOTE;
-        }
-      });
-      
-      // Add separator line if this page will have footnotes
-      if (currentPageFootnotes.size === 0 && elementFootnotes.size > 0) {
-        newFootnotesHeight += FOOTNOTE_SEPARATOR_LINES;
-      }
-      
-      const elementHeight = estimateElementHeight(element);
-      const totalRequiredHeight = currentPageHeight + elementHeight + pageFootnotesHeight + newFootnotesHeight;
-      
-      // Check if we need a new page
-      if (totalRequiredHeight > MAX_LINES_PER_PAGE && currentPage.length > 0) {
-        finalizePage();
-      }
-      
-      // Add element to current page
-      currentPage.push(element);
-      currentPageHeight += elementHeight;
-      
-      // Track footnotes for this page
-      elementFootnotes.forEach(id => {
-        if (!currentPageFootnotes.has(id)) {
-          currentPageFootnotes.add(id);
-          pageFootnotesHeight += LINES_PER_FOOTNOTE;
-          if (currentPageFootnotes.size === 1) {
-            pageFootnotesHeight += FOOTNOTE_SEPARATOR_LINES;
-          }
-        }
-      });
-    });
-    
-    // Finalize the last page
-    finalizePage();
-    
-    // Ensure at least one page exists
-    if (pages.length === 0) {
-      pages.push([]);
-    }
-    
-    return pages;
-  }
-  
-  private findFootnoteReferences(element: DocumentElement, referencedFootnotes: Set<string>): void {
-    if (element.type === 'paragraph') {
-      element.runs.forEach(run => {
-        if ((run as any)._footnoteRef) {
-          referencedFootnotes.add((run as any)._footnoteRef);
-        }
-      });
-    } else if (element.type === 'footnoteReference') {
-      referencedFootnotes.add((element as any).id);
-    } else if (element.type === 'table') {
-      element.rows.forEach(row => {
-        row.cells.forEach(cell => {
-          cell.paragraphs.forEach(paragraph => {
-            this.findFootnoteReferences(paragraph, referencedFootnotes);
-          });
-        });
-      });
-    }
-  }
-  
-  private renderHeaderWithPageNumber(header: Header, pageNumber: number, totalPages: number): HTMLElement {
-    // Store current page context
-    const prevPageNumber = this.currentPageNumber;
-    const prevTotalPages = this.totalPages;
-    this.currentPageNumber = pageNumber;
-    this.totalPages = totalPages;
-    
-    const headerEl = this.doc.createElement('header');
-    headerEl.className = 'header';
-    headerEl.style.position = 'absolute';
-    headerEl.style.top = '0.5in';
-    headerEl.style.right = '1in';
-    headerEl.style.left = '1in';
-    headerEl.style.fontSize = '12pt';
-    headerEl.style.fontFamily = 'Times New Roman, serif';
-    headerEl.style.lineHeight = '1';
-    
-    // Create a container div for the header content
-    const contentDiv = this.doc.createElement('div');
-    contentDiv.style.width = '100%';
-    
-    // Render header elements
-    header.elements.forEach((el: any) => {
-      if (el.type === 'paragraph') {
-        const p = this.renderParagraph(el, { inTableCell: false });
-        // Remove default paragraph margin for headers
-        p.style.margin = '0';
-        p.style.marginBottom = '0';
-        contentDiv.appendChild(p);
-      } else if (el.type === 'table') {
-        const table = this.renderTable(el);
-        contentDiv.appendChild(table);
-      }
-    });
-    
-    headerEl.appendChild(contentDiv);
-    
-    // Restore page context
-    this.currentPageNumber = prevPageNumber;
-    this.totalPages = prevTotalPages;
-    
-    return headerEl;
-  }
-  
-  private renderFooterWithPageNumber(footer: Footer, pageNumber: number, totalPages: number): HTMLElement {
-    // Store current page context
-    const prevPageNumber = this.currentPageNumber;
-    const prevTotalPages = this.totalPages;
-    this.currentPageNumber = pageNumber;
-    this.totalPages = totalPages;
-    
-    const footerEl = this.doc.createElement('footer');
-    footerEl.className = 'footer'; // Keep footer class for positioning
-    footerEl.style.marginTop = '12pt';
-    footerEl.style.paddingTop = '8pt';
-    footerEl.style.borderTop = '1px solid #d1d5db';
-    
-    footer.elements.forEach((el: any) => {
-      if (el.type === 'paragraph') {
-        // Check if this is a footer with recipient name and page number
-        const fullText = el.runs?.map((r: any) => r.text).join('') || '';
-        
-        if (fullText.includes('[Recipient') && fullText.includes('Recovery Plan')) {
-          // Check if there's actually a tab character in the runs
-          const hasTab = el.runs?.some((r: any) => r.text?.includes('\t')) || false;
-          
-          if (hasTab) {
-            // Create flex container for left-right alignment
-            const flexDiv = this.doc.createElement('div');
-            flexDiv.style.display = 'flex';
-            flexDiv.style.justifyContent = 'space-between';
-            flexDiv.style.alignItems = 'center';
-            flexDiv.style.marginBottom = '12pt';
-            
-            const leftDiv = this.doc.createElement('div');
-            leftDiv.style.flex = '1';
-            
-            const rightDiv = this.doc.createElement('div');
-            rightDiv.style.flexShrink = '0';
-            
-            let foundTab = false;
-            const runs = el.runs || [];
-            
-            for (const run of runs) {
-              const text = run.text || '';
-              
-              // Check if this run contains a tab
-              if (text.includes('\t')) {
-                // Split on tab
-                const parts = text.split('\t');
-                
-                // Add pre-tab content to left
-                if (parts[0]) {
-                  const leftRun = { ...run, text: parts[0] };
-                  leftDiv.appendChild(this.renderTextRun(leftRun));
-                }
-                
-                // Add post-tab content to right
-                if (parts[1]) {
-                  const rightRun = { ...run, text: parts[1] };
-                  rightDiv.appendChild(this.renderTextRun(rightRun));
-                }
-                
-                foundTab = true;
-              } else if (!foundTab) {
-                // Before tab, add to left
-                leftDiv.appendChild(this.renderTextRun(run));
-              } else {
-                // After tab, add to right
-                rightDiv.appendChild(this.renderTextRun(run));
-              }
-            }
-            
-            flexDiv.appendChild(leftDiv);
-            flexDiv.appendChild(rightDiv);
-            footerEl.appendChild(flexDiv);
-          } else {
-            // No tab found, render normally
-            footerEl.appendChild(this.renderParagraph(el, { inTableCell: false }));
-          }
-        } else {
-          footerEl.appendChild(this.renderParagraph(el, { inTableCell: false }));
-        }
-      } else if (el.type === 'table') {
-        footerEl.appendChild(this.renderTable(el));
-      }
-    });
-    
-    // Restore page context
-    this.currentPageNumber = prevPageNumber;
-    this.totalPages = prevTotalPages;
-    
-    return footerEl;
   }
   
   // Convert DOM element to HTML string
