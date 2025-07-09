@@ -82,9 +82,10 @@ function parseSectionProperties(doc: Document, headerMap: Map<string, Header>, f
   // Find section properties in the document
   const sectPrElements = doc.getElementsByTagNameNS(ns, "sectPr");
   
-  // Usually the last sectPr is the main document section
-  if (sectPrElements.length > 0) {
-    const sectPr = sectPrElements[sectPrElements.length - 1];
+  // Process all section properties and merge header/footer references
+  // In Word, multiple sections can have different headers/footers
+  for (let i = 0; i < sectPrElements.length; i++) {
+    const sectPr = sectPrElements[i];
     if (sectPr) {
       // Parse header references
       const headerRefs = sectPr.getElementsByTagNameNS(ns, "headerReference");
@@ -396,7 +397,8 @@ function parseParagraph(paragraphElement: Element, relationships?: Map<string, s
     }
   }
   
-  return runs.length > 0 || images.length > 0 ? { runs, style, numId, ilvl, alignment, ...(images.length > 0 && { images }) } : null;
+  // Always return paragraph data, even if empty (for headers/footers with field codes)
+  return { runs, style, numId, ilvl, alignment, ...(images.length > 0 && { images }) };
 }
 
 function parseRun(runElement: Element, ns: string, linkUrl?: string): DocxRun | null {
@@ -544,12 +546,13 @@ function convertToDocumentElement(paragraph: DocxParagraph, processedImages?: Im
     const styleNormalized = paragraph.style.toLowerCase().replace(/\s+/g, '');
     
     // More comprehensive heading detection
+    // Exclude 'header' and 'footer' styles which are for page headers/footers
     const isHeading = (
       styleNormalized === 'title' ||
       styleNormalized === 'heading' ||
       styleNormalized.startsWith('heading') ||
-      styleNormalized.startsWith('head') ||
-      styleNormalized.includes('title') ||
+      (styleNormalized.startsWith('head') && styleNormalized !== 'header' && !styleNormalized.startsWith('header')) ||
+      (styleNormalized.includes('title') && !styleNormalized.includes('subtitle')) ||
       // Common DOCX heading style variations
       /^h[1-6]$/.test(styleNormalized) ||
       /^heading[1-6]$/.test(styleNormalized) ||
@@ -786,18 +789,18 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships
     if (!child || child.nodeType !== 1) continue; // Skip non-element nodes
     
     const element = child as Element;
-    const tagName = element.tagName;
+    const tagName = element.tagName || element.localName;
     
-    if (tagName === "w:p") {
+    if (tagName === "w:p" || tagName === "p") {
       // Parse paragraph with relationships for hyperlink resolution
       const paragraph = parseParagraph(element, relationships, undefined, undefined);
       if (paragraph) {
         const docElement = convertToDocumentElement(paragraph);
-        if (docElement.type === 'paragraph') {
+        if (docElement.type === 'paragraph' || docElement.type === 'heading') {
           elements.push(docElement as Paragraph);
         }
       }
-    } else if (tagName === "w:tbl") {
+    } else if (tagName === "w:tbl" || tagName === "tbl") {
       // Parse table with relationships for hyperlink resolution
       const table = parseTable(element, relationships);
       if (table) {
@@ -806,7 +809,12 @@ function parseHeaderFooter(xml: string, type: 'header' | 'footer', relationships
     }
   }
   
-  if (elements.length === 0) return null;
+  // Always return header/footer even if empty, as they may contain field codes
+  if (elements.length === 0 && type === 'header') {
+    // Return with empty elements array for headers
+  } else if (elements.length === 0) {
+    return null;
+  }
   
   return {
     type,
