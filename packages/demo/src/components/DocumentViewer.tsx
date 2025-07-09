@@ -309,25 +309,29 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             } as React.CSSProperties & { '--print-scale': number }}
           >
             {parsedDocument ? (
-              // For new parser documents, use DOM renderer with pagination
+              // For new parser documents, use DOM renderer - it already includes pagination
               (() => {
                 const htmlContent = renderToHtml(parsedDocument, { includeStyles: false });
-                const contentOnly = extractContent(htmlContent);
-                const pages = splitIntoPages(contentOnly);
+                
+                // The DOM renderer already splits content into pages with proper structure
+                // We need to extract the individual page divs instead of re-paginating
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlContent;
+                const pageElements = tempDiv.querySelectorAll('.page');
                 
                 // Update total pages when pages change
-                if (pages.length !== totalPages) {
-                  setTimeout(() => setTotalPages(pages.length), 0);
+                if (pageElements.length !== totalPages) {
+                  setTimeout(() => setTotalPages(pageElements.length), 0);
                 }
                 
-                return pages.map((pageContent, index) => (
+                return Array.from(pageElements).map((pageElement, index) => (
                   <div 
                     key={index} 
                     data-testid={`parsed-document-page-${index + 1}`}
                     data-page-number={index + 1}
                     data-page-type="parsed-document"
                     data-content-type="dom-rendered"
-                    data-total-pages={pages.length}
+                    data-total-pages={pageElements.length}
                     style={{
                       width: '8.5in',
                       minHeight: '11in',
@@ -343,7 +347,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                       lineHeight: '1.2',
                       fontFamily: 'Times New Roman, serif'
                     }}
-                    dangerouslySetInnerHTML={{ __html: pageContent }}
+                    dangerouslySetInnerHTML={{ __html: pageElement.innerHTML }}
                   />
                 ));
               })()
