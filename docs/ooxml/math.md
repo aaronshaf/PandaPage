@@ -27,6 +27,81 @@ Here are some of the most common elements used to build equations in OMML.
 | `<m:nary>` | **N-ary Operator.** For operators like summation (∑) or integration (∫). | `<m:sub>`, `<m:sup>`, `<m:e>` |
 | `<m:d>` | **Delimiter.** For enclosing content in parentheses, brackets, or braces. | `<m:begChr>`, `<m:endChr>`, `<m:e>` |
 
+## TypeScript Interfaces
+
+Here are some simplified TypeScript interfaces for modeling Office Math (OMML) structures.
+
+```typescript
+interface OMathPara {
+  equations: OMath[];
+}
+
+interface OMath {
+  elements: OMathElement[];
+}
+
+type OMathElement =
+  | OMathRun
+  | Fraction
+  | Superscript
+  | Subscript
+  | SubSuperscript
+  | Radical
+  | Nary
+  | Delimiter;
+
+interface OMathRun {
+  type: 'run';
+  text: string;
+}
+
+interface Fraction {
+  type: 'fraction';
+  numerator: OMathElement[];
+  denominator: OMathElement[];
+}
+
+interface Superscript {
+  type: 'superscript';
+  base: OMathElement[];
+  super: OMathElement[];
+}
+
+interface Subscript {
+  type: 'subscript';
+  base: OMathElement[];
+  sub: OMathElement[];
+}
+
+interface SubSuperscript {
+  type: 'subSuperscript';
+  base: OMathElement[];
+  sub: OMathElement[];
+  super: OMathElement[];
+}
+
+interface Radical {
+  type: 'radical';
+  degree?: OMathElement[];
+  base: OMathElement[];
+}
+
+interface Nary {
+  type: 'nary';
+  operator: string; // e.g., "∑", "∫"
+  sub?: OMathElement[];
+  super?: OMathElement[];
+  base: OMathElement[];
+}
+
+interface Delimiter {
+  type: 'delimiter';
+  beginningChar: string;
+  endingChar: string;
+  content: OMathElement[];
+}
+```
+
 ## Example: The Quadratic Formula
 
 Here is how the quadratic formula, x = (-b ± √(b² - 4ac)) / 2a, would be represented in OMML.

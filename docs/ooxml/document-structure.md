@@ -150,6 +150,78 @@ The `<w:sectPr>` element defines the page layout for a section of the document. 
 | `<w:footerReference>` | A reference to a footer part. |
 | `<w:type>` | The type of section break (e.g., `nextPage`, `continuous`). |
 
+## TypeScript Interfaces
+
+Here are some simplified TypeScript interfaces that can be used to model the core structure of a DOCX document.
+
+```typescript
+// Represents the entire document
+interface Document {
+  body: Body;
+  background?: Background;
+}
+
+// Represents the document body
+interface Body {
+  content: (Paragraph | Table)[];
+  sectionProperties?: SectionProperties;
+}
+
+// Represents a paragraph
+interface Paragraph {
+  type: 'paragraph';
+  properties?: ParagraphProperties;
+  children: (Run | Hyperlink)[];
+}
+
+// Represents a run of text with consistent formatting
+interface Run {
+  type: 'run';
+  properties?: RunProperties;
+  children: (Text | Drawing | Tab | Break)[];
+}
+
+// Represents a text element
+interface Text {
+  type: 'text';
+  text: string;
+  preserveSpace: boolean;
+}
+
+// Represents a table
+interface Table {
+  type: 'table';
+  properties?: TableProperties;
+  grid: TableGrid;
+  rows: TableRow[];
+}
+
+// Represents a table row
+interface TableRow {
+  properties?: TableRowProperties;
+  cells: TableCell[];
+}
+
+// Represents a table cell
+interface TableCell {
+  properties?: TableCellProperties;
+  children: (Paragraph | Table)[];
+}
+
+// Represents a hyperlink
+interface Hyperlink {
+  type: 'hyperlink';
+  relationshipId: string;
+  children: Run[];
+}
+
+// Represents a drawing
+interface Drawing {
+  type: 'drawing';
+  drawing: InlineDrawing | AnchoredDrawing;
+}
+```
+
 ## Important Attributes
 
 ### Revision Identifiers (`rsid*`)
@@ -175,4 +247,4 @@ The `r:id` attribute is used to create a relationship to another part in the OOX
 1.  **Missing Relationships**: Referencing a relationship ID that does not exist in the `.rels` file will result in a broken link (e.g., a missing image).
 2.  **Invalid Structure**: Elements that are out of order can cause a document to be rejected by Microsoft Word or other viewers.
 3.  **Unit Confusion**: Be mindful of the different units used for measurements (Twips, EMUs, half-points, etc.) and convert them correctly.
-4.  **Toggle Properties**: Incorrectly handling toggle properties (like bold and italic) can lead to the opposite of the intended formatting.
+4.  **Toggle Properties**: Incorrectly handling toggle properties (like bold and italic) can lead to the opposite of the intended formatting).

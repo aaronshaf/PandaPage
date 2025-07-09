@@ -100,6 +100,52 @@ These properties apply to a specific run of text within a paragraph.
 | `<w:iCs>` | Italic for complex scripts. | Toggle property |
 | `<w:szCs>` | Font size for complex scripts. | Half-points |
 
+## TypeScript Interfaces
+
+Here are some simplified TypeScript interfaces for modeling paragraph and run properties.
+
+```typescript
+interface ParagraphProperties {
+  styleId?: string;
+  justification?: 'start' | 'end' | 'center' | 'both';
+  indentation?: {
+    start?: number; // Twips
+    end?: number; // Twips
+    firstLine?: number; // Twips
+    hanging?: number; // Twips
+  };
+  spacing?: {
+    before?: number; // Twips
+    after?: number; // Twips
+    line?: number; // Twips
+    lineRule?: 'auto' | 'exact' | 'atLeast';
+  };
+  numbering?: {
+    level: number;
+    id: number;
+  };
+  // ... and other paragraph properties
+}
+
+interface RunProperties {
+  styleId?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: string;
+  color?: string; // Hex color
+  size?: number; // Half-points
+  font?: {
+    ascii?: string;
+    hAnsi?: string;
+    eastAsia?: string;
+    cs?: string;
+  };
+  highlight?: string;
+  verticalAlign?: 'baseline' | 'superscript' | 'subscript';
+  // ... and other run properties
+}
+```
+
 ## Toggle Properties
 
 Some boolean properties, like `<w:b>` (bold) and `<w:i>` (italic), are **toggle properties**. Their behavior depends on the inherited style:

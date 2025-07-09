@@ -52,6 +52,23 @@ Here is how an image is linked in a document:
 
 3.  **In the OOXML Package:** The image file is stored at `word/media/image1.png`.
 
+## TypeScript Interfaces
+
+Here are some simplified TypeScript interfaces for modeling OOXML relationships.
+
+```typescript
+interface Relationship {
+  id: string;
+  type: string; // Relationship type URI
+  target: string; // Path to target resource
+  targetMode?: 'Internal' | 'External';
+}
+
+interface Relationships {
+  relationships: Relationship[];
+}
+```
+
 ## Common Relationship Attributes
 
 The `shared-relationshipReference.xsd` schema defines several attributes that are used to establish relationships. All of these attributes are of the type `ST_RelationshipId`.

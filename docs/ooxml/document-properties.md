@@ -115,3 +115,45 @@ Inside each `<property>` element is a **variant type** element that defines the 
   </property>
 </Properties>
 ```
+
+## TypeScript Interfaces
+
+Here are some simplified TypeScript interfaces for modeling document properties.
+
+```typescript
+interface CoreProperties {
+  title?: string;
+  creator?: string;
+  subject?: string;
+  description?: string;
+  created?: Date;
+  modified?: Date;
+  lastModifiedBy?: string;
+  revision?: number;
+}
+
+interface ExtendedProperties {
+  application?: string;
+  appVersion?: string;
+  pages?: number;
+  words?: number;
+  characters?: number;
+  company?: string;
+  template?: string;
+  totalTime?: number;
+  lines?: number;
+  paragraphs?: number;
+  charactersWithSpaces?: number;
+  hyperlinkBase?: string;
+}
+
+interface CustomProperty {
+  name: string;
+  value: string | number | boolean | Date;
+  type: 'string' | 'number' | 'boolean' | 'date';
+}
+
+interface CustomProperties {
+  properties: CustomProperty[];
+}
+```
