@@ -3,7 +3,7 @@
  * Based on dml-main.xsd group transform definitions
  */
 
-import type { CT_DMLPoint2D, CT_DMLPositiveSize2D } from './transform-types';
+import type { CT_DMLPoint2D, CT_DMLPositiveSize2D } from "./transform-types";
 
 /**
  * Group transform 2D

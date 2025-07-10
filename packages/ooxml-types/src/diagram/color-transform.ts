@@ -1,5 +1,5 @@
 // color-transform.ts - Color transformation types for diagrams
-import type { CT_OfficeArtExtensionList, EG_ColorChoice } from '../dml-main';
+import type { CT_OfficeArtExtensionList, EG_ColorChoice } from "../dml-main";
 
 // Color transformation name and description
 export interface CT_CTName {

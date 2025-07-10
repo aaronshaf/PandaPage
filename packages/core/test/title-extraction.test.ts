@@ -22,16 +22,16 @@ describe("Title Extraction from DOCX", () => {
       metadata: {
         extractedAt: new Date(),
         originalFormat: "docx" as const,
-        title: "Test Title"
+        title: "Test Title",
       },
       processingTime: 100,
       extractedAt: new Date(),
       originalFormat: "docx" as const,
       wordCount: 0,
       characterCount: 0,
-      paragraphCount: 0
+      paragraphCount: 0,
     };
-    
+
     // Verify the structure matches what we expect
     expect(mockDocument.metadata.title).toBe("Test Title");
     expect(mockDocument.metadata.originalFormat).toBe("docx");
@@ -44,29 +44,29 @@ describe("Title Extraction from DOCX", () => {
       metadata: {
         title: "Metadata Title",
         extractedAt: new Date(),
-        originalFormat: "docx" as const
-      }
+        originalFormat: "docx" as const,
+      },
     };
-    
+
     const mockResult = "# First Heading\n\nSome content";
-    
+
     // Simulate getDocumentTitle logic
     const getTitle = (structuredDoc: any, markdown: string | null) => {
       if (structuredDoc?.metadata?.title) {
         return structuredDoc.metadata.title;
       }
-      
-      if (!markdown) return 'Browser Document Viewer';
-      
+
+      if (!markdown) return "Browser Document Viewer";
+
       // Try to get first heading
       const headingMatch = markdown.match(/^#\s+(.+)$/m);
       if (headingMatch) {
         return headingMatch[1];
       }
-      
-      return 'Browser Document Viewer';
+
+      return "Browser Document Viewer";
     };
-    
+
     // Test priority: metadata > heading > default
     expect(getTitle(mockStructuredDoc, mockResult)).toBe("Metadata Title");
     expect(getTitle(null, mockResult)).toBe("First Heading");

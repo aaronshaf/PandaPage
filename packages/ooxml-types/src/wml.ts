@@ -5,13 +5,30 @@
  */
 
 // Re-export all types from organized modules
-export * from './wml/index';
+export * from "./wml/index";
 
 // Import types needed for remaining complex types
-import type { ST_OnOff, ST_String, ST_DecimalNumber, ST_RelationshipId, ST_CalendarType } from './shared-types';
-import type { CT_GvmlGroupShape, CT_GvmlGraphicalObjectFrame, CT_Inline, CT_Anchor } from './wordprocessing-drawing-types';
-import type { EG_OMathMathElements } from './math-types';
-import type { ST_LongHexNumber, CT_DecimalNumber, CT_String as CT_StringWml, CT_OnOff, CT_Lang } from './wml/basic-types';
+import type {
+  ST_OnOff,
+  ST_String,
+  ST_DecimalNumber,
+  ST_RelationshipId,
+  ST_CalendarType,
+} from "./shared-types";
+import type {
+  CT_GvmlGroupShape,
+  CT_GvmlGraphicalObjectFrame,
+  CT_Inline,
+  CT_Anchor,
+} from "./wordprocessing-drawing-types";
+import type { EG_OMathMathElements } from "./math-types";
+import type {
+  ST_LongHexNumber,
+  CT_DecimalNumber,
+  CT_String as CT_StringWml,
+  CT_OnOff,
+  CT_Lang,
+} from "./wml/basic-types";
 
 // ========================================
 // Object and Drawing Types
@@ -28,7 +45,7 @@ export enum ST_ObjectDrawAspect {
 
 /**
  * Object update mode.
- * @see ECMA-376 Part 1, §17.18.57 ST_ObjectUpdateMode  
+ * @see ECMA-376 Part 1, §17.18.57 ST_ObjectUpdateMode
  */
 export enum ST_ObjectUpdateMode {
   Always = "always",
@@ -229,7 +246,7 @@ export interface CT_SdtPr {
   dataBinding?: CT_DataBinding;
   label?: CT_DecimalNumber;
   tabIndex?: any; // CT_UnsignedDecimalNumber
-  sdtType?: (
+  sdtType?:
     | { equation: any } // CT_Empty
     | { comboBox: CT_SdtComboBox }
     | { date: CT_SdtDate }
@@ -241,8 +258,7 @@ export interface CT_SdtPr {
     | { text: CT_SdtText }
     | { citation: any } // CT_Empty
     | { group: any } // CT_Empty
-    | { bibliography: any } // CT_Empty
-  );
+    | { bibliography: any }; // CT_Empty
 }
 
 // ========================================
@@ -287,7 +303,7 @@ export interface CT_RubyPr {
  * Ruby content type.
  * @see ECMA-376 Part 1, §17.3.3.27 EG_RubyContent
  */
-export type EG_RubyContent = 
+export type EG_RubyContent =
   | { r: any } // CT_R
   | any[]; // EG_RunLevelElts[]
 
@@ -353,7 +369,7 @@ export interface CT_HdrFtrRef extends CT_Rel {
  * Header/footer.
  * @see ECMA-376 Part 1, §17.10.5 CT_HdrFtr
  */
-export type CT_HdrFtr = Record<string, never>
+export type CT_HdrFtr = Record<string, never>;
 
 // ========================================
 // Position Tab Types

@@ -1,16 +1,16 @@
 // Re-export everything from the new modular structure
-export type { 
-  EnhancedDocxDocument, 
-  DocxElement, 
-  DocxTable, 
-  DocxTableRow, 
+export type {
+  EnhancedDocxDocument,
+  DocxElement,
+  DocxTable,
+  DocxTableRow,
   DocxTableCell,
   DocxParagraph,
   DocxRun,
   DocxNumbering,
   DocxAbstractFormat,
   DocxLevelFormat,
-  DocxMetadata
+  DocxMetadata,
 } from "../types";
 
 export { DocxParseError } from "./docx-reader";

@@ -6,7 +6,7 @@ import {
   calculateRowSpans,
   hasNestedTables,
   parseTableStyle,
-  convertEnhancedTableToMarkdown
+  convertEnhancedTableToMarkdown,
 } from "./table-enhancements";
 import type { DocxTable, DocxTableCell } from "./types";
 import type { EnhancedDocxTableCell } from "./table-enhancements";
@@ -21,11 +21,11 @@ describe("Table Enhancements", () => {
               getAttribute: (attr: string) => {
                 if (attr === "w:val" || attr === "val") return "3";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       expect(parseGridSpan(mockElement)).toBe(3);
@@ -33,7 +33,7 @@ describe("Table Enhancements", () => {
 
     test("should return 1 for missing grid span", () => {
       const mockElement = {
-        querySelector: () => null
+        querySelector: () => null,
       } as unknown as Element;
 
       expect(parseGridSpan(mockElement)).toBe(1);
@@ -44,11 +44,11 @@ describe("Table Enhancements", () => {
         querySelector: (selector: string) => {
           if (selector === "gridSpan") {
             return {
-              getAttribute: () => "invalid"
+              getAttribute: () => "invalid",
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       expect(parseGridSpan(mockElement)).toBe(1);
@@ -64,11 +64,11 @@ describe("Table Enhancements", () => {
               getAttribute: (attr: string) => {
                 if (attr === "w:val" || attr === "val") return "continue";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       expect(parseVMerge(mockElement)).toBe("continue");
@@ -79,11 +79,11 @@ describe("Table Enhancements", () => {
         querySelector: (selector: string) => {
           if (selector === "vMerge") {
             return {
-              getAttribute: () => null // vMerge without val = restart
+              getAttribute: () => null, // vMerge without val = restart
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       expect(parseVMerge(mockElement)).toBe("restart");
@@ -91,7 +91,7 @@ describe("Table Enhancements", () => {
 
     test("should return undefined for no vMerge", () => {
       const mockElement = {
-        querySelector: () => null
+        querySelector: () => null,
       } as unknown as Element;
 
       expect(parseVMerge(mockElement)).toBeUndefined();
@@ -107,32 +107,32 @@ describe("Table Enhancements", () => {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "Merged" }] }],
-                properties: { vMerge: "restart" } as any
+                properties: { vMerge: "restart" } as any,
               },
               {
-                content: [{ type: "paragraph", runs: [{ text: "Normal" }] }]
-              }
-            ]
+                content: [{ type: "paragraph", runs: [{ text: "Normal" }] }],
+              },
+            ],
           },
           {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "" }] }],
-                properties: { vMerge: "continue" } as any
+                properties: { vMerge: "continue" } as any,
               },
               {
-                content: [{ type: "paragraph", runs: [{ text: "Normal 2" }] }]
-              }
-            ]
-          }
-        ]
+                content: [{ type: "paragraph", runs: [{ text: "Normal 2" }] }],
+              },
+            ],
+          },
+        ],
       };
 
       const result = await Effect.runPromise(calculateRowSpans(table));
-      
+
       const firstCell = result.rows[0]?.cells[0] as EnhancedDocxTableCell;
       expect(firstCell.properties?.rowSpan).toBe(2);
-      
+
       const continuedCell = result.rows[1]?.cells[0] as EnhancedDocxTableCell;
       expect(continuedCell.properties?.rowSpan).toBe(0); // Marked as merged
     });
@@ -145,46 +145,46 @@ describe("Table Enhancements", () => {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "A" }] }],
-                properties: { vMerge: "restart" } as any
+                properties: { vMerge: "restart" } as any,
               },
               {
-                content: [{ type: "paragraph", runs: [{ text: "B" }] }]
-              }
-            ]
+                content: [{ type: "paragraph", runs: [{ text: "B" }] }],
+              },
+            ],
           },
           {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "" }] }],
-                properties: { vMerge: "continue" } as any
+                properties: { vMerge: "continue" } as any,
               },
               {
                 content: [{ type: "paragraph", runs: [{ text: "B2" }] }],
-                properties: { vMerge: "restart" } as any
-              }
-            ]
+                properties: { vMerge: "restart" } as any,
+              },
+            ],
           },
           {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "" }] }],
-                properties: { vMerge: "continue" } as any
+                properties: { vMerge: "continue" } as any,
               },
               {
                 content: [{ type: "paragraph", runs: [{ text: "" }] }],
-                properties: { vMerge: "continue" } as any
-              }
-            ]
-          }
-        ]
+                properties: { vMerge: "continue" } as any,
+              },
+            ],
+          },
+        ],
       };
 
       const result = await Effect.runPromise(calculateRowSpans(table));
-      
+
       // First column should span 3 rows
       const cellA = result.rows[0]?.cells[0] as EnhancedDocxTableCell;
       expect(cellA.properties?.rowSpan).toBe(3);
-      
+
       // Second column, second cell should span 2 rows
       const cellB2 = result.rows[1]?.cells[1] as EnhancedDocxTableCell;
       expect(cellB2.properties?.rowSpan).toBe(2);
@@ -201,12 +201,12 @@ describe("Table Enhancements", () => {
               {
                 content: [
                   { type: "paragraph", runs: [{ text: "Normal" }] },
-                  { type: "table", rows: [] } as any // Nested table
-                ]
-              }
-            ]
-          }
-        ]
+                  { type: "table", rows: [] } as any, // Nested table
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       // Note: Current implementation doesn't support nested tables
@@ -221,13 +221,11 @@ describe("Table Enhancements", () => {
           {
             cells: [
               {
-                content: [
-                  { type: "paragraph", runs: [{ text: "Normal" }] }
-                ]
-              }
-            ]
-          }
-        ]
+                content: [{ type: "paragraph", runs: [{ text: "Normal" }] }],
+              },
+            ],
+          },
+        ],
       };
 
       expect(hasNestedTables(table)).toBe(false);
@@ -240,12 +238,12 @@ describe("Table Enhancements", () => {
         querySelector: (selector: string) => {
           if (selector === "tblStyle") {
             return {
-              getAttribute: (attr: string) => 
-                (attr === "w:val" || attr === "val") ? "GridTable1Light" : null
+              getAttribute: (attr: string) =>
+                attr === "w:val" || attr === "val" ? "GridTable1Light" : null,
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const style = parseTableStyle(mockElement);
@@ -259,18 +257,24 @@ describe("Table Enhancements", () => {
             return {
               getAttribute: (attr: string) => {
                 switch (attr) {
-                  case "w:firstRow": return "1";
-                  case "w:lastRow": return "0";
-                  case "w:firstColumn": return "1";
-                  case "w:noHBand": return "0"; // Row banding enabled
-                  case "w:noVBand": return "1"; // Column banding disabled
-                  default: return null;
+                  case "w:firstRow":
+                    return "1";
+                  case "w:lastRow":
+                    return "0";
+                  case "w:firstColumn":
+                    return "1";
+                  case "w:noHBand":
+                    return "0"; // Row banding enabled
+                  case "w:noVBand":
+                    return "1"; // Column banding disabled
+                  default:
+                    return null;
                 }
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const style = parseTableStyle(mockElement);
@@ -291,22 +295,22 @@ describe("Table Enhancements", () => {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "Merged Header" }] }],
-                properties: { gridSpan: 2 } as any
-              }
+                properties: { gridSpan: 2 } as any,
+              },
             ],
-            properties: { isHeader: true }
+            properties: { isHeader: true },
           },
           {
             cells: [
               {
-                content: [{ type: "paragraph", runs: [{ text: "Cell 1" }] }]
+                content: [{ type: "paragraph", runs: [{ text: "Cell 1" }] }],
               },
               {
-                content: [{ type: "paragraph", runs: [{ text: "Cell 2" }] }]
-              }
-            ]
-          }
-        ]
+                content: [{ type: "paragraph", runs: [{ text: "Cell 2" }] }],
+              },
+            ],
+          },
+        ],
       };
 
       const markdown = convertEnhancedTableToMarkdown(table, true);
@@ -324,21 +328,21 @@ describe("Table Enhancements", () => {
             cells: [
               {
                 content: [{ type: "paragraph", runs: [{ text: "Tall Cell" }] }],
-                properties: { rowSpan: 2 } as any
+                properties: { rowSpan: 2 } as any,
               },
               {
-                content: [{ type: "paragraph", runs: [{ text: "Normal" }] }]
-              }
-            ]
+                content: [{ type: "paragraph", runs: [{ text: "Normal" }] }],
+              },
+            ],
           },
           {
             cells: [
               {
-                content: [{ type: "paragraph", runs: [{ text: "Normal 2" }] }]
-              }
-            ]
-          }
-        ]
+                content: [{ type: "paragraph", runs: [{ text: "Normal 2" }] }],
+              },
+            ],
+          },
+        ],
       };
 
       const markdown = convertEnhancedTableToMarkdown(table, true);

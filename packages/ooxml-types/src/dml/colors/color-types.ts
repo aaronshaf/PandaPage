@@ -3,16 +3,16 @@
  * @see ECMA-376 Part 1, Section 20.1.2 (Colors)
  */
 
-import type { ST_String } from '../../shared/common-types';
-import type { CT_OfficeArtExtensionList } from '../core/extension-types';
-import type { 
+import type { ST_String } from "../../shared/common-types";
+import type { CT_OfficeArtExtensionList } from "../core/extension-types";
+import type {
   CT_ScRgbColor,
   CT_SRgbColor,
   CT_HslColor,
   CT_SystemColor,
   CT_SchemeColor,
-  CT_PresetColor
-} from './color-models';
+  CT_PresetColor,
+} from "./color-models";
 
 /**
  * Color Scheme Index
@@ -38,7 +38,7 @@ export enum ST_ColorSchemeIndex {
  * Union of different color model types.
  * @see ECMA-376 Part 1, §20.1.2.3.1 EG_ColorChoice
  */
-export type EG_ColorChoice = 
+export type EG_ColorChoice =
   | { scrgbClr: CT_ScRgbColor }
   | { srgbClr: CT_SRgbColor }
   | { hslClr: CT_HslColor }
@@ -168,4 +168,3 @@ export enum ST_BlackWhiteMode {
   White = "white",
   Hidden = "hidden",
 }
-

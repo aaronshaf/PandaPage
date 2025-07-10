@@ -4,10 +4,10 @@ import type { ST_String } from "./shared-types";
 // Import extension types from dml-media
 import type { CT_OfficeArtExtension, CT_OfficeArtExtensionList } from "./dml-media";
 
-// Import color types from dml-colors  
+// Import color types from dml-colors
 import type { EG_ColorChoice } from "./dml-colors";
 
-// 
+//
 // Font collection index enum
 export enum ST_FontCollectionIndex {
   Major = "major",

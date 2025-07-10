@@ -1,6 +1,6 @@
 // extended-properties-types.ts
-import type { CT_Vector, VT_Blob } from './variant-types';
-import type { ST_String } from './shared-types';
+import type { CT_Vector, VT_Blob } from "./variant-types";
+import type { ST_String } from "./shared-types";
 
 export interface CT_VectorVariant {
   vector: CT_Vector;

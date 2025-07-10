@@ -70,7 +70,7 @@ test("createFieldPlaceholder - creates REF placeholder with bookmark", () => {
   const context = {
     bookmarks: new Map([["bookmark1", "Chapter 1"]]),
     sequences: new Map(),
-    currentDate: new Date()
+    currentDate: new Date(),
   };
   const placeholder = createFieldPlaceholder(fieldCode, context);
   expect(placeholder).toBe("Chapter 1");
@@ -99,7 +99,7 @@ test("createFieldPlaceholder - creates SEQ placeholder", () => {
   const context = {
     bookmarks: new Map(),
     sequences: new Map([["Figure", 2]]),
-    currentDate: new Date()
+    currentDate: new Date(),
   };
   const placeholder = createFieldPlaceholder(fieldCode, context);
   expect(placeholder).toBe("3");
@@ -112,7 +112,7 @@ test("createFieldPlaceholder - creates DATE placeholder", () => {
   const context = {
     bookmarks: new Map(),
     sequences: new Map(),
-    currentDate: testDate
+    currentDate: testDate,
   };
   const placeholder = createFieldPlaceholder(fieldCode, context);
   expect(placeholder).toBe(testDate.toLocaleDateString());
@@ -124,14 +124,14 @@ test("createFieldPlaceholder - creates AUTHOR placeholder", () => {
     bookmarks: new Map(),
     sequences: new Map(),
     currentDate: new Date(),
-    metadata: { creator: "John Doe" }
+    metadata: { creator: "John Doe" },
   };
   const placeholder = createFieldPlaceholder(fieldCode, context);
   expect(placeholder).toBe("John Doe");
 });
 
 test("createFieldPlaceholder - creates TOC placeholder", () => {
-  const fieldCode = parseFieldInstruction("TOC \\o \"1-3\"");
+  const fieldCode = parseFieldInstruction('TOC \\o "1-3"');
   const placeholder = createFieldPlaceholder(fieldCode);
   expect(placeholder).toBe("[Table of Contents]");
 });

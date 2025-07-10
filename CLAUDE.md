@@ -51,3 +51,12 @@
 4. Ensure tests are deterministic and fast
 5. Focus on testing public APIs and critical paths
 6. Add integration tests for complex workflows
+
+## Commit and PR Guidelines
+
+When creating commits and pull requests:
+- Keep messages modest, reasonable, and concise
+- Be as detailed as needed but avoid being verbose
+- Don't include implementation plans in PR descriptions
+- Focus on what changed and why, not how
+- Make messages easy to read and understand

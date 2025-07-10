@@ -1,10 +1,10 @@
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { Effect } from "effect";
-import { 
-  parseDocumentXmlEnhanced, 
+import {
+  parseDocumentXmlEnhanced,
   parseNumberingXml,
   extractFileContent,
-  calculateDocumentStats
+  calculateDocumentStats,
 } from "../src/formats/docx/document-parser";
 import { DocxParseError } from "../src/formats/docx/types";
 import { parseXmlString } from "../src/common/xml-parser";
@@ -39,7 +39,7 @@ describe("Document Parser", () => {
         </document>
       `;
       const root = await createMockElement(xml);
-      
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty("type", "paragraph");
@@ -58,7 +58,7 @@ describe("Document Parser", () => {
         </w:document>
       `;
       const root = await createMockElement(xml);
-      
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
     });
@@ -66,7 +66,7 @@ describe("Document Parser", () => {
     test("should handle missing body element", async () => {
       const xml = `<document></document>`;
       const root = await createMockElement(xml);
-      
+
       await expect(Effect.runPromise(parseDocumentXmlEnhanced(root))).rejects.toThrow();
     });
 
@@ -89,7 +89,7 @@ describe("Document Parser", () => {
         </document>
       `;
       const root = await createMockElement(xml);
-      
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty("type", "table");
@@ -111,7 +111,7 @@ describe("Document Parser", () => {
         </document>
       `;
       const root = await createMockElement(xml);
-      
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty("type", "paragraph");
@@ -136,10 +136,10 @@ describe("Document Parser", () => {
         </document>
       `;
       const root = await createMockElement(xml);
-      
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(2);
-      expect(result.every(el => el.type === "paragraph")).toBe(true);
+      expect(result.every((el) => el.type === "paragraph")).toBe(true);
     });
   });
 
@@ -164,21 +164,21 @@ describe("Document Parser", () => {
           </w:abstractNum>
         </numbering>
       `;
-      
+
       const result = await Effect.runPromise(parseNumberingXml(xml));
       expect(result).toBeDefined();
     });
 
     test("should handle invalid numbering XML structure", async () => {
       const xml = `<notNumbering></notNumbering>`;
-      
+
       const result = await Effect.runPromise(parseNumberingXml(xml));
       expect(result).toBeUndefined();
     });
 
     test("should handle malformed XML gracefully", async () => {
       const xml = `<numbering><invalid></numbering>`;
-      
+
       const result = await Effect.runPromise(parseNumberingXml(xml));
       expect(result).toBeUndefined();
     });
@@ -191,29 +191,29 @@ describe("Document Parser", () => {
 
     test("should extract file content successfully", () => {
       const unzipped = {
-        "word/document.xml": new TextEncoder().encode("Hello World")
+        "word/document.xml": new TextEncoder().encode("Hello World"),
       };
-      
+
       const result = extractFileContent(unzipped, "word/document.xml", strFromU8);
       expect(result).toBe("Hello World");
     });
 
     test("should return null for missing file", () => {
       const unzipped = {};
-      
+
       const result = extractFileContent(unzipped, "word/document.xml", strFromU8);
       expect(result).toBeNull();
     });
 
     test("should handle decoding errors gracefully", () => {
       const unzipped = {
-        "word/document.xml": new Uint8Array([0xFF, 0xFE, 0xFD])
+        "word/document.xml": new Uint8Array([0xff, 0xfe, 0xfd]),
       };
-      
+
       const badDecoder = () => {
         throw new Error("Decoding error");
       };
-      
+
       const result = extractFileContent(unzipped, "word/document.xml", badDecoder);
       expect(result).toBeNull();
     });
@@ -224,19 +224,14 @@ describe("Document Parser", () => {
       const elements = [
         {
           type: "paragraph",
-          runs: [
-            { text: "Hello world" },
-            { text: " this is a test" }
-          ]
+          runs: [{ text: "Hello world" }, { text: " this is a test" }],
         },
         {
           type: "paragraph",
-          runs: [
-            { text: "Another paragraph with more words" }
-          ]
-        }
+          runs: [{ text: "Another paragraph with more words" }],
+        },
       ];
-      
+
       const stats = calculateDocumentStats(elements as any);
       expect(stats.paragraphCount).toBe(2);
       expect(stats.wordCount).toBe(11); // Hello world this is a test Another paragraph with more words
@@ -254,24 +249,24 @@ describe("Document Parser", () => {
                   content: [
                     {
                       type: "paragraph",
-                      runs: [{ text: "Cell one" }]
-                    }
-                  ]
+                      runs: [{ text: "Cell one" }],
+                    },
+                  ],
                 },
                 {
                   content: [
                     {
                       type: "paragraph",
-                      runs: [{ text: "Cell two" }]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
+                      runs: [{ text: "Cell two" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ];
-      
+
       const stats = calculateDocumentStats(elements as any);
       expect(stats.paragraphCount).toBe(2);
       expect(stats.wordCount).toBe(4); // Cell one Cell two
@@ -280,7 +275,7 @@ describe("Document Parser", () => {
 
     test("should handle empty elements", () => {
       const elements: any[] = [];
-      
+
       const stats = calculateDocumentStats(elements);
       expect(stats.paragraphCount).toBe(0);
       expect(stats.wordCount).toBe(0);
@@ -291,14 +286,14 @@ describe("Document Parser", () => {
       const elements = [
         {
           type: "paragraph",
-          runs: []
+          runs: [],
         },
         {
           type: "paragraph",
-          runs: [{ text: "" }]
-        }
+          runs: [{ text: "" }],
+        },
       ];
-      
+
       const stats = calculateDocumentStats(elements as any);
       expect(stats.paragraphCount).toBe(2);
       expect(stats.wordCount).toBe(0);
@@ -309,7 +304,7 @@ describe("Document Parser", () => {
       const elements = [
         {
           type: "paragraph",
-          runs: [{ text: "Introduction text" }]
+          runs: [{ text: "Introduction text" }],
         },
         {
           type: "table",
@@ -320,20 +315,20 @@ describe("Document Parser", () => {
                   content: [
                     {
                       type: "paragraph",
-                      runs: [{ text: "Table content here" }]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+                      runs: [{ text: "Table content here" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
         {
           type: "paragraph",
-          runs: [{ text: "Conclusion text" }]
-        }
+          runs: [{ text: "Conclusion text" }],
+        },
       ];
-      
+
       const stats = calculateDocumentStats(elements as any);
       expect(stats.paragraphCount).toBe(3);
       expect(stats.wordCount).toBe(7);

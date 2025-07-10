@@ -8,16 +8,16 @@ export interface DocumentConfig {
   workerThreshold: number;
   maxWorkers: number;
   chunkSize: number;
-  
+
   // Feature flags
   enableStreaming: boolean;
   enableCaching: boolean;
   enableCompression: boolean;
-  
+
   // Limits
   maxFileSize: number;
   timeout: number;
-  
+
   // Output settings
   preserveFormatting: boolean;
   includeMetadata: boolean;
@@ -30,18 +30,21 @@ export interface DocumentConfig {
 export const DEFAULT_CONFIG: DocumentConfig = {
   // Performance settings - 1MB threshold for workers
   workerThreshold: 1024 * 1024,
-  maxWorkers: Math.max(2, typeof navigator !== 'undefined' ? navigator?.hardwareConcurrency || 4 : 4),
+  maxWorkers: Math.max(
+    2,
+    typeof navigator !== "undefined" ? navigator?.hardwareConcurrency || 4 : 4,
+  ),
   chunkSize: 1024 * 1024, // 1MB chunks
-  
+
   // Feature flags
   enableStreaming: true,
   enableCaching: true,
   enableCompression: false,
-  
+
   // Limits - 100MB max file size, 30 second timeout
   maxFileSize: 100 * 1024 * 1024,
   timeout: 30000,
-  
+
   // Output settings
   preserveFormatting: true,
   includeMetadata: true,
@@ -59,64 +62,67 @@ export class ConfigError {
 /**
  * Validate and merge configuration with defaults
  */
-export const validateConfig = (userConfig: unknown = {}): Effect.Effect<DocumentConfig, ConfigError> =>
+export const validateConfig = (
+  userConfig: unknown = {},
+): Effect.Effect<DocumentConfig, ConfigError> =>
   Effect.try({
     try: () => {
       // Parse user config - simplified approach
-      const userObj = typeof userConfig === 'object' && userConfig !== null ? userConfig as any : {};
-      
+      const userObj =
+        typeof userConfig === "object" && userConfig !== null ? (userConfig as any) : {};
+
       // Merge with defaults and validate types
       const config: DocumentConfig = {
         ...DEFAULT_CONFIG,
         ...userObj,
       };
-      
+
       // Type validation - ensure correct types
-      if (typeof config.workerThreshold !== 'number' || config.workerThreshold <= 0) {
+      if (typeof config.workerThreshold !== "number" || config.workerThreshold <= 0) {
         config.workerThreshold = DEFAULT_CONFIG.workerThreshold;
       }
-      if (typeof config.maxWorkers !== 'number' || config.maxWorkers <= 0) {
+      if (typeof config.maxWorkers !== "number" || config.maxWorkers <= 0) {
         config.maxWorkers = DEFAULT_CONFIG.maxWorkers;
       }
-      if (typeof config.chunkSize !== 'number' || config.chunkSize <= 0) {
+      if (typeof config.chunkSize !== "number" || config.chunkSize <= 0) {
         config.chunkSize = DEFAULT_CONFIG.chunkSize;
       }
-      if (typeof config.maxFileSize !== 'number' || config.maxFileSize <= 0) {
+      if (typeof config.maxFileSize !== "number" || config.maxFileSize <= 0) {
         config.maxFileSize = DEFAULT_CONFIG.maxFileSize;
       }
-      if (typeof config.timeout !== 'number' || config.timeout <= 0) {
+      if (typeof config.timeout !== "number" || config.timeout <= 0) {
         config.timeout = DEFAULT_CONFIG.timeout;
       }
-      
+
       // Ensure boolean types
-      if (typeof config.enableStreaming !== 'boolean') {
+      if (typeof config.enableStreaming !== "boolean") {
         config.enableStreaming = DEFAULT_CONFIG.enableStreaming;
       }
-      if (typeof config.enableCaching !== 'boolean') {
+      if (typeof config.enableCaching !== "boolean") {
         config.enableCaching = DEFAULT_CONFIG.enableCaching;
       }
-      if (typeof config.enableCompression !== 'boolean') {
+      if (typeof config.enableCompression !== "boolean") {
         config.enableCompression = DEFAULT_CONFIG.enableCompression;
       }
-      if (typeof config.preserveFormatting !== 'boolean') {
+      if (typeof config.preserveFormatting !== "boolean") {
         config.preserveFormatting = DEFAULT_CONFIG.preserveFormatting;
       }
-      if (typeof config.includeMetadata !== 'boolean') {
+      if (typeof config.includeMetadata !== "boolean") {
         config.includeMetadata = DEFAULT_CONFIG.includeMetadata;
       }
-      if (typeof config.generateOutline !== 'boolean') {
+      if (typeof config.generateOutline !== "boolean") {
         config.generateOutline = DEFAULT_CONFIG.generateOutline;
       }
-      
+
       // Additional validation
       if (config.maxWorkers > 16) {
         throw new ConfigError("maxWorkers cannot exceed 16");
       }
-      
+
       if (config.chunkSize > config.maxFileSize) {
         throw new ConfigError("chunkSize cannot exceed maxFileSize");
       }
-      
+
       return config;
     },
     catch: (error) => {
@@ -124,7 +130,7 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
         return error;
       }
       return new ConfigError(`Invalid configuration: ${error}`);
-    }
+    },
   });
 
 /**
@@ -132,18 +138,18 @@ export const validateConfig = (userConfig: unknown = {}): Effect.Effect<Document
  */
 export const loadConfigFromEnv = (): Effect.Effect<DocumentConfig, ConfigError> => {
   const envConfig = {
-    workerThreshold: process.env.BROWSER_DOC_VIEWER_WORKER_THRESHOLD 
-      ? parseInt(process.env.BROWSER_DOC_VIEWER_WORKER_THRESHOLD, 10) 
+    workerThreshold: process.env.BROWSER_DOC_VIEWER_WORKER_THRESHOLD
+      ? parseInt(process.env.BROWSER_DOC_VIEWER_WORKER_THRESHOLD, 10)
       : undefined,
-    maxWorkers: process.env.BROWSER_DOC_VIEWER_MAX_WORKERS 
-      ? parseInt(process.env.BROWSER_DOC_VIEWER_MAX_WORKERS, 10) 
+    maxWorkers: process.env.BROWSER_DOC_VIEWER_MAX_WORKERS
+      ? parseInt(process.env.BROWSER_DOC_VIEWER_MAX_WORKERS, 10)
       : undefined,
-    enableStreaming: process.env.BROWSER_DOC_VIEWER_STREAMING === 'true',
-    enableCaching: process.env.BROWSER_DOC_VIEWER_CACHING !== 'false',
-    maxFileSize: process.env.BROWSER_DOC_VIEWER_MAX_FILE_SIZE 
-      ? parseInt(process.env.BROWSER_DOC_VIEWER_MAX_FILE_SIZE, 10) 
+    enableStreaming: process.env.BROWSER_DOC_VIEWER_STREAMING === "true",
+    enableCaching: process.env.BROWSER_DOC_VIEWER_CACHING !== "false",
+    maxFileSize: process.env.BROWSER_DOC_VIEWER_MAX_FILE_SIZE
+      ? parseInt(process.env.BROWSER_DOC_VIEWER_MAX_FILE_SIZE, 10)
       : undefined,
   };
-  
+
   return validateConfig(envConfig);
 };

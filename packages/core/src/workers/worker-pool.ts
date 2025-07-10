@@ -60,7 +60,7 @@ export const createWorkerPool = (
           // In a real implementation, we'd create workers and execute tasks
           return { parsed: true } as T;
         },
-        catch: (error) => new Error(`Task execution failed: ${error}`)
+        catch: (error) => new Error(`Task execution failed: ${error}`),
       });
 
     // Get optimal worker count based on file size

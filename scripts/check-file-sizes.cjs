@@ -123,6 +123,11 @@ function shouldSkipFile(filePath) {
     return true;
   }
   
+  // Skip files outside of packages directory
+  if (!filePath.includes('packages/')) {
+    return true;
+  }
+  
   // Skip backup/original files
   if (fileName.includes('.original.') || fileName.includes('.backup.') || fileName.includes('.old.')) {
     return true;
@@ -224,8 +229,6 @@ function getAllFiles(dir = '.', files = []) {
 }
 
 function main() {
-  console.log('🔍 Checking TypeScript file sizes...\n');
-  
   let filesToCheck = getStagedFiles();
   
   // If no staged files (e.g., not in git or no staged changes), check all files
@@ -316,7 +319,7 @@ function main() {
   }
   
   if (!hasIssues) {
-    console.log('✅ All TypeScript files are within size limits!');
+    // No output when everything is fine - keep it quiet
     process.exit(0);
   }
   

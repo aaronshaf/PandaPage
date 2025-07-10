@@ -16,7 +16,5 @@ export const readPages = (_buffer: ArrayBuffer): Effect.Effect<PagesDocument, Pa
     // TODO: Implement Pages file parsing
     // Apple Pages files are also ZIP archives but with different structure
 
-    return yield* Effect.fail(
-      new PagesParseError("Apple Pages support is not yet implemented"),
-    );
+    return yield* Effect.fail(new PagesParseError("Apple Pages support is not yet implemented"));
   });

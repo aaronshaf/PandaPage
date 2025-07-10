@@ -1,7 +1,7 @@
 // coordinate-types.ts
 // Basic coordinate and measurement types for DrawingML
 
-import type { ST_UniversalMeasure } from '../shared-types';
+import type { ST_UniversalMeasure } from "../shared-types";
 
 // Coordinate types
 export type ST_Coordinate = ST_CoordinateUnqualified | ST_UniversalMeasure;

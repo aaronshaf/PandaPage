@@ -1,15 +1,15 @@
 // chart-legend-types.ts
 // Legend, title, and layout types for charts
 
-import type { CT_ShapeProperties, CT_TextBody } from './dml-main';
-import type { 
-  CT_Boolean, 
-  CT_Double, 
-  CT_UnsignedInt, 
+import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
+import type {
+  CT_Boolean,
+  CT_Double,
+  CT_UnsignedInt,
   CT_ExtensionList,
   CT_StrRef,
-  CT_Tx as CT_TxImport
-} from './chart-data-types';
+  CT_Tx as CT_TxImport,
+} from "./chart-data-types";
 
 // Re-export CT_Tx to avoid circular dependency
 export type CT_Tx = CT_TxImport;
@@ -126,4 +126,4 @@ export interface CT_PivotFmts {
 }
 
 // Import types from other modules
-import type { CT_Marker, CT_DLbl } from './chart-formatting-types';
+import type { CT_Marker, CT_DLbl } from "./chart-formatting-types";

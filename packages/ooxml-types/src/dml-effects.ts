@@ -1,13 +1,13 @@
 // dml-effects.ts
 // Types related to effects, fills, shadows, glows, and styles from DrawingML
 
-import type { 
-  ST_RelationshipId, 
-  ST_String, 
-  ST_Percentage, 
-  ST_FixedPercentage, 
-  ST_PositiveFixedPercentage 
-} from './shared-types';
+import type {
+  ST_RelationshipId,
+  ST_String,
+  ST_Percentage,
+  ST_FixedPercentage,
+  ST_PositiveFixedPercentage,
+} from "./shared-types";
 
 // Import from specific modules to avoid circular dependency
 import type {
@@ -17,29 +17,16 @@ import type {
   ST_FixedAngle,
   ST_PositiveFixedAngle,
   ST_RectAlignment,
-  CT_RelativeRect
-} from './dml-shapes';
+  CT_RelativeRect,
+} from "./dml-shapes";
 
-import type {
-  ST_BlackWhiteMode,
-  EG_ColorChoice,
-  CT_Color,
-  CT_ColorScheme
-} from './dml-colors';
+import type { ST_BlackWhiteMode, EG_ColorChoice, CT_Color, CT_ColorScheme } from "./dml-colors";
 
-import type {
-  CT_OfficeArtExtensionList
-} from './dml-media';
+import type { CT_OfficeArtExtensionList } from "./dml-media";
 
-import type {
-  ST_FontCollectionIndex,
-  CT_TextFont,
-  CT_SupplementalFont
-} from './dml-fonts';
+import type { ST_FontCollectionIndex, CT_TextFont, CT_SupplementalFont } from "./dml-fonts";
 
-import type {
-  ST_StyleMatrixColumnIndex
-} from './dml-shapes';
+import type { ST_StyleMatrixColumnIndex } from "./dml-shapes";
 
 // These types are defined locally in this module to avoid circular dependency
 export interface CT_Point3D {
@@ -198,18 +185,16 @@ export interface CT_FlatText {
   z?: ST_Coordinate;
 }
 
-export type EG_Text3D = 
-  | { sp3d: CT_Shape3D }
-  | { flatTx: CT_FlatText };
+export type EG_Text3D = { sp3d: CT_Shape3D } | { flatTx: CT_FlatText };
 
 // Alpha Effects
 export interface CT_AlphaBiLevelEffect {
   thresh: ST_PositiveFixedPercentage;
 }
 
-export type CT_AlphaCeilingEffect = Record<string, never>
+export type CT_AlphaCeilingEffect = Record<string, never>;
 
-export type CT_AlphaFloorEffect = Record<string, never>
+export type CT_AlphaFloorEffect = Record<string, never>;
 
 export interface CT_AlphaInverseEffect {
   colorChoice?: EG_ColorChoice;
@@ -246,7 +231,7 @@ export interface CT_DuotoneEffect {
   colorChoice: [EG_ColorChoice, EG_ColorChoice];
 }
 
-export type CT_GrayscaleEffect = Record<string, never>
+export type CT_GrayscaleEffect = Record<string, never>;
 
 export interface CT_HSLEffect {
   hue?: ST_PositiveFixedAngle;
@@ -364,7 +349,7 @@ export interface CT_TransformEffect {
 }
 
 // Fill Properties
-export type CT_NoFillProperties = Record<string, never>
+export type CT_NoFillProperties = Record<string, never>;
 
 export interface CT_SolidColorFillProperties {
   colorChoice?: EG_ColorChoice;
@@ -386,7 +371,7 @@ export interface CT_PathShadeProperties {
   path?: ST_PathShadeType;
 }
 
-export type EG_ShadeProperties = 
+export type EG_ShadeProperties =
   | { lin: CT_LinearShadeProperties }
   | { path: CT_PathShadeProperties };
 
@@ -427,7 +412,7 @@ export interface CT_StretchInfoProperties {
   fillRect?: CT_RelativeRect;
 }
 
-export type EG_FillModeProperties = 
+export type EG_FillModeProperties =
   | { tile: CT_TileInfoProperties }
   | { stretch: CT_StretchInfoProperties };
 
@@ -534,9 +519,9 @@ export interface CT_PatternFillProperties {
   prst?: ST_PresetPatternVal;
 }
 
-export type CT_GroupFillProperties = Record<string, never>
+export type CT_GroupFillProperties = Record<string, never>;
 
-export type EG_FillProperties = 
+export type EG_FillProperties =
   | { noFill: CT_NoFillProperties }
   | { solidFill: CT_SolidColorFillProperties }
   | { gradFill: CT_GradientFillProperties }
@@ -579,7 +564,7 @@ export interface CT_BlendEffect {
   blend: ST_BlendMode;
 }
 
-export type EG_Effect = 
+export type EG_Effect =
   | { cont: CT_EffectContainer }
   | { effect: CT_EffectReference }
   | { alphaBiLevel: CT_AlphaBiLevelEffect }
@@ -633,9 +618,7 @@ export interface CT_EffectList {
   softEdge?: CT_SoftEdgesEffect;
 }
 
-export type EG_EffectProperties = 
-  | { effectLst: CT_EffectList }
-  | { effectDag: CT_EffectContainer };
+export type EG_EffectProperties = { effectLst: CT_EffectList } | { effectDag: CT_EffectContainer };
 
 export interface CT_EffectProperties {
   effectProperties: EG_EffectProperties;

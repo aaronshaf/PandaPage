@@ -31,17 +31,19 @@ describe("docx-to-markdown paragraph styles", () => {
         { style: "Heading5", expected: "##### " },
         { style: "Heading 5", expected: "##### " },
         { style: "Heading6", expected: "###### " },
-        { style: "Heading 6", expected: "###### " }
+        { style: "Heading 6", expected: "###### " },
       ];
 
       styles.forEach(({ style, expected, suffix = "" }) => {
         const doc: DocxDocument = {
-          paragraphs: [{
-            type: "paragraph",
-            style,
-            runs: [{ text: "Heading Text" }]
-          }],
-          numbering: undefined
+          paragraphs: [
+            {
+              type: "paragraph",
+              style,
+              runs: [{ text: "Heading Text" }],
+            },
+          ],
+          numbering: undefined,
         };
 
         const result = convertDocxToMarkdown(doc);
@@ -51,77 +53,87 @@ describe("docx-to-markdown paragraph styles", () => {
 
     test("should handle normal paragraph style", () => {
       const doc: DocxDocument = {
-        paragraphs: [{
-          type: "paragraph",
-          style: "Normal",
-          runs: [{ text: "Normal paragraph text" }]
-        }],
-        numbering: undefined
+        paragraphs: [
+          {
+            type: "paragraph",
+            style: "Normal",
+            runs: [{ text: "Normal paragraph text" }],
+          },
+        ],
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("Normal paragraph text");
     });
 
     test("should handle undefined style", () => {
       const doc: DocxDocument = {
-        paragraphs: [{
-          type: "paragraph",
-          runs: [{ text: "No style paragraph" }]
-        }],
-        numbering: undefined
+        paragraphs: [
+          {
+            type: "paragraph",
+            runs: [{ text: "No style paragraph" }],
+          },
+        ],
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("No style paragraph");
     });
 
     test("should handle quote style", () => {
       const doc: DocxDocument = {
-        paragraphs: [{
-          type: "paragraph",
-          style: "Quote",
-          runs: [{ text: "This is a quote" }]
-        }],
-        numbering: undefined
+        paragraphs: [
+          {
+            type: "paragraph",
+            style: "Quote",
+            runs: [{ text: "This is a quote" }],
+          },
+        ],
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       // Quote style is not currently handled, falls back to plain text
       expect(result).toBe("This is a quote");
     });
 
     test("should handle intense quote style", () => {
       const doc: DocxDocument = {
-        paragraphs: [{
-          type: "paragraph",
-          style: "IntenseQuote",
-          runs: [{ text: "This is an intense quote" }]
-        }],
-        numbering: undefined
+        paragraphs: [
+          {
+            type: "paragraph",
+            style: "IntenseQuote",
+            runs: [{ text: "This is an intense quote" }],
+          },
+        ],
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       // IntenseQuote style is not currently handled, falls back to plain text
       expect(result).toBe("This is an intense quote");
     });
 
     test("should handle caption style", () => {
       const doc: DocxDocument = {
-        paragraphs: [{
-          type: "paragraph",
-          style: "Caption",
-          runs: [{ text: "Figure 1: Sample caption" }]
-        }],
-        numbering: undefined
+        paragraphs: [
+          {
+            type: "paragraph",
+            style: "Caption",
+            runs: [{ text: "Figure 1: Sample caption" }],
+          },
+        ],
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       // Caption style is not currently handled, falls back to plain text
       expect(result).toBe("Figure 1: Sample caption");
     });
@@ -132,29 +144,29 @@ describe("docx-to-markdown paragraph styles", () => {
           {
             type: "paragraph",
             style: "Heading1",
-            runs: [{ text: "Main Title" }]
+            runs: [{ text: "Main Title" }],
           },
           {
             type: "paragraph",
             style: "Heading2",
-            runs: [{ text: "Subtitle" }]
+            runs: [{ text: "Subtitle" }],
           },
           {
             type: "paragraph",
-            runs: [{ text: "Regular paragraph" }]
+            runs: [{ text: "Regular paragraph" }],
           },
           {
             type: "paragraph",
             style: "Quote",
-            runs: [{ text: "A quoted text" }]
-          }
+            runs: [{ text: "A quoted text" }],
+          },
         ],
-        numbering: undefined
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
       const lines = result.split("\n");
-      
+
       expect(lines[0]).toBe("# Main Title");
       expect(lines[1]).toBe(""); // Empty line after heading
       expect(lines[2]).toBe("## Subtitle");

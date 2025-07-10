@@ -1,8 +1,8 @@
 // view-properties.ts - View and display-related types for presentations
-import type { ST_PositiveFixedPercentage, ST_RelationshipId } from '../shared-types';
-import type { CT_PositiveSize2D, CT_Point2D, CT_Scale2D, ST_Coordinate } from '../dml-main';
-import type { CT_ExtensionList } from './common';
-import type { ST_Direction } from './transitions';
+import type { ST_PositiveFixedPercentage, ST_RelationshipId } from "../shared-types";
+import type { CT_PositiveSize2D, CT_Point2D, CT_Scale2D, ST_Coordinate } from "../dml-main";
+import type { CT_ExtensionList } from "./common";
+import type { ST_Direction } from "./transitions";
 
 export enum ST_SplitterBarState {
   Minimized = "minimized",

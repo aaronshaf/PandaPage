@@ -13,23 +13,25 @@ beforeAll(() => {
 });
 
 // Helper to create a minimal valid PPTX buffer
-function createMinimalPptx(options: {
-  hasSlides?: boolean;
-  slideCount?: number;
-  slideContent?: string[];
-  hasMetadata?: boolean;
-  metadataContent?: string;
-  corruptZip?: boolean;
-} = {}): ArrayBuffer {
+function createMinimalPptx(
+  options: {
+    hasSlides?: boolean;
+    slideCount?: number;
+    slideContent?: string[];
+    hasMetadata?: boolean;
+    metadataContent?: string;
+    corruptZip?: boolean;
+  } = {},
+): ArrayBuffer {
   const { zipSync, strToU8 } = require("fflate");
-  
+
   if (options.corruptZip) {
     const buffer = new ArrayBuffer(100);
     const view = new Uint8Array(buffer);
     view.fill(255);
     return buffer;
   }
-  
+
   const files: Record<string, Uint8Array> = {
     "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -43,15 +45,15 @@ function createMinimalPptx(options: {
       <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
         <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
         <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
-      </Relationships>`)
+      </Relationships>`),
   };
-  
+
   if (options.hasSlides !== false) {
     const slideCount = options.slideCount || 1;
     for (let i = 0; i < slideCount; i++) {
       files[`ppt/slides/slide${i + 1}.xml`] = strToU8(
-        options.slideContent?.[i] || 
-        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        options.slideContent?.[i] ||
+          `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
           <p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
             <p:cSld>
               <p:spTree>
@@ -80,21 +82,22 @@ function createMinimalPptx(options: {
                 </p:sp>
               </p:spTree>
             </p:cSld>
-          </p:sld>`
+          </p:sld>`,
       );
     }
   }
-  
+
   if (options.hasMetadata !== false) {
-    files["docProps/app.xml"] = strToU8(options.metadataContent || 
-      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    files["docProps/app.xml"] = strToU8(
+      options.metadataContent ||
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes" xmlns:dc="http://purl.org/dc/elements/1.1/">
           <dc:title>Test Presentation</dc:title>
           <dc:creator>Test Author</dc:creator>
-        </Properties>`
+        </Properties>`,
     );
   }
-  
+
   const zipped = zipSync(files);
   return zipped.buffer;
 }
@@ -104,7 +107,7 @@ describe("pptx-reader internal functions", () => {
     test("should parse a simple PPTX file with one slide", async () => {
       const buffer = createMinimalPptx();
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result).toBeDefined();
       expect(result.slides).toBeArray();
       expect(result.slides).toHaveLength(1);
@@ -117,7 +120,7 @@ describe("pptx-reader internal functions", () => {
     test("should parse multiple slides", async () => {
       const buffer = createMinimalPptx({ slideCount: 3 });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides).toHaveLength(3);
       expect(result.slides[0]?.slideNumber).toBe(1);
       expect(result.slides[1]?.slideNumber).toBe(2);
@@ -128,7 +131,7 @@ describe("pptx-reader internal functions", () => {
     test("should handle slides without metadata", async () => {
       const buffer = createMinimalPptx({ hasMetadata: false });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result).toBeDefined();
       expect(result.slides).toHaveLength(1);
       expect(result.metadata).toEqual({});
@@ -162,11 +165,11 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
-      const bullets = result.slides[0]?.content.filter(c => c.type === "bullet");
+
+      const bullets = result.slides[0]?.content.filter((c) => c.type === "bullet");
       expect(bullets).toHaveLength(2);
       expect(bullets?.[0]?.text).toBe("Bullet point 1");
       expect(bullets?.[1]?.text).toBe("Bullet point 2");
@@ -194,10 +197,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides[0]?.title).toBe("Center Title");
       expect(result.slides[0]?.content[0]?.type).toBe("title");
     });
@@ -225,10 +228,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       // Empty paragraphs should be filtered out
       expect(result.slides[0]?.content).toHaveLength(0);
     });
@@ -256,10 +259,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides[0]?.content[0]?.text).toBe("Hello World");
     });
 
@@ -280,10 +283,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       // When no bullet indicator is present, it should be treated as bullet
       expect(result.slides[0]?.content[0]?.type).toBe("bullet");
     });
@@ -308,10 +311,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       // When buNone is present, it should be text
       expect(result.slides[0]?.content[0]?.type).toBe("text");
     });
@@ -322,10 +325,10 @@ describe("pptx-reader internal functions", () => {
           <dc:title>My Presentation Title</dc:title>
           <dc:creator>John Doe</dc:creator>
         </Properties>`;
-      
+
       const buffer = createMinimalPptx({ metadataContent });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.metadata?.title).toBe("My Presentation Title");
       expect(result.metadata?.author).toBe("John Doe");
     });
@@ -336,10 +339,10 @@ describe("pptx-reader internal functions", () => {
           <dc:title></dc:title>
           <dc:creator></dc:creator>
         </Properties>`;
-      
+
       const buffer = createMinimalPptx({ metadataContent });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.metadata?.title).toBe("");
       expect(result.metadata?.author).toBe("");
     });
@@ -347,7 +350,7 @@ describe("pptx-reader internal functions", () => {
     test("should handle missing slide files gracefully", async () => {
       const buffer = createMinimalPptx({ hasSlides: false });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides).toHaveLength(0);
       expect(result.metadata).toBeDefined();
     });
@@ -371,12 +374,12 @@ describe("pptx-reader internal functions", () => {
         "ppt/slides/slide1.xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
           <p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
             <p:cSld><p:spTree><p:sp><p:txBody><a:p><a:r><a:t>Slide 1</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld>
-          </p:sld>`)
+          </p:sld>`),
       };
-      
+
       const buffer = zipSync(files).buffer;
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides).toHaveLength(3);
       expect(result.slides[0]?.slideNumber).toBe(1);
       expect(result.slides[0]?.content[0]?.text).toBe("Slide 1");
@@ -390,7 +393,7 @@ describe("pptx-reader internal functions", () => {
   describe("Error handling", () => {
     test("should fail with corrupted ZIP", async () => {
       const buffer = createMinimalPptx({ corruptZip: true });
-      
+
       await expect(Effect.runPromise(readPptx(buffer))).rejects.toThrow();
     });
 
@@ -399,9 +402,9 @@ describe("pptx-reader internal functions", () => {
         <p:sld>
           <invalid XML here
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
-      
+
       // Should still parse what it can
       const result = await Effect.runPromise(readPptx(buffer));
       expect(result.slides).toHaveLength(1);
@@ -410,7 +413,7 @@ describe("pptx-reader internal functions", () => {
 
     test("should return PptxParseError for failures", async () => {
       const buffer = new ArrayBuffer(10); // Invalid PPTX
-      
+
       try {
         await Effect.runPromise(readPptx(buffer));
         expect(true).toBe(false); // Should not reach here
@@ -432,10 +435,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides[0]?.content).toHaveLength(0);
     });
 
@@ -457,10 +460,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       expect(result.slides[0]?.content).toHaveLength(1);
       expect(result.slides[0]?.content[0]?.text).toBe("Valid content");
     });
@@ -501,10 +504,10 @@ describe("pptx-reader internal functions", () => {
             </p:spTree>
           </p:cSld>
         </p:sld>`;
-      
+
       const buffer = createMinimalPptx({ slideContent: [slideContent] });
       const result = await Effect.runPromise(readPptx(buffer));
-      
+
       // Should only use the first title
       expect(result.slides[0]?.title).toBe("First Title");
       // Both should be in content

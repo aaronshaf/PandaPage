@@ -3,8 +3,14 @@
  * @see ECMA-376 Part 1, §17.18 (Simple Types)
  */
 
-import type { ST_OnOff, ST_String, ST_Lang, ST_Guid } from '../shared/common-types';
-import type { ST_DecimalNumber, ST_UnsignedDecimalNumber, ST_TwipsMeasure, ST_UniversalMeasure, ST_PositiveUniversalMeasure } from '../shared/measurement-types';
+import type { ST_OnOff, ST_String, ST_Lang, ST_Guid } from "../shared/common-types";
+import type {
+  ST_DecimalNumber,
+  ST_UnsignedDecimalNumber,
+  ST_TwipsMeasure,
+  ST_UniversalMeasure,
+  ST_PositiveUniversalMeasure,
+} from "../shared/measurement-types";
 
 /**
  * Empty element.

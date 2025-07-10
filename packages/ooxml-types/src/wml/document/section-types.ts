@@ -6,12 +6,12 @@
 /**
  * Page orientation
  */
-export type ST_PageOrientation = 'portrait' | 'landscape';
+export type ST_PageOrientation = "portrait" | "landscape";
 
 /**
  * Section type
  */
-export type ST_SectionMark = 'nextPage' | 'nextColumn' | 'continuous' | 'evenPage' | 'oddPage';
+export type ST_SectionMark = "nextPage" | "nextColumn" | "continuous" | "evenPage" | "oddPage";
 
 /**
  * Page size
@@ -64,13 +64,23 @@ export interface CT_PaperSource {
  */
 export interface CT_PageNumber {
   /** Format */
-  fmt?: 'decimal' | 'upperRoman' | 'lowerRoman' | 'upperLetter' | 'lowerLetter' | 'ordinal' | 'cardinalText' | 'ordinalText' | 'hex' | 'chicago';
+  fmt?:
+    | "decimal"
+    | "upperRoman"
+    | "lowerRoman"
+    | "upperLetter"
+    | "lowerLetter"
+    | "ordinal"
+    | "cardinalText"
+    | "ordinalText"
+    | "hex"
+    | "chicago";
   /** Start value */
   start?: number;
   /** Chapter style */
   chapStyle?: number;
   /** Chapter separator */
-  chapSep?: 'hyphen' | 'period' | 'colon' | 'emDash' | 'enDash';
+  chapSep?: "hyphen" | "period" | "colon" | "emDash" | "enDash";
 }
 
 /**
@@ -103,7 +113,7 @@ export interface CT_LineNumber {
   /** Distance from text */
   distance?: number;
   /** Restart */
-  restart?: 'newPage' | 'newSection' | 'continuous';
+  restart?: "newPage" | "newSection" | "continuous";
 }
 
 /**
@@ -111,11 +121,11 @@ export interface CT_LineNumber {
  */
 export interface CT_PageBorders {
   /** Z-order */
-  zOrder?: 'front' | 'back';
+  zOrder?: "front" | "back";
   /** Display */
-  display?: 'allPages' | 'firstPage' | 'notFirstPage';
+  display?: "allPages" | "firstPage" | "notFirstPage";
   /** Offset from */
-  offsetFrom?: 'page' | 'text';
+  offsetFrom?: "page" | "text";
   /** Top border */
   top?: any; // CT_PageBorder
   /** Left border */
@@ -131,7 +141,7 @@ export interface CT_PageBorders {
  */
 export interface CT_DocGrid {
   /** Type */
-  type?: 'default' | 'lines' | 'linesAndChars' | 'snapToChars';
+  type?: "default" | "lines" | "linesAndChars" | "snapToChars";
   /** Line pitch */
   linePitch?: number;
   /** Character space */
@@ -143,7 +153,7 @@ export interface CT_DocGrid {
  */
 export interface CT_HdrFtrRef {
   /** Type */
-  type: 'even' | 'default' | 'first';
+  type: "even" | "default" | "first";
   /** Relationship ID */
   id: string;
 }
@@ -159,13 +169,13 @@ export interface CT_SectPr {
   /** Form protection */
   formProt?: boolean;
   /** Vertical justification */
-  vAlign?: 'top' | 'center' | 'both' | 'bottom';
+  vAlign?: "top" | "center" | "both" | "bottom";
   /** No endnote */
   noEndnote?: boolean;
   /** Title page */
   titlePg?: boolean;
   /** Text direction */
-  textDirection?: 'lrTb' | 'tbRl' | 'btLr' | 'lrTbV' | 'tbRlV' | 'tbLrV';
+  textDirection?: "lrTb" | "tbRl" | "btLr" | "lrTbV" | "tbRlV" | "tbLrV";
   /** Bidirectional */
   bidi?: boolean;
   /** Right to left gutter */

@@ -1,12 +1,22 @@
 // layout-definition.ts - Layout definition types for diagrams
-import type { CT_OfficeArtExtensionList } from '../dml-main';
-import type { CT_Algorithm } from './layout-algorithms';
-import type { CT_Shape } from './shape-adjustment';
-import type { CT_PresentationOf, CT_Constraints, CT_Rules, AG_IteratorAttributes } from './layout-constraints';
-import type { CT_LayoutVariablePropertySet } from './layout-variables';
-import type { ST_ChildOrderType } from './layout-enums';
-import type { ST_FunctionType, ST_FunctionOperator, ST_FunctionValue, ST_FunctionArgument } from './layout-algorithms';
-import type { CT_SampleData, CT_Categories, CT_Name, CT_Description } from './basic-data-model';
+import type { CT_OfficeArtExtensionList } from "../dml-main";
+import type { CT_Algorithm } from "./layout-algorithms";
+import type { CT_Shape } from "./shape-adjustment";
+import type {
+  CT_PresentationOf,
+  CT_Constraints,
+  CT_Rules,
+  AG_IteratorAttributes,
+} from "./layout-constraints";
+import type { CT_LayoutVariablePropertySet } from "./layout-variables";
+import type { ST_ChildOrderType } from "./layout-enums";
+import type {
+  ST_FunctionType,
+  ST_FunctionOperator,
+  ST_FunctionValue,
+  ST_FunctionArgument,
+} from "./layout-algorithms";
+import type { CT_SampleData, CT_Categories, CT_Name, CT_Description } from "./basic-data-model";
 
 // Layout node
 export interface CT_LayoutNode {

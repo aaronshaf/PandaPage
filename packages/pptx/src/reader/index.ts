@@ -1,2 +1,2 @@
 // PPTX reader exports
-export * from './pptx-reader';
+export * from "./pptx-reader";

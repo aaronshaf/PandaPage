@@ -1,11 +1,11 @@
 // chart-element-types.ts
 // Chart element types including various chart types and plot areas
 
-import type { CT_ShapeProperties } from './dml-main';
-import type { 
-  CT_Boolean, 
-  CT_Double, 
-  CT_UnsignedInt, 
+import type { CT_ShapeProperties } from "./dml-main";
+import type {
+  CT_Boolean,
+  CT_Double,
+  CT_UnsignedInt,
   CT_ExtensionList,
   CT_LineSer,
   CT_ScatterSer,
@@ -14,9 +14,9 @@ import type {
   CT_AreaSer,
   CT_PieSer,
   CT_BubbleSer,
-  CT_SurfaceSer
-} from './chart-data-types';
-import type { 
+  CT_SurfaceSer,
+} from "./chart-data-types";
+import type {
   CT_DLbls,
   CT_ChartLines,
   CT_UpDownBars,
@@ -24,21 +24,10 @@ import type {
   CT_Overlap,
   CT_Shape,
   CT_BandFmts,
-  CT_Surface
-} from './chart-formatting-types';
-import type { 
-  CT_Layout,
-  CT_Title,
-  CT_DTable,
-  CT_Legend,
-  CT_PivotFmts
-} from './chart-legend-types';
-import type {
-  CT_ValAx,
-  CT_CatAx,
-  CT_DateAx,
-  CT_SerAx
-} from './chart-axes-types';
+  CT_Surface,
+} from "./chart-formatting-types";
+import type { CT_Layout, CT_Title, CT_DTable, CT_Legend, CT_PivotFmts } from "./chart-legend-types";
+import type { CT_ValAx, CT_CatAx, CT_DateAx, CT_SerAx } from "./chart-axes-types";
 
 // Grouping types
 export enum ST_Grouping {
@@ -353,5 +342,5 @@ import type {
   CT_SecondPieSize,
   CT_BubbleScale,
   CT_SizeRepresents,
-  CT_View3D
-} from './chart-types';
+  CT_View3D,
+} from "./chart-types";

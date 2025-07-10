@@ -3,9 +3,9 @@
  * @see ECMA-376 Part 1, §17.15 (Settings)
  */
 
-import type { ST_OnOff, ST_String, ST_Lang } from '../shared/common-types';
-import type { ST_DecimalNumber } from '../shared/measurement-types';
-import type { CT_OnOff, CT_String as CT_StringWml } from './basic-types';
+import type { ST_OnOff, ST_String, ST_Lang } from "../shared/common-types";
+import type { ST_DecimalNumber } from "../shared/measurement-types";
+import type { CT_OnOff, CT_String as CT_StringWml } from "./basic-types";
 
 /**
  * View type.

@@ -1,10 +1,10 @@
 export function addStyles(): void {
   // Add CSS styles to document head if they don't exist
-  const existingStyle = document.getElementById('browser-document-viewer-styles');
+  const existingStyle = document.getElementById("browser-document-viewer-styles");
   if (existingStyle) return;
-  
-  const style = document.createElement('style');
-  style.id = 'browser-document-viewer-styles';
+
+  const style = document.createElement("style");
+  style.id = "browser-document-viewer-styles";
   style.textContent = `
     .page {
       /* Page styles are now applied inline for dynamic dimensions */
@@ -87,6 +87,6 @@ export function addStyles(): void {
       }
     }
   `;
-  
+
   document.head.appendChild(style);
 }

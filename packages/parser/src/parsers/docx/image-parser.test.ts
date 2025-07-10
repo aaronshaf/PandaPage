@@ -1,16 +1,16 @@
-import { test, expect } from 'bun:test';
-import { parseDrawing, createImageElement, getMimeType } from './image-parser';
+import { test, expect } from "bun:test";
+import { parseDrawing, createImageElement, getMimeType } from "./image-parser";
 
 // Use DOMParser from environment or import it
 const getDOMParser = async () => {
-  if (typeof DOMParser !== 'undefined') {
+  if (typeof DOMParser !== "undefined") {
     return DOMParser;
   }
-  const { DOMParser: XMLDOMParser } = await import('@xmldom/xmldom');
+  const { DOMParser: XMLDOMParser } = await import("@xmldom/xmldom");
   return XMLDOMParser;
 };
 
-test('parseDrawing extracts relationship ID from blip element', async () => {
+test("parseDrawing extracts relationship ID from blip element", async () => {
   const drawingXml = `
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 
                xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
@@ -31,29 +31,29 @@ test('parseDrawing extracts relationship ID from blip element', async () => {
       </wp:inline>
     </w:drawing>
   `;
-  
+
   const Parser = await getDOMParser();
   const parser = new Parser();
-  const doc = parser.parseFromString(drawingXml, 'text/xml');
+  const doc = parser.parseFromString(drawingXml, "text/xml");
   const drawingElement = doc.documentElement;
-  
+
   if (!drawingElement) {
-    throw new Error('Failed to parse drawing XML');
+    throw new Error("Failed to parse drawing XML");
   }
-  
+
   const result = parseDrawing(drawingElement as any);
-  
+
   expect(result).toBeTruthy();
-  expect(result?.relationshipId).toBe('rId4');
-  expect(result?.name).toBe('Picture 1');
-  expect(result?.description).toBe('Test image description');
+  expect(result?.relationshipId).toBe("rId4");
+  expect(result?.name).toBe("Picture 1");
+  expect(result?.description).toBe("Test image description");
   // 1905000 / 9525 = 200
   expect(result?.width).toBe(200);
   // 1270000 / 9525 = 133
   expect(result?.height).toBe(133);
 });
 
-test('parseDrawing returns null for drawing without blip', async () => {
+test("parseDrawing returns null for drawing without blip", async () => {
   const drawingXml = `
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
       <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
@@ -62,22 +62,22 @@ test('parseDrawing returns null for drawing without blip', async () => {
       </wp:inline>
     </w:drawing>
   `;
-  
+
   const Parser = await getDOMParser();
   const parser = new Parser();
-  const doc = parser.parseFromString(drawingXml, 'text/xml');
+  const doc = parser.parseFromString(drawingXml, "text/xml");
   const drawingElement = doc.documentElement;
-  
+
   if (!drawingElement) {
-    throw new Error('Failed to parse drawing XML');
+    throw new Error("Failed to parse drawing XML");
   }
-  
+
   const result = parseDrawing(drawingElement as any);
-  
+
   expect(result).toBeNull();
 });
 
-test('parseDrawing handles missing dimensions', async () => {
+test("parseDrawing handles missing dimensions", async () => {
   const drawingXml = `
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 
                xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
@@ -96,95 +96,95 @@ test('parseDrawing handles missing dimensions', async () => {
       </wp:inline>
     </w:drawing>
   `;
-  
+
   const Parser = await getDOMParser();
   const parser = new Parser();
-  const doc = parser.parseFromString(drawingXml, 'text/xml');
+  const doc = parser.parseFromString(drawingXml, "text/xml");
   const drawingElement = doc.documentElement;
-  
+
   if (!drawingElement) {
-    throw new Error('Failed to parse drawing XML');
+    throw new Error("Failed to parse drawing XML");
   }
-  
+
   const result = parseDrawing(drawingElement as any);
-  
+
   expect(result).toBeTruthy();
-  expect(result?.relationshipId).toBe('rId4');
+  expect(result?.relationshipId).toBe("rId4");
   expect(result?.width).toBeUndefined();
   expect(result?.height).toBeUndefined();
 });
 
-test('createImageElement creates Image with correct properties', () => {
+test("createImageElement creates Image with correct properties", () => {
   const drawingInfo = {
-    relationshipId: 'rId4',
-    name: 'Test Image',
-    description: 'A test image',
+    relationshipId: "rId4",
+    name: "Test Image",
+    description: "A test image",
     width: 200,
-    height: 150
+    height: 150,
   };
-  
+
   const imageData = {
     data: new ArrayBuffer(10),
-    mimeType: 'image/png'
+    mimeType: "image/png",
   };
-  
+
   const image = createImageElement(drawingInfo, imageData);
-  
-  expect(image.type).toBe('image');
+
+  expect(image.type).toBe("image");
   expect(image.data).toBe(imageData.data);
-  expect(image.mimeType).toBe('image/png');
+  expect(image.mimeType).toBe("image/png");
   expect(image.width).toBe(200);
   expect(image.height).toBe(150);
-  expect(image.alt).toBe('A test image');
+  expect(image.alt).toBe("A test image");
 });
 
-test('createImageElement uses name as alt when description is missing', () => {
+test("createImageElement uses name as alt when description is missing", () => {
   const drawingInfo = {
-    relationshipId: 'rId4',
-    name: 'Test Image',
+    relationshipId: "rId4",
+    name: "Test Image",
     width: 200,
-    height: 150
+    height: 150,
   };
-  
+
   const imageData = {
     data: new ArrayBuffer(10),
-    mimeType: 'image/png'
+    mimeType: "image/png",
   };
-  
+
   const image = createImageElement(drawingInfo, imageData);
-  
-  expect(image.alt).toBe('Test Image');
+
+  expect(image.alt).toBe("Test Image");
 });
 
-test('createImageElement uses default alt when both name and description are missing', () => {
+test("createImageElement uses default alt when both name and description are missing", () => {
   const drawingInfo = {
-    relationshipId: 'rId4'
+    relationshipId: "rId4",
   };
-  
+
   const imageData = {
     data: new ArrayBuffer(10),
-    mimeType: 'image/png'
+    mimeType: "image/png",
   };
-  
+
   const image = createImageElement(drawingInfo, imageData);
-  
-  expect(image.alt).toBe('Image');
+
+  expect(image.alt).toBe("Image");
 });
 
-test('getMimeType returns correct MIME types', () => {
-  expect(getMimeType('png')).toBe('image/png');
-  expect(getMimeType('jpg')).toBe('image/jpeg');
-  expect(getMimeType('jpeg')).toBe('image/jpeg');
-  expect(getMimeType('gif')).toBe('image/gif');
-  expect(getMimeType('bmp')).toBe('image/bmp');
-  expect(getMimeType('tiff')).toBe('image/tiff');
-  expect(getMimeType('tif')).toBe('image/tiff');
-  expect(getMimeType('svg')).toBe('image/svg+xml');
-  expect(getMimeType('webp')).toBe('image/webp');
+test("getMimeType returns correct MIME types", () => {
+  expect(getMimeType("png")).toBe("image/png");
+  expect(getMimeType("jpg")).toBe("image/jpeg");
+  expect(getMimeType("jpeg")).toBe("image/jpeg");
+  expect(getMimeType("gif")).toBe("image/gif");
+  expect(getMimeType("bmp")).toBe("image/bmp");
+  expect(getMimeType("tiff")).toBe("image/tiff");
+  expect(getMimeType("tif")).toBe("image/tiff");
+  expect(getMimeType("svg")).toBe("image/svg+xml");
+  expect(getMimeType("webp")).toBe("image/webp");
 });
 
-test('getMimeType returns default for unknown extensions', () => {
-  expect(getMimeType('unknown')).toBe('image/png');
-  expect(getMimeType()).toBe('image/png');
-  expect(getMimeType('')).toBe('image/png');
+test("getMimeType returns default for unknown extensions", () => {
+  expect(getMimeType("unknown")).toBe("image/png");
+  expect(getMimeType()).toBe("image/png");
+  expect(getMimeType("")).toBe("image/png");
 });

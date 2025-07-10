@@ -10,7 +10,7 @@ export interface CT_DMLAudioFile {
   /** Content type */
   contentType?: string;
   /** Relationship ID */
-  'r:link'?: string;
+  "r:link"?: string;
 }
 
 /**
@@ -38,5 +38,5 @@ export interface CT_DMLAudioCD {
  */
 export interface CT_DMLQuickTimeFile {
   /** Relationship ID */
-  'r:link'?: string;
+  "r:link"?: string;
 }

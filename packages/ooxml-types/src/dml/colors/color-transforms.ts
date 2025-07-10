@@ -3,7 +3,14 @@
  * @see ECMA-376 Part 1, §20.1.2.3 (Color Transforms)
  */
 
-import type { CT_PositiveFixedPercentage, CT_FixedPercentage, CT_PositivePercentage, CT_Percentage, CT_PositiveFixedAngle, CT_Angle } from '../core/coordinate-types';
+import type {
+  CT_PositiveFixedPercentage,
+  CT_FixedPercentage,
+  CT_PositivePercentage,
+  CT_Percentage,
+  CT_PositiveFixedAngle,
+  CT_Angle,
+} from "../core/coordinate-types";
 
 /**
  * Complement transform.
@@ -40,7 +47,7 @@ export type CT_InverseGammaTransform = Record<string, never>;
  * Represents various color modifications that can be applied.
  * @see ECMA-376 Part 1, §20.1.2.3.1 EG_ColorTransform
  */
-export type EG_ColorTransform = 
+export type EG_ColorTransform =
   | { tint: CT_PositiveFixedPercentage }
   | { shade: CT_PositiveFixedPercentage }
   | { comp: CT_ComplementTransform }

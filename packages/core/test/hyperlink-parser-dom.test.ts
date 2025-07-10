@@ -12,16 +12,16 @@ describe("Hyperlink Parser - DOM Based", () => {
 </Relationships>`;
 
       const result = await Effect.runPromise(parseHyperlinkRelationships(relsXml));
-      
+
       expect(result.size).toBe(2);
       expect(result.get("rId1")).toEqual({
         id: "rId1",
         target: "https://example.com",
-        targetMode: "External"
+        targetMode: "External",
       });
       expect(result.get("rId2")).toEqual({
         id: "rId2",
-        target: "https://google.com"
+        target: "https://google.com",
       });
     });
   });
@@ -29,9 +29,9 @@ describe("Hyperlink Parser - DOM Based", () => {
   describe("parseHyperlink", () => {
     test("should parse hyperlink with external URL", async () => {
       const relationships = new Map([
-        ["rId1", { id: "rId1", target: "https://example.com", targetMode: "External" }]
+        ["rId1", { id: "rId1", target: "https://example.com", targetMode: "External" }],
       ]);
-      
+
       const hyperlinkXml = `<w:hyperlink r:id="rId1" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
         <w:r>
           <w:t>Visit Example</w:t>
@@ -39,7 +39,7 @@ describe("Hyperlink Parser - DOM Based", () => {
       </w:hyperlink>`;
 
       const result = await Effect.runPromise(parseHyperlink(hyperlinkXml, relationships));
-      
+
       expect(result.url).toBe("https://example.com");
       expect(result.runs).toHaveLength(1);
       expect(result.runs[0]?.text).toBe("Visit Example");
@@ -54,7 +54,7 @@ describe("Hyperlink Parser - DOM Based", () => {
       </w:hyperlink>`;
 
       const result = await Effect.runPromise(parseHyperlink(hyperlinkXml, new Map()));
-      
+
       expect(result.url).toBe("#section1");
       expect(result.runs).toHaveLength(1);
       expect(result.runs[0]?.text).toBe("Go to Section 1");
@@ -62,10 +62,8 @@ describe("Hyperlink Parser - DOM Based", () => {
     });
 
     test("should parse hyperlink without namespace declarations", async () => {
-      const relationships = new Map([
-        ["rId1", { id: "rId1", target: "https://example.com" }]
-      ]);
-      
+      const relationships = new Map([["rId1", { id: "rId1", target: "https://example.com" }]]);
+
       const hyperlinkXml = `<w:hyperlink r:id="rId1">
         <w:r>
           <w:t>Visit Example</w:t>
@@ -73,7 +71,7 @@ describe("Hyperlink Parser - DOM Based", () => {
       </w:hyperlink>`;
 
       const result = await Effect.runPromise(parseHyperlink(hyperlinkXml, relationships));
-      
+
       expect(result.url).toBe("https://example.com");
       expect(result.runs).toHaveLength(1);
       expect(result.runs[0]?.text).toBe("Visit Example");
@@ -81,10 +79,8 @@ describe("Hyperlink Parser - DOM Based", () => {
     });
 
     test("should parse hyperlink with formatting", async () => {
-      const relationships = new Map([
-        ["rId1", { id: "rId1", target: "https://example.com" }]
-      ]);
-      
+      const relationships = new Map([["rId1", { id: "rId1", target: "https://example.com" }]]);
+
       const hyperlinkXml = `<w:hyperlink r:id="rId1">
         <w:r>
           <w:rPr>
@@ -96,7 +92,7 @@ describe("Hyperlink Parser - DOM Based", () => {
       </w:hyperlink>`;
 
       const result = await Effect.runPromise(parseHyperlink(hyperlinkXml, relationships));
-      
+
       expect(result.url).toBe("https://example.com");
       expect(result.runs).toHaveLength(1);
       expect(result.runs[0]?.text).toBe("Bold Link");

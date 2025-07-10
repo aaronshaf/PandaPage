@@ -208,4 +208,3 @@ export interface DocxTableBorders {
   bottom?: string;
   left?: string;
 }
-

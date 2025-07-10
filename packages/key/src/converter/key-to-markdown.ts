@@ -14,9 +14,7 @@ export const convertKeyToMarkdown = (_document: KeyDocument): string => {
 };
 
 // Main function to convert Keynote buffer to Markdown
-export const keyToMarkdown = (
-  buffer: ArrayBuffer,
-): Effect.Effect<string, KeyParseError> =>
+export const keyToMarkdown = (buffer: ArrayBuffer): Effect.Effect<string, KeyParseError> =>
   Effect.gen(function* () {
     debug.log("Converting Keynote to Markdown...");
 

@@ -10,7 +10,7 @@
  * Empty attribute means true (e.g., `<w:b/>` = bold is on).
  * @see ECMA-376 Part 1, §22.9.2.13 ST_OnOff
  */
-export type ST_OnOff = 'on' | 'off' | boolean;
+export type ST_OnOff = "on" | "off" | boolean;
 
 /**
  * Simple string type used throughout OOXML schemas.
@@ -44,8 +44,6 @@ export type ST_HexColorRGB = string;
  * @see ECMA-376 Part 1, §22.9.2.8 ST_Panose
  */
 export type ST_Panose = string;
-
-
 
 /**
  * XML name type (NCName with constraints).

@@ -3,12 +3,12 @@
  * Based on wml.xsd table row definitions
  */
 
-import type { CT_TcPr } from './table-cell-types';
+import type { CT_TcPr } from "./table-cell-types";
 
 /**
  * Table row height type
  */
-export type ST_TblRowHeightRule = 'auto' | 'exact' | 'atLeast';
+export type ST_TblRowHeightRule = "auto" | "exact" | "atLeast";
 
 /**
  * Table row height
@@ -27,7 +27,7 @@ export interface CT_TblRowWidth {
   /** Width value */
   w?: number;
   /** Width type */
-  type?: 'nil' | 'pct' | 'dxa' | 'auto';
+  type?: "nil" | "pct" | "dxa" | "auto";
 }
 
 /**
@@ -55,7 +55,7 @@ export interface CT_TrPrBase {
   /** Table cell spacing */
   tblCellSpacing?: CT_TblRowWidth;
   /** Justification */
-  jc?: 'start' | 'center' | 'end';
+  jc?: "start" | "center" | "end";
   /** Hidden */
   hidden?: boolean;
 }

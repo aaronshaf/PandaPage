@@ -4,30 +4,30 @@ import { validateConfig, DEFAULT_CONFIG, ConfigError } from "../src/common/confi
 
 test("validateConfig - should use defaults for empty input", async () => {
   const result = await Effect.runPromise(validateConfig({}));
-  
+
   expect(result).toEqual(DEFAULT_CONFIG);
 });
 
 test("validateConfig - should merge user config with defaults", async () => {
   const userConfig = {
     maxWorkers: 8,
-    enableStreaming: false
+    enableStreaming: false,
   };
-  
+
   const result = await Effect.runPromise(validateConfig(userConfig));
-  
+
   expect(result).toMatchObject({
     ...DEFAULT_CONFIG,
     maxWorkers: 8,
-    enableStreaming: false
+    enableStreaming: false,
   });
 });
 
 test("validateConfig - should enforce maxWorkers limit", async () => {
   const userConfig = { maxWorkers: 20 };
-  
+
   const result = await Effect.runPromiseExit(validateConfig(userConfig));
-  
+
   expect(result._tag).toBe("Failure");
   if (result._tag === "Failure") {
     const error = result.cause._tag === "Fail" ? result.cause.error : null;
@@ -39,11 +39,11 @@ test("validateConfig - should enforce maxWorkers limit", async () => {
 test("validateConfig - should enforce chunkSize vs maxFileSize", async () => {
   const userConfig = {
     chunkSize: 200 * 1024 * 1024, // 200MB
-    maxFileSize: 100 * 1024 * 1024  // 100MB
+    maxFileSize: 100 * 1024 * 1024, // 100MB
   };
-  
+
   const result = await Effect.runPromiseExit(validateConfig(userConfig));
-  
+
   expect(result._tag).toBe("Failure");
   if (result._tag === "Failure") {
     const error = result.cause._tag === "Fail" ? result.cause.error : null;
@@ -57,12 +57,12 @@ test("validateConfig - should handle invalid types gracefully", async () => {
     { maxWorkers: "invalid" },
     { timeout: -1000 },
     { enableStreaming: "not-boolean" },
-    { chunkSize: null }
+    { chunkSize: null },
   ];
-  
+
   for (const config of invalidConfigs) {
     const result = await Effect.runPromise(validateConfig(config));
-    
+
     // Should fall back to defaults for invalid values
     expect(result.maxWorkers).toBe(DEFAULT_CONFIG.maxWorkers);
     expect(result.timeout).toBe(DEFAULT_CONFIG.timeout);
@@ -73,18 +73,18 @@ test("validateConfig - should handle invalid types gracefully", async () => {
 
 test("DEFAULT_CONFIG - should have valid structure", () => {
   expect(DEFAULT_CONFIG).toBeDefined();
-  expect(DEFAULT_CONFIG).toHaveProperty('workerThreshold');
-  expect(DEFAULT_CONFIG).toHaveProperty('maxWorkers');
-  expect(DEFAULT_CONFIG).toHaveProperty('chunkSize');
-  expect(DEFAULT_CONFIG).toHaveProperty('enableStreaming');
-  expect(DEFAULT_CONFIG).toHaveProperty('enableCaching');
-  expect(DEFAULT_CONFIG).toHaveProperty('enableCompression');
-  expect(DEFAULT_CONFIG).toHaveProperty('maxFileSize');
-  expect(DEFAULT_CONFIG).toHaveProperty('timeout');
-  expect(DEFAULT_CONFIG).toHaveProperty('preserveFormatting');
-  expect(DEFAULT_CONFIG).toHaveProperty('includeMetadata');
-  expect(DEFAULT_CONFIG).toHaveProperty('generateOutline');
-  
+  expect(DEFAULT_CONFIG).toHaveProperty("workerThreshold");
+  expect(DEFAULT_CONFIG).toHaveProperty("maxWorkers");
+  expect(DEFAULT_CONFIG).toHaveProperty("chunkSize");
+  expect(DEFAULT_CONFIG).toHaveProperty("enableStreaming");
+  expect(DEFAULT_CONFIG).toHaveProperty("enableCaching");
+  expect(DEFAULT_CONFIG).toHaveProperty("enableCompression");
+  expect(DEFAULT_CONFIG).toHaveProperty("maxFileSize");
+  expect(DEFAULT_CONFIG).toHaveProperty("timeout");
+  expect(DEFAULT_CONFIG).toHaveProperty("preserveFormatting");
+  expect(DEFAULT_CONFIG).toHaveProperty("includeMetadata");
+  expect(DEFAULT_CONFIG).toHaveProperty("generateOutline");
+
   // Validate numeric constraints - use simple checks
   expect(DEFAULT_CONFIG.maxWorkers > 0).toBe(true);
   expect(DEFAULT_CONFIG.maxWorkers <= 16).toBe(true);
@@ -96,7 +96,7 @@ test("DEFAULT_CONFIG - should have valid structure", () => {
 
 test("ConfigError - should have proper structure", () => {
   const error = new ConfigError("Test error message");
-  
+
   expect(error._tag).toBe("ConfigError");
   expect(error.message).toBe("Test error message");
   expect(error).toBeInstanceOf(ConfigError);
@@ -106,10 +106,10 @@ test("validateConfig - should handle null and undefined", async () => {
   const results = await Promise.all([
     Effect.runPromise(validateConfig(null)),
     Effect.runPromise(validateConfig(undefined)),
-    Effect.runPromise(validateConfig())
+    Effect.runPromise(validateConfig()),
   ]);
-  
-  results.forEach(result => {
+
+  results.forEach((result) => {
     expect(result).toEqual(DEFAULT_CONFIG);
   });
 });

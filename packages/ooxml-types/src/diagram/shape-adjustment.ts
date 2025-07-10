@@ -1,5 +1,5 @@
 // shape-adjustment.ts - Shape adjustment types for diagrams
-import type { CT_OfficeArtExtensionList } from '../dml-main';
+import type { CT_OfficeArtExtensionList } from "../dml-main";
 
 // Layout shape type
 export enum ST_LayoutShapeType {

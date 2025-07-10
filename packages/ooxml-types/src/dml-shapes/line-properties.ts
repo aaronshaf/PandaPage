@@ -1,15 +1,15 @@
 // line-properties.ts
 // Line properties and styles for DrawingML
 
-import type { ST_PositiveFixedPercentage } from '../shared-types';
-import type { ST_PositiveCoordinate } from './coordinate-types';
-import type { CT_OfficeArtExtensionList } from '../dml-media';
+import type { ST_PositiveFixedPercentage } from "../shared-types";
+import type { ST_PositiveCoordinate } from "./coordinate-types";
+import type { CT_OfficeArtExtensionList } from "../dml-media";
 import type {
   CT_NoFillProperties,
   CT_SolidColorFillProperties,
   CT_GradientFillProperties,
-  CT_PatternFillProperties
-} from '../dml-effects';
+  CT_PatternFillProperties,
+} from "../dml-effects";
 
 // Line end type enum
 export enum ST_LineEndType {
@@ -96,10 +96,10 @@ export interface CT_CustomDashProperties {
 }
 
 // Round line cap properties
-export type CT_RoundLineCapProperties = Record<string, never>
+export type CT_RoundLineCapProperties = Record<string, never>;
 
 // Bevel line cap properties
-export type CT_BevelLineCapProperties = Record<string, never>
+export type CT_BevelLineCapProperties = Record<string, never>;
 
 // Miter limit properties
 export interface CT_MiterLimitProperties {

@@ -1,6 +1,6 @@
 // layout-constraints.ts - Layout constraint types for diagrams
-import type { CT_OfficeArtExtensionList } from '../dml-main';
-import type { ST_BoolOperator } from './layout-enums';
+import type { CT_OfficeArtExtensionList } from "../dml-main";
+import type { ST_BoolOperator } from "./layout-enums";
 
 // Axis types
 export enum ST_AxisType {

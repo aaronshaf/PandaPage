@@ -3,8 +3,8 @@
  * Based on wml.xsd abstract numbering definitions
  */
 
-import type { CT_Lvl } from './level-types';
-import type { ST_MultiLevelType } from './numbering-types';
+import type { CT_Lvl } from "./level-types";
+import type { ST_MultiLevelType } from "./numbering-types";
 
 /**
  * Abstract numbering definition

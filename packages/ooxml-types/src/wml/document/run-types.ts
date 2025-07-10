@@ -3,7 +3,7 @@
  * Based on wml.xsd run definitions
  */
 
-import type { CT_RPr } from '../style/run-properties-types';
+import type { CT_RPr } from "../style/run-properties-types";
 
 /**
  * Text content
@@ -12,7 +12,7 @@ export interface CT_Text {
   /** Text content */
   _text: string;
   /** Preserve space */
-  space?: 'preserve' | 'default';
+  space?: "preserve" | "default";
 }
 
 /**
@@ -25,9 +25,9 @@ export type CT_Tab = Record<string, never>;
  */
 export interface CT_Br {
   /** Break type */
-  type?: 'page' | 'column' | 'textWrapping';
+  type?: "page" | "column" | "textWrapping";
   /** Clear */
-  clear?: 'none' | 'left' | 'right' | 'all';
+  clear?: "none" | "left" | "right" | "all";
 }
 
 /**
@@ -78,7 +78,7 @@ export type CT_YearLong = Record<string, never>;
 /**
  * Run content elements
  */
-export type RunContent = 
+export type RunContent =
   | CT_Text
   | CT_Tab
   | CT_Br

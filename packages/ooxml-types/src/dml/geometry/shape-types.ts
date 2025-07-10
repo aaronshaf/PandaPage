@@ -3,8 +3,13 @@
  * Based on dml-main.xsd shape definitions
  */
 
-import type { CT_PresetGeometry2D, CT_CustomGeometry2D, CT_Point2D, CT_PositiveSize2D } from './geometry-types';
-import type { CT_Path2DList } from './path-types';
+import type {
+  CT_PresetGeometry2D,
+  CT_CustomGeometry2D,
+  CT_Point2D,
+  CT_PositiveSize2D,
+} from "./geometry-types";
+import type { CT_Path2DList } from "./path-types";
 
 /**
  * Shape geometry container
@@ -58,10 +63,18 @@ export interface CT_Transform2D {
   flipV?: boolean;
 }
 
-
 /**
  * Black and white mode
  */
-export type ST_BlackWhiteMode = 
-  | 'clr' | 'auto' | 'gray' | 'ltGray' | 'invGray' | 'grayWhite' 
-  | 'blackGray' | 'blackWhite' | 'black' | 'white' | 'hidden';
+export type ST_BlackWhiteMode =
+  | "clr"
+  | "auto"
+  | "gray"
+  | "ltGray"
+  | "invGray"
+  | "grayWhite"
+  | "blackGray"
+  | "blackWhite"
+  | "black"
+  | "white"
+  | "hidden";

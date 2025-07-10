@@ -1,5 +1,5 @@
 // dml-media.ts - Media-related types extracted from dml-main.ts
-import type { ST_RelationshipId, ST_String } from './shared-types';
+import type { ST_RelationshipId, ST_String } from "./shared-types";
 
 /**
  * Office Art Extension
@@ -73,7 +73,7 @@ export interface CT_EmbeddedWAVAudioFile {
  * Media element group
  * Union type for all media elements
  */
-export type EG_Media = 
+export type EG_Media =
   | { audioCd: CT_AudioCD }
   | { wavAudioFile: CT_EmbeddedWAVAudioFile }
   | { audioFile: CT_AudioFile }

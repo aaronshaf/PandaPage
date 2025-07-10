@@ -1,12 +1,12 @@
 import { describe, test, expect } from "bun:test";
 import { Effect } from "effect";
-import { 
-  parseTableEnhanced, 
-  parseTableRowEnhanced, 
+import {
+  parseTableEnhanced,
+  parseTableRowEnhanced,
   parseTableCellEnhanced,
   parseTableProperties,
   parseTableRowProperties,
-  parseTableCellProperties
+  parseTableCellProperties,
 } from "./table-parser";
 import type { DocxTable, DocxTableRow, DocxTableCell } from "./types";
 
@@ -21,11 +21,11 @@ describe("Table Parser", () => {
                 if (attr === "w") return "5000";
                 if (attr === "type") return "dxa";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableProperties(mockElement));
@@ -41,11 +41,11 @@ describe("Table Parser", () => {
                 if (attr === "w") return "50";
                 if (attr === "type") return "pct";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableProperties(mockElement));
@@ -57,11 +57,11 @@ describe("Table Parser", () => {
         querySelector: (selector: string) => {
           if (selector === "jc") {
             return {
-              getAttribute: (attr: string) => attr === "val" ? "center" : null
+              getAttribute: (attr: string) => (attr === "val" ? "center" : null),
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableProperties(mockElement));
@@ -73,11 +73,11 @@ describe("Table Parser", () => {
         querySelector: (selector: string) => {
           if (selector === "shd") {
             return {
-              getAttribute: (attr: string) => attr === "fill" ? "FF0000" : null
+              getAttribute: (attr: string) => (attr === "fill" ? "FF0000" : null),
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableProperties(mockElement));
@@ -86,7 +86,7 @@ describe("Table Parser", () => {
 
     test("should handle missing properties", async () => {
       const mockElement = {
-        querySelector: () => null
+        querySelector: () => null,
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableProperties(mockElement));
@@ -100,11 +100,11 @@ describe("Table Parser", () => {
         querySelector: (selector: string) => {
           if (selector === "trHeight") {
             return {
-              getAttribute: (attr: string) => attr === "val" ? "400" : null
+              getAttribute: (attr: string) => (attr === "val" ? "400" : null),
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableRowProperties(mockElement));
@@ -118,7 +118,7 @@ describe("Table Parser", () => {
             return {}; // Element exists
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableRowProperties(mockElement));
@@ -136,11 +136,11 @@ describe("Table Parser", () => {
                 if (attr === "w") return "2500";
                 if (attr === "type") return "dxa";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableCellProperties(mockElement));
@@ -152,11 +152,11 @@ describe("Table Parser", () => {
         querySelector: (selector: string) => {
           if (selector === "vAlign") {
             return {
-              getAttribute: (attr: string) => attr === "val" ? "center" : null
+              getAttribute: (attr: string) => (attr === "val" ? "center" : null),
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableCellProperties(mockElement));
@@ -168,11 +168,11 @@ describe("Table Parser", () => {
         querySelector: (selector: string) => {
           if (selector === "shd") {
             return {
-              getAttribute: (attr: string) => attr === "fill" ? "00FF00" : null
+              getAttribute: (attr: string) => (attr === "fill" ? "00FF00" : null),
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableCellProperties(mockElement));
@@ -294,11 +294,11 @@ describe("Table Parser", () => {
                 if (attr === "sz") return "8"; // 8 eighths = 1px
                 if (attr === "color") return "000000";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const mockElement = {
@@ -307,7 +307,7 @@ describe("Table Parser", () => {
             return mockBordersElement;
           }
           return null;
-        }
+        },
       } as unknown as Element;
 
       const properties = await Effect.runPromise(parseTableProperties(mockElement));
@@ -315,7 +315,7 @@ describe("Table Parser", () => {
         top: "1px solid #000000",
         right: "1px solid #000000",
         bottom: "1px solid #000000",
-        left: "1px solid #000000"
+        left: "1px solid #000000",
       });
     });
 
@@ -329,17 +329,17 @@ describe("Table Parser", () => {
                 if (attr === "sz") return "8";
                 if (attr === "color") return "FF0000";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       });
 
       // Test dashed border
       const dashedElement = {
-        querySelector: (selector: string) => 
-          selector === "tblBorders" ? createBorderElement("dashed") : null
+        querySelector: (selector: string) =>
+          selector === "tblBorders" ? createBorderElement("dashed") : null,
       } as unknown as Element;
 
       const dashedProps = await Effect.runPromise(parseTableProperties(dashedElement));
@@ -347,8 +347,8 @@ describe("Table Parser", () => {
 
       // Test dotted border
       const dottedElement = {
-        querySelector: (selector: string) => 
-          selector === "tblBorders" ? createBorderElement("dotted") : null
+        querySelector: (selector: string) =>
+          selector === "tblBorders" ? createBorderElement("dotted") : null,
       } as unknown as Element;
 
       const dottedProps = await Effect.runPromise(parseTableProperties(dottedElement));

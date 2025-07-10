@@ -1,8 +1,8 @@
 import { describe, it, expect } from "bun:test";
 import { parseTable } from "./table-parser";
 import { parseStylesheet } from "./style-parser";
-import { WORD_NAMESPACE } from './types';
-import { ST_Border, ST_Shd } from '@browser-document-viewer/ooxml-types';
+import { WORD_NAMESPACE } from "./types";
+import { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
 
 describe("Table Parser", () => {
   const ns = WORD_NAMESPACE;
@@ -30,11 +30,11 @@ describe("Table Parser", () => {
       const result = parseTable(table);
 
       expect(result).toBeDefined();
-      expect(result?.type).toBe('table');
+      expect(result?.type).toBe("table");
       expect(result?.rows).toHaveLength(1);
       expect(result?.rows[0]?.cells).toHaveLength(1);
       expect(result?.rows[0]?.cells[0]?.paragraphs).toHaveLength(1);
-      expect(result?.rows[0]?.cells[0]?.paragraphs[0]?.type).toBe('paragraph');
+      expect(result?.rows[0]?.cells[0]?.paragraphs[0]?.type).toBe("paragraph");
     });
 
     it("should parse table with multiple rows and cells", () => {
@@ -177,7 +177,7 @@ describe("Table Parser", () => {
         top: 100,
         bottom: 100,
         left: 120,
-        right: 120
+        right: 120,
       });
     });
   });
@@ -281,7 +281,7 @@ describe("Table Parser", () => {
 
       const result = parseTable(table);
 
-      expect(result?.rows[0]?.cells[0]?.verticalAlignment).toBe('center');
+      expect(result?.rows[0]?.cells[0]?.verticalAlignment).toBe("center");
     });
 
     it("should parse cell text direction", () => {
@@ -304,7 +304,7 @@ describe("Table Parser", () => {
 
       const result = parseTable(table);
 
-      expect(result?.rows[0]?.cells[0]?.textDirection).toBe('tbV');
+      expect(result?.rows[0]?.cells[0]?.textDirection).toBe("tbV");
     });
   });
 
@@ -329,9 +329,9 @@ describe("Table Parser", () => {
       const result = parseTable(table);
 
       expect(result?.rows[0]?.cells[0]?.paragraphs).toHaveLength(3);
-      expect(result?.rows[0]?.cells[0]?.paragraphs[0]?.type).toBe('paragraph');
-      expect(result?.rows[0]?.cells[0]?.paragraphs[1]?.type).toBe('paragraph');
-      expect(result?.rows[0]?.cells[0]?.paragraphs[2]?.type).toBe('paragraph');
+      expect(result?.rows[0]?.cells[0]?.paragraphs[0]?.type).toBe("paragraph");
+      expect(result?.rows[0]?.cells[0]?.paragraphs[1]?.type).toBe("paragraph");
+      expect(result?.rows[0]?.cells[0]?.paragraphs[2]?.type).toBe("paragraph");
     });
 
     it("should parse nested table", () => {
@@ -361,8 +361,8 @@ describe("Table Parser", () => {
 
       // The current implementation only parses paragraphs in cells, not nested tables
       expect(result?.rows[0]?.cells[0]?.paragraphs).toHaveLength(2); // Only paragraphs, not the nested table
-      expect(result?.rows[0]?.cells[0]?.paragraphs[0]?.runs[0]?.text).toBe('Before nested table');
-      expect(result?.rows[0]?.cells[0]?.paragraphs[1]?.runs[0]?.text).toBe('After nested table');
+      expect(result?.rows[0]?.cells[0]?.paragraphs[0]?.runs[0]?.text).toBe("Before nested table");
+      expect(result?.rows[0]?.cells[0]?.paragraphs[1]?.runs[0]?.text).toBe("After nested table");
     });
   });
 
@@ -441,12 +441,12 @@ describe("Table Parser", () => {
       expect(result?.borders?.top).toEqual({
         style: ST_Border.Single,
         width: 1, // 8 eighth-points = 1 point
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(result?.borders?.insideH).toEqual({
         style: ST_Border.Dashed,
         width: 0.5, // 4 eighth-points = 0.5 points
-        color: '#0000FF'
+        color: "#0000FF",
       });
     });
 
@@ -493,8 +493,8 @@ describe("Table Parser", () => {
 
       expect(result?.shading).toEqual({
         pattern: ST_Shd.Pct25,
-        fill: '#FFFF00',
-        color: '#FF0000'
+        fill: "#FFFF00",
+        color: "#FF0000",
       });
     });
   });
@@ -526,12 +526,12 @@ describe("Table Parser", () => {
       expect(result?.rows[0]?.cells[0]?.borders?.top).toEqual({
         style: ST_Border.Single,
         width: 1,
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(result?.rows[0]?.cells[0]?.borders?.tl2br).toEqual({
         style: ST_Border.Single,
         width: 0.5,
-        color: '#00FF00'
+        color: "#00FF00",
       });
     });
 
@@ -560,7 +560,7 @@ describe("Table Parser", () => {
 
       expect(result?.rows[0]?.cells[0]?.margin).toEqual({
         top: 50,
-        left: 60
+        left: 60,
       });
     });
   });

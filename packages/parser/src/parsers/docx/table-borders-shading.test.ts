@@ -1,7 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { parseTable } from "./table-parser";
-import { WORD_NAMESPACE } from './types';
-import { ST_Border, ST_Shd } from '@browser-document-viewer/ooxml-types';
+import { WORD_NAMESPACE } from "./types";
+import { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
 
 describe("Table Borders and Shading", () => {
   const ns = WORD_NAMESPACE;
@@ -43,32 +43,32 @@ describe("Table Borders and Shading", () => {
       expect(result?.borders?.top).toEqual({
         style: ST_Border.Single,
         width: 0.5, // 4 eighth-points = 0.5 points
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(result?.borders?.bottom).toEqual({
         style: ST_Border.Double,
         width: 1, // 8 eighth-points = 1 point
-        color: '#00FF00'
+        color: "#00FF00",
       });
       expect(result?.borders?.left).toEqual({
         style: ST_Border.Dashed,
         width: 0.75, // 6 eighth-points = 0.75 points
-        color: '#0000FF'
+        color: "#0000FF",
       });
       expect(result?.borders?.right).toEqual({
         style: ST_Border.Dotted,
         width: 0.25, // 2 eighth-points = 0.25 points
-        color: '#000000'
+        color: "#000000",
       });
       expect(result?.borders?.insideH).toEqual({
         style: ST_Border.Single,
         width: 0.5,
-        color: '#808080'
+        color: "#808080",
       });
       expect(result?.borders?.insideV).toEqual({
         style: ST_Border.Single,
         width: 0.5,
-        color: '#C0C0C0'
+        color: "#C0C0C0",
       });
     });
 
@@ -101,7 +101,7 @@ describe("Table Borders and Shading", () => {
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
         style: ST_Border.Single,
-        width: 0.5
+        width: 0.5,
       });
       expect(result?.borders?.top?.color).toBeUndefined();
     });
@@ -166,7 +166,7 @@ describe("Table Borders and Shading", () => {
 
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
-        fill: '#FFFF00'
+        fill: "#FFFF00",
       });
     });
 
@@ -197,8 +197,8 @@ describe("Table Borders and Shading", () => {
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
         pattern: ST_Shd.Pct25,
-        fill: '#FFFF00',
-        color: '#FF0000'
+        fill: "#FFFF00",
+        color: "#FF0000",
       });
     });
   });
@@ -238,7 +238,7 @@ describe("Table Borders and Shading", () => {
         top: 100,
         bottom: 100,
         left: 120,
-        right: 120
+        right: 120,
       });
     });
   });
@@ -280,32 +280,32 @@ describe("Table Borders and Shading", () => {
       expect(borders?.top).toEqual({
         style: ST_Border.Single,
         width: 1, // 8 eighth-points = 1 point
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(borders?.bottom).toEqual({
         style: ST_Border.Double,
         width: 1.5, // 12 eighth-points = 1.5 points
-        color: '#00FF00'
+        color: "#00FF00",
       });
       expect(borders?.left).toEqual({
         style: ST_Border.Dashed,
         width: 0.5,
-        color: '#0000FF'
+        color: "#0000FF",
       });
       expect(borders?.right).toEqual({
         style: ST_Border.Dotted,
         width: 0.75,
-        color: '#000000'
+        color: "#000000",
       });
       expect(borders?.tl2br).toEqual({
         style: ST_Border.Single,
         width: 0.5,
-        color: '#FF00FF'
+        color: "#FF00FF",
       });
       expect(borders?.tr2bl).toEqual({
         style: ST_Border.Single,
         width: 0.5,
-        color: '#00FFFF'
+        color: "#00FFFF",
       });
     });
   });
@@ -338,8 +338,8 @@ describe("Table Borders and Shading", () => {
       expect(result?.rows[0]?.cells[0]?.shading).toBeDefined();
       expect(result?.rows[0]?.cells[0]?.shading).toEqual({
         pattern: ST_Shd.Pct50,
-        fill: '#00FF00',
-        color: '#FF0000'
+        fill: "#00FF00",
+        color: "#FF0000",
       });
     });
   });
@@ -379,7 +379,7 @@ describe("Table Borders and Shading", () => {
         top: 50,
         bottom: 50,
         left: 60,
-        right: 60
+        right: 60,
       });
     });
   });
@@ -433,7 +433,7 @@ describe("Table Borders and Shading", () => {
       // Check table-level properties
       expect(result?.borders).toBeDefined();
       expect(result?.shading).toEqual({
-        fill: '#F0F0F0'
+        fill: "#F0F0F0",
       });
 
       // Check cell-level properties (override table properties)
@@ -441,10 +441,10 @@ describe("Table Borders and Shading", () => {
       expect(firstCell?.borders?.top).toEqual({
         style: ST_Border.Double,
         width: 1,
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(firstCell?.shading).toEqual({
-        fill: '#FFFF00'
+        fill: "#FFFF00",
       });
 
       // Second cell should inherit table properties

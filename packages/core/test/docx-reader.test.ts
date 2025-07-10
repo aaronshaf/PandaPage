@@ -5,7 +5,7 @@ import {
   parseDocumentXml,
   parseNumbering,
   parseParagraph,
-  DocxParseError
+  DocxParseError,
 } from "../src/formats/docx/docx-reader";
 
 // Set up DOM environment for testing
@@ -26,8 +26,8 @@ describe("docx-reader", () => {
       const buffer = new ArrayBuffer(10);
       const view = new Uint8Array(buffer);
       // Fill with invalid data
-      view.fill(0xFF);
-      
+      view.fill(0xff);
+
       const result = await Effect.runPromiseExit(readDocx(buffer));
 
       expect(result._tag).toBe("Failure");
@@ -42,12 +42,12 @@ describe("docx-reader", () => {
 
     test("should handle missing document.xml", async () => {
       const fflate = await import("fflate");
-      
+
       // Create a valid zip but without document.xml
       const files: Record<string, Uint8Array> = {
         "word/styles.xml": fflate.strToU8(`<?xml version="1.0"?><styles/>`),
       };
-      
+
       const zipped = fflate.zipSync(files);
       const result = await Effect.runPromiseExit(readDocx(zipped.buffer as ArrayBuffer));
 
@@ -68,7 +68,7 @@ describe("docx-reader", () => {
     test("should parse numbering definitions through readDocx", async () => {
       // We need to import fflate to create a mock DOCX file
       const fflate = await import("fflate");
-      
+
       // Create minimal DOCX structure with numbering
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
@@ -103,38 +103,38 @@ describe("docx-reader", () => {
             <w:num w:numId="1">
               <w:abstractNumId w:val="0"/>
             </w:num>
-          </w:numbering>`)
+          </w:numbering>`),
       };
-      
+
       // Create a zip buffer
       const zipped = fflate.zipSync(files);
       const buffer = zipped.buffer;
-      
+
       const result = await Effect.runPromise(readDocx(buffer as ArrayBuffer));
-      
+
       expect(result.numbering).toBeDefined();
       expect(result.numbering?.instances.size).toBe(1);
       expect(result.numbering?.instances.get("1")).toBe("0");
       expect(result.numbering?.abstractFormats.size).toBeGreaterThanOrEqual(1);
-      
+
       const format = result.numbering?.abstractFormats.get("0");
       expect(format).toBeDefined();
       if (format) {
         expect(format.levels.size).toBe(2);
         expect(format.levels.get(0)).toMatchObject({
           numFmt: "decimal",
-          lvlText: "%1."
+          lvlText: "%1.",
         });
         expect(format.levels.get(1)).toMatchObject({
           numFmt: "lowerLetter",
-          lvlText: "%2)"
+          lvlText: "%2)",
         });
       }
     });
 
     test("should handle style links in numbering", async () => {
       const fflate = await import("fflate");
-      
+
       // Create DOCX with style links
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
@@ -169,19 +169,19 @@ describe("docx-reader", () => {
             <w:num w:numId="2">
               <w:abstractNumId w:val="2"/>
             </w:num>
-          </w:numbering>`)
+          </w:numbering>`),
       };
-      
+
       const zipped = fflate.zipSync(files);
       const result = await Effect.runPromise(readDocx(zipped.buffer as ArrayBuffer));
-      
+
       expect(result.numbering).toBeDefined();
       expect(result.numbering?.abstractFormats.size).toBeGreaterThanOrEqual(2);
     });
 
     test("should handle empty numbering elements", async () => {
       const fflate = await import("fflate");
-      
+
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
           <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -204,12 +204,12 @@ describe("docx-reader", () => {
             <w:num w:numId="3">
               <w:abstractNumId w:val=""/>
             </w:num>
-          </w:numbering>`)
+          </w:numbering>`),
       };
-      
+
       const zipped = fflate.zipSync(files);
       const result = await Effect.runPromise(readDocx(zipped.buffer as ArrayBuffer));
-      
+
       expect(result.numbering).toBeDefined();
       // Should skip entries with empty IDs
       expect(result.numbering?.instances.size).toBe(0);
@@ -218,7 +218,7 @@ describe("docx-reader", () => {
 
     test("should handle numbering with missing attributes", async () => {
       const fflate = await import("fflate");
-      
+
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
           <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -243,28 +243,28 @@ describe("docx-reader", () => {
             <w:num w:numId="1">
               <w:abstractNumId w:val="0"/>
             </w:num>
-          </w:numbering>`)
+          </w:numbering>`),
       };
-      
+
       const zipped = fflate.zipSync(files);
       const result = await Effect.runPromise(readDocx(zipped.buffer as ArrayBuffer));
-      
+
       expect(result.numbering).toBeDefined();
       const format = result.numbering?.abstractFormats.get("0");
       expect(format).toBeDefined();
       expect(format?.levels.get(0)).toMatchObject({
         numFmt: "bullet",
-        lvlText: "*"
+        lvlText: "*",
       });
       expect(format?.levels.get(1)).toMatchObject({
         numFmt: "decimal",
-        lvlText: "•"
+        lvlText: "•",
       });
     });
 
     test("should handle complex style link resolution", async () => {
       const fflate = await import("fflate");
-      
+
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
           <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -295,12 +295,12 @@ describe("docx-reader", () => {
             <w:num w:numId="2">
               <w:abstractNumId w:val="2"/>
             </w:num>
-          </w:numbering>`)
+          </w:numbering>`),
       };
-      
+
       const zipped = fflate.zipSync(files);
       const result = await Effect.runPromise(readDocx(zipped.buffer as ArrayBuffer));
-      
+
       expect(result.numbering).toBeDefined();
       // Abstract 1 should resolve to abstract 0's format
       const format1 = result.numbering?.abstractFormats.get("1");
@@ -308,7 +308,7 @@ describe("docx-reader", () => {
       if (format0 && format1) {
         expect(format1).toEqual(format0);
       }
-      
+
       // Abstract 2 should not have a format (unresolved style link)
       const format2 = result.numbering?.abstractFormats.get("2");
       expect(format2).toBeUndefined();
@@ -316,7 +316,7 @@ describe("docx-reader", () => {
 
     test("should parse multiple levels correctly", async () => {
       const fflate = await import("fflate");
-      
+
       const files: Record<string, Uint8Array> = {
         "word/document.xml": fflate.strToU8(`<?xml version="1.0"?>
           <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -345,17 +345,17 @@ describe("docx-reader", () => {
             <w:num w:numId="1">
               <w:abstractNumId w:val="0"/>
             </w:num>
-          </w:numbering>`)
+          </w:numbering>`),
       };
-      
+
       const zipped = fflate.zipSync(files);
       const result = await Effect.runPromise(readDocx(zipped.buffer as ArrayBuffer));
-      
+
       const format = result.numbering?.abstractFormats.get("0");
       expect(format?.levels.size).toBe(3);
       expect(format?.levels.get(2)).toMatchObject({
         numFmt: "lowerRoman",
-        lvlText: "%3."
+        lvlText: "%3.",
       });
     });
   });
@@ -366,53 +366,61 @@ describe("docx-reader", () => {
       const mockNumberingRoot = {
         querySelectorAll: (selector: string) => {
           if (selector === "abstractNum") {
-            return [{
-              getAttribute: (attr: string) => attr === "abstractNumId" ? "0" : null,
-              querySelectorAll: (lvlSelector: string) => {
-                if (lvlSelector === "lvl") {
-                  return [{
-                    getAttribute: (attr: string) => attr === "ilvl" ? "0" : null,
-                    querySelector: (innerSelector: string) => {
-                      if (innerSelector === "numFmt") {
-                        return { getAttribute: (a: string) => a === "val" ? "decimal" : null };
-                      }
-                      if (innerSelector === "lvlText") {
-                        return { getAttribute: (a: string) => a === "val" ? "%1." : null };
-                      }
-                      return null;
-                    }
-                  }];
-                }
-                return [];
-              }
-            }];
+            return [
+              {
+                getAttribute: (attr: string) => (attr === "abstractNumId" ? "0" : null),
+                querySelectorAll: (lvlSelector: string) => {
+                  if (lvlSelector === "lvl") {
+                    return [
+                      {
+                        getAttribute: (attr: string) => (attr === "ilvl" ? "0" : null),
+                        querySelector: (innerSelector: string) => {
+                          if (innerSelector === "numFmt") {
+                            return {
+                              getAttribute: (a: string) => (a === "val" ? "decimal" : null),
+                            };
+                          }
+                          if (innerSelector === "lvlText") {
+                            return { getAttribute: (a: string) => (a === "val" ? "%1." : null) };
+                          }
+                          return null;
+                        },
+                      },
+                    ];
+                  }
+                  return [];
+                },
+              },
+            ];
           }
           if (selector === "num") {
-            return [{
-              getAttribute: (attr: string) => attr === "numId" ? "1" : null,
-              querySelector: (innerSelector: string) => {
-                if (innerSelector === "abstractNumId") {
-                  return { getAttribute: (a: string) => a === "val" ? "0" : null };
-                }
-                return null;
-              }
-            }];
+            return [
+              {
+                getAttribute: (attr: string) => (attr === "numId" ? "1" : null),
+                querySelector: (innerSelector: string) => {
+                  if (innerSelector === "abstractNumId") {
+                    return { getAttribute: (a: string) => (a === "val" ? "0" : null) };
+                  }
+                  return null;
+                },
+              },
+            ];
           }
           return [];
-        }
+        },
       } as any;
 
       const result = parseNumbering(mockNumberingRoot);
-      
+
       expect(result.instances.size).toBe(1);
       expect(result.instances.get("1")).toBe("0");
       expect(result.abstractFormats.size).toBe(1);
-      
+
       const format = result.abstractFormats.get("0");
       expect(format?.levels.size).toBe(1);
       expect(format?.levels.get(0)).toMatchObject({
         numFmt: "decimal",
-        lvlText: "%1."
+        lvlText: "%1.",
       });
     });
 
@@ -424,21 +432,23 @@ describe("docx-reader", () => {
               {
                 // Missing abstractNumId
                 getAttribute: (attr: string) => null,
-                querySelectorAll: () => []
+                querySelectorAll: () => [],
               },
               {
-                getAttribute: (attr: string) => attr === "abstractNumId" ? "1" : null,
+                getAttribute: (attr: string) => (attr === "abstractNumId" ? "1" : null),
                 querySelectorAll: (lvlSelector: string) => {
                   if (lvlSelector === "lvl") {
-                    return [{
-                      // Missing ilvl
-                      getAttribute: (attr: string) => null,
-                      querySelector: () => null
-                    }];
+                    return [
+                      {
+                        // Missing ilvl
+                        getAttribute: (attr: string) => null,
+                        querySelector: () => null,
+                      },
+                    ];
                   }
                   return [];
-                }
-              }
+                },
+              },
             ];
           }
           if (selector === "num") {
@@ -446,26 +456,26 @@ describe("docx-reader", () => {
               {
                 // Missing numId
                 getAttribute: (attr: string) => null,
-                querySelector: () => null
+                querySelector: () => null,
               },
               {
-                getAttribute: (attr: string) => attr === "numId" ? "2" : null,
+                getAttribute: (attr: string) => (attr === "numId" ? "2" : null),
                 querySelector: (innerSelector: string) => {
                   if (innerSelector === "abstractNumId") {
                     // abstractNumId element exists but has no val attribute
                     return { getAttribute: () => null };
                   }
                   return null;
-                }
-              }
+                },
+              },
             ];
           }
           return [];
-        }
+        },
       } as any;
 
       const result = parseNumbering(mockNumberingRoot);
-      
+
       // Should skip entries with missing required attributes
       expect(result.instances.size).toBe(0);
       expect(result.abstractFormats.size).toBe(0);
@@ -488,7 +498,7 @@ describe("docx-reader", () => {
                 querySelector: (innerSelector: string) => {
                   if (innerSelector === "b") return {};
                   return null;
-                }
+                },
               },
               {
                 querySelectorAll: (innerSelector: string) => {
@@ -500,35 +510,35 @@ describe("docx-reader", () => {
                 querySelector: (innerSelector: string) => {
                   if (innerSelector === "i") return {};
                   return null;
-                }
-              }
+                },
+              },
             ];
           }
           return [];
         },
         querySelector: (selector: string) => {
           if (selector === "pPr pStyle") {
-            return { getAttribute: (attr: string) => attr === "val" ? "Heading1" : null };
+            return { getAttribute: (attr: string) => (attr === "val" ? "Heading1" : null) };
           }
           if (selector === "pPr numPr") {
             return {
               querySelector: (innerSelector: string) => {
                 if (innerSelector === "numId") {
-                  return { getAttribute: (attr: string) => attr === "val" ? "1" : null };
+                  return { getAttribute: (attr: string) => (attr === "val" ? "1" : null) };
                 }
                 if (innerSelector === "ilvl") {
-                  return { getAttribute: (attr: string) => attr === "val" ? "0" : null };
+                  return { getAttribute: (attr: string) => (attr === "val" ? "0" : null) };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = parseParagraph(mockParagraph);
-      
+
       expect(result.type).toBe("paragraph");
       expect(result.style).toBe("Heading1");
       expect(result.numId).toBe("1");
@@ -536,11 +546,11 @@ describe("docx-reader", () => {
       expect(result.runs).toHaveLength(2);
       expect(result.runs[0]).toMatchObject({
         text: "Bold text",
-        bold: true
+        bold: true,
       });
       expect(result.runs[1]).toMatchObject({
         text: "Italic text",
-        italic: true
+        italic: true,
       });
     });
 
@@ -548,23 +558,25 @@ describe("docx-reader", () => {
       const mockParagraph = {
         querySelectorAll: (selector: string) => {
           if (selector === "r") {
-            return [{
-              querySelectorAll: (innerSelector: string) => {
-                if (innerSelector === "t") {
-                  return [{ textContent: "Plain text" }];
-                }
-                return [];
+            return [
+              {
+                querySelectorAll: (innerSelector: string) => {
+                  if (innerSelector === "t") {
+                    return [{ textContent: "Plain text" }];
+                  }
+                  return [];
+                },
+                querySelector: () => null,
               },
-              querySelector: () => null
-            }];
+            ];
           }
           return [];
         },
-        querySelector: () => null
+        querySelector: () => null,
       } as any;
 
       const result = parseParagraph(mockParagraph);
-      
+
       expect(result.numId).toBeUndefined();
       expect(result.ilvl).toBeUndefined();
       expect(result.style).toBeUndefined();

@@ -90,16 +90,14 @@ export async function renderPptx(buffer: ArrayBuffer): Promise<string> {
 export async function renderKey(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
-      const { keyToMarkdown } = yield* Effect.promise(
-        () => import("@browser-document-viewer/key"),
-      );
+      const { keyToMarkdown } = yield* Effect.promise(() => import("@browser-document-viewer/key"));
       return yield* keyToMarkdown(buffer);
     }),
   );
 }
 
 // Re-export types for document structure
-export type { 
+export type {
   DocxElement,
   DocxTable,
   DocxTableRow,
@@ -107,16 +105,16 @@ export type {
   DocxTableProperties,
   DocxTableRowProperties,
   DocxTableCellProperties,
-  EnhancedDocxDocument
+  EnhancedDocxDocument,
 } from "@browser-document-viewer/docx";
 
 // Re-export reader function
 export { readEnhancedDocx } from "@browser-document-viewer/docx";
 
 // Re-export structured parsing
-export { 
+export {
   parseDocxToStructured,
-  type StructuredDocxResult 
+  type StructuredDocxResult,
 } from "./src/formats/docx/docx-to-structured";
 
 // Re-export other utilities
@@ -157,7 +155,7 @@ export {
   TWIPS_PER_POINT,
   EMUS_PER_INCH,
   EMUS_PER_POINT,
-  EMUS_PER_TWIP
+  EMUS_PER_TWIP,
 } from "./src/common/units";
 
 // Export wrapper functions for bundling compatibility
@@ -173,7 +171,7 @@ export type {
   TextRun,
   Image,
   DocumentMetadata,
-  ParseOptions as ParserOptions
+  ParseOptions as ParserOptions,
 } from "@browser-document-viewer/parser";
 
 export type { MarkdownRenderOptions } from "@browser-document-viewer/markdown-renderer";

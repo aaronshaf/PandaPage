@@ -10,42 +10,50 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Header 1" }]
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Header 1" }],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Header 2" }]
-              }]
-            }
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Header 2" }],
+                },
+              ],
+            },
           ],
-          properties: { isHeader: true }
+          properties: { isHeader: true },
         },
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Cell 1" }]
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Cell 1" }],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Cell 2" }]
-              }]
-            }
-          ]
-        }
-      ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Cell 2" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
-    const lines = markdown.split('\n');
-    
+    const lines = markdown.split("\n");
+
     expect(lines[0]).toBe("| Header 1 | Header 2 |");
     expect(lines[1]).toBe("| --- | --- |");
     expect(lines[2]).toBe("| Cell 1 | Cell 2 |");
@@ -58,18 +66,20 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [
-                  { text: "Bold ", bold: true },
-                  { text: "and ", italic: true },
-                  { text: "underlined", underline: true }
-                ]
-              }]
-            }
-          ]
-        }
-      ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [
+                    { text: "Bold ", bold: true },
+                    { text: "and ", italic: true },
+                    { text: "underlined", underline: true },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
@@ -87,17 +97,17 @@ describe("Table to Markdown Conversion", () => {
               content: [
                 {
                   type: "paragraph",
-                  runs: [{ text: "First paragraph" }]
+                  runs: [{ text: "First paragraph" }],
                 },
                 {
                   type: "paragraph",
-                  runs: [{ text: "Second paragraph" }]
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  runs: [{ text: "Second paragraph" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
@@ -112,20 +122,24 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: []
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Not empty" }]
-              }]
-            }
-          ]
-        }
-      ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Not empty" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
@@ -139,21 +153,23 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Centered" }]
-              }],
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Centered" }],
+                },
+              ],
               properties: {
-                alignment: "center"
-              }
-            }
-          ]
-        }
+                alignment: "center",
+              },
+            },
+          ],
+        },
       ],
       properties: {
         width: "100%",
-        alignment: "center"
-      }
+        alignment: "center",
+      },
     };
 
     const markdown = convertTableToMarkdown(table);
@@ -167,54 +183,66 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Meeting Topic" }]
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Meeting Topic" }],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Duration" }]
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Duration" }],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Owner" }]
-              }]
-            }
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Owner" }],
+                },
+              ],
+            },
           ],
-          properties: { isHeader: true }
+          properties: { isHeader: true },
         },
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Review previous action items" }]
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Review previous action items" }],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "10 minutes" }]
-              }]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "10 minutes" }],
+                },
+              ],
             },
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Project Manager" }]
-              }]
-            }
-          ]
-        }
-      ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Project Manager" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
-    const lines = markdown.split('\n');
-    
+    const lines = markdown.split("\n");
+
     expect(lines[0]).toBe("| Meeting Topic | Duration | Owner |");
     expect(lines[1]).toBe("| --- | --- | --- |");
     expect(lines[2]).toContain("Review previous action items");
@@ -229,14 +257,16 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Command | Option" }]
-              }]
-            }
-          ]
-        }
-      ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Command | Option" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
@@ -255,19 +285,19 @@ describe("Table to Markdown Conversion", () => {
                   type: "paragraph",
                   runs: [{ text: "Item 1" }],
                   numId: "1",
-                  ilvl: 0
+                  ilvl: 0,
                 },
                 {
                   type: "paragraph",
                   runs: [{ text: "Item 2" }],
-                  numId: "1", 
-                  ilvl: 0
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  numId: "1",
+                  ilvl: 0,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     // Note: The actual markdown conversion would need numbering data
@@ -280,7 +310,7 @@ describe("Table to Markdown Conversion", () => {
   test("should handle tables with no rows", () => {
     const table: DocxTable = {
       type: "table",
-      rows: []
+      rows: [],
     };
 
     const markdown = convertTableToMarkdown(table);
@@ -294,30 +324,34 @@ describe("Table to Markdown Conversion", () => {
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Implicit Header" }]
-              }]
-            }
-          ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Implicit Header" }],
+                },
+              ],
+            },
+          ],
           // No properties specifying isHeader
         },
         {
           cells: [
             {
-              content: [{
-                type: "paragraph",
-                runs: [{ text: "Data Row" }]
-              }]
-            }
-          ]
-        }
-      ]
+              content: [
+                {
+                  type: "paragraph",
+                  runs: [{ text: "Data Row" }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertTableToMarkdown(table);
-    const lines = markdown.split('\n');
-    
+    const lines = markdown.split("\n");
+
     // First row should be treated as header
     expect(lines[0]).toBe("| Implicit Header |");
     expect(lines[1]).toBe("| --- |");

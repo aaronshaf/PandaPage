@@ -3,8 +3,8 @@
  * @see ECMA-376 Part 1, §18.15 (Single Cell Tables)
  */
 
-import type { ST_Xstring } from '../shared/common-types';
-import type { CT_ExtensionList } from '../chart-types';
+import type { ST_Xstring } from "../shared/common-types";
+import type { CT_ExtensionList } from "../chart-types";
 
 /**
  * Schema.

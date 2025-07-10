@@ -10,5 +10,5 @@ export interface CT_DMLVideoFile {
   /** Content type */
   contentType?: string;
   /** Relationship ID */
-  'r:link'?: string;
+  "r:link"?: string;
 }

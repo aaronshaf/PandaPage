@@ -14,9 +14,7 @@ export const convertPagesToMarkdown = (_document: PagesDocument): string => {
 };
 
 // Main function to convert Pages buffer to Markdown
-export const pagesToMarkdown = (
-  buffer: ArrayBuffer,
-): Effect.Effect<string, PagesParseError> =>
+export const pagesToMarkdown = (buffer: ArrayBuffer): Effect.Effect<string, PagesParseError> =>
   Effect.gen(function* () {
     debug.log("Converting Apple Pages to Markdown...");
 

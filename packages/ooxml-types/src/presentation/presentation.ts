@@ -1,9 +1,21 @@
 // presentation.ts - Main presentation types
-import type { ST_Percentage, ST_RelationshipId, ST_ConformanceClass } from '../shared-types';
-import type { CT_PositiveSize2D, CT_TextListStyle, CT_TextFont, CT_Color } from '../dml-main';
-import type { CT_Empty } from './common';
-import type { CT_SlideIdList, CT_SlideMasterIdList, CT_NotesMasterIdList, CT_HandoutMasterIdList } from './slides';
-import type { CT_ExtensionList, CT_CustomShowList, CT_CustomerDataList, CT_EmbeddedFontList, CT_SmartTags, EG_SlideListChoice } from './common';
+import type { ST_Percentage, ST_RelationshipId, ST_ConformanceClass } from "../shared-types";
+import type { CT_PositiveSize2D, CT_TextListStyle, CT_TextFont, CT_Color } from "../dml-main";
+import type { CT_Empty } from "./common";
+import type {
+  CT_SlideIdList,
+  CT_SlideMasterIdList,
+  CT_NotesMasterIdList,
+  CT_HandoutMasterIdList,
+} from "./slides";
+import type {
+  CT_ExtensionList,
+  CT_CustomShowList,
+  CT_CustomerDataList,
+  CT_EmbeddedFontList,
+  CT_SmartTags,
+  EG_SlideListChoice,
+} from "./common";
 
 export type ST_SlideSizeCoordinate = number; // a:ST_PositiveCoordinate32, minInclusive 914400, maxInclusive 51206400
 export type ST_BookmarkIdSeed = number; // xsd:unsignedInt, minInclusive 1, maxExclusive 2147483648
@@ -148,7 +160,7 @@ export interface CT_ShowInfoKiosk {
   restart?: number; // xsd:unsignedInt
 }
 
-export type EG_ShowType = 
+export type EG_ShowType =
   | { present: CT_Empty }
   | { browse: CT_ShowInfoBrowse }
   | { kiosk: CT_ShowInfoKiosk };

@@ -37,24 +37,13 @@
       "TableHeading",
       "Figure"
     ],
-    "uniqueTextFormats": [
-      "verticalAlign",
-      "bold",
-      "italic"
-    ],
-    "uniqueSpecialElements": [
-      "complexFields"
-    ]
+    "uniqueTextFormats": ["verticalAlign", "bold", "italic"],
+    "uniqueSpecialElements": ["complexFields"]
   },
   "documentAnalyses": [
     {
       "fileName": "001.docx",
-      "paragraphStyles": [
-        "Heading",
-        "Heading 2",
-        "Heading 3",
-        "Body A"
-      ],
+      "paragraphStyles": ["Heading", "Heading 2", "Heading 3", "Body A"],
       "textFormats": [],
       "specialElements": [],
       "tableInfo": {
@@ -72,9 +61,7 @@
       "listInfo": {
         "hasNumberedLists": true,
         "hasBulletLists": false,
-        "listLevels": [
-          0
-        ]
+        "listLevels": [0]
       },
       "sampleContent": [
         "Heading 1",
@@ -91,10 +78,7 @@
     },
     {
       "fileName": "002.docx",
-      "paragraphStyles": [
-        "Heading",
-        "Body"
-      ],
+      "paragraphStyles": ["Heading", "Body"],
       "textFormats": [],
       "specialElements": [],
       "tableInfo": {
@@ -129,12 +113,8 @@
     },
     {
       "fileName": "003.docx",
-      "paragraphStyles": [
-        "Body"
-      ],
-      "textFormats": [
-        "verticalAlign"
-      ],
+      "paragraphStyles": ["Body"],
+      "textFormats": ["verticalAlign"],
       "specialElements": [],
       "tableInfo": {
         "hasTableStyles": false,
@@ -151,10 +131,7 @@
       "listInfo": {
         "hasNumberedLists": true,
         "hasBulletLists": false,
-        "listLevels": [
-          0,
-          1
-        ]
+        "listLevels": [0, 1]
       },
       "sampleContent": [
         "Open Source Policy Template",
@@ -209,10 +186,7 @@
       "listInfo": {
         "hasNumberedLists": true,
         "hasBulletLists": false,
-        "listLevels": [
-          0,
-          1
-        ]
+        "listLevels": [0, 1]
       },
       "sampleContent": [
         "End-to-End Open-source Collaboration Guidance",
@@ -239,11 +213,7 @@
         "TOC2",
         "ListParagraph"
       ],
-      "textFormats": [
-        "bold",
-        "italic",
-        "verticalAlign"
-      ],
+      "textFormats": ["bold", "italic", "verticalAlign"],
       "specialElements": [],
       "tableInfo": {
         "hasTableStyles": false,
@@ -260,12 +230,7 @@
       "listInfo": {
         "hasNumberedLists": true,
         "hasBulletLists": false,
-        "listLevels": [
-          0,
-          1,
-          2,
-          3
-        ]
+        "listLevels": [0, 1, 2, 3]
       },
       "sampleContent": [
         "Demonstration of DOCX support in calibre",
@@ -293,14 +258,8 @@
         "Figure",
         "Heading2"
       ],
-      "textFormats": [
-        "bold",
-        "italic",
-        "verticalAlign"
-      ],
-      "specialElements": [
-        "complexFields"
-      ],
+      "textFormats": ["bold", "italic", "verticalAlign"],
+      "specialElements": ["complexFields"],
       "tableInfo": {
         "hasTableStyles": false,
         "hasTableCells": true,
@@ -316,10 +275,7 @@
       "listInfo": {
         "hasNumberedLists": true,
         "hasBulletLists": false,
-        "listLevels": [
-          0,
-          1
-        ]
+        "listLevels": [0, 1]
       },
       "sampleContent": [
         "Paper",

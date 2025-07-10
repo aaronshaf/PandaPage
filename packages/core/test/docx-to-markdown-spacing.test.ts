@@ -1,5 +1,8 @@
 import { describe, test, expect, beforeAll } from "bun:test";
-import { convertDocxToMarkdown, convertEnhancedDocxToMarkdown } from "../src/formats/docx/docx-to-markdown";
+import {
+  convertDocxToMarkdown,
+  convertEnhancedDocxToMarkdown,
+} from "../src/formats/docx/docx-to-markdown";
 import type { DocxDocument } from "../src/formats/docx/docx-reader";
 import type { EnhancedDocxDocument, DocxElement } from "../src/formats/docx/docx-reader-enhanced";
 import { Window } from "happy-dom";
@@ -20,59 +23,57 @@ describe("docx-to-markdown spacing and formatting", () => {
         {
           type: "paragraph",
           style: "Heading1",
-          runs: [{ text: "Heading" }]
+          runs: [{ text: "Heading" }],
         },
         {
           type: "paragraph",
-          runs: [{ text: "Paragraph after heading" }]
+          runs: [{ text: "Paragraph after heading" }],
         },
         {
           type: "paragraph",
-          runs: [{ text: "Another paragraph" }]
+          runs: [{ text: "Another paragraph" }],
         },
         {
           type: "table",
           rows: [
             {
-              cells: [
-                { content: [{ type: "paragraph", runs: [{ text: "Table" }] }] }
-              ]
-            }
-          ]
+              cells: [{ content: [{ type: "paragraph", runs: [{ text: "Table" }] }] }],
+            },
+          ],
         },
         {
           type: "paragraph",
-          runs: [{ text: "After table" }]
-        }
+          runs: [{ text: "After table" }],
+        },
       ];
 
       const doc: EnhancedDocxDocument = {
         elements,
         metadata: {
           extractedAt: new Date(),
-          originalFormat: "docx" as const
+          originalFormat: "docx" as const,
         },
         numbering: undefined,
         processingTime: 100,
         extractedAt: new Date(),
-        originalFormat: "docx"
+        originalFormat: "docx",
       };
 
       const result = convertEnhancedDocxToMarkdown(doc);
       const lines = result.split("\n");
-      
+
       // Check spacing after heading
-      const headingIndex = lines.findIndex(l => l === "# Heading");
+      const headingIndex = lines.findIndex((l) => l === "# Heading");
       expect(lines[headingIndex + 1]).toBe("");
-      
+
       // Check spacing between paragraphs
-      const para1Index = lines.findIndex(l => l === "Paragraph after heading");
-      const para2Index = lines.findIndex(l => l === "Another paragraph");
+      const para1Index = lines.findIndex((l) => l === "Paragraph after heading");
+      const para2Index = lines.findIndex((l) => l === "Another paragraph");
       expect(para2Index - para1Index).toBe(2); // One empty line between
-      
+
       // Check spacing after table
-      const tableIndex = lines.findIndex(l => l.includes("| Table |"));
-      const afterTableIndex = lines.findIndex(l => l === "After table");
+      const tableIndex = lines.findIndex((l) => l.includes("| Table |"));
+      const afterTableIndex = lines.findIndex((l) => l === "After table");
       expect(lines[tableIndex + 2]).toBe(""); // Empty line after table
     });
 
@@ -81,14 +82,14 @@ describe("docx-to-markdown spacing and formatting", () => {
         paragraphs: [
           {
             type: "paragraph",
-            runs: [{ text: "Last paragraph" }]
-          }
+            runs: [{ text: "Last paragraph" }],
+          },
         ],
-        numbering: undefined
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("Last paragraph");
       expect(result).not.toEndWith("\n");
     });
@@ -98,22 +99,22 @@ describe("docx-to-markdown spacing and formatting", () => {
         paragraphs: [
           {
             type: "paragraph",
-            runs: [{ text: "First" }]
+            runs: [{ text: "First" }],
           },
           {
             type: "paragraph",
-            runs: []
+            runs: [],
           },
           {
             type: "paragraph",
-            runs: [{ text: "Third" }]
-          }
+            runs: [{ text: "Third" }],
+          },
         ],
-        numbering: undefined
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("First\nThird");
     });
 
@@ -122,22 +123,22 @@ describe("docx-to-markdown spacing and formatting", () => {
         paragraphs: [
           {
             type: "paragraph",
-            runs: [{ text: "First" }]
+            runs: [{ text: "First" }],
           },
           {
             type: "paragraph",
-            runs: [{ text: "   " }]
+            runs: [{ text: "   " }],
           },
           {
             type: "paragraph",
-            runs: [{ text: "Third" }]
-          }
+            runs: [{ text: "Third" }],
+          },
         ],
-        numbering: undefined
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("First\n   \nThird");
     });
 
@@ -146,35 +147,35 @@ describe("docx-to-markdown spacing and formatting", () => {
         paragraphs: [
           {
             type: "paragraph",
-            runs: [{ text: "Before list" }]
+            runs: [{ text: "Before list" }],
           },
           {
             type: "paragraph",
             runs: [{ text: "Item 1" }],
             numId: "1",
-            ilvl: 0
+            ilvl: 0,
           },
           {
             type: "paragraph",
             runs: [{ text: "Item 2" }],
             numId: "1",
-            ilvl: 0
+            ilvl: 0,
           },
           {
             type: "paragraph",
-            runs: [{ text: "After list" }]
-          }
+            runs: [{ text: "After list" }],
+          },
         ],
         numbering: {
           instances: new Map([["1", "0"]]),
           abstractFormats: new Map([
-            ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }]
-          ])
-        }
+            ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }],
+          ]),
+        },
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("Before list\n- Item 1\n- Item 2\nAfter list");
     });
 
@@ -184,24 +185,24 @@ describe("docx-to-markdown spacing and formatting", () => {
           {
             type: "paragraph",
             style: "Heading1",
-            runs: [{ text: "Chapter" }]
+            runs: [{ text: "Chapter" }],
           },
           {
             type: "paragraph",
             style: "Heading2",
-            runs: [{ text: "Section" }]
+            runs: [{ text: "Section" }],
           },
           {
             type: "paragraph",
             style: "Heading3",
-            runs: [{ text: "Subsection" }]
-          }
+            runs: [{ text: "Subsection" }],
+          },
         ],
-        numbering: undefined
+        numbering: undefined,
       };
 
       const result = convertDocxToMarkdown(doc);
-      
+
       expect(result).toBe("# Chapter\n\n## Section\n\n### Subsection");
     });
   });

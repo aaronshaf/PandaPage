@@ -3,8 +3,8 @@
  * Based on wml.xsd table definitions
  */
 
-import type { CT_TblPr } from './table-properties-types';
-import type { CT_TblRow } from './table-row-types';
+import type { CT_TblPr } from "./table-properties-types";
+import type { CT_TblRow } from "./table-row-types";
 
 /**
  * Table grid column

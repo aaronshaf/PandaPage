@@ -3,8 +3,8 @@
  * @see ECMA-376 Part 1, §18.13 (External Links)
  */
 
-import type { ST_Xstring } from '../shared/common-types';
-import type { CT_ExtensionList } from '../chart-types';
+import type { ST_Xstring } from "../shared/common-types";
+import type { CT_ExtensionList } from "../chart-types";
 
 /**
  * Credential method.

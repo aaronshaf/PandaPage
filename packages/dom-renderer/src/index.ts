@@ -1,14 +1,14 @@
-import type { ParsedDocument } from '@browser-document-viewer/parser';
+import type { ParsedDocument } from "@browser-document-viewer/parser";
 
 // Re-export the new DOM-based renderer
-export { DOMRenderer, type DOMRenderOptions } from './dom-renderer';
+export { DOMRenderer, type DOMRenderOptions } from "./dom-renderer";
 
 // Export the enhanced DOM renderer
-export { EnhancedDOMRenderer, type EnhancedDOMRenderOptions } from './improved-dom-renderer';
+export { EnhancedDOMRenderer, type EnhancedDOMRenderOptions } from "./improved-dom-renderer";
 
 export interface HtmlRenderOptions {
   includeStyles?: boolean;
-  pageSize?: 'letter' | 'a4';
+  pageSize?: "letter" | "a4";
   margins?: {
     top: string;
     right: string;
@@ -20,26 +20,25 @@ export interface HtmlRenderOptions {
 
 function escapeHtml(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-
 // Import the new DOM-based renderer
-import { DOMRenderer } from './dom-renderer';
+import { DOMRenderer } from "./dom-renderer";
 
 export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
   // Use the new DOM-based renderer
   const renderer = new DOMRenderer();
-  
+
   if (options.fullDocument) {
     // Return full HTML document with head/body
     return renderFullDocument(document, options);
   }
-  
+
   // Return just the elements HTML without container div for backward compatibility
   return renderer.renderToHTML(document, { includeContainer: false });
 }
@@ -48,22 +47,22 @@ export function renderToHtml(document: ParsedDocument, options: HtmlRenderOption
 function renderFullDocument(document: ParsedDocument, options: HtmlRenderOptions): string {
   const renderer = new DOMRenderer();
   const elements = renderer.renderToHTML(document);
-  
+
   // Include full HTML document with styles
-  const pageSize = options.pageSize || 'letter';
+  const pageSize = options.pageSize || "letter";
   const margins = options.margins || {
-    top: '1in',
-    right: '1in',
-    bottom: '1in',
-    left: '1in'
+    top: "1in",
+    right: "1in",
+    bottom: "1in",
+    left: "1in",
   };
-  
+
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  ${document.metadata.title ? `<title>${escapeHtml(document.metadata.title)}</title>` : ''}
+  ${document.metadata.title ? `<title>${escapeHtml(document.metadata.title)}</title>` : ""}
   <script>
     function confirmDocumentLink(url) {
       const message = 'This document contains a link to an external website:\\n\\n' + url + 
@@ -82,7 +81,7 @@ function renderFullDocument(document: ParsedDocument, options: HtmlRenderOptions
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.6;
       color: #333;
-      max-width: ${pageSize === 'letter' ? '8.5in' : '210mm'};
+      max-width: ${pageSize === "letter" ? "8.5in" : "210mm"};
       margin: 0 auto;
       padding: ${margins.top} ${margins.right} ${margins.bottom} ${margins.left};
     }

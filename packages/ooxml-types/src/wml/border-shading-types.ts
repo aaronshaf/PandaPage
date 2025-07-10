@@ -3,8 +3,8 @@
  * @see ECMA-376 Part 1, §17.18 (Borders and Shading)
  */
 
-import type { ST_UcharHexNumber } from './basic-types';
-import type { ST_HexColor, ST_ThemeColor } from './text-formatting-types';
+import type { ST_UcharHexNumber } from "./basic-types";
+import type { ST_HexColor, ST_ThemeColor } from "./text-formatting-types";
 
 /**
  * Border styles.

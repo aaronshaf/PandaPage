@@ -3,10 +3,9 @@
  * @see ECMA-376 Part 1, §18.3 (Filters)
  */
 
-import type { ST_Xstring, ST_CalendarType } from '../shared/common-types';
-import type { CT_ExtensionList } from '../chart-types';
-import type { ST_Ref } from './cell-types';
-
+import type { ST_Xstring, ST_CalendarType } from "../shared/common-types";
+import type { CT_ExtensionList } from "../chart-types";
+import type { ST_Ref } from "./cell-types";
 
 /**
  * DXF identifier.

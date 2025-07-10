@@ -1,8 +1,28 @@
 // wordprocessing-drawing-types.ts
-import type { ST_Coordinate, CT_PositiveSize2D, CT_NonVisualDrawingProps, CT_NonVisualGraphicFrameProperties, CT_GraphicalObject, CT_Point2D, CT_NonVisualDrawingShapeProps, CT_NonVisualConnectorProperties, CT_ShapeProperties, CT_ShapeStyle, CT_TextBodyProperties, CT_OfficeArtExtensionList, CT_NonVisualContentPartProperties, CT_Transform2D, ST_BlackWhiteMode, CT_NonVisualGroupDrawingShapeProps, CT_GroupShapeProperties, CT_BackgroundFormatting, CT_WholeE2oFormatting } from './dml-main';
-import type { CT_Picture } from './picture-types';
-import type { EG_BlockLevelElts } from './wml';
-import type { ST_RelationshipId } from './shared-types';
+import type {
+  ST_Coordinate,
+  CT_PositiveSize2D,
+  CT_NonVisualDrawingProps,
+  CT_NonVisualGraphicFrameProperties,
+  CT_GraphicalObject,
+  CT_Point2D,
+  CT_NonVisualDrawingShapeProps,
+  CT_NonVisualConnectorProperties,
+  CT_ShapeProperties,
+  CT_ShapeStyle,
+  CT_TextBodyProperties,
+  CT_OfficeArtExtensionList,
+  CT_NonVisualContentPartProperties,
+  CT_Transform2D,
+  ST_BlackWhiteMode,
+  CT_NonVisualGroupDrawingShapeProps,
+  CT_GroupShapeProperties,
+  CT_BackgroundFormatting,
+  CT_WholeE2oFormatting,
+} from "./dml-main";
+import type { CT_Picture } from "./picture-types";
+import type { EG_BlockLevelElts } from "./wml";
+import type { ST_RelationshipId } from "./shared-types";
 
 export interface CT_EffectExtent {
   l: ST_Coordinate;
@@ -38,7 +58,7 @@ export interface CT_WrapPath {
   edited?: boolean;
 }
 
-export type CT_WrapNone = Record<string, never>
+export type CT_WrapNone = Record<string, never>;
 
 export interface CT_WrapSquare {
   effectExtent?: CT_EffectExtent;
@@ -69,7 +89,7 @@ export interface CT_WrapTopBottom {
   distB?: ST_WrapDistance;
 }
 
-export type EG_WrapType = 
+export type EG_WrapType =
   | { wrapNone: CT_WrapNone }
   | { wrapSquare: CT_WrapSquare }
   | { wrapTight: CT_WrapTight }
@@ -228,7 +248,6 @@ export interface CT_WordprocessingCanvas {
   extLst?: CT_OfficeArtExtensionList;
 }
 
-
 // Missing types that are imported by wml.ts
-export type CT_GvmlGroupShape = Record<string, never>
-export type CT_GvmlGraphicalObjectFrame = Record<string, never>
+export type CT_GvmlGroupShape = Record<string, never>;
+export type CT_GvmlGraphicalObjectFrame = Record<string, never>;

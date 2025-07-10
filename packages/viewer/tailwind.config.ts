@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 export default {
   content: [
@@ -17,12 +17,18 @@ export default {
   // Safelist ensures these classes are always included in the CSS
   safelist: [
     // Dynamic margin classes used in renderer-dom
-    'ml-0', 'ml-4', 'ml-8', 'ml-12', 'ml-16', 'ml-20', 'ml-24',
+    "ml-0",
+    "ml-4",
+    "ml-8",
+    "ml-12",
+    "ml-16",
+    "ml-20",
+    "ml-24",
     // Arbitrary width values if needed
-    'w-[480px]',
-    'w-[420px]',
-    'w-[360px]',
-    'w-[260px]',
-    'w-[140px]',
+    "w-[480px]",
+    "w-[420px]",
+    "w-[360px]",
+    "w-[260px]",
+    "w-[140px]",
   ],
-} satisfies Config
+} satisfies Config;

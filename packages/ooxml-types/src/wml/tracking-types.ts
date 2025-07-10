@@ -3,9 +3,9 @@
  * @see ECMA-376 Part 1, §17.13 (Annotations)
  */
 
-import type { ST_String } from '../shared/common-types';
-import type { ST_DecimalNumber } from '../shared/measurement-types';
-import type { ST_DateTime, ST_LongHexNumber } from './basic-types';
+import type { ST_String } from "../shared/common-types";
+import type { ST_DecimalNumber } from "../shared/measurement-types";
+import type { ST_DateTime, ST_LongHexNumber } from "./basic-types";
 
 /**
  * Displaced by custom XML.

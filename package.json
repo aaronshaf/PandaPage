@@ -19,14 +19,18 @@
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
-    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun run test:unit",
+    "precommit": "node scripts/check-file-sizes.cjs && node scripts/quiet-lint.js && node scripts/quiet-typecheck.js && node scripts/quiet-test-unit.js",
     "check-file-sizes": "node scripts/check-file-sizes.cjs",
     "prepare": "simple-git-hooks",
-    "sync-docs": "bun scripts/sync-documents.js"
+    "sync-docs": "bun scripts/sync-documents.js",
+    "analyze-docx": "bun scripts/analyze-docx.ts",
+    "quiet-lint": "node scripts/quiet-lint.js",
+    "quiet-typecheck": "node scripts/quiet-typecheck.js",
+    "quiet-test-unit": "node scripts/quiet-test-unit.js"
   },
   "simple-git-hooks": {
     "pre-commit": "bun run precommit",
-    "pre-push": "bun run lint && bun run typecheck && bun run test:unit"
+    "pre-push": "node scripts/quiet-lint.js && node scripts/quiet-typecheck.js && node scripts/quiet-test-unit.js"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.6",

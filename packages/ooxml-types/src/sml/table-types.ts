@@ -3,11 +3,11 @@
  * @see ECMA-376 Part 1, §18.5 (Tables)
  */
 
-import type { ST_Xstring } from '../shared/common-types';
-import type { ST_DxfId } from './filter-types';
-import type { ST_Ref } from './cell-types';
-import type { CT_AutoFilter, CT_SortState } from './filter-types';
-import type { CT_ExtensionList } from '../chart-types';
+import type { ST_Xstring } from "../shared/common-types";
+import type { ST_DxfId } from "./filter-types";
+import type { ST_Ref } from "./cell-types";
+import type { CT_AutoFilter, CT_SortState } from "./filter-types";
+import type { CT_ExtensionList } from "../chart-types";
 
 /**
  * Table type.

@@ -9,7 +9,7 @@ import {
   DocxMetadataError,
   type DocxMetadata,
   type DocxOutlineItem,
-  type DocxStyleUsage
+  type DocxStyleUsage,
 } from "../src/formats/docx/docx-metadata";
 import { Window } from "happy-dom";
 
@@ -226,17 +226,17 @@ describe("docx-metadata", () => {
       expect(result[0]).toEqual({
         level: 1,
         title: "Chapter 1",
-        style: "Heading1"
+        style: "Heading1",
       });
       expect(result[1]).toEqual({
         level: 2,
         title: "Section 1.1",
-        style: "Heading2"
+        style: "Heading2",
       });
       expect(result[2]).toEqual({
         level: 1,
         title: "Document Title",
-        style: "Title"
+        style: "Title",
       });
     });
 
@@ -348,12 +348,12 @@ describe("docx-metadata", () => {
       expect(result[0]).toEqual({
         level: 1,
         title: "H1 Heading",
-        style: "h1"
+        style: "h1",
       });
       expect(result[1]).toEqual({
         level: 3,
         title: "H3 Heading",
-        style: "h3"
+        style: "h3",
       });
     });
 
@@ -405,33 +405,33 @@ describe("docx-metadata", () => {
       const result = await Effect.runPromise(analyzeStyleUsage(documentXml));
 
       expect(result).toHaveLength(4);
-      
-      const heading1Style = result.find(s => s.name === "Heading1");
+
+      const heading1Style = result.find((s) => s.name === "Heading1");
       expect(heading1Style).toEqual({
         name: "Heading1",
         usage: 2,
-        type: "paragraph"
+        type: "paragraph",
       });
 
-      const charStyle = result.find(s => s.name === "CharBold");
+      const charStyle = result.find((s) => s.name === "CharBold");
       expect(charStyle).toEqual({
         name: "CharBold",
         usage: 1,
-        type: "character"  // "CharBold" matches /char|run|font/i pattern
+        type: "character", // "CharBold" matches /char|run|font/i pattern
       });
 
-      const paragraphStyle = result.find(s => s.name === "BodyParagraph");
+      const paragraphStyle = result.find((s) => s.name === "BodyParagraph");
       expect(paragraphStyle).toEqual({
         name: "BodyParagraph",
         usage: 1,
-        type: "paragraph"  // "BodyParagraph" matches /paragraph|para/i pattern
+        type: "paragraph", // "BodyParagraph" matches /paragraph|para/i pattern
       });
 
-      const runStyle = result.find(s => s.name === "RunDefault");
+      const runStyle = result.find((s) => s.name === "RunDefault");
       expect(runStyle).toEqual({
         name: "RunDefault",
         usage: 1,
-        type: "character"  // "RunDefault" matches /char|run|font/i pattern
+        type: "character", // "RunDefault" matches /char|run|font/i pattern
       });
     });
 
@@ -481,15 +481,15 @@ describe("docx-metadata", () => {
       const result = await Effect.runPromise(analyzeStyleUsage(documentXml));
 
       expect(result).toHaveLength(3);
-      
-      const tableStyle = result.find(s => s.name === "TableHeader");
+
+      const tableStyle = result.find((s) => s.name === "TableHeader");
       expect(tableStyle?.type).toBe("table");
 
-      const listStyle = result.find(s => s.name === "ListNumber");
-      expect(listStyle?.type).toBe("numbering");  // "ListNumber" matches /list|num/i pattern
+      const listStyle = result.find((s) => s.name === "ListNumber");
+      expect(listStyle?.type).toBe("numbering"); // "ListNumber" matches /list|num/i pattern
 
-      const charStyle = result.find(s => s.name === "CharacterFont");
-      expect(charStyle?.type).toBe("character");  // "CharacterFont" matches /char|run|font/i pattern
+      const charStyle = result.find((s) => s.name === "CharacterFont");
+      expect(charStyle?.type).toBe("character"); // "CharacterFont" matches /char|run|font/i pattern
     });
 
     test("should fail with invalid XML", async () => {
@@ -527,11 +527,13 @@ describe("docx-metadata", () => {
           </w:body>
         </w:document>`;
 
-      const result = await Effect.runPromise(extractCompleteMetadata({
-        coreXml,
-        appXml,
-        documentXml
-      }));
+      const result = await Effect.runPromise(
+        extractCompleteMetadata({
+          coreXml,
+          appXml,
+          documentXml,
+        }),
+      );
 
       expect(result.title).toBe("Complete Test");
       expect(result.creator).toBe("Test Author");
@@ -561,9 +563,11 @@ describe("docx-metadata", () => {
           <dc:title>Partial Test</dc:title>
         </cp:coreProperties>`;
 
-      const result = await Effect.runPromise(extractCompleteMetadata({
-        coreXml
-      }));
+      const result = await Effect.runPromise(
+        extractCompleteMetadata({
+          coreXml,
+        }),
+      );
 
       expect(result.title).toBe("Partial Test");
       expect(result.outline).toEqual([]);
@@ -573,16 +577,20 @@ describe("docx-metadata", () => {
     test("should handle errors in individual parsers", async () => {
       const invalidXml = "<invalid>";
 
-      await expect(Effect.runPromise(extractCompleteMetadata({
-        coreXml: invalidXml
-      }))).rejects.toThrow();
+      await expect(
+        Effect.runPromise(
+          extractCompleteMetadata({
+            coreXml: invalidXml,
+          }),
+        ),
+      ).rejects.toThrow();
     });
   });
 
   describe("DocxMetadataError", () => {
     test("should have correct structure", () => {
       const error = new DocxMetadataError("test message");
-      
+
       expect(error._tag).toBe("DocxMetadataError");
       expect(error.message).toBe("test message");
     });
@@ -605,7 +613,7 @@ describe("docx-metadata", () => {
               </w:p>
             </w:body>
           </w:document>`;
-        
+
         const result = await Effect.runPromise(extractDocumentOutline(documentXml));
         return result.length > 0;
       };

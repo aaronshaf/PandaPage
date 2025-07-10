@@ -3,41 +3,85 @@
  * Based on wml.xsd numbering-related definitions
  */
 
-import type { CT_AbstractNum } from './abstract-numbering-types';
-import type { CT_NumLvl } from './level-types';
+import type { CT_AbstractNum } from "./abstract-numbering-types";
+import type { CT_NumLvl } from "./level-types";
 
 /**
  * Number format enumeration
  */
-export type ST_NumberFormat = 
-  | 'decimal' | 'upperRoman' | 'lowerRoman' | 'upperLetter' | 'lowerLetter'
-  | 'ordinal' | 'cardinalText' | 'ordinalText' | 'hex' | 'chicago'
-  | 'ideographDigital' | 'japaneseCounting' | 'aiueo' | 'iroha'
-  | 'decimalFullWidth' | 'decimalHalfWidth' | 'japaneseLegal'
-  | 'japaneseDigitalTenThousand' | 'decimalEnclosedCircle'
-  | 'decimalFullWidth2' | 'aiueoFullWidth' | 'irohaFullWidth'
-  | 'decimalZero' | 'bullet' | 'ganada' | 'chosung' | 'decimalEnclosedFullstop'
-  | 'decimalEnclosedParen' | 'decimalEnclosedCircleChinese'
-  | 'ideographEnclosedCircle' | 'ideographTraditional'
-  | 'ideographZodiac' | 'ideographZodiacTraditional' | 'taiwaneseCounting'
-  | 'ideographLegalTraditional' | 'taiwaneseCountingThousand'
-  | 'taiwaneseDigital' | 'chineseCounting' | 'chineseLegalSimplified'
-  | 'chineseCountingThousand' | 'koreanDigital' | 'koreanCounting'
-  | 'koreanLegal' | 'koreanDigital2' | 'vietnameseCounting'
-  | 'russianLower' | 'russianUpper' | 'none' | 'numberInDash'
-  | 'hebrew1' | 'hebrew2' | 'arabicAlpha' | 'arabicAbjad' | 'hindiVowels'
-  | 'hindiConsonants' | 'hindiNumbers' | 'hindiCounting' | 'thaiLetters'
-  | 'thaiNumbers' | 'thaiCounting' | 'bahtText' | 'dollarText';
+export type ST_NumberFormat =
+  | "decimal"
+  | "upperRoman"
+  | "lowerRoman"
+  | "upperLetter"
+  | "lowerLetter"
+  | "ordinal"
+  | "cardinalText"
+  | "ordinalText"
+  | "hex"
+  | "chicago"
+  | "ideographDigital"
+  | "japaneseCounting"
+  | "aiueo"
+  | "iroha"
+  | "decimalFullWidth"
+  | "decimalHalfWidth"
+  | "japaneseLegal"
+  | "japaneseDigitalTenThousand"
+  | "decimalEnclosedCircle"
+  | "decimalFullWidth2"
+  | "aiueoFullWidth"
+  | "irohaFullWidth"
+  | "decimalZero"
+  | "bullet"
+  | "ganada"
+  | "chosung"
+  | "decimalEnclosedFullstop"
+  | "decimalEnclosedParen"
+  | "decimalEnclosedCircleChinese"
+  | "ideographEnclosedCircle"
+  | "ideographTraditional"
+  | "ideographZodiac"
+  | "ideographZodiacTraditional"
+  | "taiwaneseCounting"
+  | "ideographLegalTraditional"
+  | "taiwaneseCountingThousand"
+  | "taiwaneseDigital"
+  | "chineseCounting"
+  | "chineseLegalSimplified"
+  | "chineseCountingThousand"
+  | "koreanDigital"
+  | "koreanCounting"
+  | "koreanLegal"
+  | "koreanDigital2"
+  | "vietnameseCounting"
+  | "russianLower"
+  | "russianUpper"
+  | "none"
+  | "numberInDash"
+  | "hebrew1"
+  | "hebrew2"
+  | "arabicAlpha"
+  | "arabicAbjad"
+  | "hindiVowels"
+  | "hindiConsonants"
+  | "hindiNumbers"
+  | "hindiCounting"
+  | "thaiLetters"
+  | "thaiNumbers"
+  | "thaiCounting"
+  | "bahtText"
+  | "dollarText";
 
 /**
  * Level suffix type
  */
-export type ST_LevelSuffix = 'tab' | 'space' | 'nothing';
+export type ST_LevelSuffix = "tab" | "space" | "nothing";
 
 /**
  * Multi-level type enumeration
  */
-export type ST_MultiLevelType = 'singleLevel' | 'multilevel' | 'hybridMultilevel';
+export type ST_MultiLevelType = "singleLevel" | "multilevel" | "hybridMultilevel";
 
 /**
  * Number format definition

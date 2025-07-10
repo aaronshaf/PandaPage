@@ -21,31 +21,31 @@ describe("docx-to-markdown table conversion", () => {
           {
             cells: [
               { content: [{ type: "paragraph", runs: [{ text: "A" }] }] },
-              { content: [{ type: "paragraph", runs: [{ text: "B" }] }] }
-            ]
+              { content: [{ type: "paragraph", runs: [{ text: "B" }] }] },
+            ],
           },
           {
             cells: [
               { content: [{ type: "paragraph", runs: [{ text: "1" }] }] },
-              { content: [{ type: "paragraph", runs: [{ text: "2" }] }] }
-            ]
-          }
-        ]
+              { content: [{ type: "paragraph", runs: [{ text: "2" }] }] },
+            ],
+          },
+        ],
       };
 
       const result = convertTableToMarkdown(table);
-      
+
       expect(result).toBe("| A | B |\n| --- | --- |\n| 1 | 2 |");
     });
 
     test("should handle empty table", () => {
       const table: DocxTable = {
         type: "table",
-        rows: []
+        rows: [],
       };
 
       const result = convertTableToMarkdown(table);
-      
+
       expect(result).toBe("");
     });
 
@@ -54,21 +54,17 @@ describe("docx-to-markdown table conversion", () => {
         type: "table",
         rows: [
           {
-            cells: [
-              { content: [{ type: "paragraph", runs: [{ text: "Header" }] }] }
-            ],
-            properties: { isHeader: true }
+            cells: [{ content: [{ type: "paragraph", runs: [{ text: "Header" }] }] }],
+            properties: { isHeader: true },
           },
           {
-            cells: [
-              { content: [{ type: "paragraph", runs: [{ text: "Data" }] }] }
-            ]
-          }
-        ]
+            cells: [{ content: [{ type: "paragraph", runs: [{ text: "Data" }] }] }],
+          },
+        ],
       };
 
       const result = convertTableToMarkdown(table);
-      
+
       expect(result).toContain("| Header |");
       expect(result).toContain("| --- |");
       expect(result).toContain("| Data |");
@@ -80,19 +76,19 @@ describe("docx-to-markdown table conversion", () => {
         rows: [
           {
             cells: [
-              { 
+              {
                 content: [
                   { type: "paragraph", runs: [{ text: "Line 1" }] },
-                  { type: "paragraph", runs: [{ text: "Line 2" }] }
-                ]
-              }
-            ]
-          }
-        ]
+                  { type: "paragraph", runs: [{ text: "Line 2" }] },
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       const result = convertTableToMarkdown(table);
-      
+
       expect(result).toContain("Line 1 Line 2");
     });
 
@@ -101,15 +97,13 @@ describe("docx-to-markdown table conversion", () => {
         type: "table",
         rows: [
           {
-            cells: [
-              { content: [{ type: "paragraph", runs: [{ text: "A | B" }] }] }
-            ]
-          }
-        ]
+            cells: [{ content: [{ type: "paragraph", runs: [{ text: "A | B" }] }] }],
+          },
+        ],
       };
 
       const result = convertTableToMarkdown(table);
-      
+
       expect(result).toContain("A \\| B");
     });
 
@@ -119,25 +113,25 @@ describe("docx-to-markdown table conversion", () => {
         rows: [
           {
             cells: [
-              { 
+              {
                 content: [
-                  { 
-                    type: "paragraph", 
+                  {
+                    type: "paragraph",
                     runs: [
                       { text: "Bold", bold: true },
                       { text: " and " },
-                      { text: "italic", italic: true }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+                      { text: "italic", italic: true },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       const result = convertTableToMarkdown(table);
-      
+
       // Bold formatting is currently disabled in formatRun function
       // And it seems italic formatting is stripped in table cells
       expect(result).toContain("| Bold and italic |");
@@ -149,36 +143,36 @@ describe("docx-to-markdown table conversion", () => {
         rows: [
           {
             cells: [
-              { 
+              {
                 content: [
-                  { 
-                    type: "paragraph", 
+                  {
+                    type: "paragraph",
                     runs: [{ text: "Item 1" }],
                     numId: "1",
-                    ilvl: 0
+                    ilvl: 0,
                   },
-                  { 
-                    type: "paragraph", 
+                  {
+                    type: "paragraph",
                     runs: [{ text: "Item 2" }],
-                    numId: "1", 
-                    ilvl: 0
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+                    numId: "1",
+                    ilvl: 0,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       };
 
       const numbering = {
         instances: new Map([["1", "0"]]),
         abstractFormats: new Map([
-          ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }]
-        ])
+          ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }],
+        ]),
       };
 
       const result = convertTableToMarkdown(table, numbering);
-      
+
       // Lists in table cells are rendered inline
       expect(result).toContain("Item 1 Item 2");
     });

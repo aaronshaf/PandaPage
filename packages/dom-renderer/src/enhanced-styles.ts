@@ -1,5 +1,5 @@
 export function addEnhancedStyles(doc: Document): void {
-  const style = doc.createElement('style');
+  const style = doc.createElement("style");
   style.textContent = `
     .document-container {
       font-family: 'Times New Roman', Times, serif;
@@ -208,6 +208,6 @@ export function addEnhancedStyles(doc: Document): void {
       }
     }
   `;
-  
+
   doc.head.appendChild(style);
 }

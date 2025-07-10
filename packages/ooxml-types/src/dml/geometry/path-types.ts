@@ -3,12 +3,12 @@
  * Based on dml-main.xsd path definitions
  */
 
-import type { CT_AdjPoint2D } from './geometry-types';
+import type { CT_AdjPoint2D } from "./geometry-types";
 
 /**
  * Path fill mode
  */
-export type ST_PathFillMode = 'none' | 'norm' | 'lighten' | 'lightenLess' | 'darken' | 'darkenLess';
+export type ST_PathFillMode = "none" | "norm" | "lighten" | "lightenLess" | "darken" | "darkenLess";
 
 /**
  * Move to command
@@ -70,7 +70,7 @@ export type CT_Path2DClose = Record<string, never>;
 /**
  * Path commands union
  */
-export type PathCommand = 
+export type PathCommand =
   | { moveTo: CT_Path2DMoveTo }
   | { lineTo: CT_Path2DLineTo }
   | { arcTo: CT_Path2DArcTo }
@@ -103,4 +103,3 @@ export interface CT_Path2DList {
   /** Paths */
   path?: CT_Path2D[];
 }
-

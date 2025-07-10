@@ -3,7 +3,7 @@
  * Extracted from dml-main.ts
  */
 
-import type { ST_Guid } from './shared-types';
+import type { ST_Guid } from "./shared-types";
 
 // Chart and Diagram Build Steps
 export enum ST_ChartBuildStep {
@@ -32,7 +32,7 @@ export interface CT_AnimationChartElement {
   bldStep: ST_ChartBuildStep;
 }
 
-export type CT_AnimationElementChoice = 
+export type CT_AnimationElementChoice =
   | { dgm: CT_AnimationDgmElement }
   | { chart: CT_AnimationChartElement };
 
@@ -69,6 +69,6 @@ export interface CT_AnimationChartBuildProperties {
   animBg?: boolean;
 }
 
-export type CT_AnimationGraphicalObjectBuildProperties = 
+export type CT_AnimationGraphicalObjectBuildProperties =
   | { bldDgm: CT_AnimationDgmBuildProperties }
   | { bldChart: CT_AnimationChartBuildProperties };

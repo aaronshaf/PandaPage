@@ -1,8 +1,8 @@
 import { describe, it, expect } from "bun:test";
 import { parseParagraph } from "./paragraph-parser";
 import { parseStylesheet } from "./style-parser";
-import { WORD_NAMESPACE } from './types';
-import { ST_Border, ST_Shd } from '@browser-document-viewer/ooxml-types';
+import { WORD_NAMESPACE } from "./types";
+import { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
 
 describe("Paragraph Borders and Shading", () => {
   const ns = WORD_NAMESPACE;
@@ -37,25 +37,25 @@ describe("Paragraph Borders and Shading", () => {
         style: ST_Border.Single,
         size: 4,
         space: 1,
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(result?.borders?.bottom).toEqual({
         style: ST_Border.Double,
         size: 8,
         space: 2,
-        color: '#00FF00'
+        color: "#00FF00",
       });
       expect(result?.borders?.left).toEqual({
         style: ST_Border.Dashed,
         size: 6,
         space: 3,
-        color: '#0000FF'
+        color: "#0000FF",
       });
       expect(result?.borders?.right).toEqual({
         style: ST_Border.Dotted,
         size: 2,
         space: 4,
-        color: '#000000'
+        color: "#000000",
       });
     });
 
@@ -83,7 +83,7 @@ describe("Paragraph Borders and Shading", () => {
       expect(result?.borders?.between).toEqual({
         style: ST_Border.Single,
         size: 4,
-        color: '#808080'
+        color: "#808080",
       });
     });
 
@@ -110,7 +110,7 @@ describe("Paragraph Borders and Shading", () => {
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
         style: ST_Border.Single,
-        size: 4
+        size: 4,
       });
       expect(result?.borders?.top?.color).toBeUndefined();
     });
@@ -164,7 +164,7 @@ describe("Paragraph Borders and Shading", () => {
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
         val: ST_Shd.Clear,
-        fill: '#FFFF00'
+        fill: "#FFFF00",
       });
     });
 
@@ -189,8 +189,8 @@ describe("Paragraph Borders and Shading", () => {
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
         val: ST_Shd.Pct25,
-        fill: '#FFFF00',
-        color: '#FF0000'
+        fill: "#FFFF00",
+        color: "#FF0000",
       });
     });
 
@@ -214,7 +214,7 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
-        val: ST_Shd.Solid
+        val: ST_Shd.Solid,
       });
       expect(result?.shading?.fill).toBeUndefined();
       expect(result?.shading?.color).toBeUndefined();
@@ -261,16 +261,16 @@ describe("Paragraph Borders and Shading", () => {
       expect(result?.borders?.top).toEqual({
         style: ST_Border.Single,
         size: 4,
-        color: '#000000'
+        color: "#000000",
       });
       expect(result?.borders?.bottom).toEqual({
         style: ST_Border.Single,
         size: 4,
-        color: '#000000'
+        color: "#000000",
       });
       expect(result?.shading).toEqual({
         val: ST_Shd.Clear,
-        fill: '#F0F0F0'
+        fill: "#F0F0F0",
       });
     });
 
@@ -315,11 +315,11 @@ describe("Paragraph Borders and Shading", () => {
       expect(result?.borders?.top).toEqual({
         style: ST_Border.Double,
         size: 8,
-        color: '#FF0000'
+        color: "#FF0000",
       });
       expect(result?.shading).toEqual({
-        fill: '#FFFF00',
-        val: ST_Shd.Clear
+        fill: "#FFFF00",
+        val: ST_Shd.Clear,
       });
     });
   });

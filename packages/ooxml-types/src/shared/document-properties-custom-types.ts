@@ -34,14 +34,14 @@ import type {
   VT_Stream,
   VT_Storage,
   CT_Vstream,
-  VT_Clsid
-} from '../variant-types';
-import type { CT_Empty } from '../dml-main';
+  VT_Clsid,
+} from "../variant-types";
+import type { CT_Empty } from "../dml-main";
 
 /**
  * Union type for all possible property value types
  */
-export type PropertyValue = 
+export type PropertyValue =
   | CT_Vector
   | CT_Array
   | VT_Blob

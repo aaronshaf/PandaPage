@@ -30,6 +30,27 @@ bun dev
 
 For detailed development information, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
+## Development Tools
+
+### Document Analysis
+
+Analyze any DOCX file to understand its structure and test rendering:
+
+```bash
+# Analyze a specific DOCX file
+bun run analyze-docx documents/005.docx
+
+# Analyze any DOCX file
+bun run analyze-docx path/to/your/file.docx
+```
+
+This will generate:
+- Markdown output (`tmp/docx-analysis/filename-output.md`)
+- HTML output (`tmp/docx-analysis/filename-output.html`)
+- JSON analysis report (`tmp/docx-analysis/filename-analysis.json`)
+
+All output files are saved to the `tmp` directory which is ignored by git.
+
 ## Document Support
 
 ### Current Support

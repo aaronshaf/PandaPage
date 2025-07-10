@@ -1,6 +1,6 @@
 // variant-types.ts
-import type { ST_Guid } from './shared-types';
-import type { CT_Empty } from './dml-main';
+import type { ST_Guid } from "./shared-types";
+import type { CT_Empty } from "./dml-main";
 
 export enum ST_VectorBaseType {
   Variant = "variant",
@@ -48,7 +48,7 @@ export enum ST_ArrayBaseType {
 export type ST_Cy = string; // pattern "\\s*[0-9]*\\.[0-9]{4}\\s*"
 export type ST_Error = string; // pattern "\\s*0x[0-9A-Za-z]{8}\\s*"
 
-export type CT_Null = Record<string, never>
+export type CT_Null = Record<string, never>;
 
 // Primitive types as elements
 export type VT_I1 = number; // xsd:byte
@@ -85,7 +85,7 @@ export interface CT_Vstream {
   version?: ST_Guid;
 }
 
-export type VariantValue = 
+export type VariantValue =
   | { variant: CT_Variant }
   | { vector: CT_Vector }
   | { array: CT_Array }
@@ -123,7 +123,7 @@ export type VariantValue =
 
 export type CT_Variant = VariantValue & {};
 
-export type VectorValue = 
+export type VectorValue =
   | { variant: CT_Variant }
   | { i1: VT_I1 }
   | { i2: VT_I2 }
@@ -151,7 +151,7 @@ export interface CT_Vector {
   size: number; // xsd:unsignedInt
 }
 
-export type ArrayValue = 
+export type ArrayValue =
   | { variant: CT_Variant }
   | { i1: VT_I1 }
   | { i2: VT_I2 }

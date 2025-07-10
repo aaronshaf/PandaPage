@@ -6,17 +6,17 @@
 /**
  * Table width type
  */
-export type ST_TblWidth = 'nil' | 'pct' | 'dxa' | 'auto';
+export type ST_TblWidth = "nil" | "pct" | "dxa" | "auto";
 
 /**
  * Table layout type
  */
-export type ST_TblLayoutType = 'fixed' | 'autofit';
+export type ST_TblLayoutType = "fixed" | "autofit";
 
 /**
  * Table overlap type
  */
-export type ST_TblOverlap = 'never' | 'overlap';
+export type ST_TblOverlap = "never" | "overlap";
 
 /**
  * Table width definition
@@ -33,7 +33,7 @@ export interface CT_TblWidth {
  */
 export interface CT_TblJc {
   /** Justification value */
-  val: 'start' | 'center' | 'end';
+  val: "start" | "center" | "end";
 }
 
 /**
@@ -137,17 +137,17 @@ export interface CT_TblPPr {
   /** Bottom from text */
   bottomFromText?: number;
   /** Vertical anchor */
-  vertAnchor?: 'text' | 'margin' | 'page';
+  vertAnchor?: "text" | "margin" | "page";
   /** Horizontal anchor */
-  horzAnchor?: 'text' | 'margin' | 'page';
+  horzAnchor?: "text" | "margin" | "page";
   /** Table X position */
   tblpX?: number;
   /** Table Y position */
   tblpY?: number;
   /** Table X alignment */
-  tblpXSpec?: 'left' | 'center' | 'right' | 'inside' | 'outside';
+  tblpXSpec?: "left" | "center" | "right" | "inside" | "outside";
   /** Table Y alignment */
-  tblpYSpec?: 'top' | 'center' | 'bottom' | 'inside' | 'outside';
+  tblpYSpec?: "top" | "center" | "bottom" | "inside" | "outside";
 }
 
 /**

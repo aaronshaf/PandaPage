@@ -46,22 +46,21 @@ export interface CT_DMLRelativeRect {
 /**
  * Tile flip mode
  */
-export type ST_DMLTileFlipMode = 'none' | 'x' | 'y' | 'xy';
+export type ST_DMLTileFlipMode = "none" | "x" | "y" | "xy";
 
 /**
  * Rectangle alignment
  */
-export type ST_DMLRectAlignment = 
-  | 'tl' | 'tr' | 'bl' | 'br' | 'ctr' | 'l' | 'r' | 't' | 'b';
+export type ST_DMLRectAlignment = "tl" | "tr" | "bl" | "br" | "ctr" | "l" | "r" | "t" | "b";
 
 /**
  * Blip (Binary Large Image or Picture)
  */
 export interface CT_DMLBlip {
   /** Relationship ID */
-  'r:embed'?: string;
+  "r:embed"?: string;
   /** Link relationship ID */
-  'r:link'?: string;
+  "r:link"?: string;
   /** Compression state */
   cstate?: ST_DMLBlipCompression;
   /** Alpha modulation effects */
@@ -77,7 +76,7 @@ export interface CT_DMLBlip {
 /**
  * Blip compression
  */
-export type ST_DMLBlipCompression = 'email' | 'screen' | 'print' | 'hqprint' | 'none';
+export type ST_DMLBlipCompression = "email" | "screen" | "print" | "hqprint" | "none";
 
 /**
  * Alpha modulate effect
@@ -108,4 +107,4 @@ export interface CT_DMLEffectContainer {
 /**
  * Effect container type
  */
-export type ST_DMLEffectContainerType = 'sib' | 'tree';
+export type ST_DMLEffectContainerType = "sib" | "tree";

@@ -1,6 +1,6 @@
 // Field code parsing functions
-import type { DocxRun } from './types';
-import { parseAdvancedFieldRun } from './field-code-parser';
+import type { DocxRun } from "./types";
+import { parseAdvancedFieldRun } from "./field-code-parser";
 
 /**
  * Parse a field instruction and create a run with placeholder text
@@ -11,15 +11,15 @@ import { parseAdvancedFieldRun } from './field-code-parser';
  * @returns A DocxRun with placeholder text and field code metadata
  */
 export function parseFieldRun(
-  fieldInstruction: string, 
-  runProperties: Element | null, 
+  fieldInstruction: string,
+  runProperties: Element | null,
   ns: string,
   context?: {
     bookmarks?: Map<string, string>;
     sequences?: Map<string, number>;
     metadata?: any;
     currentDate?: Date;
-  }
+  },
 ): DocxRun | null {
   // Use the advanced field parser
   return parseAdvancedFieldRun(fieldInstruction, runProperties, ns, context);
@@ -32,16 +32,16 @@ export function parseFieldRun(
  */
 export function getMimeType(extension?: string): string {
   const mimeTypes: Record<string, string> = {
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif',
-    'bmp': 'image/bmp',
-    'tiff': 'image/tiff',
-    'tif': 'image/tiff',
-    'svg': 'image/svg+xml',
-    'webp': 'image/webp'
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    bmp: "image/bmp",
+    tiff: "image/tiff",
+    tif: "image/tiff",
+    svg: "image/svg+xml",
+    webp: "image/webp",
   };
-  
-  return mimeTypes[extension || ''] || 'image/png';
+
+  return mimeTypes[extension || ""] || "image/png";
 }

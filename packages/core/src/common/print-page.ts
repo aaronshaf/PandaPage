@@ -3,17 +3,17 @@
  * Based on CSS Paged Media specifications
  */
 
-import { twipsToCss, parseUniversalMeasure, PAGE_SIZES } from './units.js';
+import { twipsToCss, parseUniversalMeasure, PAGE_SIZES } from "./units.js";
 
 /**
  * CSS page size keywords
  */
-export type PageSizeKeyword = 'letter' | 'a4' | 'legal' | 'a3' | 'a5' | 'ledger' | 'tabloid';
+export type PageSizeKeyword = "letter" | "a4" | "legal" | "a3" | "a5" | "ledger" | "tabloid";
 
 /**
  * Page orientation
  */
-export type PageOrientation = 'portrait' | 'landscape';
+export type PageOrientation = "portrait" | "landscape";
 
 /**
  * Page margin configuration
@@ -41,7 +41,7 @@ export interface PageConfig {
   margins: PageMargins;
   orientation?: PageOrientation;
   bleed?: string;
-  marks?: 'crop' | 'cross' | 'crop cross' | 'none';
+  marks?: "crop" | "cross" | "crop cross" | "none";
 }
 
 /**
@@ -69,7 +69,7 @@ export function createPageRule(config: PageConfig): string {
   }
 
   // Orientation
-  if (config.orientation && config.orientation !== 'portrait') {
+  if (config.orientation && config.orientation !== "portrait") {
     parts.push(`size: ${config.orientation}`);
   }
 
@@ -85,18 +85,21 @@ export function createPageRule(config: PageConfig): string {
   }
 
   // Marks
-  if (config.marks && config.marks !== 'none') {
+  if (config.marks && config.marks !== "none") {
     parts.push(`marks: ${config.marks}`);
   }
 
-  return `@page {\n  ${parts.join(';\n  ')};\n}`;
+  return `@page {\n  ${parts.join(";\n  ")};\n}`;
 }
 
 /**
  * Get page size from keyword or custom dimensions
  */
-export function getPageSize(size: PageSizeKeyword | PageSize, orientation: PageOrientation = 'portrait'): PageSize {
-  if (typeof size === 'object') {
+export function getPageSize(
+  size: PageSizeKeyword | PageSize,
+  orientation: PageOrientation = "portrait",
+): PageSize {
+  if (typeof size === "object") {
     return size;
   }
 
@@ -106,17 +109,17 @@ export function getPageSize(size: PageSizeKeyword | PageSize, orientation: PageO
   }
 
   const { width, height } = sizeData.points;
-  
-  if (orientation === 'landscape') {
+
+  if (orientation === "landscape") {
     return {
       width: `${height}pt`,
-      height: `${width}pt`
+      height: `${width}pt`,
     };
   }
 
   return {
     width: `${width}pt`,
-    height: `${height}pt`
+    height: `${height}pt`,
   };
 }
 
@@ -124,13 +127,13 @@ export function getPageSize(size: PageSizeKeyword | PageSize, orientation: PageO
  * Normalize margins to individual values
  */
 export function normalizeMargins(margins: PageMargins | string): PageMargins {
-  if (typeof margins === 'object') {
+  if (typeof margins === "object") {
     return margins;
   }
 
   // Handle CSS shorthand: "10pt" or "10pt 20pt" or "10pt 20pt 30pt 40pt"
   const parts = margins.trim().split(/\s+/);
-  
+
   switch (parts.length) {
     case 1:
       return { top: parts[0]!, right: parts[0]!, bottom: parts[0]!, left: parts[0]! };
@@ -152,16 +155,16 @@ export function createPrintPageContainerCSS(config: PrintPageContainerConfig): s
   const pageSize = getPageSize(config.pageSize, config.orientation);
   const margins = normalizeMargins(config.margins);
   const scale = config.scale || 1;
-  const containerClass = config.containerClass || 'document-container';
-  const pageClass = config.pageClass || 'page';
+  const containerClass = config.containerClass || "document-container";
+  const pageClass = config.pageClass || "page";
 
   // Calculate content area
   const pageWidthPt = parseFloat(pageSize.width);
   const pageHeightPt = parseFloat(pageSize.height);
-  const marginTopPt = parseUniversalMeasure(margins.top, 'points');
-  const marginRightPt = parseUniversalMeasure(margins.right, 'points');
-  const marginBottomPt = parseUniversalMeasure(margins.bottom, 'points');
-  const marginLeftPt = parseUniversalMeasure(margins.left, 'points');
+  const marginTopPt = parseUniversalMeasure(margins.top, "points");
+  const marginRightPt = parseUniversalMeasure(margins.right, "points");
+  const marginBottomPt = parseUniversalMeasure(margins.bottom, "points");
+  const marginLeftPt = parseUniversalMeasure(margins.left, "points");
 
   const contentWidth = pageWidthPt - marginLeftPt - marginRightPt;
   const contentHeight = pageHeightPt - marginTopPt - marginBottomPt;
@@ -202,7 +205,9 @@ export function createPrintPageContainerCSS(config: PrintPageContainerConfig): s
 }
 
 /* Page break handling */
-${config.showPageBreaks ? `
+${
+  config.showPageBreaks
+    ? `
 .${pageClass}:not(:last-child):after {
   content: '';
   position: absolute;
@@ -214,7 +219,9 @@ ${config.showPageBreaks ? `
   background: #ccc;
   opacity: 0.5;
 }
-` : ''}
+`
+    : ""
+}
 
 /* Print styles */
 @media print {
@@ -328,19 +335,19 @@ export function createPageBreakCSS(): string {
 export function calculateOptimalScale(
   containerWidth: number,
   pageSize: PageSizeKeyword | PageSize,
-  orientation: PageOrientation = 'portrait',
-  maxScale: number = 1
+  orientation: PageOrientation = "portrait",
+  maxScale: number = 1,
 ): number {
   const size = getPageSize(pageSize, orientation);
   const pageWidthPt = parseFloat(size.width);
-  
+
   // Convert container width to points (assuming 96 DPI)
   const containerWidthPt = containerWidth * 0.75; // 96 DPI to points
-  
+
   // Calculate scale to fit with some padding
   const availableWidth = containerWidthPt - 40; // 20pt padding on each side
   const optimalScale = Math.min(maxScale, availableWidth / pageWidthPt);
-  
+
   return Math.max(0.1, optimalScale); // Minimum scale of 10%
 }
 
@@ -349,28 +356,28 @@ export function calculateOptimalScale(
  */
 export function generatePageCSS(
   pageSize: PageSizeKeyword,
-  margins: string = '1in',
-  orientation: PageOrientation = 'portrait'
+  margins: string = "1in",
+  orientation: PageOrientation = "portrait",
 ): string {
   const size = getPageSize(pageSize, orientation);
   const normalizedMargins = normalizeMargins(margins);
-  
+
   const pageRule = createPageRule({
     size,
     margins: normalizedMargins,
-    orientation
+    orientation,
   });
-  
+
   const containerCSS = createPrintPageContainerCSS({
     pageSize,
     margins,
     orientation,
     scale: 1,
-    showPageBreaks: true
+    showPageBreaks: true,
   });
-  
+
   const pageBreakCSS = createPageBreakCSS();
-  
+
   return `${pageRule}\n\n${containerCSS}\n\n${pageBreakCSS}`;
 }
 
@@ -380,19 +387,19 @@ export function generatePageCSS(
 export function docxPageToCSS(
   widthTwips: number,
   heightTwips: number,
-  marginsTwips: { top: number; right: number; bottom: number; left: number }
+  marginsTwips: { top: number; right: number; bottom: number; left: number },
 ): PageConfig {
   return {
     size: {
       width: twipsToCss(widthTwips),
-      height: twipsToCss(heightTwips)
+      height: twipsToCss(heightTwips),
     },
     margins: {
       top: twipsToCss(marginsTwips.top),
       right: twipsToCss(marginsTwips.right),
       bottom: twipsToCss(marginsTwips.bottom),
-      left: twipsToCss(marginsTwips.left)
-    }
+      left: twipsToCss(marginsTwips.left),
+    },
   };
 }
 
@@ -401,21 +408,21 @@ export function docxPageToCSS(
  */
 export function detectPageSize(widthPt: number, heightPt: number): PageSizeKeyword | null {
   const tolerance = 5; // 5pt tolerance
-  
+
   for (const [name, size] of Object.entries(PAGE_SIZES)) {
     const { width, height } = size.points;
-    
+
     // Check portrait
     if (Math.abs(widthPt - width) <= tolerance && Math.abs(heightPt - height) <= tolerance) {
       return name as PageSizeKeyword;
     }
-    
+
     // Check landscape
     if (Math.abs(widthPt - height) <= tolerance && Math.abs(heightPt - width) <= tolerance) {
       return name as PageSizeKeyword;
     }
   }
-  
+
   return null;
 }
 
@@ -425,10 +432,10 @@ export function detectPageSize(widthPt: number, heightPt: number): PageSizeKeywo
 export function createViewportMeta(pageSize: PageSizeKeyword, scale: number = 1): string {
   const size = getPageSize(pageSize);
   const widthPt = parseFloat(size.width);
-  
+
   // Convert to CSS pixels (assuming 96 DPI)
-  const widthPx = Math.round(widthPt * 96 / 72);
+  const widthPx = Math.round((widthPt * 96) / 72);
   const scaledWidth = Math.round(widthPx * scale);
-  
+
   return `<meta name="viewport" content="width=${scaledWidth}, initial-scale=1.0, user-scalable=yes">`;
 }

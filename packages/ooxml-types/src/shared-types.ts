@@ -4,4 +4,4 @@
  * New code should import from specific modules in the shared/ directory.
  */
 
-export * from './shared/index';
+export * from "./shared/index";

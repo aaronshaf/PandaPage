@@ -1,10 +1,10 @@
 // math-types.ts
-import type { ST_OnOff, ST_String, ST_TwipsMeasure, ST_XAlign, ST_YAlign } from './shared-types';
-import type { CT_OnOff, CT_String } from './wml/basic-types';
+import type { ST_OnOff, ST_String, ST_TwipsMeasure, ST_XAlign, ST_YAlign } from "./shared-types";
+import type { CT_OnOff, CT_String } from "./wml/basic-types";
 
 // Re-export common types for backward compatibility
-export type { CT_OnOff, CT_String } from './wml/basic-types';
-export type { CT_Text } from './wml/run-types';
+export type { CT_OnOff, CT_String } from "./wml/basic-types";
+export type { CT_Text } from "./wml/run-types";
 
 export type ST_Integer255 = number; // xsd:integer, minInclusive 1, maxInclusive 255
 export interface CT_Integer255 {
@@ -30,7 +30,6 @@ export type ST_Char = string; // xsd:string, maxLength 1
 export interface CT_Char {
   val: ST_Char;
 }
-
 
 export interface CT_XAlign {
   val: ST_XAlign;
@@ -112,7 +111,6 @@ export interface CT_RPR {
   brk?: CT_ManualBreak;
   aln?: CT_OnOff;
 }
-
 
 export interface CT_R {
   rPr?: CT_RPR;
@@ -375,7 +373,7 @@ export interface CT_SSup {
   sup: CT_OMathArg;
 }
 
-export type EG_OMathMathElements = 
+export type EG_OMathMathElements =
   | { acc: CT_Acc }
   | { bar: CT_Bar }
   | { box: CT_Box }
@@ -397,9 +395,7 @@ export type EG_OMathMathElements =
   | { sSup: CT_SSup }
   | { r: CT_R };
 
-export type EG_OMathElements = 
-  | EG_OMathMathElements
-  | { pContentMath: any }; // w:EG_PContentMath is complex, represent as any for now
+export type EG_OMathElements = EG_OMathMathElements | { pContentMath: any }; // w:EG_PContentMath is complex, represent as any for now
 
 export interface CT_OMathArgPr {
   argSz?: CT_Integer2;

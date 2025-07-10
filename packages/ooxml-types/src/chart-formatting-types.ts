@@ -1,16 +1,16 @@
 // chart-formatting-types.ts
 // Formatting and style types for charts
 
-import type { ST_Xstring } from './shared-types';
-import type { CT_ShapeProperties, CT_TextBody } from './dml-main';
-import type { 
-  CT_UnsignedInt, 
-  CT_Boolean, 
-  CT_Double, 
+import type { ST_Xstring } from "./shared-types";
+import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
+import type {
+  CT_UnsignedInt,
+  CT_Boolean,
+  CT_Double,
   CT_ExtensionList,
   CT_NumDataSource,
-  CT_AxDataSource
-} from './chart-data-types';
+  CT_AxDataSource,
+} from "./chart-data-types";
 
 // Number formatting
 export interface CT_NumFmt {
@@ -336,4 +336,4 @@ export interface CT_Style {
 }
 
 // Import types from other modules
-import type { CT_Layout, CT_Tx } from './chart-legend-types';
+import type { CT_Layout, CT_Tx } from "./chart-legend-types";

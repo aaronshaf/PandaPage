@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import {
   docxToStructured,
   parseDocxToStructured,
-  type StructuredDocxResult
+  type StructuredDocxResult,
 } from "../src/formats/docx/docx-to-structured";
 import { DocxParseError } from "../src/formats/docx/types";
 import { Window } from "happy-dom";
@@ -20,7 +20,7 @@ beforeAll(() => {
 // Helper to create minimal DOCX buffer for testing
 function createTestDocx(): ArrayBuffer {
   const { zipSync, strToU8 } = require("fflate");
-  
+
   const files: Record<string, Uint8Array> = {
     "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -41,9 +41,9 @@ function createTestDocx(): ArrayBuffer {
             </w:r>
           </w:p>
         </w:body>
-      </w:document>`)
+      </w:document>`),
   };
-  
+
   const zipped = zipSync(files);
   return zipped.buffer;
 }

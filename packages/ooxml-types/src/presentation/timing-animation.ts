@@ -1,8 +1,20 @@
 // timing-animation.ts - Timing and animation-related types for presentations
-import type { ST_PositivePercentage, ST_Percentage, ST_PositiveFixedPercentage, ST_FixedPercentage } from '../shared-types';
-import type { CT_EmbeddedWAVAudioFile, CT_AnimationElementChoice, CT_AnimationGraphicalObjectBuildProperties, ST_Angle, CT_Color, CT_Point2D } from '../dml-main';
-import type { CT_Empty } from './common';
-import type { CT_ExtensionListModify } from './transitions';
+import type {
+  ST_PositivePercentage,
+  ST_Percentage,
+  ST_PositiveFixedPercentage,
+  ST_FixedPercentage,
+} from "../shared-types";
+import type {
+  CT_EmbeddedWAVAudioFile,
+  CT_AnimationElementChoice,
+  CT_AnimationGraphicalObjectBuildProperties,
+  ST_Angle,
+  CT_Color,
+  CT_Point2D,
+} from "../dml-main";
+import type { CT_Empty } from "./common";
+import type { CT_ExtensionListModify } from "./transitions";
 
 export type ST_TLTimeIndefinite = "indefinite";
 export type ST_TLTime = number | ST_TLTimeIndefinite;
@@ -292,13 +304,12 @@ export interface CT_TLAnimVariantStringVal {
 }
 
 export interface CT_TLAnimVariant {
-  val: (
+  val:
     | { boolVal: CT_TLAnimVariantBooleanVal }
     | { intVal: CT_TLAnimVariantIntegerVal }
     | { fltVal: CT_TLAnimVariantFloatVal }
     | { strVal: CT_TLAnimVariantStringVal }
-    | { clrVal: CT_Color }
-  );
+    | { clrVal: CT_Color };
 }
 
 export type ST_TLTimeAnimateValueTime = ST_PositiveFixedPercentage | ST_TLTimeIndefinite;
