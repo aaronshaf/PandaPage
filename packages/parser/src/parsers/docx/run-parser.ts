@@ -11,6 +11,21 @@ import type { DocxTheme } from './theme-parser';
 import { resolveThemeColor, resolveThemeFont } from './theme-parser';
 import { ST_Em } from '@browser-document-viewer/ooxml-types';
 
+/**
+ * Check if text content is purely punctuation that shouldn't inherit language attributes
+ * This helps prevent issues where quotation marks get tagged with inappropriate language codes
+ */
+function isPunctuationOnly(text: string): boolean {
+  // Don't treat empty strings as punctuation-only
+  if (!text || text.length === 0) {
+    return false;
+  }
+  
+  // Common punctuation characters that often get incorrectly tagged with language attributes
+  const punctuationRegex = /^[\s\p{P}\p{S}]+$/u;
+  return punctuationRegex.test(text);
+}
+
 // Helper type for field parsing state
 export interface FieldParsingState {
   inField: boolean;
@@ -392,9 +407,24 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
       }
     }
     
-    // Language
+    // Language - but don't apply language attributes to punctuation-only text
+    // This prevents issues where quotation marks get incorrectly tagged with Arabic or other language codes
     const langElement = getElementByTagNameNSFallback(runProps, ns, "lang");
-    lang = langElement?.getAttribute("w:val") || undefined;
+    const langValue = langElement?.getAttribute("w:val");
+    
+    // Only apply language if it's not punctuation-only text or if it's a sensible language for punctuation
+    if (langValue && !isPunctuationOnly(text)) {
+      lang = langValue;
+    } else if (langValue && isPunctuationOnly(text)) {
+      // For punctuation-only text, only keep common/neutral language codes
+      const neutralLanguages = ['en-US', 'en-GB', 'en', 'default'];
+      if (neutralLanguages.includes(langValue)) {
+        lang = langValue;
+      }
+      // Otherwise, leave lang as undefined to avoid inappropriate language tagging
+    } else {
+      lang = langValue || undefined;
+    }
   }
   
   // Apply style cascade if stylesheet is available
