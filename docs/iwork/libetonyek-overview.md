@@ -22,10 +22,11 @@ An examination of `libetonyek`'s internal structure, as revealed through its sou
 
 For modern iWork documents (2013+), which use the IWA (iWork Archive) format, `libetonyek` includes specialized modules:
 
-*   **`IWASnappyStream`:** Handles Apple's custom Snappy decompression. This component is vital because Apple uses a non-standard Snappy framing without a Stream Identifier, requiring a specific decompression approach.
-*   **`IWAParser`:** The main parser for the IWA format, responsible for reading and interpreting the binary streams.
+*   **`IWASnappyStream`:** Handles Apple's custom Snappy decompression. This component is vital because Apple uses a non-standard Snappy framing without a Stream Identifier, requiring a specific decompression approach. The `uncompressBlock` static method suggests block-by-block decompression, and the stream itself might be structured with multiple logical substreams.
+*   **`IWAParser`:** The main parser for the IWA format, responsible for reading and interpreting the binary streams. It acts as an orchestrator, dispatching different types of objects (shapes, text, comments, styles) to specific parsing methods and providing helper functions to extract common iWork data types from `IWAMessage` fields.
+*   **`IWAMessage`:** Represents a single Protocol Buffer message, providing methods to access various field types (e.g., `uint32`, `string`, `message`). It handles the standard Protobuf wire types.
 *   **`IWAField`, `IWAMessage`:** Components that represent and process the individual fields and messages within the Protocol Buffer structures found in `.iwa` files.
-*   **`IWAObjectIndex`:** A critical mechanism for resolving object IDs and managing references between different parts of the document. iWork documents extensively use internal IDs to link elements (e.g., a text run to its style, or a shape to its properties).
+*   **`IWAObjectIndex`:** A critical mechanism for resolving object IDs and managing references between different parts of the document. iWork documents extensively use internal IDs to link elements (e.g., a text run to its style, or a shape to its properties). It also handles mapping file IDs to streams (e.g., for embedded media) and even colors.
 
 ### c. Version-Specific Parsers
 
@@ -36,13 +37,16 @@ To accommodate the evolution of the iWork file formats, `libetonyek` contains di
 
 This modularity allows `libetonyek` to handle the nuances and changes across various iWork application versions.
 
-### d. Document Component Handling
+### e. Document Assembly and Collection (`IWORKCollector`)
 
-The library includes numerous modules dedicated to parsing and representing specific document components, reflecting the granular nature of iWork document structures. These often map directly to the inferred schema elements:
+`IWORKCollector` is a central component responsible for assembling the parsed document into a coherent in-memory representation. It acts as an interface that receives various parsed elements and orchestrates their placement and styling.
 
-*   **`IWORKChart`, `IWORKTable`, `IWORKText`, `IWORKShape`, `IWORKStyle`:** These components are responsible for processing the data related to charts, tables, text blocks, graphical shapes, and styles, respectively. They build the internal object model of the document.
-*   **`IWORKPropertyMap`:** Manages the properties associated with various document elements and styles.
-*   **`IWORKCollector` (and application-specific collectors like `PAGCollector`):** These components are involved in collecting and assembling the parsed data into a coherent in-memory representation of the document.
+*   **Orchestration**: It receives calls to `collectStyle`, `collectShape`, `collectImage`, `collectTable`, `collectText`, and other document elements.
+*   **Hierarchy Management**: It manages internal stacks (`m_levelStack`, `m_styleStack`, `m_stylesheetStack`) to correctly apply hierarchical properties and group elements.
+*   **Rendering/Output**: It contains virtual methods like `drawTable()` and `drawMedia()`, indicating its role in preparing the parsed content for rendering or output to another format.
+*   **Structural Handling**: It handles document-level structural events such as `startDocument`/`endDocument`, `startAttachment`/`endAttachment`, and `startGroup`/`endGroup`.
+*   **Object Creation**: It is responsible for creating core content objects like `IWORKTable` and `IWORKText`.
+*   **Property Passing**: It uses `librevenge::RVNGPropertyList` to pass collected properties to the underlying output system.
 
 ## 3. Insights for New Implementations
 

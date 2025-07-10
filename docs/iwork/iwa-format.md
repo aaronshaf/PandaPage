@@ -38,18 +38,34 @@ Key characteristics of Apple's Snappy implementation:
 
 The decompressed content of `.iwa` files consists of Google Protocol Buffer messages. Protocol Buffers are a language-neutral, platform-neutral, extensible mechanism for serializing structured data.
 
-To parse the Protobuf messages, you need:
-*   **`.proto` definitions:** These define the structure of the messages. Since Apple does not publicly release these, they must be reverse-engineered. Tools like `proto-dump` are used to extract these definitions from iWork executables.
-*   **Protobuf parser:** A library or custom code to deserialize the binary Protobuf data into structured objects based on the `.proto` definitions.
+### Generic Protobuf Message Structure (as seen in SheetJS)
 
-The `libetonyek` library, for instance, includes modules specifically for handling the IWA format, such as `IWASnappyStream` (for Snappy decompression), `IWAParser`, `IWAField`, `IWAMessage`, and `IWAObjectIndex` (for parsing Protocol Buffer structures). This confirms the reliance on Snappy and Protobuf for modern Pages documents.
+SheetJS's implementation reveals a generic representation of Protobuf messages, reflecting the wire format:
+*   **`ProtoItem`**: Represents a single field value, typically `{ data: Uint8Array, type: number }`, where `type` corresponds to the Protobuf wire type (e.g., varint, length-delimited).
+*   **`ProtoField`**: An array of `ProtoItem`s, as a single field number can appear multiple times in a message.
+*   **`ProtoMessage`**: An array of `ProtoField`s, where the array index often corresponds to the Protobuf field number.
+
+### .proto Definitions and Reverse Engineering
+
+To semantically parse these binary messages, you need the `.proto` definitions (schemas). Since Apple does not publicly release these, they must be reverse-engineered. Tools like `proto-dump` (mentioned previously) and SheetJS's `packages/otorp/` module are designed for this purpose. `otorp` specifically aims to recover `FileDescriptorProto` definitions from Mach-O binaries, which are the compiled `.proto` files.
+
+### Identified iWork Protobuf Message IDs
+
+Analysis of SheetJS's `numbers.ts` reveals various hardcoded message IDs, which correspond to specific iWork Protobuf message types. These IDs are crucial for understanding the semantic meaning of different parts of the IWA file:
+*   `6002`: Often related to table tiles (e.g., `TST.Tile`).
+*   `6144`: Appears related to merged cells.
+*   `212`: Associated with comment authors.
+*   `3056`: Associated with comments themselves.
+*   `2001`: Likely `TSWPSAS` (Text Storage with Paragraph Styles Archive).
+*   `6218`: Possibly `RTPAID` (Rich Text Paragraph Attributes ID).
+
+These IDs, combined with the field numbers within their respective `ProtoMessage` structures, form the basis of the inferred iWork schema.
 
 ## 4. Reverse Engineering and Tools
 
 Due to the proprietary nature of the modern Pages format, reverse engineering is essential. Key tools and resources for this process include:
 *   **`proto-dump`:** For extracting Protobuf descriptors from iWork applications.
+*   **SheetJS `packages/otorp/`:** A concrete example of a tool for recovering `.proto` definitions from Mach-O binaries. It contains logic to find `.proto` strings and parse `FileDescriptorProto`.
 *   **Binary analysis tools:** Such as Synalyze It! or Hexinator, for examining the raw binary structure of `.iwa` files.
 *   **`snzip`:** A reference implementation for Snappy compression, which can be helpful in understanding the compression algorithm.
-*   **SheetJS iWork parser documentation:** Provides valuable, community-derived Protobuf message documentation.
-
-By understanding the IWA file structure, Apple's specific Snappy implementation, and the role of Protocol Buffers, developers can begin to build parsers for modern Apple Pages documents.
+*   **SheetJS `modules/83_numbers.ts`:** Provides a working JavaScript implementation of IWA parsing, including Apple's custom Snappy and Protobuf message handling, serving as a valuable reference for reverse engineering efforts.

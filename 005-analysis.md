@@ -1,32 +1,3 @@
----
-title: "DOCX Demo"
-author: "Kovid Goyal"
-created: 2013-06-05T07:56:00.000Z
-modified: 2013-06-20T06:14:00.000Z
-keywords: ["calibre", "docs", "ebook", "conversion"]
-description: "Demonstration of DOCX support in calibre"
----
-
-<a id="OLE_LINK1">Demonstration of DOCX support in calibre</a>
-<a id="OLE_LINK2">Demonstration of DOCX support in calibre</a>
-<a id="_Toc359077851">Demonstration of DOCX support in calibre</a>
-<a id="_Toc359077852">Text Formatting</a>
-<a id="_Toc359077853">Inline formatting</a>
-<a id="_Toc359077854">Fun with fonts</a>
-<a id="_Paragraph_level_formatting"></a>
-<a id="_Toc359077855">Paragraph level formatting</a>
-<a id="_Toc359077856">Tables</a>
-<a id="_Toc359077857">Structural Elements</a>
-<a id="_Toc359077858">Footnotes & Endnotes</a>
-<a id="_Toc359077859">Dropcaps</a>
-<a id="_Toc359077860">Links</a>
-<a id="_Toc359077861">Table of Contents</a>
-<a id="_Toc359077862">Images</a>
-<a id="_Toc359077863">Lists</a>
-<a id="_Toc359077864">Bulleted List</a>
-<a id="_Toc359077865">Numbered List</a>
-<a id="_Toc359077866">Multi-level Lists</a>
-<a id="_Toc359077867">Continued Lists</a>
 # Demonstration of DOCX support in calibre
 
 This document demonstrates the ability of the calibre DOCX Input plugin to convert the various typographic features in a Microsoft Word (2007 and newer) document. Convert this document to a modern ebook format, such as AZW3 for Kindles or EPUB for other ebook readers, to see it in action.
@@ -57,63 +28,17 @@ For the lovers of poetry amongst you, paragraphs with hanging indents, like this
 
 # Tables
 
-| ITEM | NEEDED |
-| --- | --- |
-| Books | 1 |
-| Pens | 3 |
-| Pencils | 2 |
-| Highlighter | 2 colors |
-| Scissors | 1 pair |
-
 Tables in Word can vary from the extremely simple to the extremely complex. calibre tries to do its best when converting tables. While you may run into trouble with the occasional table, the vast majority of common cases should be converted very well, as demonstrated in this section. Note that for optimum results, when creating tables in Word, you should set their widths using percentages, rather than absolute units.  To the left of this paragraph is a floating two column table with a nice green border and header row.
 
 Now let’s look at a fancier table—one with alternating row colors and partial borders. This table is stretched out to take 100% of the available width.
 
-| City or Town | Point A | Point B | Point C | Point D | Point E |
-| --- | --- | --- | --- | --- | --- |
-| Point A | — |  |  |  |  |
-| Point B | 87 | — |  |  |  |
-| Point C | 64 | 56 | — |  |  |
-| Point D | 37 | 32 | 91 | — |  |
-| Point E | 93 | 35 | 54 | 43 | — |
-
 Next, we see a table with special formatting in various locations. Notice how the formatting for the header row and sub header rows is preserved.
-
-| College | New students | Graduating students | Change |
-| --- | --- | --- | --- |
-|  | Undergraduate |  |  |
-| Cedar University | 110 | 103 | +7 |
-| Oak Institute | 202 | 210 | -8 |
-|  | Graduate |  |  |
-| Cedar University | 24 | 20 | +4 |
-| Elm College | 43 | 53 | -10 |
-| Total | 998 | 908 | 90 |
 
 Source: Fictitious data, for illustration purposes only
 
 Next, we have something a little more complex, a nested table, i.e. a table inside another table. Additionally, the inner table has some of its cells merged. The table is displayed horizontally centered.
 
-| One Three Two  Four  | One Three | Two |  | Four | To the left is a table inside a table, with some cells merged. |
-| --- | --- | --- | --- | --- | --- |
-| One Three | Two |
-|  | Four |
-
 We end with a fancy calendar, note how much of the original formatting is preserved. Note that this table will only display correctly on relatively wide screens. In general, very wide tables or tables whose cells have fixed width requirements don’t fare well in ebooks.
-
-| December 2007 |
-| --- |
-| Sun |  | Mon |  | Tue |  | Wed |  | Thu |  | Fri |  | Sat |
-|  |  |  |  |  |  |  |  |  |  |  |  | 1 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 2 |  | 3 |  | 4 |  | 5 |  | 6 |  | 7 |  | 8 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 9 |  | 10 |  | 11 |  | 12 |  | 13 |  | 14 |  | 15 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 16 |  | 17 |  | 18 |  | 19 |  | 20 |  | 21 |  | 22 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 23 |  | 24 |  | 25 |  | 26 |  | 27 |  | 28 |  | 29 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |
-| 30 |  | 31 |  |  |  |  |  |  |  |  |  |  |
 
 # Structural Elements
 

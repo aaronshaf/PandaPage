@@ -13,20 +13,21 @@ Since a `.pages` file is a ZIP archive, the first step is to decompress it. The 
 
 ## 2. Decompress IWA Files (Custom Snappy)
 
-Each `.iwa` file is compressed using Apple's custom Snappy implementation. This is a crucial step that often requires a specialized decompression routine.
+Each `.iwa` file is compressed using Apple's custom Snappy implementation. This is a crucial step that often requires a specialized decompression routine, as confirmed by the `IWASnappyStream` class in `libetonyek`.
 
 **Steps:**
 1.  **Read `.iwa` file content:** Load the binary content of an `.iwa` file.
-2.  **Apply custom Snappy decompression:** Use a Snappy decompressor that accounts for Apple's non-standard framing (i.e., no stream identifier). Libraries like `libetonyek` contain components like `IWASnappyStream` for this purpose.
+2.  **Apply custom Snappy decompression:** Utilize a decompressor (like `IWASnappyStream::uncompressBlock`) that accounts for Apple's non-standard Snappy framing (i.e., no stream identifier). The decompressed stream might also be structured, potentially containing multiple logical substreams.
 
-## 3. Parse Protocol Buffer Messages
+## 3. Parse Protocol Buffer Messages and Resolve Objects
 
-The decompressed `.iwa` content is a stream of Protocol Buffer messages. To make sense of this binary data, you need the corresponding `.proto` definitions and a Protobuf parsing library.
+The decompressed `.iwa` content is a stream of Protocol Buffer messages. To make sense of this binary data, you need the corresponding `.proto` definitions and a Protobuf parsing library. The `libetonyek` library uses `IWAMessage` to represent these messages and `IWAParser` to orchestrate their processing. SheetJS's implementation further clarifies the generic structure of these messages.
 
 **Steps:**
-1.  **Obtain `.proto` definitions:** Since Apple does not publish these, they must be reverse-engineered from iWork executables using tools like `proto-dump`. These definitions describe the structure of the messages (e.g., `DocumentArchive`, `StylesheetArchive`).
-2.  **Deserialize Protobuf data:** Use a Protobuf library (e.g., `protobuf.js` in JavaScript, `python-protobuf` in Python) to deserialize the binary data into structured objects based on the `.proto` definitions.
-3.  **Handle message types:** The `libetonyek` library uses components like `IWAParser`, `IWAField`, and `IWAMessage` to process these messages, often mapping them to internal C++ objects representing document components.
+1.  **Obtain `.proto` definitions:** Since Apple does not publish these, they must be reverse-engineered from iWork executables using tools like `proto-dump` or by analyzing tools like SheetJS's `packages/otorp/`. These definitions describe the structure of the messages (e.g., `DocumentArchive`, `StylesheetArchive`).
+2.  **Deserialize Protobuf data:** Use a Protobuf library (or `IWAMessage` in `libetonyek`, or SheetJS's `parse_shallow` function) to deserialize the binary data into structured objects. This involves mapping the raw bytes to generic `ProtoItem`s, which are then grouped into `ProtoField`s and finally into `ProtoMessage`s based on field numbers and wire types. `IWAMessage` provides methods to access various field types (e.g., `uint32`, `string`, `message`).
+3.  **Resolve Object IDs:** A critical step is resolving internal object IDs to their corresponding data. The `IWAObjectIndex` (in `libetonyek`) is central to this. It maps object IDs to their types and `IWAMessage` (or `ProtoMessage`) data, and also handles mapping file IDs to streams (e.g., for embedded media) and even colors.
+4.  **Dispatch and Process:** The `IWAParser` dispatches different types of objects (shapes, text, comments, styles) to specific parsing methods. It also provides helper methods to extract common iWork data types (e.g., `readRef`, `readPosition`, `readColor`, `readStroke`) from `IWAMessage` fields.
 
 ## 4. Reconstruct Document Structure
 

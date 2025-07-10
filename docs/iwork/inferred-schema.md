@@ -16,15 +16,111 @@ Regardless of the format generation, the parser handles both package (directory-
 
 Styles are fundamental to iWork documents, acting as named, inheritable collections of properties that define the appearance and behavior of various document elements. As detailed in [Data Structures](./data-structures.md), `IWORKStyle` objects encapsulate these definitions.
 
-A `IWORKPropertyMap` stores these properties, mapping string IDs to values. The schema defines a comprehensive set of strongly typed properties, categorized into:
+A `IWORKPropertyMap` stores these properties, mapping `IWORKPropertyID_t` (string IDs) to their values. The schema defines a comprehensive set of strongly typed properties, categorized into:
 
-*   **Text/Paragraph Properties:** Covering alignment, font attributes (color, size, name, bold, italic), line spacing, indents, and text effects (shadow, strikethru, underline). These properties are crucial for text rendering and layout.
-*   **Layout/Geometry Properties:** Including columns, geometric transformations (`IWORKGeometry`), opacity, padding, and vertical alignment. These define the positioning and visual presentation of objects on a page.
-*   **Graphic/Media Properties:** Such as fills (`IWORKFill`), strokes (`IWORKStroke`), shadows (`IWORKShadow`), and line endings. These apply to shapes, images, and other visual elements.
-*   **List Properties:** Defining list labels, indents, and styles, enabling structured lists.
-*   **Table Properties:** Extensive properties for cell styles, borders, fills, and various table components, allowing for complex tabular data representation.
-*   **Page Properties:** For managing page masters (even, first, odd pages), headers, and footers, controlling the overall page layout.
-*   **Chart Properties:** Specific properties for different chart types (area, column, pie), defining their visual representation and data binding.
+*   **Text/Paragraph Properties**:
+    *   `Alignment` (`IWORKAlignment`)
+    *   `Baseline` (`IWORKBaseline`)
+    *   `BaselineShift` (`double`)
+    *   `Bold` (`bool`)
+    *   `Capitalization` (`IWORKCapitalization`)
+    *   `FontColor` (`IWORKColor`)
+    *   `FontName` (`std::string`)
+    *   `FontSize` (`double`)
+    *   `Hyphenate` (`bool`)
+    *   `Italic` (`bool`)
+    *   `KeepLinesTogether` (`bool`)
+    *   `KeepWithNext` (`bool`)
+    *   `Language` (`std::string`)
+    *   `LeftIndent` (`double`)
+    *   `LineSpacing` (`IWORKLineSpacing`)
+    *   `Outline` (`bool`)
+    *   `PageBreakBefore` (`bool`)
+    *   `ParagraphBorderType` (`IWORKBorderType`)
+    *   `ParagraphFill` (`IWORKColor`)
+    *   `ParagraphStroke` (`IWORKStroke`)
+    *   `RightIndent` (`double`)
+    *   `SpaceAfter` (`double`)
+    *   `SpaceBefore` (`double`)
+    *   `Strikethru` (`bool`)
+    *   `Tabs` (`IWORKTabStops_t`)
+    *   `TextBackground` (`IWORKColor`)
+    *   `TextShadow` (`IWORKShadow`)
+    *   `Tracking` (`double`)
+    *   `Underline` (`bool`)
+    *   `WidowControl` (`bool`)
+    *   `WritingMode` (`std::string`)
+*   **Layout/Geometry Properties**:
+    *   `Columns` (`IWORKColumns`)
+    *   `Geometry` (`IWORKGeometryPtr_t`)
+    *   `LayoutMargins` (`IWORKPadding`)
+    *   `LayoutParagraphStyle` (`IWORKStylePtr_t`)
+    *   `LayoutStyle` (`IWORKStylePtr_t`)
+    *   `Opacity` (`double`)
+    *   `Padding` (`IWORKPadding`)
+    *   `VerticalAlignment` (`IWORKVerticalAlignment`)
+*   **Graphic/Media Properties**:
+    *   `Fill` (`IWORKFill`)
+    *   `HeadLineEnd` (`IWORKMarker`)
+    *   `TailLineEnd` (`IWORKMarker`)
+    *   `Shadow` (`IWORKShadow`)
+    *   `Stroke` (`IWORKStroke`)
+    *   `ExternalTextWrap` (`IWORKExternalTextWrap`)
+*   **List Properties**:
+    *   `DropCap` (`IWORKDropCap`)
+    *   `ListLabelGeometry` (`IWORKListLabelGeometry`)
+    *   `ListLabelGeometries` (`std::deque<IWORKListLabelGeometry>`)
+    *   `ListLabelIndent` (`double`)
+    *   `ListLabelIndents` (`std::deque<double>`)
+    *   `ListLabelTypeInfo` (`IWORKListLabelTypeInfo_t`)
+    *   `ListLabelTypes` (`std::deque<IWORKListLabelTypeInfo_t>`)
+    *   `ListLevelStyles` (`IWORKListLevels_t`)
+    *   `ListStyle` (`IWORKStylePtr_t`)
+    *   `ListTextIndent` (`double`)
+    *   `ListTextIndents` (`std::deque<double>`)
+*   **Table Properties**:
+    *   `SFTableCellStylePropertyFill` (`IWORKFill`)
+    *   `SFTableStylePropertyCellStyle` (`IWORKStylePtr_t`)
+    *   `SFTableStylePropertyHeaderColumnCellStyle` (`IWORKStylePtr_t`)
+    *   `SFTableStylePropertyHeaderRowCellStyle` (`IWORKStylePtr_t`)
+    *   `SFTAutoResizeProperty` (`bool`)
+    *   `SFTCellStylePropertyDateTimeFormat` (`IWORKDateTimeFormat`)
+    *   `SFTCellStylePropertyDurationFormat` (`IWORKDurationFormat`)
+    *   `SFTCellStylePropertyNumberFormat` (`IWORKNumberFormat`)
+    *   `SFTCellStylePropertyLayoutStyle` (`IWORKStylePtr_t`)
+    *   `SFTCellStylePropertyParagraphStyle` (`IWORKStylePtr_t`)
+    *   `SFTDefaultBodyCellStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultBodyVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultBorderVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultFooterBodyVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultFooterRowCellStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultFooterSeparatorVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultGroupingLevelVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultGroupingRowCellStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultHeaderBodyVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultHeaderColumnCellStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultHeaderRowCellStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTDefaultHeaderSeparatorVectorStyleProperty` (`IWORKStylePtr_t`)
+    *   `SFTHeaderColumnRepeatsProperty` (`bool`)
+    *   `SFTHeaderRowRepeatsProperty` (`bool`)
+    *   `SFTStrokeProperty` (`IWORKStroke`)
+    *   `SFTTableBandedCellFillProperty` (`IWORKFill`)
+    *   `SFTTableBandedRowsProperty` (`bool`)
+    *   `SFTTableNameStylePropertyLayoutStyle` (`IWORKStylePtr_t`)
+    *   `SFTTableNameStylePropertyParagraphStyle` (`IWORKStylePtr_t`)
+*   **Page Properties**:
+    *   `EvenPageMaster` (`IWORKPageMaster`)
+    *   `FirstPageMaster` (`IWORKPageMaster`)
+    *   `OddPageMaster` (`IWORKPageMaster`)
+*   **Chart Properties**:
+    *   `SFSeries` (`IWORKStylePtr_t`)
+    *   `SFC2DAreaFillProperty` (`IWORKFill`)
+    *   `SFC2DColumnFillProperty` (`IWORKFill`)
+    *   `SFC2DMixedColumnFillProperty` (`IWORKFill`)
+    *   `SFC2DPieFillProperty` (`IWORKFill`)
+    *   `SFC3DAreaFillProperty` (`IWORKFill`)
+    *   `SFC3DColumnFillProperty` (`IWORKFill`)
+    *   `SFC3DPieFillProperty` (`IWORKFill`)
 
 Stylesheets (`IWORKStylesheet`) organize these styles, potentially in a hierarchical manner, allowing for efficient management and application of consistent formatting across the document.
 
@@ -32,13 +128,59 @@ Stylesheets (`IWORKStylesheet`) organize these styles, potentially in a hierarch
 
 The schema defines distinct objects for various content types, forming the building blocks of the document. These correspond to the `IWORK` prefixed objects identified in `libetonyek` and further detailed in [Data Structures](./data-structures.md):
 
-*   **Text (`IWORKText`):** Manages text blocks, including paragraphs, inline spans, dynamic fields (page numbers, dates), links, and breaks (line, column, page). It handles language-specific properties and applies styles at different text levels, forming the narrative content of the document.
-*   **Shapes (`IWORKShape`):** Generic graphical objects with defined geometry, style, and optional paths. This includes both predefined shapes (like polygons, arrows, and stars) and custom vector shapes, allowing for rich visual elements.
-*   **Images and Media (`IWORKMedia`):** Represents embedded images, videos, and other media. It includes properties for type (e.g., original size, tile), dimensions, raw data, and cropping information, enabling the inclusion of rich media.
-*   **Lines (`IWORKLine`):** Simple line objects with geometry and style, used for dividers, connectors, or decorative elements.
-*   **Tables (`IWORKTable`):** Complex grid structures for tabular data. They support various cell types (text, number, date, formula), formulas, grid lines, and configurable headers/footers, providing structured data presentation.
-*   **Charts (`IWORKChart`):** Visual representations of data with properties for titles and series, often linked to underlying table data.
-*   **Annotations, Footnotes/Endnotes, Groups:** Support for comments, notes, and grouping of drawable objects, enhancing collaboration and document organization.
+*   **Text (`IWORKText`)**: Represents a block of text, managing paragraphs, spans, fields, links, and various text formatting attributes.
+    *   `m_langManager`: Manages language-specific text properties.
+    *   `m_layoutStyleStack`, `m_paraStyleStack`: Style stacks for layout and paragraph styles.
+    *   `m_elements`: Output elements for text content.
+    *   `m_breakDelayed`: Delayed break type (line, column, page).
+    *   `m_pageMasters`, `m_sections`, `m_paras`, `m_spans`, `m_lists`, `m_dropCaps`: Maps of styles applied at different text levels.
+    *   **Paragraphs (`p`)**: Basic text containers, can have associated styles.
+    *   **Spans (`span`)**: Inline text elements for applying character-level formatting.
+    *   **Fields**: Dynamic content like page numbers, dates, or filenames.
+    *   **Breaks**: Line, column, and page breaks.
+*   **Shapes (`IWORKShape`)**: Generic graphical objects with geometry, style, and an optional path.
+    *   `m_geometry`: Pointer to `IWORKGeometry` defining position, size, rotation, etc.
+    *   `m_style`: Pointer to `IWORKStyle` for visual properties.
+    *   `m_path`: Pointer to `IWORKPath` defining the shape's outline.
+    *   `m_text`: Pointer to `IWORKText` if the shape contains text.
+    *   **Paths (`IWORKPath`)**: Defines the outline of a shape using a sequence of `MoveTo`, `LineTo`, `CurveTo`, and `Close` operations. Can be complex Bezier paths.
+    *   **Predefined Shapes**: Polygon, Rounded Rectangle, Arrow, Star, Callout, Quote Bubble.
+*   **Images and Media (`IWORKMedia`, `IWORKMediaContent`)**: Represents embedded images and other media (e.g., videos).
+    *   `m_type`: `IWORKImageType` (original size, stretch, tile, scale to fill, scale to fit).
+    *   `m_size`: Optional `IWORKSize` for media dimensions.
+    *   `m_data`: Pointer to `IWORKData` containing the raw media bytes.
+    *   `m_fillColor`: Optional `IWORKColor` for fill.
+    *   `m_geometry`, `m_cropGeometry`: Geometry and cropping information.
+    *   `m_style`: Style for the media object.
+    *   `m_order`: Z-order for layering.
+    *   `m_locked`, `m_placeholder`, `m_placeholderSize`: Flags and properties for media behavior.
+*   **Lines (`IWORKLine`)**: Simple line objects with geometry and style.
+    *   `m_geometry`: Pointer to `IWORKGeometry`.
+    *   `m_style`: Pointer to `IWORKStyle`.
+    *   `m_order`: Z-order.
+    *   `m_x1`, `m_y1`, `m_x2`, `m_y2`: Line coordinates.
+*   **Tables (`IWORKTable`)**: Complex grid structures for tabular data.
+    *   `m_tableNameMap`: Map of table names to IDs.
+    *   `m_formatNameMap`: Map of format names to IDs.
+    *   `m_langManager`: Language manager.
+    *   `m_commentMap`: Map of cell coordinates to comments.
+    *   `m_style`: Table style.
+    *   `m_columnSizes`, `m_rowSizes`: Sizes of columns and rows.
+    *   `m_verticalLines`, `m_horizontalLines`: Grid line styles.
+    *   `m_defaultCellStyles`, `m_defaultLayoutStyles`, `m_defaultParaStyles`: Default styles for different cell types.
+    *   **Cells (`IWORKTableCell`)**: Can contain text, numbers, dates, durations, booleans, or formulas.
+        *   `m_style`: Cell style.
+        *   `m_preferredHeight`: Preferred cell height.
+        *   `m_minXBorder`, `m_maxXBorder`, `m_minYBorder`, `m_maxYBorder`: Border styles.
+    *   **Formulas (`IWORKFormula`)**: Supports a wide range of functions and cell references.
+    *   **Grid Lines**: Defines borders and styling for table grid lines.
+    *   **Headers/Footers**: Configurable header and footer rows/columns.
+*   **Charts (`IWORKChart`)**: Visual representations of data.
+    *   `m_chartName`: Chart name.
+    *   `m_valueTitle`, `m_categoryTitle`: Chart axis titles.
+*   **Annotations**: Comments within the document.
+*   **Footnotes/Endnotes**: References and content for notes.
+*   **Groups**: Allows for grouping multiple drawable objects together.
 
 ## 4. Parsing and Object Resolution: Bringing the Document to Life
 
@@ -54,14 +196,33 @@ Building the internal representation is often handled by collector classes (e.g.
 
 ## 5. Data Types and Enumerations
 
-The schema heavily relies on custom C++ structs and enumerations to define data types and their allowed values, ensuring strong typing and consistency. These enumerations cover a wide range of properties, including:
+The schema heavily relies on custom C++ structs and enumerations to define data types and their allowed values, ensuring strong typing and consistency. These enumerations, primarily defined in `IWORKEnum.h`, cover a wide range of properties, including:
 
-*   Document confidence and result types
-*   Text alignment (e.g., left, center, right, justified)
-*   Baseline and capitalization options
-*   Border types, image types, gradient types
-*   Cell types (e.g., text, number, date, formula)
-*   Various formatting and layout options.
+*   **`EtonyekDocument` Enums**:
+    *   `Confidence`: `CONFIDENCE_NONE`, `CONFIDENCE_SUPPORTED_PART`, `CONFIDENCE_EXCELLENT`.
+    *   `Result`: `RESULT_OK`, `RESULT_FILE_ACCESS_ERROR`, `RESULT_PACKAGE_ERROR`, `RESULT_PARSE_ERROR`, `RESULT_UNSUPPORTED_FORMAT`, `RESULT_UNKNOWN_ERROR`.
+    *   `Type`: `TYPE_UNKNOWN`, `TYPE_KEYNOTE`, `TYPE_NUMBERS`, `TYPE_PAGES`.
+*   **`IWORKAlignment`**: `IWORK_ALIGNMENT_LEFT`, `IWORK_ALIGNMENT_RIGHT`, `IWORK_ALIGNMENT_CENTER`, `IWORK_ALIGNMENT_JUSTIFY`, `IWORK_ALIGNMENT_AUTOMATIC`.
+*   **`IWORKBaseline`**: `IWORK_BASELINE_NORMAL`, `IWORK_BASELINE_SUB`, `IWORK_BASELINE_SUPER`.
+*   **`IWORKBorderType`**: `IWORK_BORDER_TYPE_NONE`, `IWORK_BORDER_TYPE_TOP`, `IWORK_BORDER_TYPE_BOTTOM`, `IWORK_BORDER_TYPE_TOP_AND_BOTTOM`, `IWORK_BORDER_TYPE_ALL`.
+*   **`IWORKBorderStroke`**: `IWORK_BORDER_STROKE_NONE`, `IWORK_BORDER_STROKE_SOLID`, `IWORK_BORDER_STROKE_DOTTED`, `IWORK_BORDER_STROKE_DASHED`.
+*   **`IWORKBreakType`**: `IWORK_BREAK_NONE`, `IWORK_BREAK_LINE`, `IWORK_BREAK_COLUMN`, `IWORK_BREAK_PAGE`.
+*   **`IWORKCapitalization`**: `IWORK_CAPITALIZATION_NONE`, `IWORK_CAPITALIZATION_ALL_CAPS`, `IWORK_CAPITALIZATION_SMALL_CAPS`, `IWORK_CAPITALIZATION_TITLE`.
+*   **`IWORKLineCap`**: `IWORK_LINE_CAP_NONE`, `IWORK_LINE_CAP_BUTT`, `IWORK_LINE_CAP_ROUND`.
+*   **`IWORKLineJoin`**: `IWORK_LINE_JOIN_NONE`, `IWORK_LINE_JOIN_MITER`, `IWORK_LINE_JOIN_ROUND`.
+*   **`IWORKCellType`**: `IWORK_CELL_TYPE_NUMBER`, `IWORK_CELL_TYPE_TEXT`, `IWORK_CELL_TYPE_DATE_TIME`, `IWORK_CELL_TYPE_DURATION`, `IWORK_CELL_TYPE_BOOL`.
+*   **`IWORKCellNumberType`**: `IWORK_CELL_NUMBER_TYPE_CURRENCY`, `IWORK_CELL_NUMBER_TYPE_DOUBLE`, `IWORK_CELL_NUMBER_TYPE_FRACTION`, `IWORK_CELL_NUMBER_TYPE_PERCENTAGE`, `IWORK_CELL_NUMBER_TYPE_SCIENTIFIC`.
+*   **`IWORKImageType`**: `IWORK_IMAGE_TYPE_ORIGINAL_SIZE`, `IWORK_IMAGE_TYPE_STRETCH`, `IWORK_IMAGE_TYPE_TILE`, `IWORK_IMAGE_TYPE_SCALE_TO_FILL`, `IWORK_IMAGE_TYPE_SCALE_TO_FIT`.
+*   **`IWORKGradientType`**: `IWORK_GRADIENT_TYPE_LINEAR`, `IWORK_GRADIENT_TYPE_RADIAL`.
+*   **`IWORKVerticalAlignment`**: `IWORK_VERTICAL_ALIGNMENT_TOP`, `IWORK_VERTICAL_ALIGNMENT_MIDDLE`, `IWORK_VERTICAL_ALIGNMENT_BOTTOM`.
+*   **`IWORKStrokeType`**: `IWORK_STROKE_TYPE_NONE`, `IWORK_STROKE_TYPE_SOLID`, `IWORK_STROKE_TYPE_DASHED`, `IWORK_STROKE_TYPE_AUTO`.
+*   **`IWORKLabelNumFormat`**: `IWORK_LABEL_NUM_FORMAT_NUMERIC`, `IWORK_LABEL_NUM_FORMAT_ALPHA`, `IWORK_LABEL_NUM_FORMAT_ALPHA_LOWERCASE`, `IWORK_LABEL_NUM_FORMAT_ROMAN`, `IWORK_LABEL_NUM_FORMAT_ROMAN_LOWERCASE`.
+*   **`IWORKLabelNumFormatSurrounding`**: `IWORK_LABEL_NUM_FORMAT_SURROUNDING_NONE`, `IWORK_LABEL_NUM_FORMAT_SURROUNDING_PARENTHESIS`, `IWORK_LABEL_NUM_FORMAT_SURROUNDING_DOT`.
+*   **`IWORKFieldType`**: `IWORK_FIELD_DATETIME`, `IWORK_FIELD_FILENAME`, `IWORK_FIELD_PAGECOUNT`, `IWORK_FIELD_PAGENUMBER`.
+*   **`IWORKTabulationType`**: `IWORK_TABULATION_LEFT`, `IWORK_TABULATION_RIGHT`, `IWORK_TABULATION_CENTER`, `IWORK_TABULATION_DECIMAL`.
+*   **`IWORKWrapDirection`**: `IWORK_WRAP_DIRECTION_BOTH`, `IWORK_WRAP_DIRECTION_LEFT`, `IWORK_WRAP_DIRECTION_RIGHT`.
+*   **`IWORKWrapStyle`**: `IWORK_WRAP_STYLE_REGULAR`, `IWORK_WRAP_STYLE_TIGHT`.
+*   **`IWORKWrapType`**: `IWORK_WRAP_TYPE_DIRECTIONAL`, `IWORK_WRAP_TYPE_LARGEST`, `IWORK_WRAP_TYPE_NEITHER`.
 
 These detailed enumerations provide the granular control necessary for representing the rich formatting capabilities of iWork applications.
 

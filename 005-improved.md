@@ -40,7 +40,7 @@ To see the DOCX conversion in action, simply add this file to calibre using the 
 
 Here, we demonstrate various types of inline text formatting and the use of embedded fonts.
 
-Here is some **bold, ***italic, ****bold-italic, ***<u>underlined </u>and ~~struck out ~~ text. Then, we have a super<sup>script</sup> and a sub<sub>script</sub>. Now we see some red, green and blue text. Some text with a yellow highlight. Some text in a box. Some text in inverse video.
+Here is some **bold, ***italic, ****bold-italic, ***<u>underlined </u>and ~~struck out ~~ text. Then, we have a super<sup>script</sup> and a sub<sub>script</sub>. Now we see some <span style="color: #FF0000">red</span>, <span style="color: #92D050">green</span> and <span style="color: #0070C0">blue</span> text. Some text with a yellow highlight. Some text in a box. Some text in <span style="color: ##FFFFFF">inverse video</span>.
 
 A paragraph with styled text: subtle emphasis  followed by strong text and intense emphasis. This paragraph uses document wide styles for styling rather than inline text properties as demonstrated in the previous paragraph — calibre can handle both with equal ease.
 
@@ -50,7 +50,7 @@ This document has embedded the Ubuntu font family. The body text is in the Ubunt
 
 ## **Paragraph level formatting**
 
-You can do crazy things with paragraphs, if the urge strikes you. For instance this paragraph is right aligned and has a right border. It has also been given a light gray background.
+<div style="text-align: right">You can do crazy things with paragraphs, if the urge strikes you. For instance this paragraph is right aligned and has a right border. It has also been given a light gray background.</div>
 
 For the lovers of poetry amongst you, paragraphs with hanging indents, like this often come in handy. You can use hanging indents to ensure that a line of poetry retains its individual identity as a line even when the screen is  too narrow to display it as a single line. Not only does this paragraph have a hanging indent, it is also has an extra top margin, setting it apart from the preceding paragraph.
 
@@ -68,13 +68,13 @@ Tables in Word can vary from the extremely simple to the extremely complex. cali
 
 Now let’s look at a fancier table—one with alternating row colors and partial borders. This table is stretched out to take 100% of the available width.
 
-| City or Town | Point A | Point B | Point C | Point D | Point E |
+| <span style="color: #auto">City or Town</span> | <span style="color: #auto">Point A</span> | <span style="color: #auto">Point B</span> | <span style="color: #auto">Point C</span> | <span style="color: #auto">Point D</span> | <span style="color: #auto">Point E</span> |
 | --- | --- | --- | --- | --- | --- |
-| Point A | — |  |  |  |  |
-| Point B | 87 | — |  |  |  |
-| Point C | 64 | 56 | — |  |  |
-| Point D | 37 | 32 | 91 | — |  |
-| Point E | 93 | 35 | 54 | 43 | — |
+| <span style="color: #auto">Point A</span> | <span style="color: #auto">—</span> |  |  |  |  |
+| <span style="color: #auto">Point B</span> | <span style="color: #auto">87</span> | <span style="color: #auto">—</span> |  |  |  |
+| <span style="color: #auto">Point C</span> | <span style="color: #auto">64</span> | <span style="color: #auto">56</span> | <span style="color: #auto">—</span> |  |  |
+| <span style="color: #auto">Point D</span> | <span style="color: #auto">37</span> | <span style="color: #auto">32</span> | <span style="color: #auto">91</span> | <span style="color: #auto">—</span> |  |
+| <span style="color: #auto">Point E</span> | <span style="color: #auto">93</span> | <span style="color: #auto">35</span> | <span style="color: #auto">54</span> | <span style="color: #auto">43</span> | <span style="color: #auto">—</span> |
 
 Next, we see a table with special formatting in various locations. Notice how the formatting for the header row and sub header rows is preserved.
 
