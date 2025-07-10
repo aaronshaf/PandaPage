@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
-import { DocxRenderer } from './DocxRenderer';
-import { renderToHtml } from '@browser-document-viewer/dom-renderer';
+import { setupPageTracking, calculatePrintScale, checkMobile, calculatePageIndicatorTop } from './page-tracking-utils';
+import { renderPrintPages } from './page-render-utils';
 import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/core';
 
 interface DocumentViewerProps {
@@ -45,27 +45,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false);
   const [navHeight, setNavHeight] = useState(140);
   const [isMobile, setIsMobile] = useState(false);
+  const [scrollbarHeight, setScrollbarHeight] = useState(0);
+  const [scrollbarOffset, setScrollbarOffset] = useState(0);
 
   // Check if mobile on mount and resize
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const updateMobile = () => setIsMobile(checkMobile());
+    updateMobile();
+    window.addEventListener('resize', updateMobile);
+    return () => window.removeEventListener('resize', updateMobile);
   }, []);
 
-  // Calculate print scale
-  const calculatePrintScale = () => {
-    if (typeof window === 'undefined') return 1;
-    
-    const containerWidth = window.innerWidth - 320; // Account for potential sidebar
-    const pageWidth = 8.5 * 96; // 8.5 inches at 96 DPI
-    const maxScale = Math.min(containerWidth / pageWidth, 1.2); // Max 120%
-    return Math.max(0.4, maxScale * 0.83); // Use 83% of available width for 100% default scale, min 40%
-  };
 
   useEffect(() => {
     if (viewMode === 'print') {
@@ -97,96 +87,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   // Page tracking for print view
   useEffect(() => {
-    if (viewMode !== 'print') return;
-
-    // Small delay to ensure DOM is updated after page elements are created
-    const setupScrollTracking = () => {
-      // Find the scrollable container (the document content area)
-      const scrollContainer = document.querySelector('.document-scroll-container');
-      if (!scrollContainer) {
-        console.warn('No .document-scroll-container found for page tracking');
-        return;
-      }
-
-      const handleScroll = (event: Event) => {
-        const container = event.target as HTMLElement;
-        const pages = container.querySelectorAll('.print-page');
-        let currentVisiblePage = 1;
-        
-        // Debug logging
-        if (pages.length === 0) {
-          console.warn('No .print-page elements found for page tracking');
-          return;
-        }
-        
-        const containerRect = container.getBoundingClientRect();
-        const containerMiddle = containerRect.top + containerRect.height / 2;
-        
-        for (let i = 0; i < pages.length; i++) {
-          const page = pages[i];
-          if (!page) continue;
-          const rect = page.getBoundingClientRect();
-          
-          // Consider a page "current" if its center is closest to container center
-          if (rect.top <= containerMiddle && rect.bottom > containerMiddle) {
-            currentVisiblePage = i + 1;
-            break;
-          }
-          
-          // If we're past the container middle, this is probably the current page
-          if (rect.top <= containerMiddle) {
-            currentVisiblePage = i + 1;
-          }
-        }
-        
-        setCurrentPage(currentVisiblePage);
-        
-        // Update scroll progress for page indicator positioning
-        const scrollTop = container.scrollTop;
-        const scrollHeight = container.scrollHeight - container.clientHeight;
-        const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
-        setScrollProgress(progress);
-        
-        // Show page indicator temporarily when manually scrolling (but not programmatic scroll)
-        const shouldShowIndicator = !isProgrammaticScroll;
-        setShowPageIndicator(shouldShowIndicator);
-        
-        if (shouldShowIndicator) {
-          clearTimeout(window.pageIndicatorTimeout);
-          window.pageIndicatorTimeout = window.setTimeout(() => {
-            setShowPageIndicator(false);
-          }, 2000);
-        }
-        
-        // Reset programmatic scroll flag after a short delay
-        if (isProgrammaticScroll) {
-          setTimeout(() => {
-            setIsProgrammaticScroll(false);
-          }, 100);
-        }
-      };
-
-      scrollContainer.addEventListener('scroll', handleScroll);
-      
-      // Initial call with fake event - mark as programmatic to avoid showing page indicator
-      setIsProgrammaticScroll(true);
-      handleScroll({ target: scrollContainer } as any);
-      // Reset programmatic flag after initial setup
-      setTimeout(() => setIsProgrammaticScroll(false), 100);
-
-      return () => {
-        scrollContainer.removeEventListener('scroll', handleScroll);
-        clearTimeout(window.pageIndicatorTimeout);
-      };
-    };
-
-    // Small delay to ensure DOM elements are rendered
-    const timeoutId = setTimeout(setupScrollTracking, 100);
-    
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [viewMode, result, totalPages]);
+    return setupPageTracking({
+      viewMode,
+      setCurrentPage,
+      setScrollProgress,
+      setShowPageIndicator,
+      setScrollbarHeight,
+      setScrollbarOffset,
+      isProgrammaticScroll,
+      setIsProgrammaticScroll
+    });
+  }, [viewMode, result, totalPages, isProgrammaticScroll]);
 
   // Update nav height when primary nav visibility changes
   useEffect(() => {
@@ -288,30 +199,24 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           {showPageIndicator && totalPages > 1 && (
             <div 
               data-testid="page-indicator"
-              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-sm transition-opacity duration-300 z-30"
+              className="fixed bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg transition-all duration-200 z-30 pointer-events-none"
               style={{
-                // Position relative to viewport
-                right: '24px', // Account for scrollbar width + padding
-                top: (() => {
-                  if (typeof window === 'undefined') return `${navHeight + 20}px`;
-                  
-                  // Calculate available space from nav to bottom of viewport
-                  const viewportHeight = window.innerHeight;
-                  const indicatorHeight = 60; // Approximate height of the indicator
-                  const padding = 20;
-                  const availableSpace = viewportHeight - navHeight - indicatorHeight - (padding * 2);
-                  const travelSpace = Math.max(0, availableSpace);
-                  
-                  // Calculate position based on scroll progress
-                  const calculatedTop = navHeight + padding + (scrollProgress * travelSpace);
-                  
-                  return `${calculatedTop}px`;
-                })(),
-                transform: 'translateY(-50%)'
+                // Position relative to viewport, centered in scrollbar area
+                right: '8px', // Close to scrollbar
+                top: calculatePageIndicatorTop({
+                  scrollProgress,
+                  scrollbarHeight,
+                  scrollbarOffset,
+                  navHeight
+                }),
+                transform: 'translateY(-50%)',
+                // Add visual improvements
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}
             >
               <div 
-                className="text-sm font-medium font-sans"
+                className="text-sm font-medium font-sans whitespace-nowrap"
                 aria-label={`Page ${currentPage} of ${totalPages}`}
                 role="status"
                 aria-live="polite"
@@ -328,128 +233,16 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               '--print-scale': printScale,
             } as React.CSSProperties & { '--print-scale': number }}
           >
-            {parsedDocument ? (
-              // For new parser documents, use DOM renderer - it already includes pagination
-              (() => {
-                const htmlContent = renderToHtml(parsedDocument, { includeStyles: false });
-                
-                // The DOM renderer already splits content into pages with proper structure
-                // We need to extract the individual page divs instead of re-paginating
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = htmlContent;
-                const pageElements = tempDiv.querySelectorAll('.page');
-                
-                // Update total pages when pages change
-                if (pageElements.length !== totalPages) {
-                  setTimeout(() => setTotalPages(pageElements.length), 0);
-                }
-                
-                return Array.from(pageElements).map((pageElement, index) => (
-                  <div 
-                    key={index} 
-                    className="print-page"
-                    data-testid={`parsed-document-page-${index + 1}`}
-                    data-page-number={index + 1}
-                    data-page-type="parsed-document"
-                    data-content-type="dom-rendered"
-                    data-total-pages={pageElements.length}
-                    dangerouslySetInnerHTML={{ __html: pageElement.innerHTML }}
-                  />
-                ));
-              })()
-            ) : structuredDocument?.elements ? (
-              // For structured documents, split by page breaks if available
-              (() => {
-                const allElements = structuredDocument.elements;
-                const pages: any[][] = [];
-                let currentPage: any[] = [];
-                
-                // Split elements by page breaks
-                for (const element of allElements) {
-                  if (element.type === 'pageBreak') {
-                    // Found a page break - finish current page
-                    if (currentPage.length > 0) {
-                      pages.push(currentPage);
-                      currentPage = [];
-                    }
-                  } else {
-                    currentPage.push(element);
-                  }
-                }
-                
-                // Add the last page if it has content
-                if (currentPage.length > 0) {
-                  pages.push(currentPage);
-                }
-                
-                // If no pages or page breaks found, treat as single page
-                if (pages.length === 0) {
-                  pages.push(allElements);
-                }
-                
-                if (pages.length !== totalPages) {
-                  setTimeout(() => setTotalPages(pages.length), 0);
-                }
-                
-                return pages.map((pageElements, index) => (
-                  <div 
-                    key={index} 
-                    className="print-page"
-                    data-testid={`print-page-${index}`}
-                    data-page-number={index + 1}
-                    data-page-type="structured-document"
-                    data-content-type="docx-rendered"
-                    data-total-pages={pages.length}
-                  >
-                    <DocxRenderer 
-                      elements={pageElements} 
-                      viewMode={viewMode}
-                    />
-                  </div>
-                ));
-              })()
-            ) : (
-              // For markdown, use the existing pagination
-              (() => {
-                const htmlContent = marked.parse(removeFrontmatter(result));
-                const pages = splitIntoPages(htmlContent as string);
-                
-                // Update total pages when pages change
-                if (pages.length !== totalPages) {
-                  setTimeout(() => setTotalPages(pages.length), 0);
-                }
-                
-                return pages.map((pageContent, index) => (
-                  <div key={index} data-testid={`markdown-page-container-${index + 1}`} style={{ position: 'relative' }}>
-                    <div 
-                      className="print-page"
-                      data-testid={`markdown-page-${index + 1}`}
-                      data-page-number={index + 1}
-                      data-page-type="markdown"
-                      data-content-type="markdown-rendered"
-                      data-total-pages={pages.length}
-                      dangerouslySetInnerHTML={{ __html: pageContent }}
-                    />
-                    {/* Page number - only show in screen view */}
-                    <div 
-                      data-testid={`page-number-${index + 1}`}
-                      style={{
-                        position: 'absolute',
-                        bottom: '24px',
-                        right: '24px',
-                        fontSize: '12px',
-                        color: '#9ca3af',
-                        fontFamily: 'system-ui, -apple-system, sans-serif'
-                      }}
-                      className="print:hidden"
-                      aria-label={`Page ${index + 1} of ${pages.length}`}
-                    >
-                      {index + 1} of {pages.length}
-                    </div>
-                  </div>
-                ));
-              })()
-            )}
+            {renderPrintPages({
+              parsedDocument,
+              structuredDocument,
+              result,
+              viewMode,
+              removeFrontmatter,
+              splitIntoPages,
+              setTotalPages,
+              totalPages
+            })}
           </div>
         </div>
       )}

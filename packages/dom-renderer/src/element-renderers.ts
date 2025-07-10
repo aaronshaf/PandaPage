@@ -334,13 +334,54 @@ export function renderTable(
   return tableEl;
 }
 
-export function renderImage(image: Image, doc: Document): HTMLElement {
+export function renderImage(image: Image, doc: Document, options?: { currentPageNumber?: number, totalPages?: number, lazy?: boolean }): HTMLElement {
   const img = doc.createElement('img');
+  
+  const shouldLazyLoad = options?.lazy !== false && options?.currentPageNumber && options?.totalPages;
+  
+  // Create placeholder image for lazy loading
+  const placeholderSrc = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y5ZmFmYiIgc3Ryb2tlPSIjZTFlNWU5Ii8+PHRleHQgeD0iMTAwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOWNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Loading...</vdGV4dD48L3N2Zz4=';
   
   try {
     // Convert ArrayBuffer to base64 safely
     const imgData = safeBase64Encode(image.data);
-    img.src = `data:${image.mimeType};base64,${imgData}`;
+    const realSrc = `data:${image.mimeType};base64,${imgData}`;
+    
+    if (shouldLazyLoad) {
+      // Set up lazy loading
+      img.src = placeholderSrc;
+      img.setAttribute('data-src', realSrc);
+      img.loading = 'lazy';
+      img.className = 'lazy-image';
+      
+      // Add intersection observer for better lazy loading control
+      if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const lazyImg = entry.target as HTMLImageElement;
+              const src = lazyImg.getAttribute('data-src');
+              if (src) {
+                lazyImg.src = src;
+                lazyImg.removeAttribute('data-src');
+                lazyImg.classList.remove('lazy-image');
+                observer.unobserve(lazyImg);
+              }
+            }
+          });
+        }, {
+          rootMargin: '100px' // Start loading 100px before the image comes into view
+        });
+        
+        // Observe the image after a short delay to allow DOM insertion
+        setTimeout(() => observer.observe(img), 100);
+      } else {
+        // Fallback for browsers without IntersectionObserver
+        img.src = realSrc;
+      }
+    } else {
+      img.src = realSrc;
+    }
   } catch (error) {
     console.error('Error encoding image data:', error);
     // Create a placeholder for failed images
@@ -359,7 +400,7 @@ export function renderImage(image: Image, doc: Document): HTMLElement {
   return img;
 }
 
-export function renderFootnote(footnote: any, doc: Document, currentPageNumber: number, totalPages: number): HTMLElement {
+export function renderFootnote(footnote: any, doc: Document, currentPageNumber: number, totalPages: number, options?: { footnoteMap?: Map<string, any> }): HTMLElement {
   const div = doc.createElement('div');
   div.className = 'footnote';
   div.id = `footnote-${footnote.id}`;
@@ -370,7 +411,10 @@ export function renderFootnote(footnote: any, doc: Document, currentPageNumber: 
   
   const numberSpan = doc.createElement('span');
   numberSpan.className = 'footnote-number';
-  numberSpan.textContent = footnote.id;
+  
+  // Convert footnote ID to 1-based numbering for display
+  const displayNumber = getFootnoteDisplayNumber(footnote.id, options?.footnoteMap);
+  numberSpan.textContent = displayNumber.toString();
   contentDiv.appendChild(numberSpan);
   
   const textDiv = doc.createElement('div');
@@ -389,17 +433,44 @@ export function renderFootnote(footnote: any, doc: Document, currentPageNumber: 
   return div;
 }
 
-export function renderFootnoteReference(footnoteRef: any, doc: Document): HTMLElement {
+export function renderFootnoteReference(footnoteRef: any, doc: Document, options?: { footnoteMap?: Map<string, any> }): HTMLElement {
   const link = doc.createElement('a');
   link.href = `#footnote-${footnoteRef.id}`;
   link.className = 'footnote-reference';
   link.setAttribute('data-footnote-id', footnoteRef.id);
   
   const sup = doc.createElement('sup');
-  sup.textContent = footnoteRef.text;
+  // Convert footnote ID to 1-based numbering for display
+  const displayNumber = getFootnoteDisplayNumber(footnoteRef.id, options?.footnoteMap);
+  sup.textContent = displayNumber.toString();
   link.appendChild(sup);
   
   return link;
+}
+
+// Helper function to get 1-based footnote numbering
+function getFootnoteDisplayNumber(footnoteId: string, footnoteMap?: Map<string, any>): number {
+  if (!footnoteMap) {
+    // Fallback: try to parse the ID as a number and add 1
+    const numId = parseInt(footnoteId, 10);
+    return isNaN(numId) ? 1 : numId + 1;
+  }
+  
+  // Create a sorted list of footnote IDs for consistent numbering
+  const sortedIds = Array.from(footnoteMap.keys()).sort((a, b) => {
+    // Try to parse as numbers first, fall back to string comparison
+    const numA = parseInt(a, 10);
+    const numB = parseInt(b, 10);
+    
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    }
+    
+    return a.localeCompare(b);
+  });
+  
+  const index = sortedIds.indexOf(footnoteId);
+  return index >= 0 ? index + 1 : 1; // 1-based numbering
 }
 
 export function renderBookmark(bookmark: any, doc: Document): HTMLElement {

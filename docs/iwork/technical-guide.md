@@ -65,14 +65,73 @@ The most significant challenge in parsing the IWA format is the lack of official
 *   **SheetJS `js-iwork`**: The SheetJS project provides detailed documentation and partial implementations that are highly valuable.
 *   **`iwork2html` (Go)**: A functional command-line tool that converts iWork files to HTML, offering a practical reference for a complete parsing pipeline.
 
-## Implementation Recommendations for a TypeScript/Web Parser
 
-1.  **Obtain Schemas**: Use `otorp` or a similar tool to extract the `.proto` schemas from the iWork applications. This is the foundation of your parser.
-2.  **Handle ZIP**: Use a library like `jszip` to handle the outer iWork archive and the nested `Index.zip`.
-3.  **Solve Snappy Decompression**: Implement or find a library that can handle Apple's non-standard, headerless Snappy compression. Porting the logic from `libetonyek` or `iwork2html` (possibly to Wasm) is a reliable strategy.
-4.  **Parse Protobuf**: Use `protobuf.js` to load the schemas you extracted and to deserialize the `.iwa` message streams.
-5.  **Build a Message Dispatcher**: The `.iwa` stream contains multiple message types. You will need to parse a generic wrapper message first to identify the type of the main message payload, then deserialize the payload using the correct schema definition.
-6.  **Construct a Document Model**: The parsed Protobuf messages are a flat list of objects with ID-based references. You must build a hierarchical document model in memory by resolving these references, starting from the root object in `Document.iwa`.
-7.  **Render the Model**: Once you have a coherent document model, you can traverse it to render HTML, extract text, or convert to another format. This involves mapping iWork's complex styling objects to CSS.
+## Recommended JavaScript Libraries for Browser-Based Parsing
 
-Due to the complexity, it is advisable to **start with a minimal goal**, such as extracting plain text, before attempting a full, high-fidelity renderer.
+For developers building a parser that runs in a web browser, selecting the right set of JavaScript libraries is crucial. The following libraries are recommended for each stage of the parsing process.
+
+| Task                     | Recommended Library                                       | Why?                                                                                                                                                                                             |
+| :----------------------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Unzipping**         | **`fflate`**                                              | A modern, high-performance library with a focus on small bundle size. It is significantly faster than older libraries, which is a major advantage for handling large iWork files in the browser.      |
+| **2. Snappy Decompression** | **WebAssembly (Wasm) Port**                               | **This is the most reliable solution.** Apple's Snappy implementation is non-standard. Porting the C++ logic from `libetonyek` or the Go logic from `iwork2html` to Wasm guarantees compatibility. |
+| **3. Protobuf Parsing**  | **`protobuf.js`**                                         | The most powerful and flexible Protobuf library for JavaScript. It can load the `.proto` schemas you extract at runtime and includes tools to pre-compile them for production.                     |
+
+### Conceptual Code Workflow
+
+Here is a simplified code example illustrating how these libraries would work together:
+
+```javascript
+// Assumes 'fflate', 'protobuf', and a Wasm 'decompress' function are available
+
+async function parseIworkFile(file) {
+  const fileBuffer = await file.arrayBuffer();
+
+  // 1. Unzip the main container with fflate
+  const zipData = new Uint8Array(fileBuffer);
+  const unzipper = new fflate.Unzip(err => { if (err) throw err; });
+  let indexZipBuffer;
+  unzipper.onfile = f => {
+    if (f.name === 'Index.zip') {
+      const chunks = [];
+      f.ondata = (err, data, final) => {
+        chunks.push(data);
+        if (final) indexZipBuffer = fflate.concat(chunks);
+      };
+      f.start();
+    }
+  };
+  unzipper.push(zipData, true);
+
+  if (!indexZipBuffer) throw new Error("Invalid iWork file: Index.zip not found.");
+
+  // 2. Unzip Index.zip to get the .iwa files
+  const indexUnzipper = new fflate.Unzip(err => { if (err) throw err; });
+  let iwaBuffer;
+  indexUnzipper.onfile = f => {
+    if (f.name === 'Document.iwa') { // Or other .iwa files
+      const chunks = [];
+      f.ondata = (err, data, final) => {
+        chunks.push(data);
+        if (final) iwaBuffer = fflate.concat(chunks);
+      };
+      f.start();
+    }
+  };
+  indexUnzipper.push(indexZipBuffer, true);
+
+  if (!iwaBuffer) throw new Error("Could not find Document.iwa.");
+
+  // 3. Decompress the .iwa file with a custom Wasm Snappy module
+  const decompressedBuffer = decompress(iwaBuffer);
+
+  // 4. Load your .proto schemas and parse the data with protobuf.js
+  const root = await protobuf.load("path/to/your/extracted/schemas.proto");
+  const DocumentArchive = root.lookupType("TP.DocumentArchive"); // Example message type
+  const message = DocumentArchive.decode(decompressedBuffer);
+
+  // 5. You now have a JavaScript object representing the document
+  console.log("Successfully parsed document:", message);
+  return message;
+}
+```
+
