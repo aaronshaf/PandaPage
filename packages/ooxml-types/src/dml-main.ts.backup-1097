@@ -1,9 +1,9 @@
 // dml-main.ts - Re-export all DrawingML types from modular files
-import type { ST_RelationshipId, ST_Guid, ST_String, ST_Percentage } from './shared-types';
+import type { ST_RelationshipId, ST_Guid, ST_String, ST_HexColorRGB, ST_UniversalMeasure, ST_PositiveUniversalMeasure, ST_Percentage, ST_FixedPercentage, ST_PositiveFixedPercentage } from './shared-types';
 
 // Re-export all types from modular files for backward compatibility
 export * from './dml-media';
-export * from './dml-fonts';  
+export * from './dml-fonts';
 export * from './dml-colors';
 export * from './dml-shapes';
 export * from './dml-effects';
@@ -11,29 +11,45 @@ export * from './dml-animation';
 
 // Import commonly used types from extracted modules
 import type { 
+  CT_OfficeArtExtension, 
   CT_OfficeArtExtensionList,
-  EG_ColorChoice
+  EG_ColorChoice,
+  CT_Color,
+  CT_ColorScheme,
+  ST_ColorSchemeIndex
 } from './dml-colors';
 
 import type {
-  ST_Coordinate,
-  ST_PositiveCoordinate,
-  ST_Angle
+  CT_Transform2D,
+  CT_Point2D,
+  CT_PositiveSize2D,
+  CT_ShapeProperties,
+  CT_GroupShapeProperties,
+  CT_ShapeStyle,
+  CT_StyleMatrixReference,
+  CT_Connection
 } from './dml-shapes';
 
 import type {
-  CT_TextFont
+  CT_FontReference,
+  CT_TextFont,
+  CT_FontCollection,
+  CT_FontScheme,
+  ST_FontCollectionIndex
 } from './dml-fonts';
 
 import type {
   EG_FillProperties,
-  CT_EffectList
+  EG_EffectProperties,
+  CT_EffectList,
+  CT_StyleMatrix,
+  CT_BaseStyles
 } from './dml-effects';
 
-// Text-related enums and types not extracted to other modules
+// Text-related types not extracted to other modules
 export enum ST_TextVerticalType {
   Horz = "horz",
-  Vert = "vert", 
+  Vert = "vert",
   Vert270 = "vert270",
   WordArtVert = "wordArtVert",
   EaVert = "eaVert",
@@ -44,7 +60,7 @@ export enum ST_TextVerticalType {
 export enum ST_TextAlignType {
   L = "l",
   Ctr = "ctr",
-  R = "r", 
+  R = "r",
   Just = "just",
   JustLow = "justLow",
   Dist = "dist",
@@ -74,7 +90,7 @@ export enum ST_TextUnderlineType {
 
 export enum ST_TextStrikeType {
   NoStrike = "noStrike",
-  SngStrike = "sngStrike", 
+  SngStrike = "sngStrike",
   DblStrike = "dblStrike"
 }
 
@@ -82,6 +98,50 @@ export enum ST_TextCapsType {
   None = "none",
   Small = "small",
   All = "all"
+}
+
+export enum ST_TextAutonumberScheme {
+  AlphaLcParenBoth = "alphaLcParenBoth",
+  AlphaUcParenBoth = "alphaUcParenBoth",
+  AlphaLcParenR = "alphaLcParenR",
+  AlphaUcParenR = "alphaUcParenR",
+  AlphaLcPeriod = "alphaLcPeriod",
+  AlphaUcPeriod = "alphaUcPeriod",
+  ArabicParenBoth = "arabicParenBoth",
+  ArabicParenR = "arabicParenR",
+  ArabicPeriod = "arabicPeriod",
+  ArabicPlain = "arabicPlain",
+  RomanLcParenBoth = "romanLcParenBoth",
+  RomanUcParenBoth = "romanUcParenBoth",
+  RomanLcParenR = "romanLcParenR",
+  RomanUcParenR = "romanUcParenR",
+  RomanLcPeriod = "romanLcPeriod",
+  RomanUcPeriod = "romanUcPeriod",
+  CircleNumDbPlain = "circleNumDbPlain",
+  CircleNumWdBlackPlain = "circleNumWdBlackPlain",
+  CircleNumWdWhitePlain = "circleNumWdWhitePlain",
+  ArabicDbPeriod = "arabicDbPeriod",
+  ArabicDbPlain = "arabicDbPlain",
+  Ea1ChsPeriod = "ea1ChsPeriod",
+  Ea1ChsPlain = "ea1ChsPlain",
+  Ea1ChtPeriod = "ea1ChtPeriod",
+  Ea1ChtPlain = "ea1ChtPlain",
+  Ea1JpnChsDbPeriod = "ea1JpnChsDbPeriod",
+  Ea1JpnKorPlain = "ea1JpnKorPlain",
+  Ea1JpnKorPeriod = "ea1JpnKorPeriod",
+  Arabic1Minus = "arabic1Minus",
+  Arabic2Minus = "arabic2Minus",
+  Hebrew2Minus = "hebrew2Minus",
+  ThaiAlphaPeriod = "thaiAlphaPeriod",
+  ThaiAlphaParenR = "thaiAlphaParenR",
+  ThaiAlphaParenBoth = "thaiAlphaParenBoth",
+  ThaiNumPeriod = "thaiNumPeriod",
+  ThaiNumParenR = "thaiNumParenR",
+  ThaiNumParenBoth = "thaiNumParenBoth",
+  HindiAlphaPeriod = "hindiAlphaPeriod",
+  HindiNumPeriod = "hindiNumPeriod",
+  HindiNumParenR = "hindiNumParenR",
+  HindiAlpha1Period = "hindiAlpha1Period"
 }
 
 export enum ST_TextTabAlignType {
@@ -92,7 +152,7 @@ export enum ST_TextTabAlignType {
 }
 
 export enum ST_TextWrappingType {
-  None = "none", 
+  None = "none",
   Square = "square"
 }
 
@@ -134,7 +194,7 @@ export enum ST_TextVertOverflowType {
   Clip = "clip"
 }
 
-// Text properties interfaces  
+// Text properties interfaces
 export interface CT_TextUnderline {
   u?: { val?: ST_TextUnderlineType };
   uFill?: EG_FillProperties;
@@ -215,7 +275,7 @@ export type EG_TextRun = CT_RegularTextRun | CT_TextLineBreak | CT_TextField;
 
 export interface CT_TextParagraphProperties {
   lnSpc?: any; // CT_TextSpacing
-  spcBef?: any; // CT_TextSpacing  
+  spcBef?: any; // CT_TextSpacing
   spcAft?: any; // CT_TextSpacing
   buClrTx?: any; // Empty element
   buClr?: EG_ColorChoice;
@@ -316,26 +376,6 @@ export interface CT_Hyperlink {
   extLst?: CT_OfficeArtExtensionList;
 }
 
-// Additional required types
-export enum ST_TextAutonumberScheme {
-  AlphaLcParenBoth = "alphaLcParenBoth",
-  AlphaUcParenBoth = "alphaUcParenBoth", 
-  AlphaLcParenR = "alphaLcParenR",
-  AlphaUcParenR = "alphaUcParenR",
-  AlphaLcPeriod = "alphaLcPeriod",
-  AlphaUcPeriod = "alphaUcPeriod",
-  ArabicParenBoth = "arabicParenBoth",
-  ArabicParenR = "arabicParenR",
-  ArabicPeriod = "arabicPeriod",
-  ArabicPlain = "arabicPlain",
-  RomanLcParenBoth = "romanLcParenBoth",
-  RomanUcParenBoth = "romanUcParenBoth",
-  RomanLcParenR = "romanLcParenR",
-  RomanUcParenR = "romanUcParenR",
-  RomanLcPeriod = "romanLcPeriod",
-  RomanUcPeriod = "romanUcPeriod"
-}
-
 // Type aliases for convenience
 export type ST_TextMargin = ST_Coordinate;
 export type ST_TextIndentLevelType = number; // 0-8
@@ -344,8 +384,8 @@ export type ST_TextFontAlignType = "auto" | "t" | "ctr" | "base" | "b";
 export type ST_TextBulletSizePercent = ST_Percentage;
 export type ST_TextBulletSizePoint = number; // 1-4000
 
-// Essential types that may be referenced
-export type CT_Empty = {}
+// Additional types that may be referenced
+export interface CT_Empty {}
 export interface CT_WholeE2oFormatting {
   ln?: any; // CT_LineProperties from dml-shapes
   effectLst?: CT_EffectList;
@@ -362,5 +402,134 @@ export interface CT_BackgroundFormatting {
   grpFill?: CT_Empty;
   effectLst?: CT_EffectList;
   effectDag?: any; // CT_EffectContainer
+  extLst?: CT_OfficeArtExtensionList;
+}
+
+// Camera and lighting types (3D scene)
+export enum ST_PresetCameraType {
+  LegacyObliqueTopLeft = "legacyObliqueTopLeft",
+  LegacyObliqueTop = "legacyObliqueTop",
+  LegacyObliqueTopRight = "legacyObliqueTopRight",
+  LegacyObliqueLeft = "legacyObliqueLeft",
+  LegacyObliqueFront = "legacyObliqueFront",
+  LegacyObliqueRight = "legacyObliqueRight",
+  LegacyObliqueBottomLeft = "legacyObliqueBottomLeft",
+  LegacyObliqueBottom = "legacyObliqueBottom",
+  LegacyObliqueBottomRight = "legacyObliqueBottomRight",
+  LegacyPerspectiveTopLeft = "legacyPerspectiveTopLeft",
+  LegacyPerspectiveTop = "legacyPerspectiveTop",
+  LegacyPerspectiveTopRight = "legacyPerspectiveTopRight",
+  LegacyPerspectiveLeft = "legacyPerspectiveLeft",
+  LegacyPerspectiveFront = "legacyPerspectiveFront",
+  LegacyPerspectiveRight = "legacyPerspectiveRight",
+  LegacyPerspectiveBottomLeft = "legacyPerspectiveBottomLeft",
+  LegacyPerspectiveBottom = "legacyPerspectiveBottom",
+  LegacyPerspectiveBottomRight = "legacyPerspectiveBottomRight",
+  OrthographicFront = "orthographicFront",
+  IsometricTopUp = "isometricTopUp",
+  IsometricTopDown = "isometricTopDown",
+  IsometricBottomUp = "isometricBottomUp",
+  IsometricBottomDown = "isometricBottomDown",
+  IsometricLeftUp = "isometricLeftUp",
+  IsometricLeftDown = "isometricLeftDown",
+  IsometricRightUp = "isometricRightUp",
+  IsometricRightDown = "isometricRightDown",
+  IsometricOffAxis1Left = "isometricOffAxis1Left",
+  IsometricOffAxis1Right = "isometricOffAxis1Right",
+  IsometricOffAxis1Top = "isometricOffAxis1Top",
+  IsometricOffAxis2Left = "isometricOffAxis2Left",
+  IsometricOffAxis2Right = "isometricOffAxis2Right",
+  IsometricOffAxis2Top = "isometricOffAxis2Top",
+  IsometricOffAxis3Left = "isometricOffAxis3Left",
+  IsometricOffAxis3Right = "isometricOffAxis3Right",
+  IsometricOffAxis3Bottom = "isometricOffAxis3Bottom",
+  IsometricOffAxis4Left = "isometricOffAxis4Left",
+  IsometricOffAxis4Right = "isometricOffAxis4Right",
+  IsometricOffAxis4Bottom = "isometricOffAxis4Bottom",
+  ObliqueTopLeft = "obliqueTopLeft",
+  ObliqueTop = "obliqueTop",
+  ObliqueTopRight = "obliqueTopRight",
+  ObliqueLeft = "obliqueLeft",
+  ObliqueRight = "obliqueRight",
+  ObliqueBottomLeft = "obliqueBottomLeft",
+  ObliqueBottom = "obliqueBottom",
+  ObliqueBottomRight = "obliqueBottomRight",
+  PerspectiveFront = "perspectiveFront",
+  PerspectiveLeft = "perspectiveLeft",
+  PerspectiveRight = "perspectiveRight",
+  PerspectiveAbove = "perspectiveAbove",
+  PerspectiveBelow = "perspectiveBelow",
+  PerspectiveAboveLeftFacing = "perspectiveAboveLeftFacing",
+  PerspectiveAboveRightFacing = "perspectiveAboveRightFacing",
+  PerspectiveContrastingLeftFacing = "perspectiveContrastingLeftFacing",
+  PerspectiveContrastingRightFacing = "perspectiveContrastingRightFacing",
+  PerspectiveHeroicLeftFacing = "perspectiveHeroicLeftFacing",
+  PerspectiveHeroicRightFacing = "perspectiveHeroicRightFacing",
+  PerspectiveHeroicExtremeLeftFacing = "perspectiveHeroicExtremeLeftFacing",
+  PerspectiveHeroicExtremeRightFacing = "perspectiveHeroicExtremeRightFacing",
+  PerspectiveRelaxed = "perspectiveRelaxed",
+  PerspectiveRelaxedModerately = "perspectiveRelaxedModerately"
+}
+
+export enum ST_LightRigType {
+  LegacyFlat1 = "legacyFlat1",
+  LegacyFlat2 = "legacyFlat2",
+  LegacyFlat3 = "legacyFlat3",
+  LegacyFlat4 = "legacyFlat4",
+  LegacyNormal1 = "legacyNormal1",
+  LegacyNormal2 = "legacyNormal2",
+  LegacyNormal3 = "legacyNormal3",
+  LegacyNormal4 = "legacyNormal4",
+  LegacyHarsh1 = "legacyHarsh1",
+  LegacyHarsh2 = "legacyHarsh2",
+  LegacyHarsh3 = "legacyHarsh3",
+  LegacyHarsh4 = "legacyHarsh4",
+  ThreePt = "threePt",
+  Balanced = "balanced",
+  Soft = "soft",
+  Harsh = "harsh",
+  Flood = "flood",
+  Contrasting = "contrasting",
+  Morning = "morning",
+  Sunrise = "sunrise",
+  Sunset = "sunset",
+  Chilly = "chilly",
+  Freezing = "freezing",
+  Flat = "flat",
+  TwoPt = "twoPt",
+  Glow = "glow",
+  BrightRoom = "brightRoom"
+}
+
+export enum ST_LightRigDirection {
+  Tl = "tl",
+  T = "t",
+  Tr = "tr",
+  L = "l",
+  Tr = "tr",
+  R = "r",
+  Bl = "bl",
+  B = "b",
+  Br = "br"
+}
+
+export interface CT_Spherical3DCoords {
+  lat: ST_Coordinate;
+  lon: ST_Coordinate;
+  rev: ST_PositiveCoordinate;
+}
+
+export interface CT_Camera {
+  prst: ST_PresetCameraType;
+  fov?: number; // 0-180 degrees * 60000
+  zoom?: ST_PositivePercentage;
+  rot?: CT_Spherical3DCoords;
+  extLst?: CT_OfficeArtExtensionList;
+}
+
+export interface CT_LightRig {
+  rig: ST_LightRigType;
+  dir: ST_LightRigDirection;
+  rot?: CT_Spherical3DCoords;
   extLst?: CT_OfficeArtExtensionList;
 }
