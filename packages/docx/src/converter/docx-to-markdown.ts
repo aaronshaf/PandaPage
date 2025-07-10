@@ -282,14 +282,50 @@ const escapeYamlString = (str: string): string => {
   return str.replace(/"/g, '\\"').replace(/\n/g, "\\n");
 };
 
+// Merge consecutive runs with same formatting to avoid excessive asterisks
+const mergeConsecutiveRuns = (runs: DocxRun[]): DocxRun[] => {
+  if (runs.length === 0) return runs;
+  
+  const merged: DocxRun[] = [];
+  let currentRun: DocxRun = { ...runs[0] };
+  
+  for (let i = 1; i < runs.length; i++) {
+    const run = runs[i];
+    
+    // Check if formatting matches (excluding superscript/subscript which should be separate)
+    if (
+      currentRun.bold === run.bold &&
+      currentRun.italic === run.italic &&
+      currentRun.underline === run.underline &&
+      currentRun.superscript === run.superscript &&
+      currentRun.subscript === run.subscript
+    ) {
+      // Merge text
+      currentRun.text += run.text;
+    } else {
+      // Different formatting, push current and start new
+      merged.push(currentRun);
+      currentRun = { ...run };
+    }
+  }
+  
+  // Don't forget the last run
+  merged.push(currentRun);
+  
+  return merged;
+};
+
 // Convert a single paragraph to Markdown
 const convertParagraphToMarkdown = (
   paragraph: DocxParagraph,
   numbering?: DocxNumbering,
   listCounters?: Map<string, number>,
 ): string => {
-  // Combine all runs into a single text
-  let combinedText = paragraph.runs.map((run) => formatRun(run)).join("");
+  // Merge consecutive runs with same formatting to avoid excessive asterisks
+  const mergedRuns = mergeConsecutiveRuns(paragraph.runs);
+  
+  // Format merged runs
+  let combinedText = mergedRuns.map((run) => formatRun(run)).join("");
 
   // If paragraph has fields, integrate their markdown representation
   if (paragraph.fields && paragraph.fields.length > 0) {
@@ -323,7 +359,8 @@ const convertParagraphToMarkdown = (
       return `## ${combinedText}`;
 
     case "Author":
-      return `**${combinedText}**`;
+      // Author style already has bold runs, don't add extra bold formatting
+      return combinedText;
 
     case "Heading":
     case "Heading1":
@@ -425,9 +462,7 @@ const formatRun = (run: DocxRun): string => {
   if (run.bold && run.italic) {
     text = `***${text}***`;
   } else if (run.bold) {
-    // For now, don't format bold text to match expected output
-    // In a real implementation, this would be configurable
-    // text = `**${text}**`;
+    text = `**${text}**`;
   } else if (run.italic) {
     text = `_${text}_`;
   }
@@ -440,6 +475,13 @@ const formatRun = (run: DocxRun): string => {
       text = `<u>${text}</u>`;
     }
     // For longer text, ignore underline as it's likely document-wide formatting
+  }
+
+  // Apply superscript and subscript formatting
+  if (run.superscript) {
+    text = `<sup>${text}</sup>`;
+  } else if (run.subscript) {
+    text = `<sub>${text}</sub>`;
   }
 
   return text;

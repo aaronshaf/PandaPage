@@ -10,8 +10,8 @@ export default defineConfig({
     alias: {
       '@browser-document-viewer/core': resolve(__dirname, '../core/index.ts'),
       '@browser-document-viewer/parser': resolve(__dirname, '../parser/src/index.ts'),
-      '@browser-document-viewer/renderer-dom': resolve(__dirname, '../renderer-dom/src/index.ts'),
-      '@browser-document-viewer/renderer-markdown': resolve(__dirname, '../renderer-markdown/src/index.ts'),
+      '@browser-document-viewer/dom-renderer': resolve(__dirname, '../dom-renderer/src/index.ts'),
+      '@browser-document-viewer/markdown-renderer': resolve(__dirname, '../markdown-renderer/src/index.ts'),
     },
   },
   server: {
@@ -34,8 +34,8 @@ export default defineConfig({
     exclude: [
       '@browser-document-viewer/core',
       '@browser-document-viewer/parser', 
-      '@browser-document-viewer/renderer-dom',
-      '@browser-document-viewer/renderer-markdown'
+      '@browser-document-viewer/dom-renderer',
+      '@browser-document-viewer/markdown-renderer'
     ],
   },
 });

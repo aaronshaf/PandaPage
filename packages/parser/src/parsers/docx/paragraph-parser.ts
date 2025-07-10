@@ -5,6 +5,7 @@ import { parseFieldRun } from './field-parser';
 import type { FieldParsingContext } from './field-context';
 import type { Image } from '../../types/document';
 import { getElementByTagNameNSFallback } from './xml-utils';
+import { mapParagraphAlignment } from './ooxml-mappers';
 import { applyStyleCascade, type DocxStylesheet } from './style-parser';
 import type { DocxTheme } from './theme-parser';
 import { parseRunElement, parseHyperlink, parseStructuredDocumentTag, parseRun, type FieldParsingState } from './run-parser';
@@ -66,17 +67,7 @@ export function parseParagraph(
     const jcElement = getElementByTagNameNSFallback(pPrElement, ns, "jc");
     const jcVal = jcElement?.getAttribute("w:val");
     if (jcVal) {
-      switch (jcVal) {
-        case 'center': alignment = 'center'; break;
-        case 'right': case 'end': alignment = 'end'; break;
-        case 'both': case 'justify': alignment = 'both'; break;
-        case 'distribute': alignment = 'distribute'; break;
-        case 'highKashida': alignment = 'highKashida'; break;
-        case 'lowKashida': alignment = 'lowKashida'; break;
-        case 'mediumKashida': alignment = 'mediumKashida'; break;
-        case 'thaiDistribute': alignment = 'thaiDistribute'; break;
-        case 'left': case 'start': default: alignment = 'start'; break;
-      }
+      alignment = mapParagraphAlignment(jcVal);
     }
     
     // Get numbering info

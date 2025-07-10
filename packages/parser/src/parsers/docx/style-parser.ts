@@ -1,7 +1,8 @@
 // Style parsing functions for DOCX
 import { WORD_NAMESPACE } from './types';
 import type { DocxBorder, DocxShading, DocxParagraphBorders } from './types';
-import type { ParagraphAlignmentString, TextDirectionString, VerticalAlignmentString, LineSpacingRuleString } from '@browser-document-viewer/ooxml-types';
+import type { TextDirectionString, VerticalAlignmentString, LineSpacingRuleString, ST_Jc } from '@browser-document-viewer/ooxml-types';
+import { mapParagraphAlignment, mapBorderStyle } from './ooxml-mappers';
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from './xml-utils';
 
 export interface DocxStyle {
@@ -15,7 +16,7 @@ export interface DocxStyle {
 }
 
 export interface DocxParagraphProperties {
-  alignment?: ParagraphAlignmentString;
+  alignment?: ST_Jc;
   indent?: {
     left?: number;
     right?: number;
@@ -193,17 +194,7 @@ function parseParagraphProperties(pPr: Element, ns: string): DocxParagraphProper
   const jc = getElementByTagNameNSFallback(pPr, ns, 'jc');
   const jcVal = jc?.getAttribute('w:val');
   if (jcVal) {
-    switch (jcVal) {
-      case 'center': props.alignment = 'center'; break;
-      case 'right': case 'end': props.alignment = 'end'; break;
-      case 'both': case 'justify': props.alignment = 'both'; break;
-      case 'distribute': props.alignment = 'distribute'; break;
-      case 'highKashida': props.alignment = 'highKashida'; break;
-      case 'lowKashida': props.alignment = 'lowKashida'; break;
-      case 'mediumKashida': props.alignment = 'mediumKashida'; break;
-      case 'thaiDistribute': props.alignment = 'thaiDistribute'; break;
-      case 'left': case 'start': default: props.alignment = 'start'; break;
-    }
+    props.alignment = mapParagraphAlignment(jcVal);
   }
   
   // Indentation
@@ -566,10 +557,8 @@ function parseBorder(borderElement: Element | null): DocxBorder | undefined {
   
   // Border style
   const val = borderElement.getAttribute('w:val');
-  if (val && val !== 'nil' && val !== 'none') {
-    border.style = val as DocxBorder['style'];
-  } else if (val === 'nil' || val === 'none') {
-    border.style = 'none';
+  if (val) {
+    border.style = mapBorderStyle(val);
   }
   
   // Border color

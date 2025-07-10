@@ -118,11 +118,31 @@ export const parseParagraph = (pElement: Element): DocxParagraph => {
         // If w:color but no w:val, it's likely for color styling only, not underline
       }
       
+      // Check for superscript/subscript
+      // Look for vertAlign in run properties (rPr)
+      const rPrElement = runElement.querySelector('rPr');
+      let superscript = false;
+      let subscript = false;
+      
+      if (rPrElement) {
+        // Try with namespace and without
+        const vertAlignElement = rPrElement.querySelector('vertAlign') || 
+                                rPrElement.querySelector('[*|vertAlign]');
+        if (vertAlignElement) {
+          const vertAlign = vertAlignElement.getAttribute('val') || 
+                           vertAlignElement.getAttribute('w:val');
+          superscript = vertAlign === 'superscript';
+          subscript = vertAlign === 'subscript';
+        }
+      }
+      
       runs.push({
         text: textElement.textContent || '',
         bold: !!runElement.querySelector('b'),
         italic: !!runElement.querySelector('i'),
         underline,
+        superscript,
+        subscript,
       });
     }
   }

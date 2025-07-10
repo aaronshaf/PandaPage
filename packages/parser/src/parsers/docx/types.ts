@@ -4,10 +4,10 @@ import type {
   ST_HighlightColor, 
   ST_VerticalAlignRun,
   ST_Lang,
-  BorderStyleString,
-  ShadingPatternString,
-  EmphasisMarkString,
-  ParagraphAlignmentString
+  ST_Border,
+  ST_Shd,
+  ST_Jc,
+  ST_Em
 } from '@browser-document-viewer/ooxml-types';
 
 export interface DocxRun {
@@ -43,13 +43,13 @@ export interface DocxRun {
   doubleStrikethrough?: boolean; // w:dstrike
   kerning?: number; // Minimum font size for kerning (half-points)
   textScale?: number; // Horizontal scaling percentage (w:w)
-  emphasis?: EmphasisMarkString; // w:em - East Asian emphasis marks
+  emphasis?: ST_Em; // w:em - East Asian emphasis marks
   lang?: ST_Lang; // Language code (w:lang)
   verticalAlign?: ST_VerticalAlignRun; // Vertical alignment (superscript/subscript/baseline)
 }
 
 export interface DocxBorder {
-  style?: BorderStyleString;
+  style?: ST_Border;
   color?: string; // Hex color or 'auto'
   size?: number; // Border width in eighth-points (1/8 of a point)
   space?: number; // Space from text in points
@@ -58,7 +58,7 @@ export interface DocxBorder {
 export interface DocxShading {
   fill?: string; // Background fill color (hex or 'auto')
   color?: string; // Pattern color (hex or 'auto')
-  val?: ShadingPatternString;
+  val?: ST_Shd;
 }
 
 export interface DocxParagraphBorders {
@@ -74,7 +74,7 @@ export interface DocxParagraph {
   style?: string;
   numId?: string;
   ilvl?: number;
-  alignment?: ParagraphAlignmentString;
+  alignment?: ST_Jc;
   outlineLevel?: number; // w:outlineLvl for heading detection
   images?: any[]; // Temporary, will be processed to Image[]
   spacing?: {
@@ -102,7 +102,7 @@ export class DocxParseError {
 
 // Table-specific types for DOCX parsing
 export interface DocxTableBorder {
-  style?: BorderStyleString;
+  style?: ST_Border;
   color?: string; // Hex color or 'auto'
   size?: number; // Border width in eighth-points (1/8 of a point)
   space?: number; // Space from text in points

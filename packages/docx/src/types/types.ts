@@ -9,6 +9,8 @@ export interface DocxRun {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  superscript?: boolean;
+  subscript?: boolean;
   fontSize?: string;
   color?: string;
   highlight?: string;

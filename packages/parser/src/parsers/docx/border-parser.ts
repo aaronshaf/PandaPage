@@ -1,6 +1,7 @@
 // Border and shading parsing functions
 import type { DocxBorder, DocxShading, DocxParagraphBorders } from './types';
 import { getElementByTagNameNSFallback } from './xml-utils';
+import { mapBorderStyle, mapShadingPattern } from './ooxml-mappers';
 
 /**
  * Parse a border element
@@ -12,10 +13,8 @@ export function parseBorder(borderElement: Element | null): DocxBorder | undefin
   
   // Border style
   const val = borderElement.getAttribute('w:val');
-  if (val && val !== 'nil' && val !== 'none') {
-    border.style = val as DocxBorder['style'];
-  } else if (val === 'nil' || val === 'none') {
-    border.style = 'none';
+  if (val) {
+    border.style = mapBorderStyle(val);
   }
   
   // Border color
@@ -81,8 +80,8 @@ export function parseShading(shdElement: Element): DocxShading | undefined {
   
   // Shading pattern
   const val = shdElement.getAttribute('w:val');
-  if (val && val !== 'nil' && val !== 'clear') {
-    shading.val = val as DocxShading['val'];
+  if (val) {
+    shading.val = mapShadingPattern(val);
   }
   
   // Fill color (background)

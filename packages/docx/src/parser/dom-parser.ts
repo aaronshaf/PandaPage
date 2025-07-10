@@ -131,6 +131,9 @@ export const parseDocumentXmlWithDom = (xmlContent: string): Effect.Effect<DocxP
           let italic = false;
           let underline = false;
           
+          let superscript = false;
+          let subscript = false;
+          
           if (rPrElements.length > 0) {
             const rPr = rPrElements[0];
             if (rPr) {
@@ -155,6 +158,17 @@ export const parseDocumentXmlWithDom = (xmlContent: string): Effect.Effect<DocxP
                   // If w:color but no w:val, it's likely for color styling only, not underline
                 }
               }
+              
+              // Check for superscript/subscript
+              const vertAlignElements = rPr.getElementsByTagName('w:vertAlign');
+              if (vertAlignElements.length > 0) {
+                const vertAlignElement = vertAlignElements[0];
+                if (vertAlignElement) {
+                  const vertAlign = vertAlignElement.getAttribute('w:val');
+                  superscript = vertAlign === 'superscript';
+                  subscript = vertAlign === 'subscript';
+                }
+              }
             }
           }
 
@@ -163,6 +177,8 @@ export const parseDocumentXmlWithDom = (xmlContent: string): Effect.Effect<DocxP
             ...(bold && { bold }),
             ...(italic && { italic }),
             ...(underline && { underline }),
+            ...(superscript && { superscript }),
+            ...(subscript && { subscript }),
           });
         }
       }

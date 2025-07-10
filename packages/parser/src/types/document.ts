@@ -1,9 +1,10 @@
 import type { 
-  BorderStyleString, 
-  ShadingPatternString,
-  ParagraphAlignmentString,
   ST_HighlightColor,
-  ST_Underline
+  ST_Underline,
+  ST_Border,
+  ST_Shd,
+  ST_Jc,
+  ST_Em
 } from '@browser-document-viewer/ooxml-types';
 
 export interface DocumentMetadata {
@@ -46,7 +47,7 @@ export interface TextRun {
   doubleStrikethrough?: boolean;
   kerning?: number; // Half-points
   textScale?: number; // Percentage
-  emphasis?: 'dot' | 'comma' | 'circle' | 'underDot';
+  emphasis?: ST_Em;
   lang?: string;
 }
 
@@ -54,7 +55,7 @@ export interface Paragraph {
   type: 'paragraph';
   runs: TextRun[];
   style?: string;
-  alignment?: ParagraphAlignmentString;
+  alignment?: ST_Jc;
   indentLevel?: number;
   listInfo?: {
     level: number;
@@ -81,7 +82,7 @@ export interface Heading {
   type: 'heading';
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: TextRun[];
-  alignment?: ParagraphAlignmentString;
+  alignment?: ST_Jc;
   images?: Image[];
   spacing?: {
     before?: number; // Twips
@@ -98,7 +99,7 @@ export interface Heading {
 }
 
 export interface TableBorder {
-  style?: BorderStyleString;
+  style?: ST_Border;
   color?: string; // Hex color
   width?: number; // Border width in points (converted from eighth-points)
 }
@@ -115,7 +116,7 @@ export interface TableBorders {
 export interface TableShading {
   fill?: string; // Background fill color (hex)
   color?: string; // Pattern color (hex)
-  pattern?: ShadingPatternString;
+  pattern?: ST_Shd;
 }
 
 export interface Table {

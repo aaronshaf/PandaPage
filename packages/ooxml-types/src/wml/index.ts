@@ -17,8 +17,6 @@ export * from './table';
 export * from './document';
 
 // Legacy top-level types (deprecated - use structured modules instead)
-// Commented out to avoid duplicate exports - import from specific modules instead
-// export * from './paragraph-types';
-// export * from './run-types';
-// export * from './section-types';
-// export * from './document-types';
+// Export specific enums to avoid conflicts
+export { ST_Jc } from './paragraph-types';
+export { ST_Em } from './run-types';

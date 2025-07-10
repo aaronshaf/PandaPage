@@ -5,6 +5,7 @@ import { WORD_NAMESPACE, type DocxTableProperties, type DocxTableCellProperties,
 import type { DocxTheme } from './theme-parser';
 import type { DocxStylesheet } from './style-parser';
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from './xml-utils';
+import { mapBorderStyle, mapShadingPattern } from './ooxml-mappers';
 
 /**
  * Parse a table element
@@ -24,10 +25,8 @@ function parseTableBorder(borderElement: Element | null): DocxTableBorder | unde
   
   // Border style
   const val = borderElement.getAttribute('w:val');
-  if (val && val !== 'nil' && val !== 'none') {
-    border.style = val as DocxTableBorder['style'];
-  } else if (val === 'nil' || val === 'none') {
-    border.style = 'none';
+  if (val) {
+    border.style = mapBorderStyle(val);
   }
   
   // Border color

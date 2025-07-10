@@ -2,5 +2,5 @@
 # Enable coverage reporting with thresholds
 # Renderer DOM package: 78.57% functions, 77.05% lines  
 coverage = true
-coverageThreshold = { line = 75, function = 75, statement = 75, branch = 60 }
+coverageThreshold = { line = 77, function = 78, statement = 75, branch = 60 }
 coverageSkipTestFiles = true
