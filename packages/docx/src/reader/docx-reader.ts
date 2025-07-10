@@ -1,17 +1,17 @@
 import { Effect } from "effect";
 import { debug } from "@browser-document-viewer/shared-utils/debug";
-import { 
-  parseFieldsFromParagraph, 
+import {
+  parseFieldsFromParagraph,
   paragraphContainsFields,
-  type DocxField 
+  type DocxField,
 } from "../parser/form-field-parser";
 import { parseDocumentXmlWithDom, parseNumberingXmlWithDom } from "../parser/dom-parser";
-import type { 
-  DocxParagraph, 
-  DocxRun, 
-  DocxNumbering, 
-  DocxAbstractFormat, 
-  DocxLevelFormat 
+import type {
+  DocxParagraph,
+  DocxRun,
+  DocxNumbering,
+  DocxAbstractFormat,
+  DocxLevelFormat,
 } from "../types";
 
 // Error types
@@ -36,8 +36,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       // We need to unzip and parse the document.xml
       const { unzipSync, strFromU8 } = yield* Effect.tryPromise({
         try: () => import("fflate"),
-        catch: (error) =>
-          new DocxParseError(`Failed to load fflate library: ${error}`),
+        catch: (error) => new DocxParseError(`Failed to load fflate library: ${error}`),
       });
 
       // Convert ArrayBuffer to Uint8Array
@@ -53,9 +52,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
         documentXml = unzipped["document.xml"];
       }
       if (!documentXml) {
-        return yield* Effect.fail(
-          new DocxParseError("No document.xml found in DOCX file"),
-        );
+        return yield* Effect.fail(new DocxParseError("No document.xml found in DOCX file"));
       }
 
       // Convert to string
@@ -78,36 +75,34 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
 
       return { paragraphs, numbering };
     } catch (error) {
-      return yield* Effect.fail(
-        new DocxParseError(`Failed to read DOCX: ${error}`),
-      );
+      return yield* Effect.fail(new DocxParseError(`Failed to read DOCX: ${error}`));
     }
   });
 
 // Parse document.xml content using DOM-based parsing
-export const parseDocumentXml = (xmlContent: string): Effect.Effect<DocxParagraph[], DocxParseError> =>
+export const parseDocumentXml = (
+  xmlContent: string,
+): Effect.Effect<DocxParagraph[], DocxParseError> =>
   Effect.gen(function* () {
     // Use DOM-based parser for reliable XML parsing
     return yield* parseDocumentXmlWithDom(xmlContent);
   });
 
-
-
 // Simple paragraph parser helper
 export const parseParagraph = (pElement: Element): DocxParagraph => {
   const runs: DocxRun[] = [];
-  const runElements = pElement.querySelectorAll('r');
-  
+  const runElements = pElement.querySelectorAll("r");
+
   for (const runElement of runElements) {
-    const textElements = runElement.querySelectorAll('t');
+    const textElements = runElement.querySelectorAll("t");
     for (const textElement of textElements) {
       // Check for underline with proper attribute analysis
-      const underlineElement = runElement.querySelector('u');
+      const underlineElement = runElement.querySelector("u");
       let underline = false;
       if (underlineElement) {
-        const val = underlineElement.getAttribute('val');
-        const color = underlineElement.getAttribute('color');
-        
+        const val = underlineElement.getAttribute("val");
+        const color = underlineElement.getAttribute("color");
+
         if (val) {
           // If w:val is present, only apply underline if it's not "none" or "0"
           underline = val !== "none" && val !== "0";
@@ -117,51 +112,51 @@ export const parseParagraph = (pElement: Element): DocxParagraph => {
         }
         // If w:color but no w:val, it's likely for color styling only, not underline
       }
-      
+
       // Check for superscript/subscript
       // Look for vertAlign in run properties (rPr)
-      const rPrElement = runElement.querySelector('rPr');
+      const rPrElement = runElement.querySelector("rPr");
       let superscript = false;
       let subscript = false;
-      
+
       if (rPrElement) {
         // Try with namespace and without
-        const vertAlignElement = rPrElement.querySelector('vertAlign') || 
-                                rPrElement.querySelector('[*|vertAlign]');
+        const vertAlignElement =
+          rPrElement.querySelector("vertAlign") || rPrElement.querySelector("[*|vertAlign]");
         if (vertAlignElement) {
-          const vertAlign = vertAlignElement.getAttribute('val') || 
-                           vertAlignElement.getAttribute('w:val');
-          superscript = vertAlign === 'superscript';
-          subscript = vertAlign === 'subscript';
+          const vertAlign =
+            vertAlignElement.getAttribute("val") || vertAlignElement.getAttribute("w:val");
+          superscript = vertAlign === "superscript";
+          subscript = vertAlign === "subscript";
         }
       }
-      
+
       runs.push({
-        text: textElement.textContent || '',
-        bold: !!runElement.querySelector('b'),
-        italic: !!runElement.querySelector('i'),
+        text: textElement.textContent || "",
+        bold: !!runElement.querySelector("b"),
+        italic: !!runElement.querySelector("i"),
         underline,
         superscript,
         subscript,
       });
     }
   }
-  
+
   // Extract style
-  const styleElement = pElement.querySelector('pPr pStyle');
-  const style = styleElement?.getAttribute('val') || undefined;
-  
+  const styleElement = pElement.querySelector("pPr pStyle");
+  const style = styleElement?.getAttribute("val") || undefined;
+
   // Extract numbering properties
-  const numPrElement = pElement.querySelector('pPr numPr');
-  const numIdElement = numPrElement?.querySelector('numId');
-  const ilvlElement = numPrElement?.querySelector('ilvl');
-  
+  const numPrElement = pElement.querySelector("pPr numPr");
+  const numIdElement = numPrElement?.querySelector("numId");
+  const ilvlElement = numPrElement?.querySelector("ilvl");
+
   return {
     type: "paragraph" as const,
     style,
     runs,
-    numId: numIdElement?.getAttribute('val') || undefined,
-    ilvl: ilvlElement ? parseInt(ilvlElement.getAttribute('val') || '0', 10) : undefined,
+    numId: numIdElement?.getAttribute("val") || undefined,
+    ilvl: ilvlElement ? parseInt(ilvlElement.getAttribute("val") || "0", 10) : undefined,
   };
 };
 
@@ -170,69 +165,68 @@ export const parseNumbering = (numberingRoot: Element): DocxNumbering => {
   const instances = new Map<string, string>();
   const abstractFormats = new Map<string, DocxAbstractFormat>();
 
-  // Parse abstract numbering definitions  
-  const abstractNumElements = numberingRoot.getElementsByTagName ? 
-    numberingRoot.getElementsByTagName('w:abstractNum') : 
-    numberingRoot.querySelectorAll('abstractNum');
-  
+  // Parse abstract numbering definitions
+  const abstractNumElements = numberingRoot.getElementsByTagName
+    ? numberingRoot.getElementsByTagName("w:abstractNum")
+    : numberingRoot.querySelectorAll("abstractNum");
+
   for (const abstractElement of abstractNumElements) {
-    const abstractNumId = abstractElement.getAttribute('w:abstractNumId') || 
-      abstractElement.getAttribute('abstractNumId');
+    const abstractNumId =
+      abstractElement.getAttribute("w:abstractNumId") ||
+      abstractElement.getAttribute("abstractNumId");
     if (!abstractNumId) continue;
 
     const levels = new Map<number, DocxLevelFormat>();
-    
+
     // Parse levels within this abstract format
-    const levelElements = abstractElement.getElementsByTagName ? 
-      abstractElement.getElementsByTagName('w:lvl') : 
-      abstractElement.querySelectorAll('lvl');
-    
+    const levelElements = abstractElement.getElementsByTagName
+      ? abstractElement.getElementsByTagName("w:lvl")
+      : abstractElement.querySelectorAll("lvl");
+
     for (const levelElement of levelElements) {
-      const ilvlStr = levelElement.getAttribute('w:ilvl') || 
-        levelElement.getAttribute('ilvl');
+      const ilvlStr = levelElement.getAttribute("w:ilvl") || levelElement.getAttribute("ilvl");
       if (!ilvlStr) continue;
-      
+
       const ilvl = parseInt(ilvlStr, 10);
-      
+
       // Extract numFmt
-      const numFmtElement = levelElement.getElementsByTagName ? 
-        levelElement.getElementsByTagName('w:numFmt')[0] : 
-        levelElement.querySelector('numFmt');
-      const numFmt = numFmtElement?.getAttribute('w:val') || 
-        numFmtElement?.getAttribute('val') || 'bullet';
-      
+      const numFmtElement = levelElement.getElementsByTagName
+        ? levelElement.getElementsByTagName("w:numFmt")[0]
+        : levelElement.querySelector("numFmt");
+      const numFmt =
+        numFmtElement?.getAttribute("w:val") || numFmtElement?.getAttribute("val") || "bullet";
+
       // Extract lvlText
-      const lvlTextElement = levelElement.getElementsByTagName ? 
-        levelElement.getElementsByTagName('w:lvlText')[0] : 
-        levelElement.querySelector('lvlText');
-      const lvlText = lvlTextElement?.getAttribute('w:val') || 
-        lvlTextElement?.getAttribute('val') || '•';
-      
+      const lvlTextElement = levelElement.getElementsByTagName
+        ? levelElement.getElementsByTagName("w:lvlText")[0]
+        : levelElement.querySelector("lvlText");
+      const lvlText =
+        lvlTextElement?.getAttribute("w:val") || lvlTextElement?.getAttribute("val") || "•";
+
       levels.set(ilvl, { numFmt, lvlText });
     }
-    
+
     if (levels.size > 0) {
       abstractFormats.set(abstractNumId, { levels });
     }
   }
 
   // Parse numbering instances
-  const numElements = numberingRoot.getElementsByTagName ? 
-    numberingRoot.getElementsByTagName('w:num') : 
-    numberingRoot.querySelectorAll('num');
-  
+  const numElements = numberingRoot.getElementsByTagName
+    ? numberingRoot.getElementsByTagName("w:num")
+    : numberingRoot.querySelectorAll("num");
+
   for (const numElement of numElements) {
-    const numId = numElement.getAttribute('w:numId') || 
-      numElement.getAttribute('numId');
+    const numId = numElement.getAttribute("w:numId") || numElement.getAttribute("numId");
     if (!numId) continue;
-    
+
     // Extract abstractNumId reference
-    const abstractNumIdElement = numElement.getElementsByTagName ? 
-      numElement.getElementsByTagName('w:abstractNumId')[0] : 
-      numElement.querySelector('abstractNumId');
-    const abstractNumId = abstractNumIdElement?.getAttribute('w:val') || 
-      abstractNumIdElement?.getAttribute('val');
-    
+    const abstractNumIdElement = numElement.getElementsByTagName
+      ? numElement.getElementsByTagName("w:abstractNumId")[0]
+      : numElement.querySelector("abstractNumId");
+    const abstractNumId =
+      abstractNumIdElement?.getAttribute("w:val") || abstractNumIdElement?.getAttribute("val");
+
     if (abstractNumId) {
       instances.set(numId, abstractNumId);
     }

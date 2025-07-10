@@ -3,9 +3,9 @@
  * @see ECMA-376 Part 1, §22.2 (Document Properties)
  */
 
-import type { ST_String, ST_Guid } from './common-types';
-import type { ST_Relation } from './relationship-types';
-import type { VariantValue } from '../variant-types';
+import type { ST_String, ST_Guid } from "./common-types";
+import type { ST_Relation } from "./relationship-types";
+import type { VariantValue } from "../variant-types";
 
 /**
  * Characteristic definition.

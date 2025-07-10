@@ -6,22 +6,22 @@
 /**
  * Table cell width type
  */
-export type ST_TblCellWidth = 'nil' | 'pct' | 'dxa' | 'auto';
+export type ST_TblCellWidth = "nil" | "pct" | "dxa" | "auto";
 
 /**
  * Vertical merge type
  */
-export type ST_Merge = 'continue' | 'restart';
+export type ST_Merge = "continue" | "restart";
 
 /**
  * Vertical alignment
  */
-export type ST_VerticalJc = 'top' | 'center' | 'bottom';
+export type ST_VerticalJc = "top" | "center" | "bottom";
 
 /**
  * Text direction
  */
-export type ST_TextDirection = 'lrTb' | 'tbRl' | 'btLr' | 'lrTbV' | 'tbRlV' | 'tbLrV';
+export type ST_TextDirection = "lrTb" | "tbRl" | "btLr" | "lrTbV" | "tbRlV" | "tbLrV";
 
 /**
  * Table cell width

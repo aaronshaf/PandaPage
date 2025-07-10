@@ -3,10 +3,17 @@
  * @see ECMA-376 Part 1, §17.16 (Fields and Hyperlinks)
  */
 
-import type { ST_OnOff, ST_String } from '../shared/common-types';
-import type { ST_DecimalNumber } from '../shared/measurement-types';
-import type { ST_RelationshipId } from '../shared/relationship-types';
-import type { CT_DecimalNumber, CT_UnsignedDecimalNumber, CT_MacroName, CT_OnOff, CT_HpsMeasure, CT_String as CT_StringWml } from './basic-types';
+import type { ST_OnOff, ST_String } from "../shared/common-types";
+import type { ST_DecimalNumber } from "../shared/measurement-types";
+import type { ST_RelationshipId } from "../shared/relationship-types";
+import type {
+  CT_DecimalNumber,
+  CT_UnsignedDecimalNumber,
+  CT_MacroName,
+  CT_OnOff,
+  CT_HpsMeasure,
+  CT_String as CT_StringWml,
+} from "./basic-types";
 
 /**
  * Field character type.

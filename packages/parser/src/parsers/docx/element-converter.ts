@@ -1,8 +1,13 @@
 // Element conversion functions
-import type { DocumentElement, Paragraph, Heading, TextRun, Image } from '../../types/document';
-import type { DocxParagraph } from './types';
-import { halfPointsToPoints } from './unit-utils';
-import { getListType, getListText, getNumberingFormat, type NumberingDefinition } from './numbering-parser';
+import type { DocumentElement, Paragraph, Heading, TextRun, Image } from "../../types/document";
+import type { DocxParagraph } from "./types";
+import { halfPointsToPoints } from "./unit-utils";
+import {
+  getListType,
+  getListText,
+  getNumberingFormat,
+  type NumberingDefinition,
+} from "./numbering-parser";
 
 /**
  * Convert a DOCX paragraph to a document element (paragraph or heading)
@@ -14,13 +19,13 @@ import { getListType, getListText, getNumberingFormat, type NumberingDefinition 
  * @returns Document element
  */
 export function convertToDocumentElement(
-  paragraph: DocxParagraph, 
+  paragraph: DocxParagraph,
   processedImages?: Image[],
   paragraphIndex?: number,
   outlineLevel?: number,
-  numberingDef?: NumberingDefinition
+  numberingDef?: NumberingDefinition,
 ): DocumentElement {
-  const runs: TextRun[] = paragraph.runs.map(run => ({
+  const runs: TextRun[] = paragraph.runs.map((run) => ({
     text: run.text,
     bold: run.bold,
     italic: run.italic,
@@ -50,66 +55,66 @@ export function convertToDocumentElement(
     kerning: run.kerning,
     textScale: run.textScale,
     emphasis: run.emphasis,
-    lang: run.lang
+    lang: run.lang,
   }));
-  
+
   // Check if it's a heading using multiple methods
   const headingDetection = detectHeading(paragraph, runs, paragraphIndex, outlineLevel);
-  
+
   if (headingDetection.isHeading) {
     const heading: Heading = {
-      type: 'heading',
+      type: "heading",
       level: headingDetection.level,
       runs,
       alignment: paragraph.alignment,
       spacing: paragraph.spacing,
       indentation: paragraph.indentation,
       ...(paragraph.textDirection && { textDirection: paragraph.textDirection }),
-      ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment })
+      ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment }),
     };
-    
+
     // Add images if present
     if (processedImages && processedImages.length > 0) {
       heading.images = processedImages;
     } else if (paragraph.images && paragraph.images.length > 0) {
       heading.images = paragraph.images as Image[];
     }
-    
+
     return heading;
   }
-  
+
   // Default to paragraph
   const para: Paragraph = {
-    type: 'paragraph',
+    type: "paragraph",
     runs,
     alignment: paragraph.alignment,
     spacing: paragraph.spacing,
     indentation: paragraph.indentation,
     ...(paragraph.textDirection && { textDirection: paragraph.textDirection }),
-    ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment })
+    ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment }),
   };
-  
+
   // Add list info if present
   if (paragraph.numId && paragraph.ilvl !== undefined) {
     const listType = getListType(paragraph.numId, paragraph.ilvl, numberingDef);
     const listText = getListText(paragraph.numId, paragraph.ilvl, numberingDef);
     const numFmt = getNumberingFormat(paragraph.numId, paragraph.ilvl, numberingDef);
-    
+
     para.listInfo = {
       level: paragraph.ilvl,
       type: listType,
       text: listText,
-      numFmt: numFmt
+      numFmt: numFmt,
     };
   }
-  
+
   // Add images if present
   if (processedImages && processedImages.length > 0) {
     para.images = processedImages;
   } else if (paragraph.images && paragraph.images.length > 0) {
     para.images = paragraph.images as Image[];
   }
-  
+
   return para;
 }
 
@@ -117,33 +122,33 @@ export function convertToDocumentElement(
  * Intelligent heading detection using multiple heuristics
  */
 function detectHeading(
-  paragraph: DocxParagraph, 
-  runs: TextRun[], 
+  paragraph: DocxParagraph,
+  runs: TextRun[],
   paragraphIndex?: number,
-  outlineLevel?: number
+  outlineLevel?: number,
 ): { isHeading: boolean; level: 1 | 2 | 3 | 4 | 5 | 6 } {
-  
   // Method 1: Style-based detection (existing logic)
   if (paragraph.style) {
-    const styleNormalized = paragraph.style.toLowerCase().replace(/\s+/g, '');
-    
+    const styleNormalized = paragraph.style.toLowerCase().replace(/\s+/g, "");
+
     // More comprehensive heading detection
     // Exclude 'header' and 'footer' styles which are for page headers/footers
-    const isStyleHeading = (
-      styleNormalized === 'title' ||
-      styleNormalized === 'heading' ||
-      styleNormalized.startsWith('heading') ||
-      (styleNormalized.startsWith('head') && styleNormalized !== 'header' && !styleNormalized.startsWith('header')) ||
-      (styleNormalized.includes('title') && !styleNormalized.includes('subtitle')) ||
+    const isStyleHeading =
+      styleNormalized === "title" ||
+      styleNormalized === "heading" ||
+      styleNormalized.startsWith("heading") ||
+      (styleNormalized.startsWith("head") &&
+        styleNormalized !== "header" &&
+        !styleNormalized.startsWith("header")) ||
+      (styleNormalized.includes("title") && !styleNormalized.includes("subtitle")) ||
       // Common DOCX heading style variations
       /^h[1-6]$/.test(styleNormalized) ||
       /^heading[1-6]$/.test(styleNormalized) ||
-      /^title\d*$/.test(styleNormalized)
-    );
-    
+      /^title\d*$/.test(styleNormalized);
+
     if (isStyleHeading) {
       let level: 1 | 2 | 3 | 4 | 5 | 6 = 1;
-      
+
       // Extract level from various patterns
       const levelMatches = [
         styleNormalized.match(/heading\s*(\d)/),
@@ -153,7 +158,7 @@ function detectHeading(
         // Look for digit at the end
         styleNormalized.match(/(\d)$/),
       ];
-      
+
       for (const match of levelMatches) {
         if (match && match[1]) {
           const parsedLevel = parseInt(match[1]);
@@ -163,54 +168,62 @@ function detectHeading(
           }
         }
       }
-      
+
       // Special case: 'title' without number is typically level 1
-      if (styleNormalized === 'title') {
+      if (styleNormalized === "title") {
         level = 1;
       }
-      
+
       return { isHeading: true, level };
     }
   }
-  
+
   // Method 2: Outline level detection
-  if (typeof outlineLevel === 'number' && outlineLevel >= 0 && outlineLevel <= 8) {
+  if (typeof outlineLevel === "number" && outlineLevel >= 0 && outlineLevel <= 8) {
     const level = Math.min(6, outlineLevel + 1) as 1 | 2 | 3 | 4 | 5 | 6;
     return { isHeading: true, level };
   }
-  
+
   // Method 3: Text and formatting-based heuristics
-  const text = runs.map(run => run.text).join('').trim();
-  
+  const text = runs
+    .map((run) => run.text)
+    .join("")
+    .trim();
+
   if (!text || text.length === 0) {
     return { isHeading: false, level: 1 };
   }
-  
+
   // Don't treat list items as headings
   if (paragraph.numId && paragraph.ilvl !== undefined) {
     return { isHeading: false, level: 1 };
   }
-  
+
   // Don't treat single runs with multiple formatting properties as headings
   // (these are likely formatted paragraphs from tests or documents with heavy formatting)
   if (runs.length === 1) {
     const run = runs[0];
     if (run) {
       const formattingCount = [
-        run.bold, run.italic, run.underline, run.strikethrough, 
-        run.fontSize, run.color, run.backgroundColor
+        run.bold,
+        run.italic,
+        run.underline,
+        run.strikethrough,
+        run.fontSize,
+        run.color,
+        run.backgroundColor,
       ].filter(Boolean).length;
-      
+
       if (formattingCount >= 4) {
         return { isHeading: false, level: 1 };
       }
     }
   }
-  
+
   // Calculate heuristic scores
   let score = 0;
   let level: 1 | 2 | 3 | 4 | 5 | 6 = 1;
-  
+
   // Text characteristics
   const isShort = text.length <= 100; // Headings are usually short
   const isAllCaps = text === text.toUpperCase() && /[A-Z]/.test(text);
@@ -218,22 +231,26 @@ function detectHeading(
   const hasNoEndPunctuation = !/[.!?:]$/.test(text); // Include colon as ending punctuation
   const wordCount = text.split(/\s+/).length;
   const isReasonableLength = wordCount >= 1 && wordCount <= 15; // 1-15 words
-  const endsWithColon = text.endsWith(':'); // Text ending with colon is usually introducing content
-  
+  const endsWithColon = text.endsWith(":"); // Text ending with colon is usually introducing content
+
   // Position-based scoring
-  const isEarlyInDocument = typeof paragraphIndex === 'number' && paragraphIndex < 20;
-  
+  const isEarlyInDocument = typeof paragraphIndex === "number" && paragraphIndex < 20;
+
   // Formatting characteristics
-  const hasBoldRuns = runs.some(run => run.bold);
-  const allRunsBold = runs.length > 0 && runs.every(run => run.bold || !run.text.trim());
-  const hasLargeFont = runs.some(run => run.fontSize && run.fontSize > 12);
-  const isCenter = paragraph.alignment === 'center';
-  const hasMixedFormatting = runs.some(run => run.bold) && runs.some(run => run.italic) && runs.some(run => !run.bold && !run.italic);
-  
+  const hasBoldRuns = runs.some((run) => run.bold);
+  const allRunsBold = runs.length > 0 && runs.every((run) => run.bold || !run.text.trim());
+  const hasLargeFont = runs.some((run) => run.fontSize && run.fontSize > 12);
+  const isCenter = paragraph.alignment === "center";
+  const hasMixedFormatting =
+    runs.some((run) => run.bold) &&
+    runs.some((run) => run.italic) &&
+    runs.some((run) => !run.bold && !run.italic);
+
   // Specific patterns
-  const looksLikeTitle = /^[A-Z][A-Z\s]*[A-Z]$/.test(text) || // ALL CAPS TITLE
-                        /^[A-Z][a-z]+(\s+[A-Z][a-z]*)*$/.test(text); // Title Case
-  
+  const looksLikeTitle =
+    /^[A-Z][A-Z\s]*[A-Z]$/.test(text) || // ALL CAPS TITLE
+    /^[A-Z][a-z]+(\s+[A-Z][a-z]*)*$/.test(text); // Title Case
+
   // Score calculation
   if (isShort) score += 2;
   if (isAllCaps) score += 3;
@@ -247,7 +264,7 @@ function detectHeading(
   if (isCenter) score += 2;
   if (looksLikeTitle) score += 3;
   if (endsWithColon) score -= 3; // Text ending with colon is usually introducing content, not a heading
-  
+
   // Specific detection for known patterns
   const titlePatterns = [
     /^TITLE OF THE/i,
@@ -259,16 +276,16 @@ function detectHeading(
     /^BIBLIOGRAPHY$/i,
     /^REFERENCES$/i,
     /^ACKNOWLEDGMENTS?$/i,
-    /^APPENDIX/i
+    /^APPENDIX/i,
   ];
-  
+
   for (const pattern of titlePatterns) {
     if (pattern.test(text)) {
       score += 5;
       break;
     }
   }
-  
+
   // Determine level based on characteristics
   if (isAllCaps || isCenter || text.length > 50) {
     level = 1; // Main title
@@ -279,27 +296,27 @@ function detectHeading(
   } else {
     level = 4; // Minor heading
   }
-  
+
   // Additional filters to reduce false positives
   const hasQuotes = text.includes('"') || text.includes('"') || text.includes('"');
-  const hasCommas = text.includes(',');
-  const hasColons = text.includes(':');
+  const hasCommas = text.includes(",");
+  const hasColons = text.includes(":");
   const hasNumbers = /\d/.test(text);
-  const hasParentheses = text.includes('(') || text.includes(')');
+  const hasParentheses = text.includes("(") || text.includes(")");
   const looksLikeCitation = hasQuotes && hasCommas && (hasNumbers || hasParentheses);
   const isProbablyBibliography = paragraphIndex && paragraphIndex > 50 && looksLikeCitation;
-  
+
   // Reduce score for likely citations
   if (looksLikeCitation) score -= 3;
   if (isProbablyBibliography) score -= 5;
-  
+
   // Reduce score for mixed formatting (typical of formatted paragraphs, not headings)
   if (hasMixedFormatting) score -= 4;
-  
+
   // Boost score for known title patterns
-  if (text.toLowerCase().includes('title of the')) score += 3;
-  if (text.toLowerCase() === 'bibliography') score += 3;
-  
+  if (text.toLowerCase().includes("title of the")) score += 3;
+  if (text.toLowerCase() === "bibliography") score += 3;
+
   // Reduce score for generic test content patterns
   const testPatterns = [
     /^part\s+\d+/i,
@@ -310,18 +327,18 @@ function detectHeading(
     /^example\s+/i,
     /^formatted\s+text/i,
     /^bold\s+text/i,
-    /^italic\s+text/i
+    /^italic\s+text/i,
   ];
-  
+
   for (const pattern of testPatterns) {
     if (pattern.test(text)) {
       score -= 5;
       break;
     }
   }
-  
+
   // Threshold for considering it a heading
   const isHeading = score >= 7; // Increased threshold to reduce false positives
-  
+
   return { isHeading, level };
 }

@@ -17,7 +17,5 @@ export const readKey = (_buffer: ArrayBuffer): Effect.Effect<KeyDocument, KeyPar
     // Keynote files use binary IWA format (Protocol Buffers)
     // This is much more complex than XML-based formats
 
-    return yield* Effect.fail(
-      new KeyParseError("Keynote support is not yet implemented"),
-    );
+    return yield* Effect.fail(new KeyParseError("Keynote support is not yet implemented"));
   });

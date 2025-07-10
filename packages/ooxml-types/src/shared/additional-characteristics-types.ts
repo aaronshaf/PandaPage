@@ -7,7 +7,7 @@
 /**
  * Relation enumeration for characteristics
  */
-export type ST_Relation = 'ge' | 'le' | 'gt' | 'lt' | 'eq';
+export type ST_Relation = "ge" | "le" | "gt" | "lt" | "eq";
 
 /**
  * Individual characteristic with name, relation, value, and optional vocabulary

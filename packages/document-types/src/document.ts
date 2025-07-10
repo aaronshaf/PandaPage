@@ -1,10 +1,10 @@
-import type { 
-  BorderStyleString, 
+import type {
+  BorderStyleString,
   ShadingPatternString,
   ParagraphAlignmentString,
   ST_HighlightColor,
-  ST_Underline
-} from '@browser-document-viewer/ooxml-types';
+  ST_Underline,
+} from "@browser-document-viewer/ooxml-types";
 
 export interface DocumentMetadata {
   title?: string;
@@ -46,19 +46,19 @@ export interface TextRun {
   doubleStrikethrough?: boolean;
   kerning?: number; // Half-points
   textScale?: number; // Percentage
-  emphasis?: 'dot' | 'comma' | 'circle' | 'underDot';
+  emphasis?: "dot" | "comma" | "circle" | "underDot";
   lang?: string;
 }
 
 export interface Paragraph {
-  type: 'paragraph';
+  type: "paragraph";
   runs: TextRun[];
   style?: string;
   alignment?: ParagraphAlignmentString;
   indentLevel?: number;
   listInfo?: {
     level: number;
-    type: 'bullet' | 'number';
+    type: "bullet" | "number";
     text?: string;
     numFmt?: string; // The numbering format (bullet, decimal, upperLetter, etc.)
   };
@@ -67,7 +67,7 @@ export interface Paragraph {
     before?: number; // Twips
     after?: number; // Twips
     line?: number; // Twips
-    lineRule?: 'auto' | 'exact' | 'atLeast';
+    lineRule?: "auto" | "exact" | "atLeast";
   };
   indentation?: {
     left?: number; // Twips
@@ -78,7 +78,7 @@ export interface Paragraph {
 }
 
 export interface Heading {
-  type: 'heading';
+  type: "heading";
   level: 1 | 2 | 3 | 4 | 5 | 6;
   runs: TextRun[];
   alignment?: ParagraphAlignmentString;
@@ -87,7 +87,7 @@ export interface Heading {
     before?: number; // Twips
     after?: number; // Twips
     line?: number; // Twips
-    lineRule?: 'auto' | 'exact' | 'atLeast';
+    lineRule?: "auto" | "exact" | "atLeast";
   };
   indentation?: {
     left?: number; // Twips
@@ -119,7 +119,7 @@ export interface TableShading {
 }
 
 export interface Table {
-  type: 'table';
+  type: "table";
   rows: TableRow[];
   width?: number;
   borders?: TableBorders;
@@ -150,8 +150,8 @@ export interface TableCell {
   colspan?: number;
   rowspan?: number;
   width?: number;
-  verticalAlignment?: 'top' | 'center' | 'bottom';
-  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+  verticalAlignment?: "top" | "center" | "bottom";
+  textDirection?: "ltr" | "rtl" | "lrV" | "tbV" | "lrTbV" | "tbLrV";
   borders?: TableCellBorders;
   shading?: TableShading;
   margin?: {
@@ -163,7 +163,7 @@ export interface TableCell {
 }
 
 export interface Image {
-  type: 'image';
+  type: "image";
   data: ArrayBuffer;
   mimeType: string;
   width?: number;
@@ -230,11 +230,11 @@ export interface GlowEffect {
 export interface ImageBorder {
   color?: string;
   width?: number; // Points
-  style?: 'solid' | 'dashed' | 'dotted' | 'double';
+  style?: "solid" | "dashed" | "dotted" | "double";
 }
 
 export interface Shape {
-  type: 'shape';
+  type: "shape";
   shapeType: string; // e.g., 'rect', 'ellipse', 'triangle', 'arrow'
   width?: number;
   height?: number;
@@ -246,7 +246,7 @@ export interface Shape {
 }
 
 export interface ShapeFill {
-  type: 'solid' | 'gradient' | 'pattern' | 'picture';
+  type: "solid" | "gradient" | "pattern" | "picture";
   color?: string;
   transparency?: number; // 0-100
   gradient?: GradientFill;
@@ -257,7 +257,7 @@ export interface ShapeFill {
 }
 
 export interface GradientFill {
-  type: 'linear' | 'radial' | 'rectangular' | 'path';
+  type: "linear" | "radial" | "rectangular" | "path";
   stops: GradientStop[];
   angle?: number; // Degrees (for linear)
 }
@@ -271,31 +271,31 @@ export interface GradientStop {
 export interface ShapeOutline {
   color?: string;
   width?: number; // Points
-  style?: 'solid' | 'dashed' | 'dotted' | 'dashDot' | 'dashDotDot';
+  style?: "solid" | "dashed" | "dotted" | "dashDot" | "dashDotDot";
   transparency?: number; // 0-100
 }
 
 export interface TextBox {
   paragraphs: Paragraph[];
-  verticalAlignment?: 'top' | 'middle' | 'bottom';
+  verticalAlignment?: "top" | "middle" | "bottom";
   margins?: {
     top?: number;
     bottom?: number;
     left?: number;
     right?: number;
   };
-  autoFit?: 'none' | 'shrinkText' | 'resizeShape';
+  autoFit?: "none" | "shrinkText" | "resizeShape";
   wordWrap?: boolean;
 }
 
 export interface DrawingObject {
-  type: 'drawing';
-  drawingType: 'inline' | 'anchor';
+  type: "drawing";
+  drawingType: "inline" | "anchor";
   content: Image | Shape | Chart | SmartArt | Group;
   // Positioning for anchored drawings
   position?: DrawingPosition;
-  wrapType?: 'none' | 'square' | 'tight' | 'through' | 'topAndBottom';
-  wrapSide?: 'both' | 'left' | 'right' | 'largest';
+  wrapType?: "none" | "square" | "tight" | "through" | "topAndBottom";
+  wrapSide?: "both" | "left" | "right" | "largest";
   allowOverlap?: boolean;
   behindText?: boolean;
   locked?: boolean;
@@ -310,19 +310,35 @@ export interface DrawingObject {
 
 export interface DrawingPosition {
   horizontal?: {
-    relativeTo: 'character' | 'column' | 'insideMargin' | 'leftMargin' | 'margin' | 'outsideMargin' | 'page' | 'rightMargin';
+    relativeTo:
+      | "character"
+      | "column"
+      | "insideMargin"
+      | "leftMargin"
+      | "margin"
+      | "outsideMargin"
+      | "page"
+      | "rightMargin";
     offset?: number; // EMUs
-    align?: 'left' | 'center' | 'right' | 'inside' | 'outside';
+    align?: "left" | "center" | "right" | "inside" | "outside";
   };
   vertical?: {
-    relativeTo: 'line' | 'paragraph' | 'margin' | 'page' | 'topMargin' | 'bottomMargin' | 'insideMargin' | 'outsideMargin';
+    relativeTo:
+      | "line"
+      | "paragraph"
+      | "margin"
+      | "page"
+      | "topMargin"
+      | "bottomMargin"
+      | "insideMargin"
+      | "outsideMargin";
     offset?: number; // EMUs
-    align?: 'top' | 'center' | 'bottom' | 'inside' | 'outside';
+    align?: "top" | "center" | "bottom" | "inside" | "outside";
   };
 }
 
 export interface Chart {
-  type: 'chart';
+  type: "chart";
   chartType: string; // e.g., 'bar', 'line', 'pie', 'scatter'
   width?: number;
   height?: number;
@@ -331,7 +347,7 @@ export interface Chart {
 }
 
 export interface SmartArt {
-  type: 'smartArt';
+  type: "smartArt";
   layout: string; // SmartArt layout type
   width?: number;
   height?: number;
@@ -345,22 +361,22 @@ export interface SmartArtNode {
 }
 
 export interface Group {
-  type: 'group';
+  type: "group";
   children: (Image | Shape | Chart | SmartArt | Group)[];
   transform?: DrawingTransform;
 }
 
 export interface PageBreak {
-  type: 'pageBreak';
+  type: "pageBreak";
 }
 
 export interface Header {
-  type: 'header';
+  type: "header";
   elements: (Paragraph | Table)[];
 }
 
 export interface Footer {
-  type: 'footer';
+  type: "footer";
   elements: (Paragraph | Table)[];
 }
 
@@ -372,25 +388,40 @@ export interface HeaderFooterInfo {
 }
 
 export interface Bookmark {
-  type: 'bookmark';
+  type: "bookmark";
   id: string;
   name: string;
   text?: string;
 }
 
 export interface FootnoteReference {
-  type: 'footnoteReference';
+  type: "footnoteReference";
   id: string;
   text: string; // The reference number or marker
 }
 
 export interface Footnote {
-  type: 'footnote';
+  type: "footnote";
   id: string;
   elements: (Paragraph | Table)[];
 }
 
-export type DocumentElement = Paragraph | Heading | Table | Image | PageBreak | Header | Footer | Bookmark | FootnoteReference | Footnote | DrawingObject | Shape | Chart | SmartArt | Group;
+export type DocumentElement =
+  | Paragraph
+  | Heading
+  | Table
+  | Image
+  | PageBreak
+  | Header
+  | Footer
+  | Bookmark
+  | FootnoteReference
+  | Footnote
+  | DrawingObject
+  | Shape
+  | Chart
+  | SmartArt
+  | Group;
 
 export interface ParsedDocument {
   metadata: DocumentMetadata;

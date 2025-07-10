@@ -3,32 +3,37 @@
  * Based on wml.xsd paragraph property definitions
  */
 
-import type { CT_NumPr } from '../numbering/numbering-types';
+import type { CT_NumPr } from "../numbering/numbering-types";
 
 /**
  * Tab stop alignment
  */
-export type ST_TabJc = 'clear' | 'start' | 'center' | 'end' | 'decimal' | 'bar' | 'num';
+export type ST_TabJc = "clear" | "start" | "center" | "end" | "decimal" | "bar" | "num";
 
 /**
  * Tab stop leader character
  */
-export type ST_TabTlc = 'none' | 'dot' | 'hyphen' | 'underscore' | 'heavy' | 'middleDot';
+export type ST_TabTlc = "none" | "dot" | "hyphen" | "underscore" | "heavy" | "middleDot";
 
 /**
  * WML paragraph text direction
  */
-export type ST_WMLParagraphTextDirection = 'lrTb' | 'tbRl' | 'btLr' | 'lrTbV' | 'tbRlV' | 'tbLrV';
+export type ST_WMLParagraphTextDirection = "lrTb" | "tbRl" | "btLr" | "lrTbV" | "tbRlV" | "tbLrV";
 
 /**
  * Text alignment
  */
-export type ST_TextAlignment = 'top' | 'center' | 'baseline' | 'bottom' | 'auto';
+export type ST_TextAlignment = "top" | "center" | "baseline" | "bottom" | "auto";
 
 /**
  * Textbox tight wrap
  */
-export type ST_TextboxTightWrap = 'none' | 'allLines' | 'firstAndLastLine' | 'firstLineOnly' | 'lastLineOnly';
+export type ST_TextboxTightWrap =
+  | "none"
+  | "allLines"
+  | "firstAndLastLine"
+  | "firstLineOnly"
+  | "lastLineOnly";
 
 /**
  * Tab stop definition
@@ -65,7 +70,7 @@ export interface CT_Spacing {
   /** Line spacing */
   line?: number;
   /** Line spacing rule */
-  lineRule?: 'auto' | 'exact' | 'atLeast';
+  lineRule?: "auto" | "exact" | "atLeast";
 }
 
 /**
@@ -95,7 +100,16 @@ export interface CT_Ind {
  */
 export interface CT_Jc {
   /** Justification value */
-  val: 'start' | 'center' | 'end' | 'both' | 'distribute' | 'numTab' | 'highKashida' | 'lowKashida' | 'thaiDistribute';
+  val:
+    | "start"
+    | "center"
+    | "end"
+    | "both"
+    | "distribute"
+    | "numTab"
+    | "highKashida"
+    | "lowKashida"
+    | "thaiDistribute";
 }
 
 /**
@@ -127,7 +141,7 @@ export interface CT_TextboxTightWrap {
  */
 export interface CT_FramePr {
   /** Drop cap */
-  dropCap?: 'none' | 'drop' | 'margin';
+  dropCap?: "none" | "drop" | "margin";
   /** Lines */
   lines?: number;
   /** Width */
@@ -139,21 +153,21 @@ export interface CT_FramePr {
   /** Horizontal space */
   hSpace?: number;
   /** Wrap */
-  wrap?: 'auto' | 'notBeside' | 'around' | 'tight' | 'through';
+  wrap?: "auto" | "notBeside" | "around" | "tight" | "through";
   /** Horizontal anchor */
-  hAnchor?: 'text' | 'margin' | 'page';
+  hAnchor?: "text" | "margin" | "page";
   /** Vertical anchor */
-  vAnchor?: 'text' | 'margin' | 'page';
+  vAnchor?: "text" | "margin" | "page";
   /** Horizontal position */
   x?: number;
   /** Horizontal alignment */
-  xAlign?: 'left' | 'center' | 'right' | 'inside' | 'outside';
+  xAlign?: "left" | "center" | "right" | "inside" | "outside";
   /** Vertical position */
   y?: number;
   /** Vertical alignment */
-  yAlign?: 'top' | 'center' | 'bottom' | 'inside' | 'outside';
+  yAlign?: "top" | "center" | "bottom" | "inside" | "outside";
   /** Height rule */
-  hRule?: 'auto' | 'exact' | 'atLeast';
+  hRule?: "auto" | "exact" | "atLeast";
   /** Anchor lock */
   anchorLock?: boolean;
 }

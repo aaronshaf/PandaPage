@@ -29,7 +29,7 @@ export function halfPointsToPoints(halfPoints: number): number {
  * Convert half-points to CSS pt string
  */
 export function halfPointsToPt(halfPoints: string | number): string {
-  const value = typeof halfPoints === 'string' ? parseInt(halfPoints, 10) : halfPoints;
+  const value = typeof halfPoints === "string" ? parseInt(halfPoints, 10) : halfPoints;
   return `${halfPointsToPoints(value)}pt`;
 }
 
@@ -39,15 +39,15 @@ export function halfPointsToPt(halfPoints: string | number): string {
  * @param lineRule - The line spacing rule
  * @returns CSS line-height value
  */
-export function convertLineSpacing(value: number, lineRule?: 'auto' | 'exact' | 'atLeast'): string {
+export function convertLineSpacing(value: number, lineRule?: "auto" | "exact" | "atLeast"): string {
   switch (lineRule) {
-    case 'exact':
+    case "exact":
       // Exact line height in points
       return twipsToPt(value);
-    case 'atLeast':
+    case "atLeast":
       // Minimum line height
       return twipsToPt(value);
-    case 'auto':
+    case "auto":
     default:
       // Auto means the value is in 240ths of a line
       // Normal line height is 240, so divide by 240 to get a multiplier

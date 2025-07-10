@@ -38,19 +38,19 @@ describe("docx-to-markdown frontmatter generation", () => {
           outline: [
             { title: "Introduction", level: 1, style: "Heading1" },
             { title: "Chapter 1", level: 1, style: "Heading1" },
-            { title: "Section 1.1", level: 2, style: "Heading2" }
+            { title: "Section 1.1", level: 2, style: "Heading2" },
           ],
           extractedAt: new Date(),
-          originalFormat: "docx" as const
+          originalFormat: "docx" as const,
         },
         numbering: undefined,
         processingTime: 100,
         extractedAt: new Date(),
-        originalFormat: "docx"
+        originalFormat: "docx",
       };
 
       const result = convertEnhancedDocxToMarkdown(doc);
-      
+
       expect(result).toContain("---");
       expect(result).toContain('title: "Test Document"');
       expect(result).toContain('subject: "Testing"');
@@ -80,18 +80,18 @@ describe("docx-to-markdown frontmatter generation", () => {
         metadata: {
           title: 'Title with "quotes" and\nnewlines',
           creator: 'Author with "special" chars',
-          keywords: ['key"word', 'new\nline'],
+          keywords: ['key"word', "new\nline"],
           extractedAt: new Date(),
-          originalFormat: "docx" as const
+          originalFormat: "docx" as const,
         },
         numbering: undefined,
         processingTime: 100,
         extractedAt: new Date(),
-        originalFormat: "docx"
+        originalFormat: "docx",
       };
 
       const result = convertEnhancedDocxToMarkdown(doc);
-      
+
       expect(result).toContain('title: "Title with \\"quotes\\" and\\nnewlines"');
       expect(result).toContain('author: "Author with \\"special\\" chars"');
       expect(result).toContain('keywords: ["key\\"word", "new\\nline"]');
@@ -102,16 +102,16 @@ describe("docx-to-markdown frontmatter generation", () => {
         elements: [],
         metadata: {
           extractedAt: new Date(),
-          originalFormat: "docx" as const
+          originalFormat: "docx" as const,
         },
         numbering: undefined,
         processingTime: 100,
         extractedAt: new Date(),
-        originalFormat: "docx"
+        originalFormat: "docx",
       };
 
       const result = convertEnhancedDocxToMarkdown(doc);
-      
+
       // Should not include frontmatter section if metadata is empty
       expect(result).not.toContain("---");
     });
@@ -123,16 +123,16 @@ describe("docx-to-markdown frontmatter generation", () => {
           title: "Only Title",
           pages: 5,
           extractedAt: new Date(),
-          originalFormat: "docx" as const
+          originalFormat: "docx" as const,
         },
         numbering: undefined,
         processingTime: 100,
         extractedAt: new Date(),
-        originalFormat: "docx"
+        originalFormat: "docx",
       };
 
       const result = convertEnhancedDocxToMarkdown(doc);
-      
+
       expect(result).toContain("---");
       expect(result).toContain('title: "Only Title"');
       expect(result).toContain("pages: 5");

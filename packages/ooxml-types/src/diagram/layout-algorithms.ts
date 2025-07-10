@@ -1,6 +1,6 @@
 // layout-algorithms.ts - Layout algorithm types for diagrams
-import type { CT_OfficeArtExtensionList } from '../dml-main';
-import type { 
+import type { CT_OfficeArtExtensionList } from "../dml-main";
+import type {
   ST_DiagramHorizontalAlignment,
   ST_VerticalAlignment,
   ST_ChildDirection,
@@ -37,8 +37,8 @@ import type {
   ST_HierBranchStyle,
   ST_AnimOneStr,
   ST_AnimLvlStr,
-  ST_ResizeHandlesStr
-} from './layout-enums';
+  ST_ResizeHandlesStr,
+} from "./layout-enums";
 
 // Algorithm types
 export enum ST_AlgorithmType {
@@ -114,7 +114,7 @@ export enum ST_ParameterId {
 }
 
 // Parameter value types
-export type ST_ParameterVal = 
+export type ST_ParameterVal =
   | ST_DiagramHorizontalAlignment
   | ST_VerticalAlignment
   | ST_ChildDirection
@@ -187,7 +187,7 @@ export enum ST_FunctionOperator {
   Lte = "lte",
 }
 
-export type ST_FunctionValue = 
+export type ST_FunctionValue =
   | number // xsd:int
   | boolean // xsd:boolean
   | ST_Direction

@@ -6,7 +6,7 @@ import {
   parseTableCellEnhanced,
   parseTableProperties,
   parseTableRowProperties,
-  parseTableCellProperties
+  parseTableCellProperties,
 } from "../src/formats/docx/table-parser";
 import { JSDOM } from "jsdom";
 
@@ -26,31 +26,35 @@ describe("Table Parser Integration Tests", () => {
         querySelectorAll: (selector: string) => {
           if (selector.includes("tr") || selector.includes("w\\:tr")) {
             // Return mock row elements
-            return [{
-              querySelectorAll: (cellSelector: string) => {
-                if (cellSelector.includes("tc") || cellSelector.includes("w\\:tc")) {
-                  return [{
-                    querySelector: (propSelector: string) => null,
-                    querySelectorAll: (pSelector: string) => {
-                      if (pSelector.includes("p") || pSelector.includes("w\\:p")) {
-                        return [];
-                      }
-                      return [];
-                    }
-                  }];
-                }
-                return [];
+            return [
+              {
+                querySelectorAll: (cellSelector: string) => {
+                  if (cellSelector.includes("tc") || cellSelector.includes("w\\:tc")) {
+                    return [
+                      {
+                        querySelector: (propSelector: string) => null,
+                        querySelectorAll: (pSelector: string) => {
+                          if (pSelector.includes("p") || pSelector.includes("w\\:p")) {
+                            return [];
+                          }
+                          return [];
+                        },
+                      },
+                    ];
+                  }
+                  return [];
+                },
+                querySelector: (propSelector: string) => null,
               },
-              querySelector: (propSelector: string) => null
-            }];
+            ];
           }
           return [];
         },
-        querySelector: (selector: string) => null
+        querySelector: (selector: string) => null,
       } as any;
 
       const result = await Effect.runPromise(parseTableEnhanced(mockTable));
-      
+
       expect(result.type).toBe("table");
       expect(result.rows).toHaveLength(1);
       expect(result.rows[0]?.cells).toHaveLength(1);
@@ -61,19 +65,19 @@ describe("Table Parser Integration Tests", () => {
     test("should parse table indentation", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          const cleanSelector = selector.replace(/w\\:/g, '');
-          
+          const cleanSelector = selector.replace(/w\\:/g, "");
+
           if (cleanSelector === "tblInd") {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "1440";
                 if (attr === "type") return "dxa";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableProperties(mockTblPr));
@@ -83,19 +87,19 @@ describe("Table Parser Integration Tests", () => {
     test("should parse table indentation percentage", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          const cleanSelector = selector.replace(/w\\:/g, '');
-          
+          const cleanSelector = selector.replace(/w\\:/g, "");
+
           if (cleanSelector === "tblInd") {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "20";
                 if (attr === "type") return "pct";
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableProperties(mockTblPr));
@@ -109,30 +113,34 @@ describe("Table Parser Integration Tests", () => {
           if (attr === "sz") return sz;
           if (attr === "color") return color;
           return null;
-        }
+        },
       });
 
       const mockTblPr = {
         querySelector: (selector: string) => {
-          const cleanSelector = selector.replace(/w\\:/g, '');
-          
+          const cleanSelector = selector.replace(/w\\:/g, "");
+
           if (cleanSelector === "tblBorders") {
             return {
               querySelector: (borderSelector: string) => {
-                if (borderSelector === "top") return mockBorderElement("top", "single", "4", "000000");
-                if (borderSelector === "right") return mockBorderElement("right", "dashed", "8", "FF0000");
-                if (borderSelector === "bottom") return mockBorderElement("bottom", "dotted", "16", "00FF00");
-                if (borderSelector === "left") return mockBorderElement("left", "double", "24", "0000FF");
+                if (borderSelector === "top")
+                  return mockBorderElement("top", "single", "4", "000000");
+                if (borderSelector === "right")
+                  return mockBorderElement("right", "dashed", "8", "FF0000");
+                if (borderSelector === "bottom")
+                  return mockBorderElement("bottom", "dotted", "16", "00FF00");
+                if (borderSelector === "left")
+                  return mockBorderElement("left", "double", "24", "0000FF");
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableProperties(mockTblPr));
-      
+
       expect(result.borders).toBeDefined();
       expect(result.borders?.top).toBe("1px solid #000000");
       expect(result.borders?.right).toBe("1px dashed #FF0000");
@@ -153,15 +161,15 @@ describe("Table Parser Integration Tests", () => {
                       if (attr === "sz") return "8";
                       if (attr === "color") return "auto";
                       return null;
-                    }
+                    },
                   };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableProperties(mockTblPr));
@@ -180,15 +188,15 @@ describe("Table Parser Integration Tests", () => {
                       if (attr === "val") return "single";
                       if (attr === "color") return "FF0000";
                       return null;
-                    }
+                    },
                   };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableProperties(mockTblPr));
@@ -206,7 +214,7 @@ describe("Table Parser Integration Tests", () => {
                     getAttribute: (attr: string) => {
                       if (attr === "val") return "none";
                       return null;
-                    }
+                    },
                   };
                 }
                 if (borderSelector === "right") {
@@ -216,15 +224,15 @@ describe("Table Parser Integration Tests", () => {
                       if (attr === "sz") return "8";
                       if (attr === "color") return "000000";
                       return null;
-                    }
+                    },
                   };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableProperties(mockTblPr));
@@ -247,15 +255,15 @@ describe("Table Parser Integration Tests", () => {
                       if (attr === "sz") return "4";
                       if (attr === "color") return "FF0000";
                       return null;
-                    }
+                    },
                   };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableCellProperties(mockTcPr));
@@ -270,10 +278,12 @@ describe("Table Parser Integration Tests", () => {
       const mockRow = {
         querySelectorAll: (selector: string) => {
           if (selector.includes("tc") || selector.includes("w\\:tc")) {
-            return [{
-              querySelector: (propSelector: string) => null,
-              querySelectorAll: (pSelector: string) => []
-            }];
+            return [
+              {
+                querySelector: (propSelector: string) => null,
+                querySelectorAll: (pSelector: string) => [],
+              },
+            ];
           }
           return [];
         },
@@ -283,15 +293,15 @@ describe("Table Parser Integration Tests", () => {
               querySelector: (heightSelector: string) => {
                 if (heightSelector === "trHeight") {
                   return {
-                    getAttribute: (attr: string) => attr === "val" ? "500" : null
+                    getAttribute: (attr: string) => (attr === "val" ? "500" : null),
                   };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableRowEnhanced(mockRow));
@@ -309,35 +319,45 @@ describe("Table Parser Integration Tests", () => {
             // Return mock paragraph elements
             // The parseParagraph function will be called on these
             return [
-              { 
+              {
                 // Valid paragraph structure
-                querySelectorAll: () => [{
-                  querySelectorAll: () => [{
-                    querySelector: () => ({ textContent: "Valid paragraph" })
-                  }]
-                }]
+                querySelectorAll: () => [
+                  {
+                    querySelectorAll: () => [
+                      {
+                        querySelector: () => ({ textContent: "Valid paragraph" }),
+                      },
+                    ],
+                  },
+                ],
               },
               {
                 // Invalid structure that will cause parseParagraph to throw
-                querySelectorAll: () => { throw new Error("Parse error"); }
+                querySelectorAll: () => {
+                  throw new Error("Parse error");
+                },
               },
               {
                 // Another valid paragraph
-                querySelectorAll: () => [{
-                  querySelectorAll: () => [{
-                    querySelector: () => ({ textContent: "Another valid paragraph" })
-                  }]
-                }]
-              }
+                querySelectorAll: () => [
+                  {
+                    querySelectorAll: () => [
+                      {
+                        querySelector: () => ({ textContent: "Another valid paragraph" }),
+                      },
+                    ],
+                  },
+                ],
+              },
             ];
           }
           return [];
         },
-        querySelector: (selector: string) => null
+        querySelector: (selector: string) => null,
       } as any;
 
       const result = await Effect.runPromise(parseTableCellEnhanced(mockCell));
-      
+
       // Should have some content despite one paragraph failing
       expect(result.content).toBeDefined();
       expect(result.content.length).toBeGreaterThanOrEqual(0);
@@ -361,15 +381,15 @@ describe("Table Parser Integration Tests", () => {
                       if (attr === "w") return "2500";
                       if (attr === "type") return "dxa";
                       return null;
-                    }
+                    },
                   };
                 }
                 return null;
-              }
+              },
             };
           }
           return null;
-        }
+        },
       } as any;
 
       const result = await Effect.runPromise(parseTableCellEnhanced(mockCell));

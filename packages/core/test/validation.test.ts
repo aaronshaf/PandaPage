@@ -5,7 +5,7 @@ import {
   validateTableProperties,
   validateTableRowProperties,
   validateTableCellProperties,
-  parseWithDefaults
+  parseWithDefaults,
 } from "../src/formats/docx/validation";
 import { DocxParseError } from "../src/formats/docx/types";
 
@@ -40,7 +40,7 @@ describe("Validation Functions", () => {
     test("should return object as-is for valid object input", async () => {
       const borders = {
         top: "single",
-        bottom: "single"
+        bottom: "single",
       };
       const result = await Effect.runPromise(validateTableBorders(borders));
       expect(result).toEqual(borders);
@@ -51,7 +51,7 @@ describe("Validation Functions", () => {
         top: "double",
         bottom: "single",
         left: "dashed",
-        right: "dotted"
+        right: "dotted",
       };
       const result = await Effect.runPromise(validateTableBorders(borders));
       expect(result).toEqual(borders);
@@ -79,7 +79,7 @@ describe("Validation Functions", () => {
         width: "100%",
         alignment: "center" as const,
         backgroundColor: "#F0F0F0",
-        borders: { top: "single" }
+        borders: { top: "single" },
       };
       const result = await Effect.runPromise(validateTableProperties(properties));
       expect(result).toEqual(properties);
@@ -88,7 +88,7 @@ describe("Validation Functions", () => {
     test("should handle properties with style", async () => {
       const properties = {
         width: "5000px",
-        alignment: "left" as const
+        alignment: "left" as const,
       };
       const result = await Effect.runPromise(validateTableProperties(properties));
       expect(result).toEqual(properties);
@@ -115,7 +115,7 @@ describe("Validation Functions", () => {
       const properties = {
         height: "720px",
         isHeader: true,
-        cantSplit: true
+        cantSplit: true,
       };
       const result = await Effect.runPromise(validateTableRowProperties(properties));
       expect(result).toEqual(properties);
@@ -126,7 +126,7 @@ describe("Validation Functions", () => {
         height: "500px",
         isHeader: false,
         cantSplit: false,
-        tblHeader: true
+        tblHeader: true,
       };
       const result = await Effect.runPromise(validateTableRowProperties(properties));
       expect(result).toEqual(properties);
@@ -153,7 +153,7 @@ describe("Validation Functions", () => {
       const properties = {
         width: "25%",
         alignment: "center" as const,
-        backgroundColor: "#FFFFFF"
+        backgroundColor: "#FFFFFF",
       };
       const result = await Effect.runPromise(validateTableCellProperties(properties));
       expect(result).toEqual(properties);
@@ -166,8 +166,8 @@ describe("Validation Functions", () => {
         backgroundColor: "#E0E0E0",
         borders: {
           top: "single",
-          bottom: "single"
-        }
+          bottom: "single",
+        },
       };
       const result = await Effect.runPromise(validateTableCellProperties(properties));
       expect(result).toEqual(properties);
@@ -194,7 +194,7 @@ describe("Validation Functions", () => {
       expect(result).toMatchObject({
         name: "custom",
         value: 42,
-        enabled: true
+        enabled: true,
       });
       expect((result as any).extra).toBe("field");
     });
@@ -217,33 +217,33 @@ describe("Validation Functions", () => {
       const defaults = {
         settings: {
           theme: "light",
-          fontSize: 14
+          fontSize: 14,
         },
         features: {
           enabled: true,
-          advanced: false
-        }
+          advanced: false,
+        },
       };
       const data = {
         settings: {
           theme: "dark",
-          fontSize: 14
+          fontSize: 14,
         },
         features: {
           enabled: true,
-          advanced: true
-        }
+          advanced: true,
+        },
       };
       const result = await Effect.runPromise(parseWithDefaults(data, defaults));
       expect(result).toEqual({
         settings: {
           theme: "dark",
-          fontSize: 14
+          fontSize: 14,
         },
         features: {
           enabled: true,
-          advanced: true
-        }
+          advanced: true,
+        },
       });
     });
 
@@ -260,7 +260,7 @@ describe("Validation Functions", () => {
         required: "overridden",
         optional: "extra",
         another: 123,
-        nested: { field: true }
+        nested: { field: true },
       };
       const result = await Effect.runPromise(parseWithDefaults(data, defaults));
       expect(result).toEqual(data);
@@ -283,7 +283,7 @@ describe("Validation Functions", () => {
       const rowPropsEffect = validateTableRowProperties({});
       const cellPropsEffect = validateTableCellProperties({});
       const defaultsEffect = parseWithDefaults({}, {});
-      
+
       // All should be Effect types
       expect(bordersEffect).toBeDefined();
       expect(propsEffect).toBeDefined();

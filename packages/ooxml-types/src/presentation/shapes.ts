@@ -1,9 +1,24 @@
 // shapes.ts - Shape-related types for presentations
-import type { CT_NonVisualDrawingProps, CT_NonVisualDrawingShapeProps, CT_ShapeProperties, CT_ShapeStyle, CT_TextBody, CT_NonVisualConnectorProperties, CT_BlipFillProperties, CT_NonVisualPictureProperties, CT_NonVisualGraphicFrameProperties, CT_GraphicalObject, CT_Transform2D, ST_BlackWhiteMode, CT_NonVisualGroupDrawingShapeProps, CT_GroupShapeProperties } from '../dml-main';
-import type { CT_Picture } from '../picture-types';
-import type { ST_RelationshipId } from '../shared-types';
-import type { CT_ExtensionListModify } from './transitions';
-import type { CT_ApplicationNonVisualDrawingProps } from './common';
+import type {
+  CT_NonVisualDrawingProps,
+  CT_NonVisualDrawingShapeProps,
+  CT_ShapeProperties,
+  CT_ShapeStyle,
+  CT_TextBody,
+  CT_NonVisualConnectorProperties,
+  CT_BlipFillProperties,
+  CT_NonVisualPictureProperties,
+  CT_NonVisualGraphicFrameProperties,
+  CT_GraphicalObject,
+  CT_Transform2D,
+  ST_BlackWhiteMode,
+  CT_NonVisualGroupDrawingShapeProps,
+  CT_GroupShapeProperties,
+} from "../dml-main";
+import type { CT_Picture } from "../picture-types";
+import type { ST_RelationshipId } from "../shared-types";
+import type { CT_ExtensionListModify } from "./transitions";
+import type { CT_ApplicationNonVisualDrawingProps } from "./common";
 
 export interface CT_ShapeNonVisual {
   cNvPr: CT_NonVisualDrawingProps;

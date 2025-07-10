@@ -3,10 +3,10 @@
  * @see ECMA-376 Part 1, §17.3.2 (Run)
  */
 
-import type { ST_OnOff, ST_String, ST_Lang } from '../shared/common-types';
-import type { ST_RelationshipId } from '../shared/relationship-types';
-import type { 
-  CT_OnOff, 
+import type { ST_OnOff, ST_String, ST_Lang } from "../shared/common-types";
+import type { ST_RelationshipId } from "../shared/relationship-types";
+import type {
+  CT_OnOff,
   CT_String,
   CT_Lang,
   CT_HpsMeasure,
@@ -15,8 +15,8 @@ import type {
   CT_Empty,
   ST_LongHexNumber,
   ST_ShortHexNumber,
-  ST_UcharHexNumber
-} from './basic-types';
+  ST_UcharHexNumber,
+} from "./basic-types";
 import type {
   CT_Highlight,
   CT_Color,
@@ -24,9 +24,9 @@ import type {
   CT_TextEffect,
   CT_TextScale,
   CT_FitText,
-  ST_UniversalMeasure
-} from './text-formatting-types';
-import type { CT_Border, CT_Shd } from './border-shading-types';
+  ST_UniversalMeasure,
+} from "./text-formatting-types";
+import type { CT_Border, CT_Shd } from "./border-shading-types";
 
 /**
  * Text content with xml:space preservation.
@@ -182,7 +182,7 @@ export interface CT_VerticalAlignRun {
  * Run properties base type (using discriminated union).
  * @see ECMA-376 Part 1, §17.3.2.25 EG_RPrBase
  */
-export type EG_RPrBase = 
+export type EG_RPrBase =
   | { rStyle: CT_String }
   | { rFonts: CT_Fonts }
   | { b: CT_OnOff }
@@ -227,9 +227,7 @@ export type EG_RPrBase =
  * Run properties content.
  * @see ECMA-376 Part 1, §17.3.2.25 EG_RPrContent
  */
-export type EG_RPrContent = 
-  | EG_RPrBase[]
-  | { rPrChange: any }; // CT_RPrChange
+export type EG_RPrContent = EG_RPrBase[] | { rPrChange: any }; // CT_RPrChange
 
 /**
  * Run properties.
@@ -243,14 +241,13 @@ export interface CT_RPr {
  * Run properties wrapper.
  * @see ECMA-376 Part 1, §17.3.2.27 EG_RPr
  */
-export type EG_RPr = 
-  | { rPr: CT_RPr };
+export type EG_RPr = { rPr: CT_RPr };
 
 /**
  * Run inner content type (discriminated union).
  * @see ECMA-376 Part 1, §17.3.2.22 EG_RunInnerContent
  */
-export type EG_RunInnerContent = 
+export type EG_RunInnerContent =
   | { br: CT_Br }
   | { t: CT_Text }
   | { contentPart: any } // CT_Rel
@@ -307,4 +304,4 @@ export interface CT_ParaRPr {
 }
 
 // Import missing type
-import type { ST_DecimalNumber } from '../shared/measurement-types';
+import type { ST_DecimalNumber } from "../shared/measurement-types";

@@ -4,19 +4,18 @@ import { parseXmlString } from "@browser-document-viewer/shared-utils/xml";
 import { safeExecute } from "@browser-document-viewer/shared-utils/errors";
 import { parseParagraph, parseNumbering } from "../reader/docx-reader";
 import { parseTableEnhanced } from "./table-parser";
-import type { 
-  DocxElement, 
-  DocxNumbering 
-} from "../types";
+import type { DocxElement, DocxNumbering } from "../types";
 import { DocxParseError } from "../reader/docx-reader";
 
 /**
  * Parse the main document XML and extract elements
  */
-export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxElement[], DocxParseError> =>
+export const parseDocumentXmlEnhanced = (
+  root: Element,
+): Effect.Effect<DocxElement[], DocxParseError> =>
   Effect.gen(function* () {
     debug.log("Parsing document XML with enhanced parser");
-    
+
     // Try multiple ways to find the body element
     let body: Element | null = root.querySelector("body");
     if (!body) {
@@ -40,18 +39,16 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
     if (!body) {
       return yield* Effect.fail(new DocxParseError("No body element found in document"));
     }
-    
+
     const elements: DocxElement[] = [];
     const children = Array.from(body.children);
-    
+
     for (const child of children) {
       const parseElement = Effect.gen(function* () {
         const tagName = child.tagName || child.localName;
         if (tagName === "p" || tagName === "w:p") {
           // Parse paragraph with safe execution
-          return yield* safeExecute(
-            Effect.sync(() => parseParagraph(child))
-          );
+          return yield* safeExecute(Effect.sync(() => parseParagraph(child)));
         } else if (tagName === "tbl" || tagName === "w:tbl") {
           // Parse table
           return yield* parseTableEnhanced(child);
@@ -64,7 +61,7 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
           return null;
         }
       });
-      
+
       const result = yield* Effect.either(parseElement);
       if (result._tag === "Right" && result.right) {
         elements.push(result.right);
@@ -73,7 +70,7 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
         // Continue with other elements
       }
     }
-    
+
     debug.log(`Parsed ${elements.length} document elements`);
     return elements;
   });
@@ -81,25 +78,27 @@ export const parseDocumentXmlEnhanced = (root: Element): Effect.Effect<DocxEleme
 /**
  * Parse numbering XML if present
  */
-export const parseNumberingXml = (numberingXml: string | null): Effect.Effect<DocxNumbering | undefined, DocxParseError> =>
+export const parseNumberingXml = (
+  numberingXml: string | null,
+): Effect.Effect<DocxNumbering | undefined, DocxParseError> =>
   Effect.gen(function* () {
     if (!numberingXml) {
       debug.log("No numbering XML found");
       return undefined;
     }
-    
+
     debug.log("Parsing numbering XML");
     const parseNumberingEffect = Effect.gen(function* () {
       const numberingDoc = yield* parseXmlString(numberingXml);
       const numberingRoot = numberingDoc.documentElement;
-      
+
       if (numberingRoot.tagName !== "numbering") {
         return yield* Effect.fail(new DocxParseError("Invalid numbering XML structure"));
       }
-      
+
       return parseNumbering(numberingRoot);
     });
-    
+
     const result = yield* Effect.either(parseNumberingEffect);
     if (result._tag === "Right") {
       return result.right;
@@ -115,14 +114,14 @@ export const parseNumberingXml = (numberingXml: string | null): Effect.Effect<Do
 export const extractFileContent = (
   unzipped: Record<string, Uint8Array>,
   filePath: string,
-  strFromU8: (data: Uint8Array) => string
+  strFromU8: (data: Uint8Array) => string,
 ): string | null => {
   const file = unzipped[filePath];
   if (!file) {
     debug.log(`File not found: ${filePath}`);
     return null;
   }
-  
+
   try {
     return strFromU8(file);
   } catch (error) {
@@ -134,7 +133,9 @@ export const extractFileContent = (
 /**
  * Calculate document statistics
  */
-export const calculateDocumentStats = (elements: DocxElement[]): {
+export const calculateDocumentStats = (
+  elements: DocxElement[],
+): {
   wordCount: number;
   characterCount: number;
   paragraphCount: number;
@@ -142,7 +143,7 @@ export const calculateDocumentStats = (elements: DocxElement[]): {
   let wordCount = 0;
   let characterCount = 0;
   let paragraphCount = 0;
-  
+
   const countTextInElements = (elements: DocxElement[]): void => {
     for (const element of elements) {
       if (element.type === "table") {
@@ -157,16 +158,19 @@ export const calculateDocumentStats = (elements: DocxElement[]): {
         paragraphCount++;
         const text = element.runs.map((run: any) => run.text).join("");
         characterCount += text.length;
-        
+
         // Simple word count (split by whitespace)
-        const words = text.trim().split(/\s+/).filter((word: string) => word.length > 0);
+        const words = text
+          .trim()
+          .split(/\s+/)
+          .filter((word: string) => word.length > 0);
         wordCount += words.length;
       }
     }
   };
-  
+
   countTextInElements(elements);
-  
+
   return {
     wordCount,
     characterCount,

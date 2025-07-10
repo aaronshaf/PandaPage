@@ -6,7 +6,7 @@
 /**
  * Diagram text direction (unique name to avoid conflicts)
  */
-export type ST_DMLDiagramTextDirection = 'horz' | 'vert' | 'vert270';
+export type ST_DMLDiagramTextDirection = "horz" | "vert" | "vert270";
 
 /**
  * Diagram definition

@@ -98,4 +98,4 @@ export interface CT_DMLPlotArea {
 /**
  * Display blanks as
  */
-export type ST_DMLDispBlanksAs = 'span' | 'gap' | 'zero';
+export type ST_DMLDispBlanksAs = "span" | "gap" | "zero";

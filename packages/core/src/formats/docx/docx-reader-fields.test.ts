@@ -30,12 +30,12 @@ describe("DOCX Reader - Field Integration", () => {
       </w:document>`;
 
     const paragraphs = await Effect.runPromise(parseDocumentXml(documentXml));
-    
+
     expect(paragraphs).toHaveLength(1);
     expect(paragraphs[0]?.runs).toHaveLength(2); // "Name: " and "John Doe"
     expect(paragraphs[0]?.runs[0]?.text).toBe("Name: ");
     expect(paragraphs[0]?.runs[1]?.text).toBe("John Doe");
-    
+
     // Check fields
     expect(paragraphs[0]?.fields).toBeDefined();
     expect(paragraphs[0]?.fields).toHaveLength(1);
@@ -64,16 +64,16 @@ describe("DOCX Reader - Field Integration", () => {
       </w:document>`;
 
     const paragraphs = await Effect.runPromise(parseDocumentXml(documentXml));
-    
+
     expect(paragraphs).toHaveLength(1);
     expect(paragraphs?.[0]?.fields).toBeDefined();
     expect(paragraphs?.[0]?.fields).toHaveLength(2);
-    
+
     // First field - DATE
     expect(paragraphs?.[0]?.fields!?.[0]?.type).toBe(FieldCode.DATE);
     expect(paragraphs?.[0]?.fields!?.[0]?.result).toBe("12/25/2023");
     expect(paragraphs?.[0]?.fields!?.[0]?.properties?.["@"]).toBe("MM/dd/yyyy");
-    
+
     // Second field - FORMTEXT
     expect(paragraphs?.[0]?.fields!?.[1]?.type).toBe(FieldCode.FORMTEXT);
     expect(paragraphs?.[0]?.fields!?.[1]?.result).toBeUndefined();
@@ -90,10 +90,12 @@ describe("DOCX Reader - Field Integration", () => {
       </w:document>`;
 
     const paragraphs = await Effect.runPromise(parseDocumentXml(documentXml));
-    
+
     expect(paragraphs).toHaveLength(1);
     expect(paragraphs?.[0]?.fields).toBeUndefined();
-    expect(paragraphs?.[0]?.runs?.[0]?.text).toBe("This is a regular paragraph without any fields.");
+    expect(paragraphs?.[0]?.runs?.[0]?.text).toBe(
+      "This is a regular paragraph without any fields.",
+    );
   });
 
   test("should parse complex field with formatting", async () => {
@@ -133,14 +135,14 @@ describe("DOCX Reader - Field Integration", () => {
       </w:document>`;
 
     const paragraphs = await Effect.runPromise(parseDocumentXml(documentXml));
-    
+
     expect(paragraphs).toHaveLength(1);
     expect(paragraphs?.[0]?.style).toBe("Heading1");
     expect(paragraphs?.[0]?.fields).toBeDefined();
     expect(paragraphs?.[0]?.fields).toHaveLength(1);
     expect(paragraphs?.[0]?.fields!?.[0]?.type).toBe(FieldCode.TITLE);
     expect(paragraphs?.[0]?.fields!?.[0]?.result).toBe("Meeting Minutes Template");
-    
+
     // Check that the text with formatting is preserved
     expect(paragraphs?.[0]?.runs?.[1]?.text).toBe("Meeting Minutes Template");
     expect(paragraphs?.[0]?.runs?.[1]?.bold).toBe(true);
@@ -168,13 +170,13 @@ describe("DOCX Reader - Field Integration", () => {
       </w:document>`;
 
     const paragraphs = await Effect.runPromise(parseDocumentXml(documentXml));
-    
+
     expect(paragraphs).toHaveLength(1);
     expect(paragraphs?.[0]?.fields).toHaveLength(2);
-    
+
     expect(paragraphs?.[0]?.fields!?.[0]?.type).toBe(FieldCode.PAGE);
     expect(paragraphs?.[0]?.fields!?.[0]?.result).toBe("1");
-    
+
     expect(paragraphs?.[0]?.fields!?.[1]?.type).toBe(FieldCode.NUMPAGES);
     expect(paragraphs?.[0]?.fields!?.[1]?.result).toBe("10");
   });

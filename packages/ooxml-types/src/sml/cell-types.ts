@@ -3,7 +3,7 @@
  * @see ECMA-376 Part 1, §18.18 (Simple Types)
  */
 
-import type { ST_Xstring } from '../shared/common-types';
+import type { ST_Xstring } from "../shared/common-types";
 
 /**
  * Cell reference.
@@ -47,7 +47,7 @@ export type ST_UnsignedIntHex = string; // xsd:hexBinary with length 4
  */
 export enum ST_CellType {
   Boolean = "b",
-  Date = "d", 
+  Date = "d",
   Error = "e",
   InlineStr = "inlineStr",
   Number = "n",

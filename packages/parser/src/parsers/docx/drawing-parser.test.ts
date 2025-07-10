@@ -4,10 +4,10 @@ import { parseDrawingObject } from "./drawing-parser";
 
 // Use DOMParser from environment or import it
 const getDOMParser = async () => {
-  if (typeof DOMParser !== 'undefined') {
+  if (typeof DOMParser !== "undefined") {
     return DOMParser;
   }
-  const { DOMParser: XMLDOMParser } = await import('@xmldom/xmldom');
+  const { DOMParser: XMLDOMParser } = await import("@xmldom/xmldom");
   return XMLDOMParser;
 };
 
@@ -47,26 +47,26 @@ describe("Drawing Parser", () => {
           </wp:inline>
         </w:drawing>
       `;
-      
+
       const DOMParserClass = await getDOMParser();
       const parser = new DOMParserClass();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
-      
-      if (!drawingElement) throw new Error('Failed to parse drawing element');
+
+      if (!drawingElement) throw new Error("Failed to parse drawing element");
       const result = Effect.runSync(parseDrawingObject(drawingElement as Element));
-      
+
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('drawing');
-      expect(result?.drawingType).toBe('inline');
-      expect(result?.content.type).toBe('image');
-      if (result?.content.type === 'image') {
+      expect(result?.type).toBe("drawing");
+      expect(result?.drawingType).toBe("inline");
+      expect(result?.content.type).toBe("image");
+      if (result?.content.type === "image") {
         expect(result.content.width).toBe(96); // Converted from EMU
         expect(result.content.height).toBe(72);
-        expect(result.content.alt).toBe('A sample image');
+        expect(result.content.alt).toBe("A sample image");
       }
     });
-    
+
     it("should parse anchored drawing with positioning", async () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -107,32 +107,32 @@ describe("Drawing Parser", () => {
           </wp:anchor>
         </w:drawing>
       `;
-      
+
       const DOMParserClass = await getDOMParser();
       const parser = new DOMParserClass();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
-      
-      if (!drawingElement) throw new Error('Failed to parse drawing element');
+
+      if (!drawingElement) throw new Error("Failed to parse drawing element");
       const result = Effect.runSync(parseDrawingObject(drawingElement as Element));
-      
+
       expect(result).not.toBeNull();
-      expect(result?.type).toBe('drawing');
-      expect(result?.drawingType).toBe('anchor');
+      expect(result?.type).toBe("drawing");
+      expect(result?.drawingType).toBe("anchor");
       expect(result?.allowOverlap).toBe(true);
       expect(result?.behindText).toBe(false);
       expect(result?.locked).toBe(true);
       expect(result?.layoutInCell).toBe(true);
-      expect(result?.wrapType).toBe('square');
-      expect(result?.wrapSide).toBe('both');
-      expect(result?.position?.horizontal?.relativeTo).toBe('page');
+      expect(result?.wrapType).toBe("square");
+      expect(result?.wrapSide).toBe("both");
+      expect(result?.position?.horizontal?.relativeTo).toBe("page");
       expect(result?.position?.horizontal?.offset).toBe(1000000);
-      expect(result?.position?.vertical?.relativeTo).toBe('paragraph');
+      expect(result?.position?.vertical?.relativeTo).toBe("paragraph");
       expect(result?.position?.vertical?.offset).toBe(500000);
       expect(result?.distanceFromText?.left).toBeCloseTo(9); // Converted from EMU
       expect(result?.distanceFromText?.right).toBeCloseTo(9);
     });
-    
+
     it("should parse image with transform and effects", async () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -173,19 +173,19 @@ describe("Drawing Parser", () => {
           </wp:inline>
         </w:drawing>
       `;
-      
+
       const DOMParserClass = await getDOMParser();
       const parser = new DOMParserClass();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
-      
-      if (!drawingElement) throw new Error('Failed to parse drawing element');
+
+      if (!drawingElement) throw new Error("Failed to parse drawing element");
       const result = Effect.runSync(parseDrawingObject(drawingElement as Element));
-      
+
       expect(result).not.toBeNull();
-      expect(result?.content.type).toBe('image');
-      
-      if (result?.content.type === 'image') {
+      expect(result?.content.type).toBe("image");
+
+      if (result?.content.type === "image") {
         const image = result.content;
         expect(image.transform?.rotation).toBe(15); // 900000 / 60000
         expect(image.transform?.flipHorizontal).toBe(true);
@@ -202,7 +202,7 @@ describe("Drawing Parser", () => {
       // expect(image?.effects?.glow?.radius).toBe(2); // 25400 / 12700
       // expect(image?.effects?.glow?.color).toBe("#FF0000");
     });
-    
+
     it("should return null for drawing without supported content", async () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -217,37 +217,37 @@ describe("Drawing Parser", () => {
           </wp:inline>
         </w:drawing>
       `;
-      
+
       const DOMParserClass = await getDOMParser();
       const parser = new DOMParserClass();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
-      
-      if (!drawingElement) throw new Error('Failed to parse drawing element');
+
+      if (!drawingElement) throw new Error("Failed to parse drawing element");
       const result = Effect.runSync(parseDrawingObject(drawingElement as Element));
-      
+
       expect(result).toBeNull();
     });
-    
+
     it("should return null for invalid drawing structure", async () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <!-- Missing inline/anchor -->
         </w:drawing>
       `;
-      
+
       const DOMParserClass = await getDOMParser();
       const parser = new DOMParserClass();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
-      
-      if (!drawingElement) throw new Error('Failed to parse drawing element');
+
+      if (!drawingElement) throw new Error("Failed to parse drawing element");
       const result = Effect.runSync(parseDrawingObject(drawingElement as Element));
-      
+
       expect(result).toBeNull();
     });
   });
-  
+
   // Additional test cases can be added here for specific functionality
   // like parsing different wrap types, position formats, etc.
 });

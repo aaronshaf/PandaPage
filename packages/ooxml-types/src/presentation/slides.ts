@@ -1,12 +1,18 @@
 // slides.ts - Slide-related types for presentations
-import type { ST_RelationshipId } from '../shared-types';
-import type { CT_ColorMapping, CT_ColorMappingOverride, CT_TextListStyle, CT_PositiveSize2D, ST_BlackWhiteMode } from '../dml-main';
-import type { CT_Empty } from './common';
-import type { CT_ExtensionListModify, CT_SlideTransition } from './transitions';
-import type { CT_SlideTiming } from './timing-animation';
-import type { CT_CommonSlideData } from './common';
-import type { CT_HeaderFooter } from './common';
-import type { CT_ExtensionList } from './common';
+import type { ST_RelationshipId } from "../shared-types";
+import type {
+  CT_ColorMapping,
+  CT_ColorMappingOverride,
+  CT_TextListStyle,
+  CT_PositiveSize2D,
+  ST_BlackWhiteMode,
+} from "../dml-main";
+import type { CT_Empty } from "./common";
+import type { CT_ExtensionListModify, CT_SlideTransition } from "./transitions";
+import type { CT_SlideTiming } from "./timing-animation";
+import type { CT_CommonSlideData } from "./common";
+import type { CT_HeaderFooter } from "./common";
+import type { CT_ExtensionList } from "./common";
 
 export type ST_SlideId = number; // xsd:unsignedInt, minInclusive 256, maxExclusive 2147483648
 export type ST_SlideMasterId = number; // xsd:unsignedInt, minInclusive 2147483648

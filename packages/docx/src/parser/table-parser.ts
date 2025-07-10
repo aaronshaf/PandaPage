@@ -1,19 +1,19 @@
 import { Effect } from "effect";
 import { debug } from "@browser-document-viewer/shared-utils/debug";
 import { parseParagraph } from "../reader/docx-reader";
-import { 
+import {
   validateTableProperties,
   validateTableRowProperties,
-  validateTableCellProperties
+  validateTableCellProperties,
 } from "./validation";
-import type { 
-  DocxTable, 
-  DocxTableRow, 
-  DocxTableCell, 
-  DocxTableProperties, 
-  DocxTableRowProperties, 
+import type {
+  DocxTable,
+  DocxTableRow,
+  DocxTableCell,
+  DocxTableProperties,
+  DocxTableRowProperties,
   DocxTableCellProperties,
-  DocxParagraph
+  DocxParagraph,
 } from "../types";
 import { DocxParseError } from "../reader/docx-reader";
 
@@ -23,20 +23,20 @@ import { DocxParseError } from "../reader/docx-reader";
 export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable, DocxParseError> =>
   Effect.gen(function* () {
     debug.log("Parsing table element");
-    
+
     const rows: DocxTableRow[] = [];
     const trElements = tblElement.querySelectorAll(":scope > tr, :scope > w\\:tr");
-    
+
     for (const trElement of trElements) {
       const row = yield* parseTableRowEnhanced(trElement);
       rows.push(row);
     }
-    
+
     // Parse table properties if present
     const tblPr = tblElement.querySelector(":scope > tblPr, :scope > w\\:tblPr");
     const rawProperties = tblPr ? yield* parseTableProperties(tblPr) : undefined;
     const properties = rawProperties ? yield* validateTableProperties(rawProperties) : undefined;
-    
+
     return {
       type: "table" as const,
       rows,
@@ -47,23 +47,25 @@ export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable
 /**
  * Parse a table row element
  */
-export const parseTableRowEnhanced = (trElement: Element): Effect.Effect<DocxTableRow, DocxParseError> =>
+export const parseTableRowEnhanced = (
+  trElement: Element,
+): Effect.Effect<DocxTableRow, DocxParseError> =>
   Effect.gen(function* () {
     debug.log("Parsing table row");
-    
+
     const cells: DocxTableCell[] = [];
     const tcElements = trElement.querySelectorAll(":scope > tc, :scope > w\\:tc");
-    
+
     for (const tcElement of tcElements) {
       const cell = yield* parseTableCellEnhanced(tcElement);
       cells.push(cell);
     }
-    
+
     // Parse row properties if present
     const trPr = trElement.querySelector(":scope > trPr, :scope > w\\:trPr");
     const rawProperties = trPr ? yield* parseTableRowProperties(trPr) : undefined;
     const properties = rawProperties ? yield* validateTableRowProperties(rawProperties) : undefined;
-    
+
     return {
       cells,
       properties,
@@ -73,13 +75,15 @@ export const parseTableRowEnhanced = (trElement: Element): Effect.Effect<DocxTab
 /**
  * Parse a table cell element
  */
-export const parseTableCellEnhanced = (tcElement: Element): Effect.Effect<DocxTableCell, DocxParseError> =>
+export const parseTableCellEnhanced = (
+  tcElement: Element,
+): Effect.Effect<DocxTableCell, DocxParseError> =>
   Effect.gen(function* () {
     debug.log("Parsing table cell");
-    
+
     const content: DocxParagraph[] = [];
     const pElements = tcElement.querySelectorAll(":scope > p, :scope > w\\:p");
-    
+
     for (const pElement of pElements) {
       try {
         const paragraph = parseParagraph(pElement);
@@ -89,12 +93,14 @@ export const parseTableCellEnhanced = (tcElement: Element): Effect.Effect<DocxTa
         // Continue with other paragraphs
       }
     }
-    
+
     // Parse cell properties if present
     const tcPr = tcElement.querySelector(":scope > tcPr, :scope > w\\:tcPr");
     const rawProperties = tcPr ? yield* parseTableCellProperties(tcPr) : undefined;
-    const properties = rawProperties ? yield* validateTableCellProperties(rawProperties) : undefined;
-    
+    const properties = rawProperties
+      ? yield* validateTableCellProperties(rawProperties)
+      : undefined;
+
     return {
       content,
       properties,
@@ -104,10 +110,12 @@ export const parseTableCellEnhanced = (tcElement: Element): Effect.Effect<DocxTa
 /**
  * Parse table properties
  */
-export const parseTableProperties = (tblPr: Element): Effect.Effect<DocxTableProperties, DocxParseError> =>
+export const parseTableProperties = (
+  tblPr: Element,
+): Effect.Effect<DocxTableProperties, DocxParseError> =>
   Effect.gen(function* () {
     const properties: DocxTableProperties = {};
-    
+
     // Parse table width
     const tblW = tblPr.querySelector("tblW");
     if (tblW) {
@@ -117,7 +125,7 @@ export const parseTableProperties = (tblPr: Element): Effect.Effect<DocxTablePro
         properties.width = type === "pct" ? `${w}%` : `${w}px`;
       }
     }
-    
+
     // Parse table alignment
     const jc = tblPr.querySelector("jc");
     if (jc) {
@@ -126,7 +134,7 @@ export const parseTableProperties = (tblPr: Element): Effect.Effect<DocxTablePro
         properties.alignment = val;
       }
     }
-    
+
     // Parse table indentation (used for centering)
     const tblInd = tblPr.querySelector("tblInd");
     if (tblInd) {
@@ -136,13 +144,13 @@ export const parseTableProperties = (tblPr: Element): Effect.Effect<DocxTablePro
         properties.indentation = type === "pct" ? `${w}%` : `${w}px`;
       }
     }
-    
+
     // Parse table borders
     const tblBorders = tblPr.querySelector("tblBorders");
     if (tblBorders) {
       properties.borders = yield* parseTableBorders(tblBorders);
     }
-    
+
     // Parse background color
     const shd = tblPr.querySelector("shd");
     if (shd) {
@@ -151,17 +159,19 @@ export const parseTableProperties = (tblPr: Element): Effect.Effect<DocxTablePro
         properties.backgroundColor = `#${fill}`;
       }
     }
-    
+
     return properties;
   });
 
 /**
  * Parse table row properties
  */
-export const parseTableRowProperties = (trPr: Element): Effect.Effect<DocxTableRowProperties, DocxParseError> =>
+export const parseTableRowProperties = (
+  trPr: Element,
+): Effect.Effect<DocxTableRowProperties, DocxParseError> =>
   Effect.gen(function* () {
     const properties: DocxTableRowProperties = {};
-    
+
     // Parse row height
     const trHeight = trPr.querySelector("trHeight");
     if (trHeight) {
@@ -170,23 +180,25 @@ export const parseTableRowProperties = (trPr: Element): Effect.Effect<DocxTableR
         properties.height = `${val}px`;
       }
     }
-    
+
     // Check if this is a header row
     const tblHeader = trPr.querySelector("tblHeader");
     if (tblHeader) {
       properties.isHeader = true;
     }
-    
+
     return properties;
   });
 
 /**
  * Parse table cell properties
  */
-export const parseTableCellProperties = (tcPr: Element): Effect.Effect<DocxTableCellProperties, DocxParseError> =>
+export const parseTableCellProperties = (
+  tcPr: Element,
+): Effect.Effect<DocxTableCellProperties, DocxParseError> =>
   Effect.gen(function* () {
     const properties: DocxTableCellProperties = {};
-    
+
     // Parse cell width
     const tcW = tcPr.querySelector("tcW");
     if (tcW) {
@@ -196,7 +208,7 @@ export const parseTableCellProperties = (tcPr: Element): Effect.Effect<DocxTable
         properties.width = type === "pct" ? `${w}%` : `${w}px`;
       }
     }
-    
+
     // Parse vertical alignment
     const vAlign = tcPr.querySelector("vAlign");
     if (vAlign) {
@@ -205,13 +217,13 @@ export const parseTableCellProperties = (tcPr: Element): Effect.Effect<DocxTable
         properties.alignment = val;
       }
     }
-    
+
     // Parse cell borders
     const tcBorders = tcPr.querySelector("tcBorders");
     if (tcBorders) {
       properties.borders = yield* parseTableBorders(tcBorders);
     }
-    
+
     // Parse background color
     const shd = tcPr.querySelector("shd");
     if (shd) {
@@ -220,36 +232,38 @@ export const parseTableCellProperties = (tcPr: Element): Effect.Effect<DocxTable
         properties.backgroundColor = `#${fill}`;
       }
     }
-    
+
     return properties;
   });
 
 /**
  * Parse table borders with validation
  */
-const parseTableBorders = (bordersElement: Element): Effect.Effect<Record<string, string>, DocxParseError> =>
+const parseTableBorders = (
+  bordersElement: Element,
+): Effect.Effect<Record<string, string>, DocxParseError> =>
   Effect.gen(function* () {
     const borders: Record<string, string> = {};
-    
+
     for (const side of ["top", "right", "bottom", "left"]) {
       const borderElement = bordersElement.querySelector(side);
       if (borderElement) {
         const val = borderElement.getAttribute("val");
         const sz = borderElement.getAttribute("sz");
         const color = borderElement.getAttribute("color");
-        
+
         if (val && val !== "none") {
           let borderStyle = "solid";
           if (val === "dashed") borderStyle = "dashed";
           if (val === "dotted") borderStyle = "dotted";
-          
+
           const width = sz ? `${Math.max(1, parseInt(sz) / 8)}px` : "1px";
           const borderColor = color && color !== "auto" ? `#${color}` : "#000000";
-          
+
           borders[side] = `${width} ${borderStyle} ${borderColor}`;
         }
       }
     }
-    
+
     return borders;
   });

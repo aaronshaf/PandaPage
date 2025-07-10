@@ -1,8 +1,12 @@
 // gvml-shape-types.ts
 // GVML (Graphics VML) shape types for DrawingML
 
-import type { CT_Transform2D } from './transform-types';
-import type { CT_ShapeProperties, CT_GroupShapeProperties, CT_ShapeStyle } from './shape-properties';
+import type { CT_Transform2D } from "./transform-types";
+import type {
+  CT_ShapeProperties,
+  CT_GroupShapeProperties,
+  CT_ShapeStyle,
+} from "./shape-properties";
 import type {
   CT_NonVisualDrawingProps,
   CT_NonVisualDrawingShapeProps,
@@ -12,10 +16,10 @@ import type {
   CT_GvmlUseShapeRectangle,
   CT_GraphicalObject,
   CT_NonVisualConnectorProperties,
-  CT_NonVisualPictureProperties
-} from './locking-properties';
-import type { CT_OfficeArtExtensionList } from '../dml-media';
-import type { CT_BlipFillProperties } from '../dml-effects';
+  CT_NonVisualPictureProperties,
+} from "./locking-properties";
+import type { CT_OfficeArtExtensionList } from "../dml-media";
+import type { CT_BlipFillProperties } from "../dml-effects";
 
 // GVML text shape
 export interface CT_GvmlTextShape {

@@ -1,6 +1,23 @@
 // spreadsheet-drawing-types.ts
-import type { CT_NonVisualDrawingProps, CT_NonVisualDrawingShapeProps, CT_ShapeProperties, CT_ShapeStyle, CT_TextBody, CT_NonVisualConnectorProperties, CT_BlipFillProperties, CT_NonVisualPictureProperties, CT_NonVisualGraphicFrameProperties, CT_Transform2D, CT_GraphicalObject, CT_NonVisualGroupDrawingShapeProps, CT_GroupShapeProperties, CT_Point2D, CT_PositiveSize2D, ST_Coordinate } from './dml-main';
-import type { ST_RelationshipId } from './shared-types';
+import type {
+  CT_NonVisualDrawingProps,
+  CT_NonVisualDrawingShapeProps,
+  CT_ShapeProperties,
+  CT_ShapeStyle,
+  CT_TextBody,
+  CT_NonVisualConnectorProperties,
+  CT_BlipFillProperties,
+  CT_NonVisualPictureProperties,
+  CT_NonVisualGraphicFrameProperties,
+  CT_Transform2D,
+  CT_GraphicalObject,
+  CT_NonVisualGroupDrawingShapeProps,
+  CT_GroupShapeProperties,
+  CT_Point2D,
+  CT_PositiveSize2D,
+  ST_Coordinate,
+} from "./dml-main";
+import type { ST_RelationshipId } from "./shared-types";
 
 export type ST_ColID = number; // xsd:int, minInclusive 0
 export type ST_RowID = number; // xsd:int, minInclusive 0
@@ -94,7 +111,7 @@ export interface CT_Rel {
   id: ST_RelationshipId;
 }
 
-export type EG_ObjectChoices = 
+export type EG_ObjectChoices =
   | { sp: CT_Shape }
   | { grpSp: CT_GroupShape }
   | { graphicFrame: CT_GraphicalObjectFrame }
@@ -130,7 +147,7 @@ export interface CT_AbsoluteAnchor {
   clientData: CT_AnchorClientData;
 }
 
-export type EG_Anchor = 
+export type EG_Anchor =
   | { twoCellAnchor: CT_TwoCellAnchor }
   | { oneCellAnchor: CT_OneCellAnchor }
   | { absoluteAnchor: CT_AbsoluteAnchor };

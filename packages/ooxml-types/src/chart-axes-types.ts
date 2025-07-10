@@ -1,16 +1,16 @@
 // chart-axes-types.ts
 // Axis-related types for charts
 
-import type { CT_ShapeProperties, CT_TextBody } from './dml-main';
-import type { 
-  CT_Boolean, 
-  CT_Double, 
-  CT_UnsignedInt, 
+import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
+import type {
+  CT_Boolean,
+  CT_Double,
+  CT_UnsignedInt,
   CT_ExtensionList,
-  CT_Tx
-} from './chart-data-types';
-import type { CT_NumFmt, CT_ChartLines } from './chart-formatting-types';
-import type { CT_Title, CT_Layout } from './chart-legend-types';
+  CT_Tx,
+} from "./chart-data-types";
+import type { CT_NumFmt, CT_ChartLines } from "./chart-formatting-types";
+import type { CT_Title, CT_Layout } from "./chart-legend-types";
 
 // Axis position
 export enum ST_AxPos {
@@ -225,4 +225,4 @@ export interface CT_ValAx {
 }
 
 // Import types from other modules
-import type { CT_LblAlgn } from './chart-formatting-types';
+import type { CT_LblAlgn } from "./chart-formatting-types";

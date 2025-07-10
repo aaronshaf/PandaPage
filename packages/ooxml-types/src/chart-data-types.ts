@@ -1,8 +1,8 @@
 // chart-data-types.ts
 // Data-related types for charts including data sources, series, and values
 
-import type { ST_Xstring, ST_Lang } from './shared-types';
-import type { CT_ShapeProperties, CT_TextBody } from './dml-main';
+import type { ST_Xstring, ST_Lang } from "./shared-types";
+import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
 
 // Basic data types
 export interface CT_UnsignedInt {
@@ -218,12 +218,12 @@ export interface CT_SurfaceSer {
 }
 
 // Import types that are defined in other modules
-import type { 
-  CT_Marker, 
-  CT_DPt, 
-  CT_DLbls, 
-  CT_Trendline, 
-  CT_ErrBars, 
+import type {
+  CT_Marker,
+  CT_DPt,
+  CT_DLbls,
+  CT_Trendline,
+  CT_ErrBars,
   CT_PictureOptions,
-  CT_Shape 
-} from './chart-formatting-types';
+  CT_Shape,
+} from "./chart-formatting-types";

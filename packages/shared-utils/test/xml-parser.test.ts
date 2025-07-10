@@ -7,7 +7,7 @@ import {
   getElementByPath,
   getElementsByPath,
   EffectXmlParser,
-  XmlParseError
+  XmlParseError,
 } from "../src/xml/parser";
 import { Window } from "happy-dom";
 
@@ -26,7 +26,7 @@ describe("XML Parser", () => {
     test("should parse valid XML", async () => {
       const xml = `<root><child>content</child></root>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc).toBeDefined();
       expect(doc.documentElement.tagName).toBe("root");
     });
@@ -34,7 +34,7 @@ describe("XML Parser", () => {
     test("should handle XML with BOM", async () => {
       const xml = `\uFEFF<root><child>content</child></root>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc).toBeDefined();
       expect(doc.documentElement.tagName).toBe("root");
     });
@@ -42,27 +42,27 @@ describe("XML Parser", () => {
     test("should handle namespaced XML", async () => {
       const xml = `<w:document xmlns:w="http://example.com"><w:body><w:p>text</w:p></w:body></w:document>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc).toBeDefined();
       expect(doc.documentElement.tagName).toBe("w:document");
     });
 
     test("should fail on invalid XML", async () => {
       const xml = `<root><child>content</root>`;
-      
+
       await expect(Effect.runPromise(parseXmlString(xml))).rejects.toThrow();
     });
 
     test("should fail on empty string", async () => {
       const xml = "";
-      
+
       await expect(Effect.runPromise(parseXmlString(xml))).rejects.toThrow();
     });
 
     test("should handle XML with attributes", async () => {
       const xml = `<root attr="value"><child id="123">content</child></root>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc.documentElement.getAttribute("attr")).toBe("value");
     });
 
@@ -70,20 +70,20 @@ describe("XML Parser", () => {
       // Note: happy-dom's DOMParser doesn't support CDATA sections properly
       const xml = `<root><![CDATA[some content]]></root>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc.documentElement.textContent).toBe("some content");
     });
 
     test("should handle XML with comments", async () => {
       const xml = `<root><!-- comment --><child>content</child></root>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc.documentElement.tagName).toBe("root");
     });
 
     test("should return XmlParseError for malformed XML", async () => {
       const xml = `<root>`;
-      
+
       await expect(Effect.runPromise(parseXmlString(xml))).rejects.toThrow("XML parsing");
     });
   });
@@ -140,7 +140,7 @@ describe("XML Parser", () => {
         const xml = `<root><item>1</item><item>2</item><item>3</item></root>`;
         const itemDoc = new DOMParser().parseFromString(xml, "application/xml");
         const items = parser.elements(itemDoc.documentElement, "item");
-        
+
         expect(items).toHaveLength(3);
         expect(items[0]?.textContent).toBe("1");
         expect(items[2]?.textContent).toBe("3");
@@ -149,8 +149,8 @@ describe("XML Parser", () => {
       test("should find all child elements when no local name", () => {
         const elements = parser.elements(root);
         expect(elements.length).toBeGreaterThan(0);
-        expect(elements.some(el => el.tagName === "child1")).toBe(true);
-        expect(elements.some(el => el.tagName === "empty")).toBe(true);
+        expect(elements.some((el) => el.tagName === "child1")).toBe(true);
+        expect(elements.some((el) => el.tagName === "empty")).toBe(true);
       });
 
       test("should return empty array for no matches", () => {
@@ -191,16 +191,16 @@ describe("XML Parser", () => {
       test("should get all attributes", () => {
         const child1 = parser.element(root, "child1")!;
         const attrs = parser.attrs(child1);
-        
+
         expect(attrs.length).toBeGreaterThan(0);
-        expect(attrs.some(attr => attr.name === "id")).toBe(true);
-        expect(attrs.some(attr => attr.name === "enabled")).toBe(true);
+        expect(attrs.some((attr) => attr.name === "id")).toBe(true);
+        expect(attrs.some((attr) => attr.name === "enabled")).toBe(true);
       });
 
       test("should return empty array for element without attributes", () => {
         const empty = parser.element(root, "empty")!;
         const attrs = parser.attrs(empty);
-        
+
         expect(attrs).toEqual([]);
       });
     });
@@ -300,7 +300,7 @@ describe("XML Parser", () => {
       test("should handle hex with prefix", () => {
         const xml = `<el color="0xFF00FF"/>`;
         const elDoc = new DOMParser().parseFromString(xml, "application/xml");
-        expect(parser.hexAttr(elDoc.documentElement, "color")).toBe(0xFF00FF);
+        expect(parser.hexAttr(elDoc.documentElement, "color")).toBe(0xff00ff);
       });
 
       test("should return null for invalid hex", () => {
@@ -310,7 +310,7 @@ describe("XML Parser", () => {
 
       test("should use default value", () => {
         const child1 = parser.element(root, "child1")!;
-        expect(parser.hexAttr(child1, "missing", 0xABCD)).toBe(0xABCD);
+        expect(parser.hexAttr(child1, "missing", 0xabcd)).toBe(0xabcd);
       });
     });
 
@@ -457,7 +457,7 @@ describe("XML Parser", () => {
     test("should create new parser instance", () => {
       const parser1 = createXmlParser();
       const parser2 = createXmlParser();
-      
+
       expect(parser1).toBeDefined();
       expect(parser2).toBeDefined();
       expect(parser1).not.toBe(parser2);
@@ -467,7 +467,7 @@ describe("XML Parser", () => {
       const parser = createXmlParser();
       const xml = `<test attr="value">content</test>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(parser.attr(doc.documentElement, "attr")).toBe("value");
       expect(parser.textContent(doc.documentElement)).toBe("content");
     });
@@ -481,7 +481,7 @@ describe("XML Parser", () => {
     test("should work correctly", async () => {
       const xml = `<test id="123">text</test>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(xmlParser.attr(doc.documentElement, "id")).toBe("123");
       expect(xmlParser.intAttr(doc.documentElement, "id")).toBe(123);
     });
@@ -507,7 +507,7 @@ describe("XML Parser", () => {
       const doc = await Effect.runPromise(parseXmlString(xml));
       const parser = new EffectXmlParser();
       const child = parser.element(doc.documentElement, "child");
-      
+
       expect(child?.textContent).toBe("Child text");
     });
 
@@ -521,7 +521,7 @@ describe("XML Parser", () => {
         xml += `</level${i}>`;
       }
       xml += "</root>";
-      
+
       const doc = await Effect.runPromise(parseXmlString(xml));
       expect(doc.documentElement.textContent).toBe("Deep");
     });
@@ -529,7 +529,7 @@ describe("XML Parser", () => {
     test("should handle special characters in content", async () => {
       const xml = `<root>&lt;test&gt; &amp; &quot;quoted&quot;</root>`;
       const doc = await Effect.runPromise(parseXmlString(xml));
-      
+
       expect(doc.documentElement.textContent).toBe(`<test> & "quoted"`);
     });
   });

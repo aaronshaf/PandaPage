@@ -21,7 +21,7 @@ export interface CT_DMLStyleMatrixReference {
 /**
  * Font collection index
  */
-export type ST_DMLFontCollectionIndex = 'major' | 'minor' | 'none';
+export type ST_DMLFontCollectionIndex = "major" | "minor" | "none";
 
 /**
  * Font reference
@@ -36,9 +36,19 @@ export interface CT_DMLFontReference {
 /**
  * Color scheme index
  */
-export type ST_DMLColorSchemeIndex = 
-  | 'dk1' | 'lt1' | 'dk2' | 'lt2' | 'accent1' | 'accent2' | 'accent3' 
-  | 'accent4' | 'accent5' | 'accent6' | 'hlink' | 'folHlink';
+export type ST_DMLColorSchemeIndex =
+  | "dk1"
+  | "lt1"
+  | "dk2"
+  | "lt2"
+  | "accent1"
+  | "accent2"
+  | "accent3"
+  | "accent4"
+  | "accent5"
+  | "accent6"
+  | "hlink"
+  | "folHlink";
 
 /**
  * Color scheme reference

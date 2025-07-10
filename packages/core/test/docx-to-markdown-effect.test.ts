@@ -27,12 +27,12 @@ describe("docx-to-markdown Effect-based functions", () => {
                 <w:r><w:t>Test Heading</w:t></w:r>
               </w:p>
             </w:body>
-          </w:document>`)
+          </w:document>`),
       };
       const buffer = zipSync(files).buffer;
 
       const result = await Effect.runPromise(docxToMarkdown(buffer));
-      
+
       expect(result).toContain("# Test Heading");
     });
 
@@ -53,12 +53,12 @@ describe("docx-to-markdown Effect-based functions", () => {
           <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/">
             <dc:title>Test Title</dc:title>
             <dc:creator>Test Author</dc:creator>
-          </cp:coreProperties>`)
+          </cp:coreProperties>`),
       };
       const buffer = zipSync(files).buffer;
 
       const result = await Effect.runPromise(docxToMarkdownWithMetadata(buffer));
-      
+
       expect(result).toContain("---");
       expect(result).toContain('title: "Test Title"');
       expect(result).toContain('author: "Test Author"');
@@ -67,7 +67,7 @@ describe("docx-to-markdown Effect-based functions", () => {
 
     test("docxToMarkdown should handle invalid buffer", async () => {
       const invalidBuffer = new ArrayBuffer(100);
-      
+
       try {
         await Effect.runPromise(docxToMarkdown(invalidBuffer));
         expect(true).toBe(false); // Should not reach here
@@ -79,7 +79,7 @@ describe("docx-to-markdown Effect-based functions", () => {
 
     test("docxToMarkdown should handle empty buffer", async () => {
       const emptyBuffer = new ArrayBuffer(0);
-      
+
       try {
         await Effect.runPromise(docxToMarkdown(emptyBuffer));
         expect(true).toBe(false); // Should not reach here

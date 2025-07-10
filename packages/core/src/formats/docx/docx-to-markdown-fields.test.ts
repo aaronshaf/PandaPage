@@ -9,20 +9,17 @@ describe("DOCX to Markdown - Field Conversion", () => {
       paragraphs: [
         {
           type: "paragraph",
-          runs: [
-            { text: "Name: " },
-            { text: "John Doe" }
-          ],
+          runs: [{ text: "Name: " }, { text: "John Doe" }],
           fields: [
             {
               type: FieldCode.FORMTEXT,
               instruction: 'FORMTEXT "Enter your name"',
               properties: { defaultText: "Enter your name" },
-              result: "John Doe"
-            }
-          ]
-        }
-      ]
+              result: "John Doe",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -38,11 +35,11 @@ describe("DOCX to Markdown - Field Conversion", () => {
           fields: [
             {
               type: FieldCode.FORMTEXT,
-              instruction: "FORMTEXT"
-            }
-          ]
-        }
-      ]
+              instruction: "FORMTEXT",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -58,15 +55,15 @@ describe("DOCX to Markdown - Field Conversion", () => {
           fields: [
             {
               type: FieldCode.FORMCHECKBOX,
-              instruction: "FORMCHECKBOX"
-            }
-          ]
+              instruction: "FORMCHECKBOX",
+            },
+          ],
         },
         {
           type: "paragraph",
           runs: [{ text: " Completed" }],
-        }
-      ]
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -83,11 +80,11 @@ describe("DOCX to Markdown - Field Conversion", () => {
           fields: [
             {
               type: FieldCode.FORMDROPDOWN,
-              instruction: "FORMDROPDOWN"
-            }
-          ]
-        }
-      ]
+              instruction: "FORMDROPDOWN",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -99,20 +96,17 @@ describe("DOCX to Markdown - Field Conversion", () => {
       paragraphs: [
         {
           type: "paragraph",
-          runs: [
-            { text: "Meeting Date: " },
-            { text: "12/25/2023" }
-          ],
+          runs: [{ text: "Meeting Date: " }, { text: "12/25/2023" }],
           fields: [
             {
               type: FieldCode.DATE,
               instruction: 'DATE \\@ "MM/dd/yyyy"',
               properties: { "@": "MM/dd/yyyy" },
-              result: "12/25/2023"
-            }
-          ]
-        }
-      ]
+              result: "12/25/2023",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -124,25 +118,20 @@ describe("DOCX to Markdown - Field Conversion", () => {
       paragraphs: [
         {
           type: "paragraph",
-          runs: [
-            { text: "From: " },
-            { text: "John Doe" },
-            { text: " To: " },
-            { text: "" }
-          ],
+          runs: [{ text: "From: " }, { text: "John Doe" }, { text: " To: " }, { text: "" }],
           fields: [
             {
               type: FieldCode.FORMTEXT,
               instruction: "FORMTEXT",
-              result: "John Doe"
+              result: "John Doe",
             },
             {
               type: FieldCode.FORMTEXT,
-              instruction: "FORMTEXT"
-            }
-          ]
-        }
-      ]
+              instruction: "FORMTEXT",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -154,26 +143,21 @@ describe("DOCX to Markdown - Field Conversion", () => {
       paragraphs: [
         {
           type: "paragraph",
-          runs: [
-            { text: "Page " },
-            { text: "1" },
-            { text: " of " },
-            { text: "10" }
-          ],
+          runs: [{ text: "Page " }, { text: "1" }, { text: " of " }, { text: "10" }],
           fields: [
             {
               type: FieldCode.PAGE,
               instruction: "PAGE",
-              result: "1"
+              result: "1",
             },
             {
               type: FieldCode.NUMPAGES,
               instruction: "NUMPAGES",
-              result: "10"
-            }
-          ]
-        }
-      ]
+              result: "10",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -186,19 +170,16 @@ describe("DOCX to Markdown - Field Conversion", () => {
         {
           type: "paragraph",
           style: "Heading1",
-          runs: [
-            { text: "Meeting Minutes - " },
-            { text: "12/25/2023" }
-          ],
+          runs: [{ text: "Meeting Minutes - " }, { text: "12/25/2023" }],
           fields: [
             {
               type: FieldCode.DATE,
               instruction: "DATE",
-              result: "12/25/2023"
-            }
-          ]
-        }
-      ]
+              result: "12/25/2023",
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -210,30 +191,28 @@ describe("DOCX to Markdown - Field Conversion", () => {
       paragraphs: [
         {
           type: "paragraph",
-          runs: [
-            { text: "Action Item: " },
-            { text: "" }
-          ],
+          runs: [{ text: "Action Item: " }, { text: "" }],
           numId: "1",
           ilvl: 0,
           fields: [
             {
               type: FieldCode.FORMTEXT,
-              instruction: "FORMTEXT"
-            }
-          ]
-        }
+              instruction: "FORMTEXT",
+            },
+          ],
+        },
       ],
       numbering: {
         instances: new Map([["1", "0"]]),
         abstractFormats: new Map([
-          ["0", {
-            levels: new Map([
-              [0, { numFmt: "decimal", lvlText: "%1." }]
-            ])
-          }]
-        ])
-      }
+          [
+            "0",
+            {
+              levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]),
+            },
+          ],
+        ]),
+      },
     };
 
     const markdown = convertDocxToMarkdown(document);
@@ -250,11 +229,11 @@ describe("DOCX to Markdown - Field Conversion", () => {
             {
               type: FieldCode.FORMTEXT,
               instruction: 'FORMTEXT "Type your response here"',
-              properties: { defaultText: "Type your response here" }
-            }
-          ]
-        }
-      ]
+              properties: { defaultText: "Type your response here" },
+            },
+          ],
+        },
+      ],
     };
 
     const markdown = convertDocxToMarkdown(document);

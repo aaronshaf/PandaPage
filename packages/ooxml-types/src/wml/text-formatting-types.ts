@@ -3,11 +3,16 @@
  * @see ECMA-376 Part 1, §17.18 (Text Formatting)
  */
 
-import type { ST_OnOff, ST_String, ST_HexColorRGB } from '../shared/common-types';
-import type { ST_UniversalMeasure } from '../shared/measurement-types';
-import type { ST_TwipsMeasure } from '../shared/measurement-types';
-import type { ST_UcharHexNumber, ST_HpsMeasure, CT_HpsMeasure, CT_SignedTwipsMeasure } from './basic-types';
-import type { ST_TextAlignment, CT_TextAlignment } from './paragraph-types';
+import type { ST_OnOff, ST_String, ST_HexColorRGB } from "../shared/common-types";
+import type { ST_UniversalMeasure } from "../shared/measurement-types";
+import type { ST_TwipsMeasure } from "../shared/measurement-types";
+import type {
+  ST_UcharHexNumber,
+  ST_HpsMeasure,
+  CT_HpsMeasure,
+  CT_SignedTwipsMeasure,
+} from "./basic-types";
+import type { ST_TextAlignment, CT_TextAlignment } from "./paragraph-types";
 
 /**
  * Highlight colors.
@@ -141,7 +146,6 @@ export interface CT_TextEffect {
   val?: ST_TextEffect;
 }
 
-
 /**
  * Font size in half-points.
  * @see ECMA-376 Part 1, §17.3.2.38 CT_HpsMeasure
@@ -170,12 +174,12 @@ export interface CT_TextScale {
 /**
  * Universal measure (imported from shared).
  */
-export type { ST_UniversalMeasure } from '../shared/measurement-types';
+export type { ST_UniversalMeasure } from "../shared/measurement-types";
 
 /**
  * Twips measure (imported from shared).
  */
-export type { ST_TwipsMeasure } from '../shared/measurement-types';
+export type { ST_TwipsMeasure } from "../shared/measurement-types";
 
 /**
  * Fit text.

@@ -16,17 +16,21 @@ test("renderToHtml handles text formatting", () => {
           { text: " and " },
           { text: "underline", underline: true },
           { text: " and " },
-          { text: "strikethrough", strikethrough: true }
-        ]
-      }
-    ]
+          { text: "strikethrough", strikethrough: true },
+        ],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('<span>Normal </span><span style="font-weight: bold;">bold</span>');
   expect(result).toContain('<span> and </span><span style="font-style: italic;">italic</span>');
-  expect(result).toContain('<span> and </span><span style="text-decoration: underline;">underline</span>');
-  expect(result).toContain('<span> and </span><span style="text-decoration: line-through;">strikethrough</span>');
+  expect(result).toContain(
+    '<span> and </span><span style="text-decoration: underline;">underline</span>',
+  );
+  expect(result).toContain(
+    '<span> and </span><span style="text-decoration: line-through;">strikethrough</span>',
+  );
 });
 
 test("renderToHtml handles combined formatting", () => {
@@ -38,15 +42,19 @@ test("renderToHtml handles combined formatting", () => {
         runs: [
           { text: "bold+italic", bold: true, italic: true },
           { text: " " },
-          { text: "all", bold: true, italic: true, underline: true, strikethrough: true }
-        ]
-      }
-    ]
+          { text: "all", bold: true, italic: true, underline: true, strikethrough: true },
+        ],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
-  expect(result).toContain('<span style="font-weight: bold; font-style: italic;">bold+italic</span>');
-  expect(result).toContain('<span style="font-weight: bold; font-style: italic; text-decoration: underline line-through;">all</span>');
+  expect(result).toContain(
+    '<span style="font-weight: bold; font-style: italic;">bold+italic</span>',
+  );
+  expect(result).toContain(
+    '<span style="font-weight: bold; font-style: italic; text-decoration: underline line-through;">all</span>',
+  );
 });
 
 test("renderToHtml handles links", () => {
@@ -58,17 +66,17 @@ test("renderToHtml handles links", () => {
         runs: [
           { text: "Visit " },
           { text: "example.com", link: "https://example.com" },
-          { text: " for more" }
-        ]
-      }
-    ]
+          { text: " for more" },
+        ],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('<a href="https://example.com"');
   expect(result).toContain('target="_blank"');
-  expect(result).toContain('>example.com</a>');
-  expect(result).toContain('<span> for more</span>');
+  expect(result).toContain(">example.com</a>");
+  expect(result).toContain("<span> for more</span>");
 });
 
 test("renderToHtml adds security attributes to links", () => {
@@ -77,18 +85,16 @@ test("renderToHtml adds security attributes to links", () => {
     elements: [
       {
         type: "paragraph",
-        runs: [
-          { text: "example.com", link: "https://example.com" }
-        ]
-      }
-    ]
+        runs: [{ text: "example.com", link: "https://example.com" }],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('target="_blank"');
   expect(result).toContain('rel="noopener noreferrer"');
   // onclick is not added in test environment (no browser window)
-  expect(result).not.toContain('onclick');
+  expect(result).not.toContain("onclick");
 });
 
 test("renderToHtml includes security script in full document", () => {
@@ -97,17 +103,15 @@ test("renderToHtml includes security script in full document", () => {
     elements: [
       {
         type: "paragraph",
-        runs: [
-          { text: "example.com", link: "https://example.com" }
-        ]
-      }
-    ]
+        runs: [{ text: "example.com", link: "https://example.com" }],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc, { includeStyles: true });
   // Script is not added in test environment
-  expect(result).not.toContain('function confirmDocumentLink');
-  expect(result).not.toContain('Security Warning');
+  expect(result).not.toContain("function confirmDocumentLink");
+  expect(result).not.toContain("Security Warning");
 });
 
 test("renderToHtml handles formatted links", () => {
@@ -116,18 +120,16 @@ test("renderToHtml handles formatted links", () => {
     elements: [
       {
         type: "paragraph",
-        runs: [
-          { text: "bold link", bold: true, link: "https://example.com" }
-        ]
-      }
-    ]
+        runs: [{ text: "bold link", bold: true, link: "https://example.com" }],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('<a href="https://example.com"');
   expect(result).toContain('style="font-weight: bold;"');
   expect(result).toContain('target="_blank"');
-  expect(result).toContain('>bold link</a>');
+  expect(result).toContain(">bold link</a>");
 });
 
 test("renderToHtml handles font styling", () => {
@@ -143,12 +145,12 @@ test("renderToHtml handles font styling", () => {
           { text: " " },
           { text: "red text", color: "#FF0000" },
           { text: " " },
-          { text: "highlighted", backgroundColor: "#FFFF00" }
-        ]
-      }
-    ]
+          { text: "highlighted", backgroundColor: "#FFFF00" },
+        ],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('style="font-family: Arial;"');
   expect(result).toContain('style="font-size: 18pt;"');
@@ -165,12 +167,12 @@ test("renderToHtml handles background colors", () => {
         runs: [
           { text: "yellow highlight", backgroundColor: "#FFFF00" },
           { text: " and " },
-          { text: "green background", backgroundColor: "#00FF00" }
-        ]
-      }
-    ]
+          { text: "green background", backgroundColor: "#00FF00" },
+        ],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('style="background-color: #FFFF00;"');
   expect(result).toContain('style="background-color: #00FF00;"');
@@ -182,13 +184,11 @@ test("renderToHtml handles complex color combinations", () => {
     elements: [
       {
         type: "paragraph",
-        runs: [
-          { text: "inverse video", color: "#FFFFFF", backgroundColor: "#000000" }
-        ]
-      }
-    ]
+        runs: [{ text: "inverse video", color: "#FFFFFF", backgroundColor: "#000000" }],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).toContain('style="color: #FFFFFF; background-color: #000000;"');
 });
@@ -200,23 +200,25 @@ test("renderToHtml handles multiple style combinations", () => {
       {
         type: "paragraph",
         runs: [
-          { 
-            text: "complex", 
-            bold: true, 
-            italic: true, 
+          {
+            text: "complex",
+            bold: true,
+            italic: true,
             superscript: true,
             color: "#FF0000",
             backgroundColor: "#FFFF00",
             fontSize: 14,
-            fontFamily: "Arial"
-          }
-        ]
-      }
-    ]
+            fontFamily: "Arial",
+          },
+        ],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
-  expect(result).toContain('<span style="font-size: 14pt; font-family: Arial; color: #FF0000; background-color: #FFFF00;"><sup>complex</sup></span>');
+  expect(result).toContain(
+    '<span style="font-size: 14pt; font-family: Arial; color: #FF0000; background-color: #FFFF00;"><sup>complex</sup></span>',
+  );
 });
 
 test("renderToHtml escapes HTML entities", () => {
@@ -225,11 +227,11 @@ test("renderToHtml escapes HTML entities", () => {
     elements: [
       {
         type: "paragraph",
-        runs: [{ text: "Test <script>alert('xss')</script> & \"quotes\"" }]
-      }
-    ]
+        runs: [{ text: "Test <script>alert('xss')</script> & \"quotes\"" }],
+      },
+    ],
   };
-  
+
   const result = renderToHtml(doc);
   expect(result).not.toContain("<script>");
   expect(result).toContain("&lt;script&gt;");

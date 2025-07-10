@@ -3,7 +3,13 @@ import type { DocxParagraph, DocxNumbering } from "./docx-reader";
 import type { DocxMetadata } from "./docx-metadata";
 
 // Re-export existing types
-export type { DocxParagraph, DocxRun, DocxNumbering, DocxAbstractFormat, DocxLevelFormat } from "./docx-reader";
+export type {
+  DocxParagraph,
+  DocxRun,
+  DocxNumbering,
+  DocxAbstractFormat,
+  DocxLevelFormat,
+} from "./docx-reader";
 export type { DocxMetadata } from "./docx-metadata";
 
 /**
@@ -67,7 +73,7 @@ export interface EnhancedDocxDocument {
   headers?: DocxHeaderFooter[];
   footers?: DocxHeaderFooter[];
   numbering?: DocxNumbering;
-  
+
   // Processing metadata
   processingTime: number;
   extractedAt: Date;

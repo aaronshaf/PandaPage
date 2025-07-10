@@ -1,6 +1,12 @@
 import { Effect } from "effect";
 import { debug } from "@browser-document-viewer/shared-utils/debug";
-import { type PptxContent, type PptxDocument, type PptxSlide, readPptx, PptxParseError } from "../reader/pptx-reader";
+import {
+  type PptxContent,
+  type PptxDocument,
+  type PptxSlide,
+  readPptx,
+  PptxParseError,
+} from "../reader/pptx-reader";
 
 // Convert PPTX document to Markdown
 export const convertPptxToMarkdown = (document: PptxDocument): string => {
@@ -79,9 +85,7 @@ const convertContentToMarkdown = (content: PptxContent): string => {
 };
 
 // Main function to convert PPTX buffer to Markdown
-export const pptxToMarkdown = (
-  buffer: ArrayBuffer,
-): Effect.Effect<string, PptxParseError> =>
+export const pptxToMarkdown = (buffer: ArrayBuffer): Effect.Effect<string, PptxParseError> =>
   Effect.gen(function* () {
     debug.log("Converting PPTX to Markdown...");
 

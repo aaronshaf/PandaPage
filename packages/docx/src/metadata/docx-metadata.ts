@@ -11,22 +11,26 @@ export class DocxMetadataError {
 /**
  * Parse core properties from docProps/core.xml
  */
-export const parseCoreProperties = (xmlContent: string): Effect.Effect<Partial<DocxMetadata>, DocxMetadataError> =>
+export const parseCoreProperties = (
+  xmlContent: string,
+): Effect.Effect<Partial<DocxMetadata>, DocxMetadataError> =>
   Effect.gen(function* () {
     debug.log("Parsing core properties XML");
-    
+
     const document = yield* parseXmlString(xmlContent).pipe(
-      Effect.mapError(error => new DocxMetadataError(`Failed to parse core.xml: ${error.message}`))
+      Effect.mapError(
+        (error) => new DocxMetadataError(`Failed to parse core.xml: ${error.message}`),
+      ),
     );
-    
+
     const root = document.documentElement;
     const metadata: Partial<DocxMetadata> = {};
-    
+
     // Parse Dublin Core elements
     for (const element of xmlParser.elements(root)) {
       const localName = element.localName;
       const textContent = xmlParser.textContent(element);
-      
+
       switch (localName) {
         case "title":
           metadata.title = textContent;
@@ -60,7 +64,7 @@ export const parseCoreProperties = (xmlContent: string): Effect.Effect<Partial<D
           break;
       }
     }
-    
+
     debug.log("Parsed core properties:", Object.keys(metadata));
     return metadata;
   });
@@ -68,22 +72,26 @@ export const parseCoreProperties = (xmlContent: string): Effect.Effect<Partial<D
 /**
  * Parse extended/app properties from docProps/app.xml
  */
-export const parseAppProperties = (xmlContent: string): Effect.Effect<Partial<DocxMetadata>, DocxMetadataError> =>
+export const parseAppProperties = (
+  xmlContent: string,
+): Effect.Effect<Partial<DocxMetadata>, DocxMetadataError> =>
   Effect.gen(function* () {
     debug.log("Parsing app properties XML");
-    
+
     const document = yield* parseXmlString(xmlContent).pipe(
-      Effect.mapError(error => new DocxMetadataError(`Failed to parse app.xml: ${error.message}`))
+      Effect.mapError(
+        (error) => new DocxMetadataError(`Failed to parse app.xml: ${error.message}`),
+      ),
     );
-    
+
     const root = document.documentElement;
     const metadata: Partial<DocxMetadata> = {};
-    
+
     // Parse application-specific elements
     for (const element of xmlParser.elements(root)) {
       const localName = element.localName;
       const textContent = xmlParser.textContent(element);
-      
+
       switch (localName) {
         case "Application":
           metadata.application = textContent;
@@ -120,7 +128,7 @@ export const parseAppProperties = (xmlContent: string): Effect.Effect<Partial<Do
           break;
       }
     }
-    
+
     debug.log("Parsed app properties:", Object.keys(metadata));
     return metadata;
   });
@@ -129,43 +137,45 @@ export const parseAppProperties = (xmlContent: string): Effect.Effect<Partial<Do
  * Extract document outline/structure for TOC
  */
 export const extractDocumentOutline = (
-  documentXml: string
+  documentXml: string,
 ): Effect.Effect<DocxOutlineItem[], DocxMetadataError> =>
   Effect.gen(function* () {
     debug.log("Extracting document outline");
-    
+
     const document = yield* parseXmlString(documentXml).pipe(
-      Effect.mapError(error => new DocxMetadataError(`Failed to parse document.xml: ${error.message}`))
+      Effect.mapError(
+        (error) => new DocxMetadataError(`Failed to parse document.xml: ${error.message}`),
+      ),
     );
-    
+
     const root = document.documentElement;
     const outline: DocxOutlineItem[] = [];
-    
+
     // Find all paragraphs with heading styles
-    const paragraphs = xmlParser.elements(root).flatMap(el => 
-      el.localName === "body" ? xmlParser.elements(el, "p") : []
-    );
-    
+    const paragraphs = xmlParser
+      .elements(root)
+      .flatMap((el) => (el.localName === "body" ? xmlParser.elements(el, "p") : []));
+
     for (const paragraph of paragraphs) {
       const pPr = xmlParser.element(paragraph, "pPr");
       if (!pPr) continue;
-      
+
       const pStyle = xmlParser.element(pPr, "pStyle");
       if (!pStyle) continue;
-      
+
       const styleVal = xmlParser.attr(pStyle, "val");
       if (!styleVal || !isHeadingStyle(styleVal)) continue;
-      
+
       // Extract text content from runs
       const runs = xmlParser.elements(paragraph, "r");
       const text = runs
-        .map(run => {
+        .map((run) => {
           const textElements = xmlParser.elements(run, "t");
-          return textElements.map(t => xmlParser.textContent(t)).join("");
+          return textElements.map((t) => xmlParser.textContent(t)).join("");
         })
         .join("")
         .trim();
-      
+
       if (text) {
         outline.push({
           level: getHeadingLevel(styleVal),
@@ -174,7 +184,7 @@ export const extractDocumentOutline = (
         });
       }
     }
-    
+
     debug.log(`Extracted ${outline.length} outline items`);
     return outline;
   });
@@ -183,23 +193,25 @@ export const extractDocumentOutline = (
  * Analyze document for style usage statistics
  */
 export const analyzeStyleUsage = (
-  documentXml: string
+  documentXml: string,
 ): Effect.Effect<DocxStyleUsage[], DocxMetadataError> =>
   Effect.gen(function* () {
     debug.log("Analyzing style usage");
-    
+
     const document = yield* parseXmlString(documentXml).pipe(
-      Effect.mapError(error => new DocxMetadataError(`Failed to parse document.xml: ${error.message}`))
+      Effect.mapError(
+        (error) => new DocxMetadataError(`Failed to parse document.xml: ${error.message}`),
+      ),
     );
-    
+
     const styleUsage = new Map<string, number>();
     const root = document.documentElement;
-    
+
     // Count paragraph styles
-    const paragraphs = xmlParser.elements(root).flatMap(el => 
-      el.localName === "body" ? xmlParser.elements(el, "p") : []
-    );
-    
+    const paragraphs = xmlParser
+      .elements(root)
+      .flatMap((el) => (el.localName === "body" ? xmlParser.elements(el, "p") : []));
+
     for (const paragraph of paragraphs) {
       const pPr = xmlParser.element(paragraph, "pPr");
       if (pPr) {
@@ -211,7 +223,7 @@ export const analyzeStyleUsage = (
           }
         }
       }
-      
+
       // Count run styles
       const runs = xmlParser.elements(paragraph, "r");
       for (const run of runs) {
@@ -227,13 +239,13 @@ export const analyzeStyleUsage = (
         }
       }
     }
-    
+
     const result: DocxStyleUsage[] = Array.from(styleUsage.entries()).map(([name, usage]) => ({
       name,
       usage,
       type: determineStyleType(name),
     }));
-    
+
     debug.log(`Analyzed ${result.length} unique styles`);
     return result;
   });
@@ -250,26 +262,18 @@ export const extractCompleteMetadata = (parts: {
   Effect.gen(function* () {
     const startTime = Date.now();
     debug.log("Extracting complete DOCX metadata");
-    
+
     // Parse all available metadata sources
-    const coreProps = parts.coreXml 
-      ? yield* parseCoreProperties(parts.coreXml)
-      : {};
-      
-    const appProps = parts.appXml
-      ? yield* parseAppProperties(parts.appXml) 
-      : {};
-      
-    const outline = parts.documentXml
-      ? yield* extractDocumentOutline(parts.documentXml)
-      : [];
-      
-    const styleUsage = parts.documentXml
-      ? yield* analyzeStyleUsage(parts.documentXml)
-      : [];
-    
+    const coreProps = parts.coreXml ? yield* parseCoreProperties(parts.coreXml) : {};
+
+    const appProps = parts.appXml ? yield* parseAppProperties(parts.appXml) : {};
+
+    const outline = parts.documentXml ? yield* extractDocumentOutline(parts.documentXml) : [];
+
+    const styleUsage = parts.documentXml ? yield* analyzeStyleUsage(parts.documentXml) : [];
+
     const processingTime = Date.now() - startTime;
-    
+
     // Combine all metadata
     const metadata: DocxMetadata = {
       ...coreProps,
@@ -281,13 +285,12 @@ export const extractCompleteMetadata = (parts: {
       outline,
       styleUsage,
     };
-    
+
     debug.log("Complete metadata extraction finished in", processingTime, "ms");
     return metadata;
   });
 
 // Helper interfaces
-
 
 // Helper functions
 function parseDocxDate(dateString: string): Date | undefined {
@@ -297,8 +300,7 @@ function parseDocxDate(dateString: string): Date | undefined {
 }
 
 function isHeadingStyle(styleVal: string): boolean {
-  return /^(heading|Heading|Title|title)\d*$/i.test(styleVal) ||
-         /^h[1-6]$/i.test(styleVal);
+  return /^(heading|Heading|Title|title)\d*$/i.test(styleVal) || /^h[1-6]$/i.test(styleVal);
 }
 
 function getHeadingLevel(styleVal: string): number {
@@ -325,4 +327,3 @@ function determineStyleType(styleName: string): DocxStyleUsage["type"] {
   }
   return "unknown";
 }
-

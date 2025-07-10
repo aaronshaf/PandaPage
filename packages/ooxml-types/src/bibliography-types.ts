@@ -1,5 +1,5 @@
 // bibliography-types.ts
-import type { ST_String, ST_Lang } from './shared-types';
+import type { ST_String, ST_Lang } from "./shared-types";
 
 export enum ST_SourceType {
   ArticleInAPeriodical = "ArticleInAPeriodical",

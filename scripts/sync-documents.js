@@ -22,11 +22,14 @@ async function syncDocuments() {
   await mkdir(DEMO_PUBLIC_DIR, { recursive: true });
 
   // Get all document files from source
-  const lsResult = Bun.spawn(["ls", DOCUMENTS_SOURCE], { 
-    stdout: "pipe"
+  const lsResult = Bun.spawn(["ls", DOCUMENTS_SOURCE], {
+    stdout: "pipe",
   });
   const output = await new Response(lsResult.stdout).text();
-  const sourceFiles = output.trim().split("\n").filter(f => f.endsWith(".docx") || f.endsWith(".pages"));
+  const sourceFiles = output
+    .trim()
+    .split("\n")
+    .filter((f) => f.endsWith(".docx") || f.endsWith(".pages"));
 
   let copied = 0;
   let skipped = 0;
@@ -45,7 +48,7 @@ async function syncDocuments() {
       // Check if target file is newer
       const sourceStats = await Bun.file(sourcePath).size;
       const targetExists = existsSync(targetPath);
-      
+
       if (targetExists) {
         const targetStats = await Bun.file(targetPath).size;
         if (sourceStats === targetStats) {
@@ -58,7 +61,6 @@ async function syncDocuments() {
       await copyFile(sourcePath, targetPath);
       console.log(`✅ Copied: ${filename}`);
       copied++;
-
     } catch (error) {
       console.error(`❌ Failed to copy ${filename}:`, error.message);
     }

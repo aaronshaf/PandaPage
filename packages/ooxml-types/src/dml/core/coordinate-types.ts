@@ -3,7 +3,12 @@
  * @see ECMA-376 Part 1, §20.1.10 (Simple Types)
  */
 
-import type { ST_UniversalMeasure, ST_Percentage, ST_PositiveFixedPercentage, ST_FixedPercentage } from '../../shared/measurement-types';
+import type {
+  ST_UniversalMeasure,
+  ST_Percentage,
+  ST_PositiveFixedPercentage,
+  ST_FixedPercentage,
+} from "../../shared/measurement-types";
 
 /**
  * Coordinate type (EMUs or universal measure).

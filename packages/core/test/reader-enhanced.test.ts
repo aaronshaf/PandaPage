@@ -14,15 +14,17 @@ beforeAll(() => {
 });
 
 // Helper to create a minimal valid DOCX buffer
-function createMinimalDocx(options: {
-  hasDocument?: boolean;
-  hasMetadata?: boolean;
-  documentContent?: string;
-  metadataContent?: string;
-  corruptZip?: boolean;
-} = {}): ArrayBuffer {
+function createMinimalDocx(
+  options: {
+    hasDocument?: boolean;
+    hasMetadata?: boolean;
+    documentContent?: string;
+    metadataContent?: string;
+    corruptZip?: boolean;
+  } = {},
+): ArrayBuffer {
   const { zipSync, strToU8 } = require("fflate");
-  
+
   if (options.corruptZip) {
     // Return corrupted data
     const buffer = new ArrayBuffer(100);
@@ -30,7 +32,7 @@ function createMinimalDocx(options: {
     view.fill(255); // Fill with invalid data
     return buffer;
   }
-  
+
   const files: Record<string, Uint8Array> = {
     "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -43,11 +45,13 @@ function createMinimalDocx(options: {
       <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
         <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
         <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
-      </Relationships>`)
+      </Relationships>`),
   };
-  
+
   if (options.hasDocument !== false) {
-    files["word/document.xml"] = strToU8(options.documentContent || `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    files["word/document.xml"] = strToU8(
+      options.documentContent ||
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p>
@@ -56,19 +60,23 @@ function createMinimalDocx(options: {
             </w:r>
           </w:p>
         </w:body>
-      </w:document>`);
+      </w:document>`,
+    );
   }
-  
+
   if (options.hasMetadata !== false) {
-    files["docProps/core.xml"] = strToU8(options.metadataContent || `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    files["docProps/core.xml"] = strToU8(
+      options.metadataContent ||
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
         <dc:title>Test Document</dc:title>
         <dc:creator>Test Author</dc:creator>
         <dcterms:created xsi:type="dcterms:W3CDTF">2024-01-01T00:00:00Z</dcterms:created>
         <dcterms:modified xsi:type="dcterms:W3CDTF">2024-01-02T00:00:00Z</dcterms:modified>
-      </cp:coreProperties>`);
+      </cp:coreProperties>`,
+    );
   }
-  
+
   const zipped = zipSync(files);
   return zipped.buffer;
 }
@@ -78,7 +86,7 @@ describe("reader-enhanced", () => {
     test("should parse a simple DOCX file", async () => {
       const buffer = createMinimalDocx();
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result).toBeDefined();
       expect(result.elements).toBeArray();
       expect(result.elements.length).toBeGreaterThan(0);
@@ -107,11 +115,11 @@ describe("reader-enhanced", () => {
                 </w:tr>
               </w:tbl>
             </w:body>
-          </w:document>`
+          </w:document>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result.wordCount).toBeGreaterThanOrEqual(0); // Word count calculation may vary
       expect(result.characterCount).toBeGreaterThanOrEqual(0); // May be 0 if no text content
       expect(result.paragraphCount).toBe(2); // Only counting paragraph elements, not table cell paragraphs
@@ -120,7 +128,7 @@ describe("reader-enhanced", () => {
     test("should handle DOCX without metadata gracefully", async () => {
       const buffer = createMinimalDocx({ hasMetadata: false });
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result).toBeDefined();
       expect(result.metadata).toBeDefined();
       expect(result.metadata.extractedAt).toBeInstanceOf(Date);
@@ -132,11 +140,11 @@ describe("reader-enhanced", () => {
         metadataContent: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
           <cp:coreProperties>
             <invalid>This is not valid metadata XML</invalid>
-          </cp:coreProperties>`
+          </cp:coreProperties>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       // Should still parse the document even if metadata fails
       expect(result).toBeDefined();
       expect(result.elements).toBeArray();
@@ -156,11 +164,11 @@ describe("reader-enhanced", () => {
                 <w:r><w:t>  </w:t></w:r>
               </w:p>
             </w:body>
-          </w:document>`
+          </w:document>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result.wordCount).toBe(0);
       expect(result.characterCount).toBeGreaterThanOrEqual(0); // Character count for spaces
       expect(result.paragraphCount).toBe(3);
@@ -175,11 +183,11 @@ describe("reader-enhanced", () => {
                 <w:pPr><w:pStyle w:val="Normal"/></w:pPr>
               </w:p>
             </w:body>
-          </w:document>`
+          </w:document>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result.wordCount).toBe(0);
       expect(result.characterCount).toBe(0);
       expect(result.paragraphCount).toBe(1);
@@ -187,13 +195,15 @@ describe("reader-enhanced", () => {
 
     test("should fail when document.xml is missing", async () => {
       const buffer = createMinimalDocx({ hasDocument: false });
-      
-      await expect(Effect.runPromise(readEnhancedDocx(buffer))).rejects.toThrow("No document.xml found");
+
+      await expect(Effect.runPromise(readEnhancedDocx(buffer))).rejects.toThrow(
+        "No document.xml found",
+      );
     });
 
     test("should fail with corrupted ZIP", async () => {
       const buffer = createMinimalDocx({ corruptZip: true });
-      
+
       await expect(Effect.runPromise(readEnhancedDocx(buffer))).rejects.toThrow();
     });
 
@@ -202,9 +212,9 @@ describe("reader-enhanced", () => {
         documentContent: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
           <w:document>
             <unclosed tag
-          </w:document>`
+          </w:document>`,
       });
-      
+
       await expect(Effect.runPromise(readEnhancedDocx(buffer))).rejects.toThrow();
     });
 
@@ -224,11 +234,11 @@ describe("reader-enhanced", () => {
                 </w:tr>
               </w:tbl>
             </w:body>
-          </w:document>`
+          </w:document>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       // Tables should be included in elements but not affect paragraph statistics
       expect(result.elements).toHaveLength(1);
       expect(result.elements[0]?.type).toBe("table");
@@ -252,11 +262,11 @@ describe("reader-enhanced", () => {
                 <w:r><w:t>Paragraph two</w:t></w:r>
               </w:p>
             </w:body>
-          </w:document>`
+          </w:document>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result.elements).toHaveLength(3); // 2 paragraphs + 1 table
       expect(result.wordCount).toBeGreaterThanOrEqual(0); // Mixed content word count
       expect(result.paragraphCount).toBe(2); // Only counting paragraph elements, not table cell paragraphs
@@ -273,11 +283,11 @@ describe("reader-enhanced", () => {
             <cp:keywords>test, document, sample</cp:keywords>
             <dcterms:created xsi:type="dcterms:W3CDTF">2024-01-01T12:00:00Z</dcterms:created>
             <dcterms:modified xsi:type="dcterms:W3CDTF">2024-01-02T12:00:00Z</dcterms:modified>
-          </cp:coreProperties>`
+          </cp:coreProperties>`,
       });
-      
+
       const result = await Effect.runPromise(readEnhancedDocx(buffer));
-      
+
       expect(result.metadata.title).toBe("My Document Title");
       expect(result.metadata.creator).toBe("John Doe");
       expect(result.metadata.subject).toBe("Test Subject");
@@ -288,13 +298,17 @@ describe("reader-enhanced", () => {
 
     test("should return DocxParseError for any failure", async () => {
       const buffer = new ArrayBuffer(10); // Invalid DOCX
-      
+
       try {
         await Effect.runPromise(readEnhancedDocx(buffer));
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         // The error is a DocxParseError
-        expect(error instanceof DocxParseError || error.name === "DocxParseError" || error.message.includes("Failed to parse DOCX")).toBe(true);
+        expect(
+          error instanceof DocxParseError ||
+            error.name === "DocxParseError" ||
+            error.message.includes("Failed to parse DOCX"),
+        ).toBe(true);
       }
     });
   });

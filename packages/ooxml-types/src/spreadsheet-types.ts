@@ -5,15 +5,15 @@
  */
 
 // Re-export all types from organized modules
-export * from './sml/index';
+export * from "./sml/index";
 
 // Import types needed for remaining complex types
-import type { ST_Xstring, ST_Guid } from './shared-types';
-import type { CT_ExtensionList } from './chart-types';
-import type { CT_Marker } from './spreadsheet-drawing-types';
-import type { CT_ShapeProperties, CT_TextBody } from './dml-main';
-import type { CT_XStringElement, ST_CellRef, ST_Ref } from './sml/cell-types';
-import type { ST_DxfId } from './sml/filter-types';
+import type { ST_Xstring, ST_Guid } from "./shared-types";
+import type { CT_ExtensionList } from "./chart-types";
+import type { CT_Marker } from "./spreadsheet-drawing-types";
+import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
+import type { CT_XStringElement, ST_CellRef, ST_Ref } from "./sml/cell-types";
+import type { ST_DxfId } from "./sml/filter-types";
 
 // ========================================
 // Workbook Types
@@ -429,5 +429,5 @@ export type ST_ConditionalFormattingOperator = string; // Comparison operators
 export type ST_TimePeriod = string; // Time period for conditional formatting
 
 // Placeholder interfaces for complex types
-export type CT_Cell = Record<string, never> // Defined in cell-types
-export type CT_CellFormula = Record<string, never> // Defined in cell-types
+export type CT_Cell = Record<string, never>; // Defined in cell-types
+export type CT_CellFormula = Record<string, never>; // Defined in cell-types

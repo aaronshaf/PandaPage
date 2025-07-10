@@ -1,14 +1,14 @@
 // Internal types for DOCX parsing
-import type { 
-  ST_Underline, 
-  ST_HighlightColor, 
+import type {
+  ST_Underline,
+  ST_HighlightColor,
   ST_VerticalAlignRun,
   ST_Lang,
   ST_Border,
   ST_Shd,
   ST_Jc,
-  ST_Em
-} from '@browser-document-viewer/ooxml-types';
+  ST_Em,
+} from "@browser-document-viewer/ooxml-types";
 
 export interface DocxRun {
   text: string;
@@ -81,7 +81,7 @@ export interface DocxParagraph {
     before?: number; // Twips
     after?: number; // Twips
     line?: number; // Twips
-    lineRule?: 'auto' | 'exact' | 'atLeast';
+    lineRule?: "auto" | "exact" | "atLeast";
   };
   indentation?: {
     left?: number; // Twips
@@ -89,8 +89,8 @@ export interface DocxParagraph {
     firstLine?: number; // Twips
     hanging?: number; // Twips
   };
-  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
-  verticalAlignment?: 'top' | 'center' | 'bottom' | 'auto';
+  textDirection?: "ltr" | "rtl" | "lrV" | "tbV" | "lrTbV" | "tbLrV";
+  verticalAlignment?: "top" | "center" | "bottom" | "auto";
   borders?: DocxParagraphBorders;
   shading?: DocxShading;
 }
@@ -139,7 +139,7 @@ export interface DocxTableProperties {
   cellMargin?: DocxTableCellMargin;
   width?: {
     value: number;
-    type: 'dxa' | 'pct' | 'auto'; // dxa = twips, pct = percentage
+    type: "dxa" | "pct" | "auto"; // dxa = twips, pct = percentage
   };
 }
 
@@ -149,15 +149,16 @@ export interface DocxTableCellProperties {
   margin?: DocxTableCellMargin;
   width?: {
     value: number;
-    type: 'dxa' | 'pct' | 'auto';
+    type: "dxa" | "pct" | "auto";
   };
   gridSpan?: number;
-  vMerge?: 'restart' | 'continue';
-  vAlign?: 'top' | 'center' | 'bottom';
-  textDirection?: 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+  vMerge?: "restart" | "continue";
+  vAlign?: "top" | "center" | "bottom";
+  textDirection?: "ltr" | "rtl" | "lrV" | "tbV" | "lrTbV" | "tbLrV";
 }
 
 // Namespace constants
 export const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 export const RELS_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
-export const DRAWING_NAMESPACE = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
+export const DRAWING_NAMESPACE =
+  "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";

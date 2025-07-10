@@ -6,7 +6,20 @@
 /**
  * Table style part type
  */
-export type ST_TblStyleOverrideType = 'wholeTable' | 'firstRow' | 'lastRow' | 'firstCol' | 'lastCol' | 'band1Vert' | 'band2Vert' | 'band1Horz' | 'band2Horz' | 'neCell' | 'nwCell' | 'seCell' | 'swCell';
+export type ST_TblStyleOverrideType =
+  | "wholeTable"
+  | "firstRow"
+  | "lastRow"
+  | "firstCol"
+  | "lastCol"
+  | "band1Vert"
+  | "band2Vert"
+  | "band1Horz"
+  | "band2Horz"
+  | "neCell"
+  | "nwCell"
+  | "seCell"
+  | "swCell";
 
 /**
  * Table style property override

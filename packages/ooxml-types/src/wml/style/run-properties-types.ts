@@ -6,32 +6,91 @@
 /**
  * WML underline type
  */
-export type ST_WMLUnderline = 'single' | 'words' | 'double' | 'thick' | 'dotted' | 'dottedHeavy' | 'dash' | 'dashedHeavy' | 'dashLong' | 'dashLongHeavy' | 'dotDash' | 'dashDotHeavy' | 'dotDotDash' | 'dashDotDotHeavy' | 'wave' | 'wavyHeavy' | 'wavyDouble' | 'none';
+export type ST_WMLUnderline =
+  | "single"
+  | "words"
+  | "double"
+  | "thick"
+  | "dotted"
+  | "dottedHeavy"
+  | "dash"
+  | "dashedHeavy"
+  | "dashLong"
+  | "dashLongHeavy"
+  | "dotDash"
+  | "dashDotHeavy"
+  | "dotDotDash"
+  | "dashDotDotHeavy"
+  | "wave"
+  | "wavyHeavy"
+  | "wavyDouble"
+  | "none";
 
 /**
  * Vertical alignment for WML runs
  */
-export type ST_WMLVerticalAlignRun = 'baseline' | 'superscript' | 'subscript';
+export type ST_WMLVerticalAlignRun = "baseline" | "superscript" | "subscript";
 
 /**
  * WML highlight color
  */
-export type ST_WMLHighlightColor = 'black' | 'blue' | 'cyan' | 'green' | 'magenta' | 'red' | 'yellow' | 'white' | 'darkBlue' | 'darkCyan' | 'darkGreen' | 'darkMagenta' | 'darkRed' | 'darkYellow' | 'darkGray' | 'lightGray' | 'none';
+export type ST_WMLHighlightColor =
+  | "black"
+  | "blue"
+  | "cyan"
+  | "green"
+  | "magenta"
+  | "red"
+  | "yellow"
+  | "white"
+  | "darkBlue"
+  | "darkCyan"
+  | "darkGreen"
+  | "darkMagenta"
+  | "darkRed"
+  | "darkYellow"
+  | "darkGray"
+  | "lightGray"
+  | "none";
 
 /**
  * WML theme color
  */
-export type ST_WMLThemeColor = 'dark1' | 'light1' | 'dark2' | 'light2' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'accent6' | 'hyperlink' | 'followedHyperlink' | 'none' | 'background1' | 'text1' | 'background2' | 'text2';
+export type ST_WMLThemeColor =
+  | "dark1"
+  | "light1"
+  | "dark2"
+  | "light2"
+  | "accent1"
+  | "accent2"
+  | "accent3"
+  | "accent4"
+  | "accent5"
+  | "accent6"
+  | "hyperlink"
+  | "followedHyperlink"
+  | "none"
+  | "background1"
+  | "text1"
+  | "background2"
+  | "text2";
 
 /**
  * WML text effect
  */
-export type ST_WMLTextEffect = 'blinkBackground' | 'lights' | 'antsBlack' | 'antsRed' | 'shimmer' | 'sparkle' | 'none';
+export type ST_WMLTextEffect =
+  | "blinkBackground"
+  | "lights"
+  | "antsBlack"
+  | "antsRed"
+  | "shimmer"
+  | "sparkle"
+  | "none";
 
 /**
  * Emphasis mark
  */
-export type ST_Em = 'none' | 'dot' | 'comma' | 'circle' | 'underDot';
+export type ST_Em = "none" | "dot" | "comma" | "circle" | "underDot";
 
 /**
  * Font definition
@@ -46,7 +105,7 @@ export interface CT_Fonts {
   /** Complex script font */
   cs?: string;
   /** Font hint */
-  hint?: 'default' | 'eastAsia' | 'cs';
+  hint?: "default" | "eastAsia" | "cs";
 }
 
 /**

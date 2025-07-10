@@ -49,25 +49,29 @@ export const convertDocxToMarkdown = (document: DocxDocument): string => {
 // Convert enhanced DOCX document to Markdown with frontmatter
 export const convertEnhancedDocxToMarkdown = (document: EnhancedDocxDocument): string => {
   const lines: string[] = [];
-  
+
   // Generate YAML frontmatter
   const frontmatter = generateFrontmatter(document.metadata);
-  if (frontmatter.trim()) {  // Only add frontmatter if there's actual content
+  if (frontmatter.trim()) {
+    // Only add frontmatter if there's actual content
     lines.push("---");
     lines.push(frontmatter);
     lines.push("---");
     lines.push("");
   }
-  
+
   // Convert elements (paragraphs and tables)
   const content = convertDocxElementsToMarkdown(document.elements, document.numbering);
   lines.push(content);
-  
+
   return lines.join("\n");
 };
 
 // Convert DocxElement array to Markdown
-const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: DocxNumbering): string => {
+const convertDocxElementsToMarkdown = (
+  elements: DocxElement[],
+  numbering?: DocxNumbering,
+): string => {
   const lines: string[] = [];
   const listCounters = new Map<string, number>(); // Track counters for numbered lists
   let previousWasListItem = false;
@@ -75,7 +79,7 @@ const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: Docx
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
     if (!element) continue;
-    
+
     const nextElement = elements[i + 1];
 
     if (element.type === "paragraph") {
@@ -86,17 +90,20 @@ const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: Docx
         const isListItem = !!element.numId;
         const isHeading = element.style?.startsWith("Heading");
         const nextIsListItem = nextElement?.type === "paragraph" && !!nextElement.numId;
-        const nextIsHeading = nextElement?.type === "paragraph" && nextElement.style?.startsWith("Heading");
+        const nextIsHeading =
+          nextElement?.type === "paragraph" && nextElement.style?.startsWith("Heading");
 
         // Add spacing logic:
         // 1. Always add space after headings
         // 2. Add space between non-list paragraphs
         // 3. Add space when transitioning out of lists
         // 4. Add space before headings (unless we're already adding one)
-        if (isHeading || 
-            (!isListItem && !nextIsListItem && nextElement) ||
-            (isListItem && !nextIsListItem && nextElement) ||
-            (!isHeading && nextIsHeading)) {
+        if (
+          isHeading ||
+          (!isListItem && !nextIsListItem && nextElement) ||
+          (isListItem && !nextIsListItem && nextElement) ||
+          (!isHeading && nextIsHeading)
+        ) {
           lines.push("");
         }
 
@@ -104,19 +111,19 @@ const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: Docx
         if (!isListItem && previousWasListItem) {
           listCounters.clear();
         }
-        
+
         previousWasListItem = isListItem;
       }
     } else if (element.type === "table") {
       const tableMarkdown = convertTableToMarkdown(element, numbering);
       if (tableMarkdown) {
         lines.push(tableMarkdown);
-        
+
         // Add spacing after table if there's a next element
         if (nextElement) {
           lines.push("");
         }
-        
+
         listCounters.clear();
         previousWasListItem = false;
       }
@@ -134,38 +141,44 @@ const convertDocxElementsToMarkdown = (elements: DocxElement[], numbering?: Docx
 // Convert a table to Markdown
 export const convertTableToMarkdown = (table: DocxTable, numbering?: DocxNumbering): string => {
   if (table.rows.length === 0) return "";
-  
+
   const lines: string[] = [];
   const listCounters = new Map<string, number>();
-  
+
   // Process each row
   for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
     const row = table.rows[rowIndex];
     if (!row) continue;
-    
+
     const isHeaderRow = row.properties?.isHeader || rowIndex === 0; // First row is header by default
-    
+
     // Convert cell contents to text
-    const cellTexts = row.cells.map(cell => convertTableCellToText(cell, numbering, listCounters));
-    
+    const cellTexts = row.cells.map((cell) =>
+      convertTableCellToText(cell, numbering, listCounters),
+    );
+
     // Create the markdown table row
     const rowText = `| ${cellTexts.join(" | ")} |`;
     lines.push(rowText);
-    
+
     // Add header separator after first row
     if (isHeaderRow) {
       const separator = `| ${cellTexts.map(() => "---").join(" | ")} |`;
       lines.push(separator);
     }
   }
-  
+
   return lines.join("\n");
 };
 
 // Convert table cell content to plain text
-const convertTableCellToText = (cell: DocxTableCell, numbering?: DocxNumbering, listCounters?: Map<string, number>): string => {
+const convertTableCellToText = (
+  cell: DocxTableCell,
+  numbering?: DocxNumbering,
+  listCounters?: Map<string, number>,
+): string => {
   const texts: string[] = [];
-  
+
   for (const paragraph of cell.content) {
     const text = convertParagraphToMarkdown(paragraph, numbering, listCounters);
     if (text) {
@@ -179,13 +192,13 @@ const convertTableCellToText = (cell: DocxTableCell, numbering?: DocxNumbering, 
         .replace(/_(.*)_/g, "$1") // Remove italic formatting
         .replace(/<u>(.*?)<\/u>/g, "$1") // Remove underline formatting
         .trim();
-      
+
       if (cleanText) {
         texts.push(cleanText);
       }
     }
   }
-  
+
   // Join multiple paragraphs with space, escape pipe characters
   return texts.join(" ").replace(/\|/g, "\\|");
 };
@@ -193,9 +206,9 @@ const convertTableCellToText = (cell: DocxTableCell, numbering?: DocxNumbering, 
 // Generate YAML frontmatter from metadata
 const generateFrontmatter = (metadata: DocxMetadata): string => {
   const frontmatterLines: string[] = [];
-  
+
   // Only include actual document properties, not processing metadata
-  
+
   // Core document properties from docProps/core.xml
   if (metadata.title) {
     frontmatterLines.push(`title: "${escapeYamlString(metadata.title)}"`);
@@ -210,12 +223,14 @@ const generateFrontmatter = (metadata: DocxMetadata): string => {
     frontmatterLines.push(`author: "${escapeYamlString(metadata.creator)}"`);
   }
   if (metadata.keywords && metadata.keywords.length > 0) {
-    frontmatterLines.push(`keywords: [${metadata.keywords.map((k: string) => `"${escapeYamlString(k)}"`).join(", ")}]`);
+    frontmatterLines.push(
+      `keywords: [${metadata.keywords.map((k: string) => `"${escapeYamlString(k)}"`).join(", ")}]`,
+    );
   }
   if (metadata.language) {
     frontmatterLines.push(`language: "${metadata.language}"`);
   }
-  
+
   // Document creation and modification dates from the document
   if (metadata.created) {
     frontmatterLines.push(`created: ${metadata.created.toISOString()}`);
@@ -223,7 +238,7 @@ const generateFrontmatter = (metadata: DocxMetadata): string => {
   if (metadata.modified) {
     frontmatterLines.push(`modified: ${metadata.modified.toISOString()}`);
   }
-  
+
   // Document statistics from docProps/app.xml
   if (metadata.pages) {
     frontmatterLines.push(`pages: ${metadata.pages}`);
@@ -237,7 +252,7 @@ const generateFrontmatter = (metadata: DocxMetadata): string => {
   if (metadata.paragraphs) {
     frontmatterLines.push(`paragraphs: ${metadata.paragraphs}`);
   }
-  
+
   // Application info from docProps/app.xml
   if (metadata.application) {
     frontmatterLines.push(`application: "${escapeYamlString(metadata.application)}"`);
@@ -254,7 +269,7 @@ const generateFrontmatter = (metadata: DocxMetadata): string => {
   if (metadata.template) {
     frontmatterLines.push(`template: "${escapeYamlString(metadata.template)}"`);
   }
-  
+
   // Document outline/TOC extracted from document structure
   if (metadata.outline && metadata.outline.length > 0) {
     frontmatterLines.push(`outline:`);
@@ -267,7 +282,7 @@ const generateFrontmatter = (metadata: DocxMetadata): string => {
       }
     }
   }
-  
+
   return frontmatterLines.join("\n");
 };
 
@@ -289,8 +304,8 @@ const convertParagraphToMarkdown = (
   if (paragraph.fields && paragraph.fields.length > 0) {
     // For fields with results, the result text is already in the runs
     // For fields without results, we need to append the field markdown
-    const fieldsWithoutResults = paragraph.fields.filter(f => !f.result);
-    
+    const fieldsWithoutResults = paragraph.fields.filter((f) => !f.result);
+
     if (fieldsWithoutResults.length > 0) {
       const fieldMarkdowns = fieldsWithoutResults.map(fieldToMarkdown);
       if (combinedText) {
@@ -411,7 +426,7 @@ const formatRun = (run: DocxRun): string => {
   let text = run.text;
 
   // Convert tabs to spaces (4 spaces per tab for better markdown readability)
-  text = text.replace(/\t/g, '    ');
+  text = text.replace(/\t/g, "    ");
 
   // Apply inline formatting
   if (run.bold && run.italic) {

@@ -4,59 +4,122 @@
  * for common use cases while maintaining type safety.
  */
 
-import type { ST_Border, ST_Shd, ST_Em, ST_Jc, ST_Underline } from './wml';
+import type { ST_Border, ST_Shd, ST_Em, ST_Jc, ST_Underline } from "./wml";
 
 /**
  * Common border style values as string literal union.
  * Extracted from ST_Border enum for compatibility with string-based APIs.
  * @see ST_Border for complete OOXML specification
  */
-export type BorderStyleString = 
-  | 'single' | 'double' | 'thick' | 'dashed' | 'dotted' 
-  | 'dashDot' | 'dashDotDot' | 'triple' | 'wave' | 'doubleWave' 
-  | 'dashSmall' | 'dashDotStroked' | 'threeDEmboss' | 'threeDEngrave' 
-  | 'outset' | 'inset' | 'none';
+export type BorderStyleString =
+  | "single"
+  | "double"
+  | "thick"
+  | "dashed"
+  | "dotted"
+  | "dashDot"
+  | "dashDotDot"
+  | "triple"
+  | "wave"
+  | "doubleWave"
+  | "dashSmall"
+  | "dashDotStroked"
+  | "threeDEmboss"
+  | "threeDEngrave"
+  | "outset"
+  | "inset"
+  | "none";
 
 /**
  * Common shading pattern values as string literal union.
  * Extracted from ST_Shd enum for compatibility with string-based APIs.
  * @see ST_Shd for complete OOXML specification
  */
-export type ShadingPatternString = 
-  | 'clear' | 'solid' | 'horzStripe' | 'vertStripe' 
-  | 'reverseDiagStripe' | 'diagStripe' | 'horzCross' | 'diagCross' 
-  | 'thinHorzStripe' | 'thinVertStripe' | 'thinReverseDiagStripe' 
-  | 'thinDiagStripe' | 'thinHorzCross' | 'thinDiagCross' 
-  | 'pct5' | 'pct10' | 'pct12' | 'pct15' | 'pct20' | 'pct25' 
-  | 'pct30' | 'pct35' | 'pct37' | 'pct40' | 'pct45' | 'pct50' 
-  | 'pct55' | 'pct60' | 'pct62' | 'pct65' | 'pct70' | 'pct75' 
-  | 'pct80' | 'pct85' | 'pct87' | 'pct90' | 'pct95';
+export type ShadingPatternString =
+  | "clear"
+  | "solid"
+  | "horzStripe"
+  | "vertStripe"
+  | "reverseDiagStripe"
+  | "diagStripe"
+  | "horzCross"
+  | "diagCross"
+  | "thinHorzStripe"
+  | "thinVertStripe"
+  | "thinReverseDiagStripe"
+  | "thinDiagStripe"
+  | "thinHorzCross"
+  | "thinDiagCross"
+  | "pct5"
+  | "pct10"
+  | "pct12"
+  | "pct15"
+  | "pct20"
+  | "pct25"
+  | "pct30"
+  | "pct35"
+  | "pct37"
+  | "pct40"
+  | "pct45"
+  | "pct50"
+  | "pct55"
+  | "pct60"
+  | "pct62"
+  | "pct65"
+  | "pct70"
+  | "pct75"
+  | "pct80"
+  | "pct85"
+  | "pct87"
+  | "pct90"
+  | "pct95";
 
 /**
  * Common text emphasis marks as string literal union.
  * Used for East Asian text emphasis.
  * @see ST_Em for complete OOXML specification
  */
-export type EmphasisMarkString = 'dot' | 'comma' | 'circle' | 'underDot';
+export type EmphasisMarkString = "dot" | "comma" | "circle" | "underDot";
 
 /**
  * Common paragraph alignment values as string literal union.
  * Uses proper OOXML values (start/end/both).
  * @see ST_Jc for complete OOXML specification
  */
-export type ParagraphAlignmentString = 
-  | 'start' | 'center' | 'end' | 'both' | 'distribute' 
-  | 'highKashida' | 'lowKashida' | 'mediumKashida' | 'thaiDistribute';
+export type ParagraphAlignmentString =
+  | "start"
+  | "center"
+  | "end"
+  | "both"
+  | "distribute"
+  | "highKashida"
+  | "lowKashida"
+  | "mediumKashida"
+  | "thaiDistribute";
 
 /**
  * Common underline style values as string literal union.
  * @see ST_Underline for complete OOXML specification
  */
-export type UnderlineStyleString = 
-  | 'single' | 'words' | 'double' | 'thick' | 'dotted' 
-  | 'dottedHeavy' | 'dash' | 'dashedHeavy' | 'dashLong' 
-  | 'dashLongHeavy' | 'dotDash' | 'dashDotHeavy' | 'dotDotDash' 
-  | 'dashDotDotHeavy' | 'wave' | 'wavyHeavy' | 'wavyDouble' | 'none';
+export type UnderlineStyleString =
+  | "single"
+  | "words"
+  | "double"
+  | "thick"
+  | "dotted"
+  | "dottedHeavy"
+  | "dash"
+  | "dashedHeavy"
+  | "dashLong"
+  | "dashLongHeavy"
+  | "dotDash"
+  | "dashDotHeavy"
+  | "dotDotDash"
+  | "dashDotDotHeavy"
+  | "wave"
+  | "wavyHeavy"
+  | "wavyDouble"
+  | "none";
 
 /**
  * Helper type to extract string values from enum types.
@@ -69,45 +132,71 @@ export type EnumValues<T> = T[keyof T];
  */
 export const isBorderStyle = (value: string): value is BorderStyleString => {
   return [
-    'single', 'double', 'thick', 'dashed', 'dotted', 'dashDot', 
-    'dashDotDot', 'triple', 'wave', 'doubleWave', 'dashSmall', 
-    'dashDotStroked', 'threeDEmboss', 'threeDEngrave', 'outset', 
-    'inset', 'none'
+    "single",
+    "double",
+    "thick",
+    "dashed",
+    "dotted",
+    "dashDot",
+    "dashDotDot",
+    "triple",
+    "wave",
+    "doubleWave",
+    "dashSmall",
+    "dashDotStroked",
+    "threeDEmboss",
+    "threeDEngrave",
+    "outset",
+    "inset",
+    "none",
   ].includes(value);
 };
 
 export const isShadingPattern = (value: string): value is ShadingPatternString => {
-  return value.startsWith('pct') || [
-    'clear', 'solid', 'horzStripe', 'vertStripe', 'reverseDiagStripe',
-    'diagStripe', 'horzCross', 'diagCross', 'thinHorzStripe', 
-    'thinVertStripe', 'thinReverseDiagStripe', 'thinDiagStripe', 
-    'thinHorzCross', 'thinDiagCross'
-  ].includes(value);
+  return (
+    value.startsWith("pct") ||
+    [
+      "clear",
+      "solid",
+      "horzStripe",
+      "vertStripe",
+      "reverseDiagStripe",
+      "diagStripe",
+      "horzCross",
+      "diagCross",
+      "thinHorzStripe",
+      "thinVertStripe",
+      "thinReverseDiagStripe",
+      "thinDiagStripe",
+      "thinHorzCross",
+      "thinDiagCross",
+    ].includes(value)
+  );
 };
 
 /**
  * Line spacing rule values from OOXML.
  * @see ST_LineSpacingRule
  */
-export type LineSpacingRuleString = 'auto' | 'exact' | 'atLeast';
+export type LineSpacingRuleString = "auto" | "exact" | "atLeast";
 
 /**
  * Text direction values from OOXML.
  * @see ST_TextDirection
  */
-export type TextDirectionString = 'ltr' | 'rtl' | 'lrV' | 'tbV' | 'lrTbV' | 'tbLrV';
+export type TextDirectionString = "ltr" | "rtl" | "lrV" | "tbV" | "lrTbV" | "tbLrV";
 
 /**
  * Vertical alignment for table cells.
  * @see ST_VerticalJc
  */
-export type VerticalAlignmentString = 'top' | 'center' | 'bottom';
+export type VerticalAlignmentString = "top" | "center" | "bottom";
 
 /**
  * Merge type for table cells.
  * @see ST_Merge
  */
-export type MergeTypeString = 'restart' | 'continue';
+export type MergeTypeString = "restart" | "continue";
 
 /**
  * Convert legacy alignment values to OOXML alignment values.
@@ -115,10 +204,14 @@ export type MergeTypeString = 'restart' | 'continue';
  */
 export function toOoxmlAlignment(alignment: string): ParagraphAlignmentString {
   switch (alignment) {
-    case 'left': return 'start';
-    case 'right': return 'end';
-    case 'justify': return 'both';
-    default: return alignment as ParagraphAlignmentString;
+    case "left":
+      return "start";
+    case "right":
+      return "end";
+    case "justify":
+      return "both";
+    default:
+      return alignment as ParagraphAlignmentString;
   }
 }
 
@@ -128,10 +221,14 @@ export function toOoxmlAlignment(alignment: string): ParagraphAlignmentString {
  */
 export function fromOoxmlAlignment(alignment: ParagraphAlignmentString): string {
   switch (alignment) {
-    case 'start': return 'left';
-    case 'end': return 'right';
-    case 'both': return 'justify';
-    default: return alignment;
+    case "start":
+      return "left";
+    case "end":
+      return "right";
+    case "both":
+      return "justify";
+    default:
+      return alignment;
   }
 }
 
@@ -193,7 +290,7 @@ export function emusToPixels(emus: number): number {
  * @returns Value in points
  */
 export function halfPointsToPoints(halfPoints: number | string): number {
-  const value = typeof halfPoints === 'string' ? parseInt(halfPoints, 10) : halfPoints;
+  const value = typeof halfPoints === "string" ? parseInt(halfPoints, 10) : halfPoints;
   return value / 2;
 }
 
@@ -226,16 +323,19 @@ export function parsePercentage(percentage: string): number {
  */
 export function hexToRgb(hex: string): string {
   // Remove # if present
-  hex = hex.replace(/^#/, '');
-  
+  hex = hex.replace(/^#/, "");
+
   // Handle 3-character hex
   if (hex.length === 3) {
-    hex = hex.split('').map(c => c + c).join('');
+    hex = hex
+      .split("")
+      .map((c) => c + c)
+      .join("");
   }
-  
+
   const r = parseInt(hex.substr(0, 2), 16);
   const g = parseInt(hex.substr(2, 2), 16);
   const b = parseInt(hex.substr(4, 2), 16);
-  
+
   return `rgb(${r}, ${g}, ${b})`;
 }

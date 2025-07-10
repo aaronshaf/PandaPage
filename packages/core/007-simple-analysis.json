@@ -26,22 +26,12 @@
       "Biography",
       "BiographyBody"
     ],
-    "headingLevels": [
-      1,
-      2
-    ],
+    "headingLevels": [1, 2],
     "unstyledParagraphs": 0
   },
   "listFeatures": {
     "hasNumbering": true,
-    "listTypes": [
-      "decimal",
-      "upperRoman",
-      "upperLetter",
-      "lowerLetter",
-      "none",
-      "lowerRoman"
-    ],
+    "listTypes": ["decimal", "upperRoman", "upperLetter", "lowerLetter", "none", "lowerRoman"],
     "listItems": 43
   },
   "contentAnalysis": {

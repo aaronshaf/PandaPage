@@ -22,7 +22,8 @@
     "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun run test:unit",
     "check-file-sizes": "node scripts/check-file-sizes.cjs",
     "prepare": "simple-git-hooks",
-    "sync-docs": "bun scripts/sync-documents.js"
+    "sync-docs": "bun scripts/sync-documents.js",
+    "analyze-docx": "bun scripts/analyze-docx.ts"
   },
   "simple-git-hooks": {
     "pre-commit": "bun run precommit",

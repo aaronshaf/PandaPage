@@ -1,6 +1,12 @@
 // basic-data-model.ts - Core data model types for diagrams
-import type { CT_OfficeArtExtensionList, CT_ShapeProperties, CT_TextBody, CT_BackgroundFormatting, CT_WholeE2oFormatting } from '../dml-main';
-import type { ST_Guid, ST_Percentage } from '../shared-types';
+import type {
+  CT_OfficeArtExtensionList,
+  CT_ShapeProperties,
+  CT_TextBody,
+  CT_BackgroundFormatting,
+  CT_WholeE2oFormatting,
+} from "../dml-main";
+import type { ST_Guid, ST_Percentage } from "../shared-types";
 
 // Basic type definitions
 export type ST_ModelId = number | ST_Guid; // xsd:int or s:ST_Guid
@@ -148,5 +154,5 @@ export interface CT_RelIds {
 }
 
 // Import types needed from other modules
-import type { CT_LayoutVariablePropertySet } from './layout-variables';
-import type { CT_ShapeStyle } from '../dml-main';
+import type { CT_LayoutVariablePropertySet } from "./layout-variables";
+import type { CT_ShapeStyle } from "../dml-main";

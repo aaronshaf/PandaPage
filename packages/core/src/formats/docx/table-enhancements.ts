@@ -1,20 +1,15 @@
 import { Effect } from "effect";
 import { debug } from "../../common/debug";
-import type { 
-  DocxTable, 
-  DocxTableRow, 
-  DocxTableCell,
-  DocxTableCellProperties 
-} from "./types";
+import type { DocxTable, DocxTableRow, DocxTableCell, DocxTableCellProperties } from "./types";
 import { DocxParseError } from "./types";
 
 /**
  * Enhanced table cell properties including merge information
  */
 export interface EnhancedDocxTableCellProperties extends DocxTableCellProperties {
-  gridSpan?: number;  // Horizontal merge (colspan)
-  vMerge?: "restart" | "continue";  // Vertical merge
-  rowSpan?: number;  // Calculated from vMerge
+  gridSpan?: number; // Horizontal merge (colspan)
+  vMerge?: "restart" | "continue"; // Vertical merge
+  rowSpan?: number; // Calculated from vMerge
 }
 
 /**
@@ -61,26 +56,26 @@ export const parseVMerge = (tcPr: Element): "restart" | "continue" | undefined =
 export const calculateRowSpans = (table: DocxTable): Effect.Effect<DocxTable, DocxParseError> =>
   Effect.gen(function* () {
     debug.log("Calculating row spans for merged cells");
-    
+
     const enhancedTable = { ...table };
     const rowCount = table.rows.length;
-    
+
     // Track vertical merge states by column index
     const vMergeStates: Map<number, { startRow: number; count: number }> = new Map();
-    
+
     for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
       const row = table.rows[rowIndex];
       if (!row) continue;
-      
+
       let colIndex = 0;
-      
+
       for (let cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
         const cell = row.cells[cellIndex] as EnhancedDocxTableCell;
         if (!cell) continue;
-        
+
         const vMerge = cell.properties?.vMerge;
         const gridSpan = cell.properties?.gridSpan || 1;
-        
+
         if (vMerge === "restart") {
           // Start tracking a new vertical merge
           vMergeStates.set(colIndex, { startRow: rowIndex, count: 1 });
@@ -109,11 +104,11 @@ export const calculateRowSpans = (table: DocxTable): Effect.Effect<DocxTable, Do
           }
           vMergeStates.delete(colIndex);
         }
-        
+
         colIndex += gridSpan;
       }
     }
-    
+
     // Finalize any remaining merges
     for (const [colIndex, state] of vMergeStates.entries()) {
       if (state.count > 1) {
@@ -135,7 +130,7 @@ export const calculateRowSpans = (table: DocxTable): Effect.Effect<DocxTable, Do
         }
       }
     }
-    
+
     return enhancedTable;
   });
 
@@ -169,7 +164,7 @@ export interface TableStyle {
  */
 export const parseTableStyle = (tblPr: Element): TableStyle => {
   const style: TableStyle = {};
-  
+
   // Get table style name
   const tblStyle = tblPr.querySelector("tblStyle");
   if (tblStyle) {
@@ -178,7 +173,7 @@ export const parseTableStyle = (tblPr: Element): TableStyle => {
       style.name = val;
     }
   }
-  
+
   // Parse table look options
   const tblLook = tblPr.querySelector("tblLook");
   if (tblLook) {
@@ -189,7 +184,7 @@ export const parseTableStyle = (tblPr: Element): TableStyle => {
     style.rowBanding = tblLook.getAttribute("w:noHBand") !== "1";
     style.columnBanding = tblLook.getAttribute("w:noVBand") !== "1";
   }
-  
+
   return style;
 };
 
@@ -198,24 +193,23 @@ export const parseTableStyle = (tblPr: Element): TableStyle => {
  * This handles merged cells by adding HTML table syntax when needed
  */
 export const convertEnhancedTableToMarkdown = (
-  table: DocxTable, 
-  useHtmlForComplexTables: boolean = true
+  table: DocxTable,
+  useHtmlForComplexTables: boolean = true,
 ): string => {
   // Check if table has complex features requiring HTML
-  const hasMergedCells = table.rows.some(row => 
-    row.cells.some(cell => {
+  const hasMergedCells = table.rows.some((row) =>
+    row.cells.some((cell) => {
       const props = cell.properties as EnhancedDocxTableCellProperties;
-      return (props?.gridSpan && props.gridSpan > 1) || 
-             (props?.rowSpan && props.rowSpan > 1);
-    })
+      return (props?.gridSpan && props.gridSpan > 1) || (props?.rowSpan && props.rowSpan > 1);
+    }),
   );
-  
+
   const hasNestedTable = hasNestedTables(table);
-  
+
   if (useHtmlForComplexTables && (hasMergedCells || hasNestedTable)) {
     return convertTableToHtml(table);
   }
-  
+
   // Otherwise use standard markdown (delegate to existing function)
   // This would use the existing convertTableToMarkdown function
   return "";
@@ -226,14 +220,14 @@ export const convertEnhancedTableToMarkdown = (
  */
 const convertTableToHtml = (table: DocxTable): string => {
   const lines: string[] = ["<table>"];
-  
+
   for (const row of table.rows) {
     lines.push("  <tr>");
-    
+
     for (const cell of row.cells) {
       const props = cell.properties as EnhancedDocxTableCellProperties;
       const tag = row.properties?.isHeader ? "th" : "td";
-      
+
       let attrs = "";
       if (props?.gridSpan && props.gridSpan > 1) {
         attrs += ` colspan="${props.gridSpan}"`;
@@ -241,17 +235,15 @@ const convertTableToHtml = (table: DocxTable): string => {
       if (props?.rowSpan && props.rowSpan > 1) {
         attrs += ` rowspan="${props.rowSpan}"`;
       }
-      
-      const content = cell.content
-        .map(p => p.runs.map(r => r.text).join(""))
-        .join("<br>");
-      
+
+      const content = cell.content.map((p) => p.runs.map((r) => r.text).join("")).join("<br>");
+
       lines.push(`    <${tag}${attrs}>${content}</${tag}>`);
     }
-    
+
     lines.push("  </tr>");
   }
-  
+
   lines.push("</table>");
   return lines.join("\n");
 };

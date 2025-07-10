@@ -1,9 +1,16 @@
 // common.ts - Common types used across presentation modules
-import type { ST_RelationshipId, ST_Guid } from '../shared-types';
-import type { EG_Media, CT_TextFont, ST_BlackWhiteMode, CT_StyleMatrixReference, EG_FillProperties, EG_EffectProperties } from '../dml-main';
-import type { CT_GroupShape } from './shapes';
-import type { CT_ExtensionListModify } from './transitions';
-import type { CT_IndexRange } from './timing-animation';
+import type { ST_RelationshipId, ST_Guid } from "../shared-types";
+import type {
+  EG_Media,
+  CT_TextFont,
+  ST_BlackWhiteMode,
+  CT_StyleMatrixReference,
+  EG_FillProperties,
+  EG_EffectProperties,
+} from "../dml-main";
+import type { CT_GroupShape } from "./shapes";
+import type { CT_ExtensionListModify } from "./transitions";
+import type { CT_IndexRange } from "./timing-animation";
 
 // Common empty type
 export type CT_Empty = Record<string, never>;
@@ -37,7 +44,7 @@ export interface CT_CustomShowId {
   id: number; // xsd:unsignedInt
 }
 
-export type EG_SlideListChoice = 
+export type EG_SlideListChoice =
   | { sldAll: CT_Empty }
   | { sldRg: CT_IndexRange }
   | { custShow: CT_CustomShowId };
@@ -56,7 +63,7 @@ export interface CT_CommentAuthorList {
 }
 
 export interface CT_Comment {
-  pos: import('../dml-main').CT_Point2D;
+  pos: import("../dml-main").CT_Point2D;
   text: string;
   extLst?: CT_ExtensionListModify;
   authorId: number; // xsd:unsignedInt
@@ -89,7 +96,7 @@ export interface CT_SmartTags {
 }
 
 export interface CT_CustomShow {
-  sldLst: import('./slides').CT_SlideRelationshipList;
+  sldLst: import("./slides").CT_SlideRelationshipList;
   extLst?: CT_ExtensionList;
   name: ST_Name;
   id: number; // xsd:unsignedInt
@@ -135,7 +142,7 @@ export enum ST_PlaceholderSize {
 export interface CT_Placeholder {
   extLst?: CT_ExtensionListModify;
   type?: ST_PlaceholderType;
-  orient?: import('./transitions').ST_Direction;
+  orient?: import("./transitions").ST_Direction;
   sz?: ST_PlaceholderSize;
   idx?: number; // xsd:unsignedInt
   hasCustomPrompt?: boolean;
@@ -157,9 +164,7 @@ export interface CT_BackgroundProperties {
   shadeToTitle?: boolean;
 }
 
-export type EG_Background = 
-  | { bgPr: CT_BackgroundProperties }
-  | { bgRef: CT_StyleMatrixReference };
+export type EG_Background = { bgPr: CT_BackgroundProperties } | { bgRef: CT_StyleMatrixReference };
 
 export interface CT_Background {
   background: EG_Background;
@@ -189,8 +194,8 @@ export interface AG_Ole {
   name?: string;
   showAsIcon?: boolean;
   id?: ST_RelationshipId;
-  imgW?: import('../dml-main').CT_PositiveSize2D;
-  imgH?: import('../dml-main').CT_PositiveSize2D;
+  imgW?: import("../dml-main").CT_PositiveSize2D;
+  imgH?: import("../dml-main").CT_PositiveSize2D;
 }
 
 export enum ST_OleObjectFollowColorScheme {
@@ -212,16 +217,15 @@ export interface CT_OleObjectLink {
 export interface CT_OleObject extends AG_Ole {
   embed?: CT_OleObjectEmbed;
   link?: CT_OleObjectLink;
-  pic: import('./shapes').CT_PresentationPicture;
+  pic: import("./shapes").CT_PresentationPicture;
   progId?: string;
 }
 
 export interface CT_Control extends AG_Ole {
   extLst?: CT_ExtensionList;
-  pic?: import('./shapes').CT_PresentationPicture;
+  pic?: import("./shapes").CT_PresentationPicture;
 }
 
 export interface CT_ControlList {
   control?: CT_Control[];
 }
-

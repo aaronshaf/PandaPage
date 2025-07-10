@@ -3,10 +3,16 @@
  * @see ECMA-376 Part 1, §21.1 (Text)
  */
 
-import type { ST_Coordinate32 } from '../core/coordinate-types';
-import type { ST_Percentage, ST_PositiveFixedPercentage } from '../../shared/measurement-types';
-import type { ST_TextVerticalType, ST_TextVerticalOverflowType, ST_TextHorizontalOverflowType, ST_TextAnchoringType, ST_TextWrappingType } from './text-enums';
-import type { CT_OfficeArtExtensionList } from '../core/extension-types';
+import type { ST_Coordinate32 } from "../core/coordinate-types";
+import type { ST_Percentage, ST_PositiveFixedPercentage } from "../../shared/measurement-types";
+import type {
+  ST_TextVerticalType,
+  ST_TextVerticalOverflowType,
+  ST_TextHorizontalOverflowType,
+  ST_TextAnchoringType,
+  ST_TextWrappingType,
+} from "./text-enums";
+import type { CT_OfficeArtExtensionList } from "../core/extension-types";
 
 /**
  * Text Body Properties.

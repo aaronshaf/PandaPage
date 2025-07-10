@@ -1,9 +1,9 @@
 // locking-properties.ts
 // Locking and non-visual properties for DrawingML
 
-import type { ST_String } from '../shared-types';
-import type { ST_DrawingElementId } from './coordinate-types';
-import type { CT_OfficeArtExtensionList } from '../dml-media';
+import type { ST_String } from "../shared-types";
+import type { ST_DrawingElementId } from "./coordinate-types";
+import type { CT_OfficeArtExtensionList } from "../dml-media";
 
 // Forward declarations for complex types not yet defined
 export type CT_Hyperlink = any; // Hyperlink type

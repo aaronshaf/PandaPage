@@ -1,7 +1,7 @@
 // transform-types.ts
 // Transform and scale types for DrawingML
 
-import type { ST_Percentage, ST_PositiveFixedPercentage } from '../shared-types';
+import type { ST_Percentage, ST_PositiveFixedPercentage } from "../shared-types";
 import type {
   ST_Angle,
   ST_Coordinate,
@@ -9,8 +9,8 @@ import type {
   ST_FixedAngle,
   CT_Point2D,
   CT_PositiveSize2D,
-  CT_Ratio
-} from './coordinate-types';
+  CT_Ratio,
+} from "./coordinate-types";
 
 // Scale 2D
 export interface CT_Scale2D {

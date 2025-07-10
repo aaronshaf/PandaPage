@@ -1,6 +1,6 @@
 // transitions.ts - Transition-related types for presentations
-import type { CT_OfficeArtExtensionList, CT_EmbeddedWAVAudioFile } from '../dml-main';
-import type { CT_Empty } from './common';
+import type { CT_OfficeArtExtensionList, CT_EmbeddedWAVAudioFile } from "../dml-main";
+import type { CT_Empty } from "./common";
 
 export enum ST_TransitionSideDirectionType {
   L = "l",
@@ -29,7 +29,9 @@ export interface CT_CornerDirectionTransition {
   dir?: ST_TransitionCornerDirectionType;
 }
 
-export type ST_TransitionEightDirectionType = ST_TransitionSideDirectionType | ST_TransitionCornerDirectionType;
+export type ST_TransitionEightDirectionType =
+  | ST_TransitionSideDirectionType
+  | ST_TransitionCornerDirectionType;
 
 export interface CT_EightDirectionTransition {
   dir?: ST_TransitionEightDirectionType;

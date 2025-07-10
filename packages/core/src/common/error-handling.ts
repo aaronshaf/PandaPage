@@ -13,9 +13,9 @@ export interface BaseError {
 /**
  * Document parsing error categories
  */
-export type ErrorCategory = 
+export type ErrorCategory =
   | "parsing"
-  | "validation" 
+  | "validation"
   | "network"
   | "timeout"
   | "memory"
@@ -42,7 +42,7 @@ export const createCategorizedError = (
     recoverable?: boolean;
     retryAfter?: number;
     context?: Record<string, unknown>;
-  } = {}
+  } = {},
 ): Effect.Effect<CategorizedError, never> =>
   Effect.succeed({
     _tag: tag,
@@ -57,11 +57,7 @@ export const createCategorizedError = (
 /**
  * Error recovery strategies
  */
-export type RecoveryStrategy = 
-  | "retry"
-  | "fallback" 
-  | "ignore"
-  | "abort";
+export type RecoveryStrategy = "retry" | "fallback" | "ignore" | "abort";
 
 /**
  * Determine recovery strategy based on error type
@@ -70,7 +66,7 @@ export const getRecoveryStrategy = (error: CategorizedError): RecoveryStrategy =
   if (!error.recoverable) {
     return "abort";
   }
-  
+
   switch (error.category) {
     case "network":
     case "timeout":
@@ -87,9 +83,7 @@ export const getRecoveryStrategy = (error: CategorizedError): RecoveryStrategy =
 /**
  * Simple retry with exponential backoff
  */
-export const retryWithBackoff = <A, E>(
-  effect: Effect.Effect<A, E>
-): Effect.Effect<A, E> => {
+export const retryWithBackoff = <A, E>(effect: Effect.Effect<A, E>): Effect.Effect<A, E> => {
   // For now, just return the effect without retry logic
   // TODO: Implement proper retry logic when Effect APIs are stable
   return effect;
@@ -99,37 +93,36 @@ export const retryWithBackoff = <A, E>(
  * Safe effect execution with error categorization
  */
 export const safeExecute = <A>(
-  effect: Effect.Effect<A, unknown>
+  effect: Effect.Effect<A, unknown>,
 ): Effect.Effect<A, CategorizedError> =>
   Effect.catchAll(effect, (error): Effect.Effect<never, CategorizedError> => {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
-      
+
       if (message.includes("network") || message.includes("fetch")) {
         return Effect.fail<CategorizedError>({
           _tag: "NetworkError",
           message: error.message,
           category: "network",
           recoverable: true,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
-      
+
       return Effect.fail<CategorizedError>({
         _tag: "UnknownError",
         message: error.message,
         category: "unknown",
         recoverable: false,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
-    
+
     return Effect.fail<CategorizedError>({
       _tag: "UnknownError",
       message: typeof error === "string" ? error : "Unknown error occurred",
       category: "unknown",
       recoverable: false,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   });
-

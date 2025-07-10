@@ -6,7 +6,7 @@
 /**
  * Style type enumeration
  */
-export type ST_StyleType = 'paragraph' | 'character' | 'table' | 'numbering';
+export type ST_StyleType = "paragraph" | "character" | "table" | "numbering";
 
 /**
  * Latent style exception

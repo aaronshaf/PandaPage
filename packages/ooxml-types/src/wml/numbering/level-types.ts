@@ -3,12 +3,21 @@
  * Based on wml.xsd level-related definitions
  */
 
-import type { ST_NumberFormat, ST_LevelSuffix } from './numbering-types';
+import type { ST_NumberFormat, ST_LevelSuffix } from "./numbering-types";
 
 /**
  * Level justification
  */
-export type ST_Jc = 'start' | 'center' | 'end' | 'both' | 'distribute' | 'numTab' | 'highKashida' | 'lowKashida' | 'thaiDistribute';
+export type ST_Jc =
+  | "start"
+  | "center"
+  | "end"
+  | "both"
+  | "distribute"
+  | "numTab"
+  | "highKashida"
+  | "lowKashida"
+  | "thaiDistribute";
 
 /**
  * Level text definition

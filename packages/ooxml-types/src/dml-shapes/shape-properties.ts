@@ -1,13 +1,13 @@
 // shape-properties.ts
 // Shape properties and styles for DrawingML
 
-import type { ST_Coordinate, ST_PositiveCoordinate } from './coordinate-types';
-import type { CT_Transform2D, CT_GroupTransform2D } from './transform-types';
-import type { CT_PresetGeometry2D, CT_CustomGeometry2D } from './geometry-types';
-import type { CT_LineProperties } from './line-properties';
-import type { CT_OfficeArtExtensionList } from '../dml-media';
-import type { ST_FontCollectionIndex } from '../dml-fonts';
-import type { EG_ColorChoice, CT_Color } from '../dml-colors';
+import type { ST_Coordinate, ST_PositiveCoordinate } from "./coordinate-types";
+import type { CT_Transform2D, CT_GroupTransform2D } from "./transform-types";
+import type { CT_PresetGeometry2D, CT_CustomGeometry2D } from "./geometry-types";
+import type { CT_LineProperties } from "./line-properties";
+import type { CT_OfficeArtExtensionList } from "../dml-media";
+import type { ST_FontCollectionIndex } from "../dml-fonts";
+import type { EG_ColorChoice, CT_Color } from "../dml-colors";
 import type {
   CT_NoFillProperties,
   CT_SolidColorFillProperties,
@@ -16,8 +16,8 @@ import type {
   CT_PatternFillProperties,
   CT_GroupFillProperties,
   CT_EffectList,
-  CT_EffectContainer
-} from '../dml-effects';
+  CT_EffectContainer,
+} from "../dml-effects";
 
 // Black white mode enum
 export enum ST_BlackWhiteMode {

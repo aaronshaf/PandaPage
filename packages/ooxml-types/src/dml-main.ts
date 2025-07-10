@@ -1,15 +1,15 @@
 // dml-main.ts - Re-export all DrawingML types from modular files
-import type { ST_RelationshipId, ST_Guid, ST_String, ST_Percentage } from './shared-types';
+import type { ST_RelationshipId, ST_Guid, ST_String, ST_Percentage } from "./shared-types";
 
 // Re-export all types from modular files for backward compatibility
 // First export base types that others depend on
-export * from './dml-media';
+export * from "./dml-media";
 
 // Then export types from modules that don't have conflicts
-export * from './dml-animation';
+export * from "./dml-animation";
 
 // Export from dml-fonts
-export * from './dml-fonts';  
+export * from "./dml-fonts";
 
 // Selectively export from dml-colors to avoid conflicts
 export type {
@@ -21,7 +21,6 @@ export type {
   CT_SchemeColor,
   CT_PresetColor,
   ST_HexColorRGB,
-  
   // Main color types
   EG_ColorChoice,
   CT_Color,
@@ -29,30 +28,29 @@ export type {
   CT_ColorScheme,
   CT_ColorMapping,
   CT_ColorMappingOverride,
-  
   // Color transform types
   EG_ColorTransform,
   CT_ComplementTransform,
   CT_InverseTransform,
   CT_GrayscaleTransform,
   CT_GammaTransform,
-  CT_InverseGammaTransform
-} from './dml-colors';
+  CT_InverseGammaTransform,
+} from "./dml-colors";
 
 // Re-export enums from original source to avoid issues with type-only re-exports
-export { ST_SystemColorVal, ST_SchemeColorVal, ST_PresetColorVal } from './dml/colors/color-models';
-export { ST_BlackWhiteMode, ST_ColorSchemeIndex } from './dml/colors/color-types';
+export { ST_SystemColorVal, ST_SchemeColorVal, ST_PresetColorVal } from "./dml/colors/color-models";
+export { ST_BlackWhiteMode, ST_ColorSchemeIndex } from "./dml/colors/color-types";
 
 // Export additional color types
 export type {
   CT_CustomColor,
   CT_CustomColorList,
   CT_ColorChangeEffect,
-  CT_ColorReplaceEffect
-} from './dml-colors';
+  CT_ColorReplaceEffect,
+} from "./dml-colors";
 
 // Export from dml-shapes
-export * from './dml-shapes';
+export * from "./dml-shapes";
 
 // Finally export from dml-effects, explicitly re-exporting conflicting types
 export type {
@@ -90,52 +88,39 @@ export type {
   EG_FillProperties,
   CT_BlipFillProperties,
   // Types that need to be re-exported under their original names
-  ST_PresetMaterialType
-} from './dml-effects';
+  ST_PresetMaterialType,
+} from "./dml-effects";
 
 // Import commonly used types from extracted modules
-import type { 
-  CT_OfficeArtExtensionList
-} from './dml-media';
+import type { CT_OfficeArtExtensionList } from "./dml-media";
 
-import type {
-  EG_ColorChoice
-} from './dml-colors';
+import type { EG_ColorChoice } from "./dml-colors";
 
-import type {
-  ST_Coordinate,
-  ST_PositiveCoordinate,
-  ST_Angle
-} from './dml-shapes';
+import type { ST_Coordinate, ST_PositiveCoordinate, ST_Angle } from "./dml-shapes";
 
-import type {
-  CT_TextFont
-} from './dml-fonts';
+import type { CT_TextFont } from "./dml-fonts";
 
-import type {
-  EG_FillProperties,
-  CT_EffectList
-} from './dml-effects';
+import type { EG_FillProperties, CT_EffectList } from "./dml-effects";
 
 // Text-related enums and types not extracted to other modules
 export enum ST_TextVerticalType {
   Horz = "horz",
-  Vert = "vert", 
+  Vert = "vert",
   Vert270 = "vert270",
   WordArtVert = "wordArtVert",
   EaVert = "eaVert",
   Mongolian = "mongolianVert",
-  WordArtVertRtl = "wordArtVertRtl"
+  WordArtVertRtl = "wordArtVertRtl",
 }
 
 export enum ST_TextAlignType {
   L = "l",
   Ctr = "ctr",
-  R = "r", 
+  R = "r",
   Just = "just",
   JustLow = "justLow",
   Dist = "dist",
-  ThaiDist = "thaiDist"
+  ThaiDist = "thaiDist",
 }
 
 export enum ST_TextUnderlineType {
@@ -156,31 +141,31 @@ export enum ST_TextUnderlineType {
   DotDotDashHeavy = "dotDotDashHeavy",
   Wavy = "wavy",
   WavyHeavy = "wavyHeavy",
-  WavyDbl = "wavyDbl"
+  WavyDbl = "wavyDbl",
 }
 
 export enum ST_TextStrikeType {
   NoStrike = "noStrike",
-  SngStrike = "sngStrike", 
-  DblStrike = "dblStrike"
+  SngStrike = "sngStrike",
+  DblStrike = "dblStrike",
 }
 
 export enum ST_TextCapsType {
   None = "none",
   Small = "small",
-  All = "all"
+  All = "all",
 }
 
 export enum ST_TextTabAlignType {
   L = "l",
   Ctr = "ctr",
   R = "r",
-  Dec = "dec"
+  Dec = "dec",
 }
 
 export enum ST_TextWrappingType {
-  None = "none", 
-  Square = "square"
+  None = "none",
+  Square = "square",
 }
 
 export enum ST_TextColumnCount {
@@ -199,7 +184,7 @@ export enum ST_TextColumnCount {
   Count13 = 13,
   Count14 = 14,
   Count15 = 15,
-  Count16 = 16
+  Count16 = 16,
 }
 
 export enum ST_TextAnchoringType {
@@ -207,21 +192,21 @@ export enum ST_TextAnchoringType {
   Ctr = "ctr",
   B = "b",
   Just = "just",
-  Dist = "dist"
+  Dist = "dist",
 }
 
 export enum ST_TextHorzOverflowType {
   Overflow = "overflow",
-  Clip = "clip"
+  Clip = "clip",
 }
 
 export enum ST_TextVertOverflowType {
   Overflow = "overflow",
   Ellipsis = "ellipsis",
-  Clip = "clip"
+  Clip = "clip",
 }
 
-// Text properties interfaces  
+// Text properties interfaces
 export interface CT_TextUnderline {
   u?: { val?: ST_TextUnderlineType };
   uFill?: EG_FillProperties;
@@ -302,7 +287,7 @@ export type EG_TextRun = CT_RegularTextRun | CT_TextLineBreak | CT_TextField;
 
 export interface CT_TextParagraphProperties {
   lnSpc?: any; // CT_TextSpacing
-  spcBef?: any; // CT_TextSpacing  
+  spcBef?: any; // CT_TextSpacing
   spcAft?: any; // CT_TextSpacing
   buClrTx?: any; // Empty element
   buClr?: EG_ColorChoice;
@@ -391,8 +376,8 @@ export interface CT_TextBody {
 
 // Hyperlink interface
 export interface CT_Hyperlink {
-  hlinkClick?: { 'r:id'?: ST_RelationshipId };
-  hlinkMouseOver?: { 'r:id'?: ST_RelationshipId };
+  hlinkClick?: { "r:id"?: ST_RelationshipId };
+  hlinkMouseOver?: { "r:id"?: ST_RelationshipId };
   tooltip?: ST_String;
   tgtFrame?: ST_String;
   invalidUrl?: ST_String;
@@ -406,7 +391,7 @@ export interface CT_Hyperlink {
 // Additional required types
 export enum ST_TextAutonumberScheme {
   AlphaLcParenBoth = "alphaLcParenBoth",
-  AlphaUcParenBoth = "alphaUcParenBoth", 
+  AlphaUcParenBoth = "alphaUcParenBoth",
   AlphaLcParenR = "alphaLcParenR",
   AlphaUcParenR = "alphaUcParenR",
   AlphaLcPeriod = "alphaLcPeriod",
@@ -420,7 +405,7 @@ export enum ST_TextAutonumberScheme {
   RomanLcParenR = "romanLcParenR",
   RomanUcParenR = "romanUcParenR",
   RomanLcPeriod = "romanLcPeriod",
-  RomanUcPeriod = "romanUcPeriod"
+  RomanUcPeriod = "romanUcPeriod",
 }
 
 // Type aliases for convenience
@@ -434,7 +419,7 @@ export type ST_TextBulletSizePoint = number; // 1-4000
 // 3D Scene types
 export interface CT_Point3D {
   x: ST_Coordinate;
-  y: ST_Coordinate; 
+  y: ST_Coordinate;
   z: ST_Coordinate;
 }
 
@@ -465,10 +450,10 @@ export interface CT_Scene3D {
 }
 
 // Essential types that may be referenced
-export type CT_Empty = Record<string, never>
-export type CT_NonVisualContentPartProperties = Record<string, never>
+export type CT_Empty = Record<string, never>;
+export type CT_NonVisualContentPartProperties = Record<string, never>;
 
-// Additional types needed by other modules  
+// Additional types needed by other modules
 export type EG_EffectProperties = any; // Placeholder for effect properties group
 export interface CT_WholeE2oFormatting {
   ln?: any; // CT_LineProperties from dml-shapes

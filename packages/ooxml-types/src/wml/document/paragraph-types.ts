@@ -3,8 +3,8 @@
  * Based on wml.xsd paragraph definitions
  */
 
-import type { CT_PPr } from '../style/paragraph-properties-types';
-import type { CT_R } from './run-types';
+import type { CT_PPr } from "../style/paragraph-properties-types";
+import type { CT_R } from "./run-types";
 
 /**
  * Paragraph content elements

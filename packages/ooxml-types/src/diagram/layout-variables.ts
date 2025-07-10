@@ -1,5 +1,11 @@
 // layout-variables.ts - Layout variable types for diagrams
-import type { ST_Direction, ST_HierBranchStyle, ST_AnimOneStr, ST_AnimLvlStr, ST_ResizeHandlesStr } from './layout-enums';
+import type {
+  ST_Direction,
+  ST_HierBranchStyle,
+  ST_AnimOneStr,
+  ST_AnimLvlStr,
+  ST_ResizeHandlesStr,
+} from "./layout-enums";
 
 // Node count type
 export type ST_NodeCount = number; // xsd:int, minInclusive -1

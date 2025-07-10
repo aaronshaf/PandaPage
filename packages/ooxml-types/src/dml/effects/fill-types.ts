@@ -3,10 +3,14 @@
  * @see ECMA-376 Part 1, §20.1.8 (Fills)
  */
 
-import type { ST_Percentage, ST_PositivePercentage, ST_PositiveFixedPercentage } from '../../shared/measurement-types';
-import type { ST_Coordinate32, ST_PositiveCoordinate32, CT_Ratio } from '../core/coordinate-types';
-import type { CT_OfficeArtExtensionList } from '../core/extension-types';
-import type { CT_BlurEffect, CT_FillOverlayEffect, ST_RectAlignment } from './effect-types';
+import type {
+  ST_Percentage,
+  ST_PositivePercentage,
+  ST_PositiveFixedPercentage,
+} from "../../shared/measurement-types";
+import type { ST_Coordinate32, ST_PositiveCoordinate32, CT_Ratio } from "../core/coordinate-types";
+import type { CT_OfficeArtExtensionList } from "../core/extension-types";
+import type { CT_BlurEffect, CT_FillOverlayEffect, ST_RectAlignment } from "./effect-types";
 
 /**
  * Fill style list.

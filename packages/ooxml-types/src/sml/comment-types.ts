@@ -3,8 +3,8 @@
  * @see ECMA-376 Part 1, §18.7 (Comments)
  */
 
-import type { ST_Xstring, ST_Guid } from '../shared/common-types';
-import type { ST_CellRef } from './cell-types';
+import type { ST_Xstring, ST_Guid } from "../shared/common-types";
+import type { ST_CellRef } from "./cell-types";
 
 /**
  * Text horizontal alignment.

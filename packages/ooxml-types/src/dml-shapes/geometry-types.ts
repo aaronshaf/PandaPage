@@ -7,9 +7,9 @@ import type {
   ST_AdjCoordinate,
   ST_AdjAngle,
   ST_PositiveCoordinate,
-  CT_AdjPoint2D
-} from './coordinate-types';
-import type { CT_OfficeArtExtensionList } from '../dml-media';
+  CT_AdjPoint2D,
+} from "./coordinate-types";
+import type { CT_OfficeArtExtensionList } from "../dml-media";
 
 // Shape type enum
 export enum ST_ShapeType {
@@ -280,7 +280,14 @@ export interface CT_Path2D {
   extrusionOk?: boolean;
   w?: ST_PositiveCoordinate;
   h?: ST_PositiveCoordinate;
-  pathCmd?: (CT_Path2DMoveTo | CT_Path2DLineTo | CT_Path2DArcTo | CT_Path2DQuadBezierTo | CT_Path2DCubicBezierTo | CT_Path2DClose)[];
+  pathCmd?: (
+    | CT_Path2DMoveTo
+    | CT_Path2DLineTo
+    | CT_Path2DArcTo
+    | CT_Path2DQuadBezierTo
+    | CT_Path2DCubicBezierTo
+    | CT_Path2DClose
+  )[];
 }
 
 export interface CT_Path2DMoveTo {
@@ -306,7 +313,7 @@ export interface CT_Path2DCubicBezierTo {
   pt: CT_AdjPoint2D[];
 }
 
-export type CT_Path2DClose = Record<string, never>
+export type CT_Path2DClose = Record<string, never>;
 
 // Preset geometry 2D
 export interface CT_PresetGeometry2D {
@@ -330,6 +337,4 @@ export interface CT_CustomGeometry2D {
 }
 
 // Geometry choice
-export type EG_Geometry = 
-  | { prstGeom: CT_PresetGeometry2D }
-  | { custGeom: CT_CustomGeometry2D };
+export type EG_Geometry = { prstGeom: CT_PresetGeometry2D } | { custGeom: CT_CustomGeometry2D };

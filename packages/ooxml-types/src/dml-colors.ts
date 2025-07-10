@@ -5,17 +5,21 @@
  */
 
 // Re-export all color types from the organized dml/colors directory
-export * from './dml/colors/color-types';
-export * from './dml/colors/color-models';
-export * from './dml/colors/color-transforms';
+export * from "./dml/colors/color-types";
+export * from "./dml/colors/color-models";
+export * from "./dml/colors/color-transforms";
 
 // Import shared types needed by color definitions
-import type { ST_String, ST_HexColorRGB } from './shared/common-types';
-import type { ST_Percentage, ST_FixedPercentage, ST_PositiveFixedPercentage } from './shared/measurement-types';
-import type { CT_OfficeArtExtensionList } from './dml/core/extension-types';
+import type { ST_String, ST_HexColorRGB } from "./shared/common-types";
+import type {
+  ST_Percentage,
+  ST_FixedPercentage,
+  ST_PositiveFixedPercentage,
+} from "./shared/measurement-types";
+import type { CT_OfficeArtExtensionList } from "./dml/core/extension-types";
 
 // Import coordinate types
-import type { 
+import type {
   ST_Angle,
   ST_PositiveFixedAngle,
   CT_Angle,
@@ -23,8 +27,8 @@ import type {
   CT_Percentage,
   CT_FixedPercentage,
   CT_PositiveFixedPercentage,
-  CT_PositivePercentage
-} from './dml/core/coordinate-types';
+  CT_PositivePercentage,
+} from "./dml/core/coordinate-types";
 
 // Import color model types
 import type {
@@ -36,8 +40,8 @@ import type {
   CT_PresetColor,
   ST_SystemColorVal,
   ST_SchemeColorVal,
-  ST_PresetColorVal
-} from './dml/colors/color-models';
+  ST_PresetColorVal,
+} from "./dml/colors/color-models";
 
 // Import color transform types
 import type {
@@ -46,8 +50,8 @@ import type {
   CT_InverseTransform,
   CT_GrayscaleTransform,
   CT_GammaTransform,
-  CT_InverseGammaTransform
-} from './dml/colors/color-transforms';
+  CT_InverseGammaTransform,
+} from "./dml/colors/color-transforms";
 
 // Import main color types
 import type {
@@ -62,8 +66,8 @@ import type {
   CT_ColorMappingOverride,
   CT_ColorChangeEffect,
   CT_ColorReplaceEffect,
-  ST_BlackWhiteMode
-} from './dml/colors/color-types';
+  ST_BlackWhiteMode,
+} from "./dml/colors/color-types";
 
 // Export all types as a convenience for consumers who want everything
 export type {
@@ -75,7 +79,6 @@ export type {
   ST_PositiveFixedPercentage,
   ST_Angle,
   ST_PositiveFixedAngle,
-  
   // Complex coordinate types
   CT_Angle,
   CT_PositiveFixedAngle,
@@ -83,15 +86,12 @@ export type {
   CT_FixedPercentage,
   CT_PositiveFixedPercentage,
   CT_PositivePercentage,
-  
   // Extension types
   CT_OfficeArtExtensionList,
-  
   // Color model enums
   ST_SystemColorVal,
   ST_SchemeColorVal,
   ST_PresetColorVal,
-  
   // Color model types
   CT_ScRgbColor,
   CT_SRgbColor,
@@ -99,7 +99,6 @@ export type {
   CT_SystemColor,
   CT_SchemeColor,
   CT_PresetColor,
-  
   // Color transform types
   EG_ColorTransform,
   CT_ComplementTransform,
@@ -107,7 +106,6 @@ export type {
   CT_GrayscaleTransform,
   CT_GammaTransform,
   CT_InverseGammaTransform,
-  
   // Main color types
   ST_ColorSchemeIndex,
   EG_ColorChoice,

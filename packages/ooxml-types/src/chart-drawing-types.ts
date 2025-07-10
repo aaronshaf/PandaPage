@@ -1,5 +1,20 @@
 // chart-drawing-types.ts
-import type { CT_NonVisualDrawingProps, CT_NonVisualDrawingShapeProps, CT_ShapeProperties, CT_ShapeStyle, CT_TextBody, CT_NonVisualConnectorProperties, CT_BlipFillProperties, CT_NonVisualPictureProperties, CT_NonVisualGraphicFrameProperties, CT_Transform2D, CT_GraphicalObject, CT_NonVisualGroupDrawingShapeProps, CT_GroupShapeProperties, CT_PositiveSize2D } from './dml-main';
+import type {
+  CT_NonVisualDrawingProps,
+  CT_NonVisualDrawingShapeProps,
+  CT_ShapeProperties,
+  CT_ShapeStyle,
+  CT_TextBody,
+  CT_NonVisualConnectorProperties,
+  CT_BlipFillProperties,
+  CT_NonVisualPictureProperties,
+  CT_NonVisualGraphicFrameProperties,
+  CT_Transform2D,
+  CT_GraphicalObject,
+  CT_NonVisualGroupDrawingShapeProps,
+  CT_GroupShapeProperties,
+  CT_PositiveSize2D,
+} from "./dml-main";
 
 export interface CT_ShapeNonVisual {
   cNvPr: CT_NonVisualDrawingProps;
@@ -74,7 +89,7 @@ export interface CT_GroupShape {
   )[];
 }
 
-export type EG_ObjectChoices = 
+export type EG_ObjectChoices =
   | { sp: CT_Shape }
   | { grpSp: CT_GroupShape }
   | { graphicFrame: CT_GraphicFrame }
@@ -99,9 +114,7 @@ export interface CT_AbsSizeAnchor {
   objectChoice: EG_ObjectChoices;
 }
 
-export type EG_Anchor = 
-  | { relSizeAnchor: CT_RelSizeAnchor }
-  | { absSizeAnchor: CT_AbsSizeAnchor };
+export type EG_Anchor = { relSizeAnchor: CT_RelSizeAnchor } | { absSizeAnchor: CT_AbsSizeAnchor };
 
 export interface CT_Drawing {
   anchors?: EG_Anchor[];
