@@ -1,0 +1,46 @@
+name: Workflow Migration Helper
+
+on:
+  workflow_dispatch:
+    inputs:
+      use_optimized:
+        description: 'Use optimized workflows'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  select-workflow:
+    name: Select Workflow Version
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_name: ${{ steps.select.outputs.workflow }}
+    steps:
+      - id: select
+        run: |
+          if [[ "${{ inputs.use_optimized }}" == "true" ]]; then
+            echo "workflow=CI (Optimized)" >> $GITHUB_OUTPUT
+            echo "Using optimized workflow"
+          else
+            echo "workflow=CI (Parallel)" >> $GITHUB_OUTPUT
+            echo "Using original workflow"
+          fi
+
+  trigger-ci:
+    name: Trigger Selected CI
+    needs: select-workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflow = '${{ needs.select-workflow.outputs.workflow_name }}';
+            console.log(`Triggering workflow: ${workflow}`);
+            
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow === 'CI (Optimized)' ? 'ci-optimized.yml' : 'ci-parallel.yml',
+              ref: context.ref
+            });
