@@ -287,10 +287,11 @@ const mergeConsecutiveRuns = (runs: DocxRun[]): DocxRun[] => {
   if (runs.length === 0) return runs;
   
   const merged: DocxRun[] = [];
-  let currentRun: DocxRun = { ...runs[0] };
+  let currentRun: DocxRun = { ...runs[0], text: runs[0]?.text || '' };
   
   for (let i = 1; i < runs.length; i++) {
     const run = runs[i];
+    if (!run) continue;
     
     // Check if formatting matches (excluding superscript/subscript which should be separate)
     if (
@@ -301,11 +302,11 @@ const mergeConsecutiveRuns = (runs: DocxRun[]): DocxRun[] => {
       currentRun.subscript === run.subscript
     ) {
       // Merge text
-      currentRun.text += run.text;
+      currentRun.text = (currentRun.text || '') + (run.text || '');
     } else {
       // Different formatting, push current and start new
       merged.push(currentRun);
-      currentRun = { ...run };
+      currentRun = { ...run, text: run.text || '' };
     }
   }
   

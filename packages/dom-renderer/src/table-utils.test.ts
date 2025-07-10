@@ -22,17 +22,18 @@ describe('Table Utils', () => {
   describe('renderEnhancedTable', () => {
     it('should render a simple table', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
-              { paragraphs: [{ text: 'Header 1' } as Paragraph] },
-              { paragraphs: [{ text: 'Header 2' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Header 1' }] }] },
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Header 2' }] }] }
             ]
           } as TableRow,
           {
             cells: [
-              { paragraphs: [{ text: 'Cell 1' } as Paragraph] },
-              { paragraphs: [{ text: 'Cell 2' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell 1' }] }] },
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell 2' }] }] }
             ]
           } as TableRow
         ]
@@ -48,19 +49,19 @@ describe('Table Utils', () => {
       const headerRow = result.children[0] as HTMLTableRowElement;
       expect(headerRow.tagName).toBe('TR');
       expect(headerRow.children.length).toBe(2);
-      expect(headerRow.children[0].tagName).toBe('TH');
-      expect(headerRow.children[1].tagName).toBe('TH');
+      expect(headerRow.children[0]?.tagName).toBe('TH');
+      expect(headerRow.children[1]?.tagName).toBe('TH');
       
       // Check data row
       const dataRow = result.children[1] as HTMLTableRowElement;
       expect(dataRow.tagName).toBe('TR');
       expect(dataRow.children.length).toBe(2);
-      expect(dataRow.children[0].tagName).toBe('TD');
-      expect(dataRow.children[1].tagName).toBe('TD');
+      expect(dataRow.children[0]?.tagName).toBe('TD');
+      expect(dataRow.children[1]?.tagName).toBe('TD');
     });
 
     it('should handle empty table', () => {
-      const table: Table = { rows: [] };
+      const table: Table = { type: 'table', rows: [] };
       
       const result = renderEnhancedTable(table, document, mockRenderParagraph);
       
@@ -71,6 +72,7 @@ describe('Table Utils', () => {
 
     it('should handle table with empty rows', () => {
       const table: Table = {
+        type: 'table',
         rows: [{ cells: [] } as TableRow]
       };
       
@@ -84,20 +86,21 @@ describe('Table Utils', () => {
 
     it('should handle cells with rowspan', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
               { 
-                paragraphs: [{ text: 'Merged Cell' } as Paragraph],
+                paragraphs: [{ type: 'paragraph', runs: [{ text: 'Merged Cell' }] }],
                 rowspan: 2
               } as TableCell,
-              { paragraphs: [{ text: 'Header 2' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Header 2' }] }] }
             ]
           } as TableRow,
           {
             cells: [
-              { paragraphs: [{ text: 'Should be skipped' } as Paragraph] },
-              { paragraphs: [{ text: 'Cell 2' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Should be skipped' }] }] },
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell 2' }] }] }
             ]
           } as TableRow
         ]
@@ -118,20 +121,21 @@ describe('Table Utils', () => {
 
     it('should handle cells with colspan', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
               { 
-                paragraphs: [{ text: 'Merged Cell' } as Paragraph],
+                paragraphs: [{ type: 'paragraph', runs: [{ text: 'Merged Cell' }] }],
                 colspan: 2
               } as TableCell,
-              { paragraphs: [{ text: 'Should be skipped' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Should be skipped' }] }] }
             ]
           } as TableRow,
           {
             cells: [
-              { paragraphs: [{ text: 'Cell 1' } as Paragraph] },
-              { paragraphs: [{ text: 'Cell 2' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell 1' }] }] },
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell 2' }] }] }
             ]
           } as TableRow
         ]
@@ -151,22 +155,23 @@ describe('Table Utils', () => {
 
     it('should handle cells with both rowspan and colspan', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
               { 
-                paragraphs: [{ text: 'Merged Cell' } as Paragraph],
+                paragraphs: [{ type: 'paragraph', runs: [{ text: 'Merged Cell' }] }],
                 rowspan: 2,
                 colspan: 2
               } as TableCell,
-              { paragraphs: [{ text: 'Cell A' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell A' }] }] }
             ]
           } as TableRow,
           {
             cells: [
-              { paragraphs: [{ text: 'Skipped 1' } as Paragraph] },
-              { paragraphs: [{ text: 'Skipped 2' } as Paragraph] },
-              { paragraphs: [{ text: 'Cell C' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Skipped 1' }] }] },
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Skipped 2' }] }] },
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Cell C' }] }] }
             ]
           } as TableRow
         ]
@@ -192,16 +197,17 @@ describe('Table Utils', () => {
 
     it('should apply vertical alignment to cells', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
               { 
-                paragraphs: [{ text: 'Top Aligned' } as Paragraph],
+                paragraphs: [{ type: 'paragraph', runs: [{ text: 'Top Aligned' }] }],
                 verticalAlignment: 'top'
               } as TableCell,
               { 
-                paragraphs: [{ text: 'Middle Aligned' } as Paragraph],
-                verticalAlignment: 'middle'
+                paragraphs: [{ type: 'paragraph', runs: [{ text: 'Middle Aligned' }] }],
+                verticalAlignment: 'center'
               } as TableCell
             ]
           } as TableRow
@@ -220,11 +226,12 @@ describe('Table Utils', () => {
 
     it('should handle cells without paragraphs', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
-              { paragraphs: undefined } as TableCell,
-              { paragraphs: [] as Paragraph[] } as TableCell
+              { paragraphs: [] } as TableCell,
+              { paragraphs: [] } as TableCell
             ]
           } as TableRow
         ]
@@ -244,14 +251,15 @@ describe('Table Utils', () => {
 
     it('should handle cells with multiple paragraphs', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
               { 
                 paragraphs: [
-                  { text: 'Paragraph 1' } as Paragraph,
-                  { text: 'Paragraph 2' } as Paragraph,
-                  { text: 'Paragraph 3' } as Paragraph
+                  { type: 'paragraph', runs: [{ text: 'Paragraph 1' }] },
+                  { type: 'paragraph', runs: [{ text: 'Paragraph 2' }] },
+                  { type: 'paragraph', runs: [{ text: 'Paragraph 3' }] }
                 ]
               } as TableCell
             ]
@@ -265,22 +273,23 @@ describe('Table Utils', () => {
       const cell = row.children[0] as HTMLTableCellElement;
       
       expect(cell.children.length).toBe(3);
-      expect(cell.children[0].tagName).toBe('P');
-      expect(cell.children[1].tagName).toBe('P');
-      expect(cell.children[2].tagName).toBe('P');
+      expect(cell.children[0]?.tagName).toBe('P');
+      expect(cell.children[1]?.tagName).toBe('P');
+      expect(cell.children[2]?.tagName).toBe('P');
     });
 
     it('should use TH for first row and TD for subsequent rows', () => {
       const table: Table = {
+        type: 'table',
         rows: [
           {
             cells: [
-              { paragraphs: [{ text: 'Header' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Header' }] }] }
             ]
           } as TableRow,
           {
             cells: [
-              { paragraphs: [{ text: 'Data' } as Paragraph] }
+              { paragraphs: [{ type: 'paragraph', runs: [{ text: 'Data' }] }] }
             ]
           } as TableRow
         ]
@@ -291,8 +300,8 @@ describe('Table Utils', () => {
       const headerRow = result.children[0] as HTMLTableRowElement;
       const dataRow = result.children[1] as HTMLTableRowElement;
       
-      expect(headerRow.children[0].tagName).toBe('TH');
-      expect(dataRow.children[0].tagName).toBe('TD');
+      expect(headerRow.children[0]?.tagName).toBe('TH');
+      expect(dataRow.children[0]?.tagName).toBe('TD');
     });
   });
 });

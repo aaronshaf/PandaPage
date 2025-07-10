@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'bun:test';
 import { JSDOM } from 'jsdom';
 import { renderEnhancedTextRun, renderEnhancedParagraph } from './text-utils';
 import type { TextRun, Paragraph } from '@browser-document-viewer/parser';
+import { ST_HighlightColor, ST_Jc } from '@browser-document-viewer/ooxml-types';
 
 describe('Text Utils', () => {
   let dom: JSDOM;
@@ -192,7 +193,7 @@ describe('Text Utils', () => {
     it('should render highlight colors', () => {
       const run: TextRun = {
         text: 'Highlighted text',
-        highlightColor: 'yellow'
+        highlightColor: ST_HighlightColor.Yellow
       };
 
       const result = renderEnhancedTextRun(run, document, true);
@@ -203,7 +204,7 @@ describe('Text Utils', () => {
     it('should not render none highlight', () => {
       const run: TextRun = {
         text: 'No highlight',
-        highlightColor: 'none'
+        highlightColor: undefined
       };
 
       const result = renderEnhancedTextRun(run, document, true);
@@ -218,7 +219,7 @@ describe('Text Utils', () => {
         italic: true,
         underline: true,
         color: 'FF0000',
-        highlightColor: 'yellow'
+        highlightColor: ST_HighlightColor.Yellow
       };
 
       const result = renderEnhancedTextRun(run, document, true);
@@ -249,7 +250,7 @@ describe('Text Utils', () => {
 
     it('should handle empty text', () => {
       const run: TextRun = {
-        text: undefined,
+        text: '',
         bold: true
       };
 
@@ -280,6 +281,7 @@ describe('Text Utils', () => {
 
     it('should render basic paragraph', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [
           { text: 'Hello world' }
         ]
@@ -296,13 +298,14 @@ describe('Text Utils', () => {
       expect(result.tagName).toBe('P');
       expect(result.className).toContain('mb-4');
       expect(result.children.length).toBe(1);
-      expect(result.children[0].textContent).toBe('Hello world');
+      expect(result.children[0]?.textContent).toBe('Hello world');
     });
 
     it('should render paragraph with alignment', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Centered text' }],
-        alignment: 'center'
+        alignment: ST_Jc.Center
       };
 
       const result = renderEnhancedParagraph(
@@ -318,8 +321,9 @@ describe('Text Utils', () => {
 
     it('should render paragraph with end alignment', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Right text' }],
-        alignment: 'end'
+        alignment: ST_Jc.End
       };
 
       const result = renderEnhancedParagraph(
@@ -335,8 +339,9 @@ describe('Text Utils', () => {
 
     it('should render paragraph with justify alignment', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Justified text' }],
-        alignment: 'both'
+        alignment: ST_Jc.Both
       };
 
       const result = renderEnhancedParagraph(
@@ -352,6 +357,7 @@ describe('Text Utils', () => {
 
     it('should render paragraph with heading styles', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Heading text' }],
         style: 'Heading1'
       };
@@ -370,6 +376,7 @@ describe('Text Utils', () => {
 
     it('should render paragraph with title style', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Title text' }],
         style: 'Title'
       };
@@ -389,6 +396,7 @@ describe('Text Utils', () => {
 
     it('should render dropcap when enabled', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'This is a long paragraph that should qualify for a dropcap because it starts with a capital letter and is substantial content.' }],
         style: 'Normal'
       };
@@ -412,6 +420,7 @@ describe('Text Utils', () => {
 
     it('should not render dropcap for short paragraphs', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Short.' }],
         style: 'Normal'
       };
@@ -425,11 +434,12 @@ describe('Text Utils', () => {
       );
 
       expect(result.children.length).toBe(1);
-      expect(result.children[0].textContent).toBe('Short.');
+      expect(result.children[0]?.textContent).toBe('Short.');
     });
 
     it('should not render dropcap when disabled', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'This is a long paragraph that would qualify for a dropcap but dropcaps are disabled.' }],
         style: 'Normal'
       };
@@ -443,11 +453,12 @@ describe('Text Utils', () => {
       );
 
       expect(result.children.length).toBe(1);
-      expect(result.children[0].textContent?.startsWith('This is a long')).toBe(true);
+      expect(result.children[0]?.textContent?.startsWith('This is a long')).toBe(true);
     });
 
     it('should render multiple runs', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [
           { text: 'First run ' },
           { text: 'Second run ' },
@@ -464,17 +475,18 @@ describe('Text Utils', () => {
       );
 
       expect(result.children.length).toBe(3);
-      expect(result.children[0].textContent).toBe('First run ');
-      expect(result.children[1].textContent).toBe('Second run ');
-      expect(result.children[2].textContent).toBe('Third run');
+      expect(result.children[0]?.textContent).toBe('First run ');
+      expect(result.children[1]?.textContent).toBe('Second run ');
+      expect(result.children[2]?.textContent).toBe('Third run');
     });
 
     it('should render images in paragraph', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [{ text: 'Text with image' }],
         images: [
-          { src: 'image1.jpg' },
-          { src: 'image2.jpg' }
+          { type: 'image', data: new ArrayBuffer(0), mimeType: 'image/jpeg' },
+          { type: 'image', data: new ArrayBuffer(0), mimeType: 'image/jpeg' }
         ]
       };
 
@@ -487,13 +499,14 @@ describe('Text Utils', () => {
       );
 
       expect(result.children.length).toBe(3); // 1 run + 2 images
-      expect(result.children[1].tagName).toBe('IMG');
-      expect(result.children[2].tagName).toBe('IMG');
+      expect(result.children[1]?.tagName).toBe('IMG');
+      expect(result.children[2]?.tagName).toBe('IMG');
     });
 
     it('should handle paragraph without runs', () => {
       const paragraph: Paragraph = {
-        runs: undefined
+        type: 'paragraph',
+        runs: []
       };
 
       const result = renderEnhancedParagraph(
@@ -510,6 +523,7 @@ describe('Text Utils', () => {
 
     it('should handle paragraph with empty runs array', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: []
       };
 
@@ -527,6 +541,7 @@ describe('Text Utils', () => {
 
     it('should handle dropcap with multiple runs', () => {
       const paragraph: Paragraph = {
+        type: 'paragraph',
         runs: [
           { text: 'This is a long paragraph that should qualify for a dropcap ' },
           { text: 'and has multiple runs in it.' }
