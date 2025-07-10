@@ -1,0 +1,30 @@
+{
+  "name": "@browser-document-viewer/ooxml-parser",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./zip": "./src/zip/index.ts",
+    "./relationships": "./src/relationships/index.ts",
+    "./theme": "./src/theme/index.ts",
+    "./numbering": "./src/numbering/index.ts",
+    "./styles": "./src/styles/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test --coverage"
+  },
+  "dependencies": {
+    "@browser-document-viewer/shared-utils": "workspace:*",
+    "@browser-document-viewer/ooxml-types": "workspace:*",
+    "@browser-document-viewer/document-types": "workspace:*",
+    "effect": "^3.10.29",
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.17",
+    "bun-types": "^1.1.40",
+    "typescript": "^5.7.3"
+  }
+}

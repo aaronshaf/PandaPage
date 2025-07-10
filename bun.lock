@@ -69,6 +69,31 @@
         "vite": "^7.0.2",
       },
     },
+    "packages/document-types": {
+      "name": "@browser-document-viewer/document-types",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "^1.1.17",
+        "bun-types": "^1.1.40",
+        "typescript": "^5.7.3",
+      },
+    },
+    "packages/ooxml-parser": {
+      "name": "@browser-document-viewer/ooxml-parser",
+      "version": "0.1.0",
+      "dependencies": {
+        "@browser-document-viewer/document-types": "workspace:*",
+        "@browser-document-viewer/ooxml-types": "workspace:*",
+        "@browser-document-viewer/shared-utils": "workspace:*",
+        "effect": "^3.10.29",
+        "jszip": "^3.10.1",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.1.17",
+        "bun-types": "^1.1.40",
+        "typescript": "^5.7.3",
+      },
+    },
     "packages/ooxml-types": {
       "name": "@browser-document-viewer/ooxml-types",
       "version": "1.0.0",
@@ -115,6 +140,20 @@
       "devDependencies": {
         "@types/bun": "latest",
         "typescript": "^5",
+      },
+    },
+    "packages/shared-utils": {
+      "name": "@browser-document-viewer/shared-utils",
+      "version": "0.1.0",
+      "dependencies": {
+        "@xmldom/xmldom": "^0.9.7",
+        "effect": "^3.10.29",
+        "nanoid": "^5.0.9",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.1.17",
+        "bun-types": "^1.1.40",
+        "typescript": "^5.7.3",
       },
     },
   },
@@ -181,6 +220,10 @@
 
     "@browser-document-viewer/core": ["@browser-document-viewer/core@workspace:packages/core"],
 
+    "@browser-document-viewer/document-types": ["@browser-document-viewer/document-types@workspace:packages/document-types"],
+
+    "@browser-document-viewer/ooxml-parser": ["@browser-document-viewer/ooxml-parser@workspace:packages/ooxml-parser"],
+
     "@browser-document-viewer/ooxml-types": ["@browser-document-viewer/ooxml-types@workspace:packages/ooxml-types"],
 
     "@browser-document-viewer/parser": ["@browser-document-viewer/parser@workspace:packages/parser"],
@@ -188,6 +231,8 @@
     "@browser-document-viewer/renderer-dom": ["@browser-document-viewer/renderer-dom@workspace:packages/renderer-dom"],
 
     "@browser-document-viewer/renderer-markdown": ["@browser-document-viewer/renderer-markdown@workspace:packages/renderer-markdown"],
+
+    "@browser-document-viewer/shared-utils": ["@browser-document-viewer/shared-utils@workspace:packages/shared-utils"],
 
     "@csstools/color-helpers": ["@csstools/color-helpers@5.0.2", "", {}, "sha512-JqWH1vsgdGcw2RR6VliXXdA0/59LttzlU8UlRT/iUUsEeWfYq8I+K0yhihEUTTHLRm1EXvpsCx3083EU15ecsA=="],
 
@@ -589,7 +634,7 @@
 
     "multipasta": ["multipasta@0.2.5", "", {}, "sha512-c8eMDb1WwZcE02WVjHoOmUVk7fnKU/RmUcosHACglrWAuPQsEJv+E8430sXj6jNc1jHw0zrS16aCjQh4BcEb4A=="],
 
-    "nanoid": ["nanoid@3.3.11", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w=="],
+    "nanoid": ["nanoid@5.1.5", "", { "bin": { "nanoid": "bin/nanoid.js" } }, "sha512-Ir/+ZpE9fDsNH0hQ3C68uyThDXzYcim2EqcZ8zn8Chtt1iylPT9xXJB0kPCnqzgcEGikO9RxSrh63MsmVCU7Fw=="],
 
     "node-gyp-build-optional-packages": ["node-gyp-build-optional-packages@5.2.2", "", { "dependencies": { "detect-libc": "^2.0.1" }, "bin": { "node-gyp-build-optional-packages": "bin.js", "node-gyp-build-optional-packages-optional": "optional.js", "node-gyp-build-optional-packages-test": "build-test.js" } }, "sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw=="],
 
@@ -730,6 +775,8 @@
     "jsdom/whatwg-mimetype": ["whatwg-mimetype@4.0.0", "", {}, "sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg=="],
 
     "playwright/fsevents": ["fsevents@2.3.2", "", { "os": "darwin" }, "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA=="],
+
+    "postcss/nanoid": ["nanoid@3.3.11", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w=="],
 
     "rsbuild-react-ts/vite": ["vite@7.0.3", "", { "dependencies": { "esbuild": "^0.25.0", "fdir": "^6.4.6", "picomatch": "^4.0.2", "postcss": "^8.5.6", "rollup": "^4.40.0", "tinyglobby": "^0.2.14" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "jiti": ">=1.21.0", "less": "^4.0.0", "lightningcss": "^1.21.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "jiti", "less", "lightningcss", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-y2L5oJZF7bj4c0jgGYgBNSdIu+5HF+m68rn2cQXFbGoShdhV1phX9rbnxy9YXj82aS8MMsCLAAFkRxZeWdldrQ=="],
 

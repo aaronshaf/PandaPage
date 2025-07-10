@@ -1,0 +1,8 @@
+[test]
+root = "."
+preload = ["./test-setup.ts"]
+coverage = true
+coverageThreshold = { line = 0.75, function = 0.70 }
+
+[install]
+registry = "https://registry.npmjs.org"
