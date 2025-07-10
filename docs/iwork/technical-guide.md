@@ -52,28 +52,27 @@ Parsing an iWork document is a multi-step process:
 
 Building a parser is not a simple task. Leverage the extensive work already done by the open-source community.
 
+### Schema Extraction: The Critical First Step
+
+The most significant challenge in parsing the IWA format is the lack of official Protocol Buffer (`.proto`) schemas. The most reliable way to obtain these is to extract them directly from the iWork application binaries on macOS.
+
+*   **SheetJS `otorp`**: This is a purpose-built tool for this exact task. It analyzes a Mach-O binary (like the `Pages` application executable), finds the embedded `.proto` definitions, and extracts them into usable files. **Using a tool like `otorp` should be considered a prerequisite for any serious parsing project.**
+*   **`proto-dump`**: A similar tool that can also extract Protobuf definitions from binaries.
+
 ### Reference Implementations
 
-*   **`libetonyek` (C++)**: The library used by LibreOffice to import iWork files. It is the most complete and robust open-source implementation and serves as an invaluable reference for understanding the format's intricacies, including the custom Snappy decompression and Protobuf message structures.
-*   **SheetJS `js-iwork`**: While not a full parser, the SheetJS project has some of the most detailed documentation on the reverse-engineered Protobuf message definitions.
-*   **`iwork2html` (Go)**: A functional command-line tool that converts iWork files to HTML. Its source code is a practical reference for a complete parsing pipeline.
-
-### Reverse-Engineering Tools
-
-If you need to extend existing parsers or analyze new iWork versions, these tools are critical:
-
-*   **`proto-dump`**: A tool to extract Protobuf `.proto` definitions directly from the iWork application binaries on macOS.
-*   **Binary Analysis Tools**: Applications like Synalyze It! or Hexinator are essential for inspecting the raw binary structure of `.iwa` files.
+*   **`libetonyek` (C++)**: The library used by LibreOffice. It is the most complete open-source implementation and serves as an invaluable reference for the custom Snappy decompression and the overall document model.
+*   **SheetJS `js-iwork`**: The SheetJS project provides detailed documentation and partial implementations that are highly valuable.
+*   **`iwork2html` (Go)**: A functional command-line tool that converts iWork files to HTML, offering a practical reference for a complete parsing pipeline.
 
 ## Implementation Recommendations for a TypeScript/Web Parser
 
-Given the lack of existing JavaScript libraries, here is a recommended approach:
-
-1.  **Start with a ZIP Library**: Use a library like `jszip` to handle the outer archive.
-2.  **Solve Snappy Decompression**: This is a prerequisite. Investigate porting or creating a Wasm build of the Snappy implementation from `libetonyek` or `iwork2html` to handle the custom framing.
-3.  **Use `protobuf.js`**: This is the standard for handling Protobuf in JavaScript. Load the community-provided `.proto` definitions.
-4.  **Build a Message Dispatcher**: The `.iwa` stream contains multiple message types. You will need to parse a generic wrapper message first to identify the type of the main message payload, then deserialize the payload using the correct schema definition.
-5.  **Construct a Document Model**: The parsed Protobuf messages are a flat list of objects with ID-based references. You must build a hierarchical document model in memory by resolving these references, starting from the root object in `Document.iwa`.
-6.  **Render the Model**: Once you have a coherent document model, you can traverse it to render HTML, extract text, or convert to another format. This involves mapping iWork's complex styling objects to CSS.
+1.  **Obtain Schemas**: Use `otorp` or a similar tool to extract the `.proto` schemas from the iWork applications. This is the foundation of your parser.
+2.  **Handle ZIP**: Use a library like `jszip` to handle the outer iWork archive and the nested `Index.zip`.
+3.  **Solve Snappy Decompression**: Implement or find a library that can handle Apple's non-standard, headerless Snappy compression. Porting the logic from `libetonyek` or `iwork2html` (possibly to Wasm) is a reliable strategy.
+4.  **Parse Protobuf**: Use `protobuf.js` to load the schemas you extracted and to deserialize the `.iwa` message streams.
+5.  **Build a Message Dispatcher**: The `.iwa` stream contains multiple message types. You will need to parse a generic wrapper message first to identify the type of the main message payload, then deserialize the payload using the correct schema definition.
+6.  **Construct a Document Model**: The parsed Protobuf messages are a flat list of objects with ID-based references. You must build a hierarchical document model in memory by resolving these references, starting from the root object in `Document.iwa`.
+7.  **Render the Model**: Once you have a coherent document model, you can traverse it to render HTML, extract text, or convert to another format. This involves mapping iWork's complex styling objects to CSS.
 
 Due to the complexity, it is advisable to **start with a minimal goal**, such as extracting plain text, before attempting a full, high-fidelity renderer.

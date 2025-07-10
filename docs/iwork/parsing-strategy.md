@@ -31,13 +31,13 @@ Apple's implementation of Snappy is non-standard because it **omits the stream i
     *   **Port a C++ Implementation**: Analyze the `IWASnappyStream.cpp` from `libetonyek` or the implementation within SheetJS's parser. A direct port or a WebAssembly (Wasm) compilation of this logic is the most reliable path. The logic involves reading chunk headers and decompressing data blocks iteratively.
 2.  **Create a Decompression Utility**: Wrap the chosen library or custom code in a utility function: `decompressIWA(iwaBuffer: Uint8Array): Uint8Array`.
 
-### Step 3: Parse Protocol Buffer Messages
+### Step 3: Acquire Protobuf Schemas and Parse Messages
 
 This is the most complex step, as it requires handling undocumented Protobuf schemas.
 
-1.  **Acquire `.proto` Definitions**:
-    *   **Leverage Community Efforts**: The most practical approach is to use the `.proto` definitions that have already been reverse-engineered. The SheetJS project provides extensive documentation on the iWork message types and their fields.
-    *   **Manual Reverse Engineering (If Necessary)**: For unsupported features or new iWork versions, use tools like `proto-dump` to extract schemas from the iWork application binaries on macOS.
+1.  **Acquire `.proto` Definitions via Schema Extraction**:
+    *   **Primary Strategy**: The most reliable method is to extract the `.proto` schemas directly from the iWork application binaries on macOS. Use a tool like **SheetJS `otorp`** or **`proto-dump`** to do this. This gives you the exact, up-to-date message definitions used by the applications.
+    *   **Fallback**: If you cannot perform the extraction, you can rely on community-provided schemas, but be aware they may be incomplete or outdated.
 2.  **Choose a Protobuf Library**: Use a reliable JavaScript Protobuf library like `protobuf.js`. It supports loading `.proto` definitions at runtime and can serialize/deserialize messages to and from `Uint8Array` buffers.
 3.  **Develop a Generic Message Parser**:
     *   The decompressed `.iwa` stream is a series of Protobuf messages. Each message is preceded by a varint-encoded length.
