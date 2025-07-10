@@ -9,6 +9,7 @@ import type {
   ST_PositiveFixedPercentage 
 } from './shared-types';
 
+// Import from specific modules to avoid circular dependency
 import type {
   ST_Coordinate,
   ST_PositiveCoordinate,
@@ -16,22 +17,62 @@ import type {
   ST_FixedAngle,
   ST_PositiveFixedAngle,
   ST_RectAlignment,
+  CT_RelativeRect
+} from './dml-shapes';
+
+import type {
   ST_BlackWhiteMode,
-  ST_StyleMatrixColumnIndex,
-  ST_FontCollectionIndex,
   EG_ColorChoice,
   CT_Color,
-  CT_OfficeArtExtensionList,
-  CT_RelativeRect,
-  CT_Point3D,
-  CT_Vector3D,
-  CT_Camera,
-  CT_LightRig,
-  CT_Scene3D,
-  CT_TextFont,
-  CT_SupplementalFont,
   CT_ColorScheme
-} from './dml-main';
+} from './dml-colors';
+
+import type {
+  CT_OfficeArtExtensionList
+} from './dml-media';
+
+import type {
+  ST_FontCollectionIndex,
+  CT_TextFont,
+  CT_SupplementalFont
+} from './dml-fonts';
+
+import type {
+  ST_StyleMatrixColumnIndex
+} from './dml-shapes';
+
+// These types are defined locally in this module to avoid circular dependency
+export interface CT_Point3D {
+  x: ST_Coordinate;
+  y: ST_Coordinate;
+  z: ST_Coordinate;
+}
+
+export interface CT_Vector3D {
+  dx: ST_Coordinate;
+  dy: ST_Coordinate;
+  dz: ST_Coordinate;
+}
+
+export interface CT_Camera {
+  prst: string; // ST_PresetCameraType
+  fov?: ST_Angle;
+  zoom?: ST_Percentage;
+  rot?: any; // CT_SphereCoords
+}
+
+export interface CT_LightRig {
+  rig: string; // ST_LightRigType
+  dir: string; // ST_LightRigDirection
+  rot?: any; // CT_SphereCoords
+}
+
+export interface CT_Scene3D {
+  camera: CT_Camera;
+  lightRig: CT_LightRig;
+  backdrop?: any; // CT_Backdrop
+  extLst?: CT_OfficeArtExtensionList;
+}
 
 // Style Matrix and Style Lists
 export interface CT_EffectStyleItem {

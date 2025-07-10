@@ -8,15 +8,54 @@ export * from './dml-media';
 // Then export types from modules that don't have conflicts
 export * from './dml-animation';
 
-// Export from dml-fonts and dml-colors (no conflicts between them)
+// Export from dml-fonts
 export * from './dml-fonts';  
-export * from './dml-colors';
 
-// Export from dml-shapes except types that conflict with other modules
+// Selectively export from dml-colors to avoid conflicts
+export type {
+  // Color model types
+  CT_ScRgbColor,
+  CT_SRgbColor,
+  CT_HslColor,
+  CT_SystemColor,
+  CT_SchemeColor,
+  CT_PresetColor,
+  ST_HexColorRGB,
+  
+  // Main color types
+  EG_ColorChoice,
+  CT_Color,
+  CT_ColorMRU,
+  CT_ColorScheme,
+  CT_ColorMapping,
+  CT_ColorMappingOverride,
+  
+  // Color transform types
+  EG_ColorTransform,
+  CT_ComplementTransform,
+  CT_InverseTransform,
+  CT_GrayscaleTransform,
+  CT_GammaTransform,
+  CT_InverseGammaTransform
+} from './dml-colors';
+
+// Re-export enums from original source to avoid issues with type-only re-exports
+export { ST_SystemColorVal, ST_SchemeColorVal, ST_PresetColorVal } from './dml/colors/color-models';
+export { ST_BlackWhiteMode, ST_ColorSchemeIndex } from './dml/colors/color-types';
+
+// Export additional color types
+export type {
+  CT_CustomColor,
+  CT_CustomColorList,
+  CT_ColorChangeEffect,
+  CT_ColorReplaceEffect
+} from './dml-colors';
+
+// Export from dml-shapes
 export * from './dml-shapes';
 
 // Finally export from dml-effects, explicitly re-exporting conflicting types
-export {
+export type {
   // Re-export everything except conflicting types
   CT_EffectList,
   CT_EffectContainer,
@@ -30,7 +69,6 @@ export {
   CT_Bevel,
   CT_Shape3D,
   CT_FlatText,
-  CT_Scene3D,
   CT_InnerShadowEffect,
   CT_OuterShadowEffect,
   CT_PresetShadowEffect,
@@ -41,19 +79,14 @@ export {
   CT_GlowEffect,
   CT_PathShadeProperties,
   ST_PathShadeType,
-  ST_RectAlignment,
   CT_SoftEdgesEffect,
   CT_StretchInfoProperties,
-  CT_ShapeProperties,
-  CT_GroupShapeProperties,
   CT_LineProperties,
   CT_FontCollection,
   CT_FontScheme,
   CT_FontReference,
   CT_StyleMatrixReference,
   CT_ShapeStyle,
-  CT_ColorChangeEffect,
-  CT_ColorReplaceEffect,
   EG_FillProperties,
   CT_BlipFillProperties,
   // Types that need to be re-exported under their original names
@@ -435,15 +468,7 @@ export interface CT_Scene3D {
 export type CT_Empty = Record<string, never>
 export type CT_NonVisualContentPartProperties = Record<string, never>
 
-// Additional types needed by other modules
-export type ST_ColorSchemeIndex = number; // 0-based index
-export interface CT_CustomColor {
-  name: string;
-  color: EG_ColorChoice;
-}
-export interface CT_CustomColorList {
-  custClr?: CT_CustomColor[];
-}
+// Additional types needed by other modules  
 export type EG_EffectProperties = any; // Placeholder for effect properties group
 export interface CT_WholeE2oFormatting {
   ln?: any; // CT_LineProperties from dml-shapes
