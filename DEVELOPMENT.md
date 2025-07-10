@@ -38,9 +38,31 @@ cd packages/demo && bun test:e2e
 
 ## Development Workflow
 
-### Pre-commit Hooks
+### Git Hooks
 
-Fast Bun tests run automatically before commits. Playwright E2E tests run in CI only.
+This project uses automated git hooks to ensure code quality:
+
+**Pre-commit Hook:**
+- Runs file size checks
+- Executes linting (`bun run lint`)
+- Performs type checking (`bun run typecheck`)
+- Runs full unit test suite (`bun run test:unit`)
+
+**Pre-push Hook:**
+- Executes linting (`bun run lint`)
+- Performs type checking (`bun run typecheck`)
+- Runs full unit test suite (`bun run test:unit`)
+- Prevents pushing code with any quality issues
+- Ensures CI will pass before code reaches remote repository
+
+The hooks are managed by `simple-git-hooks` and installed automatically. To skip hooks temporarily:
+```bash
+# Skip pre-commit hook
+SKIP_SIMPLE_GIT_HOOKS=1 git commit -m "message"
+
+# Skip pre-push hook  
+SKIP_SIMPLE_GIT_HOOKS=1 git push
+```
 
 ### Project Structure
 

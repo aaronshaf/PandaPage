@@ -25,7 +25,8 @@
     "sync-docs": "bun scripts/sync-documents.js"
   },
   "simple-git-hooks": {
-    "pre-commit": "bun run precommit"
+    "pre-commit": "bun run precommit",
+    "pre-push": "bun run lint && bun run typecheck && bun run test:unit"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.6",
