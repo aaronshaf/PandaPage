@@ -2,6 +2,7 @@ import { describe, it, expect } from "bun:test";
 import { parseParagraph } from "./paragraph-parser";
 import { parseStylesheet } from "./style-parser";
 import { WORD_NAMESPACE } from './types';
+import { ST_Border, ST_Shd } from '@browser-document-viewer/ooxml-types';
 
 describe("Paragraph Borders and Shading", () => {
   const ns = WORD_NAMESPACE;
@@ -33,25 +34,25 @@ describe("Paragraph Borders and Shading", () => {
       expect(result).toBeDefined();
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         size: 4,
         space: 1,
         color: '#FF0000'
       });
       expect(result?.borders?.bottom).toEqual({
-        style: 'double',
+        style: ST_Border.Double,
         size: 8,
         space: 2,
         color: '#00FF00'
       });
       expect(result?.borders?.left).toEqual({
-        style: 'dashed',
+        style: ST_Border.Dashed,
         size: 6,
         space: 3,
         color: '#0000FF'
       });
       expect(result?.borders?.right).toEqual({
-        style: 'dotted',
+        style: ST_Border.Dotted,
         size: 2,
         space: 4,
         color: '#000000'
@@ -80,7 +81,7 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.between).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         size: 4,
         color: '#808080'
       });
@@ -108,7 +109,7 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         size: 4
       });
       expect(result?.borders?.top?.color).toBeUndefined();
@@ -136,8 +137,8 @@ describe("Paragraph Borders and Shading", () => {
       const result = parseParagraph(paragraph);
 
       expect(result?.borders).toBeDefined();
-      expect(result?.borders?.top?.style).toBe('none');
-      expect(result?.borders?.bottom?.style).toBe('none');
+      expect(result?.borders?.top?.style).toBe(ST_Border.None);
+      expect(result?.borders?.bottom?.style).toBe(ST_Border.Nil);
     });
   });
 
@@ -162,6 +163,7 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
+        val: ST_Shd.Clear,
         fill: '#FFFF00'
       });
     });
@@ -186,7 +188,7 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
-        val: 'pct25',
+        val: ST_Shd.Pct25,
         fill: '#FFFF00',
         color: '#FF0000'
       });
@@ -212,7 +214,7 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
-        val: 'solid'
+        val: ST_Shd.Solid
       });
       expect(result?.shading?.fill).toBeUndefined();
       expect(result?.shading?.color).toBeUndefined();
@@ -257,17 +259,17 @@ describe("Paragraph Borders and Shading", () => {
 
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         size: 4,
         color: '#000000'
       });
       expect(result?.borders?.bottom).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         size: 4,
         color: '#000000'
       });
       expect(result?.shading).toEqual({
-        val: 'clear',
+        val: ST_Shd.Clear,
         fill: '#F0F0F0'
       });
     });
@@ -311,13 +313,13 @@ describe("Paragraph Borders and Shading", () => {
       const result = parseParagraph(paragraph, undefined, undefined, undefined, stylesheet);
 
       expect(result?.borders?.top).toEqual({
-        style: 'double',
+        style: ST_Border.Double,
         size: 8,
         color: '#FF0000'
       });
       expect(result?.shading).toEqual({
-        val: 'clear',
-        fill: '#FFFF00'
+        fill: '#FFFF00',
+        val: ST_Shd.Clear
       });
     });
   });

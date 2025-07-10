@@ -9,6 +9,7 @@ import { getElementsByTagNameNSFallback, getElementByTagNameNSFallback, hasChild
 import { applyStyleCascade, type DocxStylesheet } from './style-parser';
 import type { DocxTheme } from './theme-parser';
 import { resolveThemeColor, resolveThemeFont } from './theme-parser';
+import { ST_Em } from '@browser-document-viewer/ooxml-types';
 
 // Helper type for field parsing state
 export interface FieldParsingState {
@@ -244,7 +245,7 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
   let doubleStrikethrough = false;
   let kerning: number | undefined;
   let textScale: number | undefined;
-  let emphasis: 'dot' | 'comma' | 'circle' | 'underDot' | undefined;
+  let emphasis: ST_Em | undefined;
   let lang: string | undefined;
   
   if (runProps) {
@@ -382,8 +383,13 @@ export function parseRun(runElement: Element, ns: string, linkUrl?: string, styl
     // Emphasis mark
     const emElement = getElementByTagNameNSFallback(runProps, ns, "em");
     const emVal = emElement?.getAttribute("w:val");
-    if (emVal && ['dot', 'comma', 'circle', 'underDot'].includes(emVal)) {
-      emphasis = emVal as 'dot' | 'comma' | 'circle' | 'underDot';
+    if (emVal) {
+      switch (emVal) {
+        case 'dot': emphasis = ST_Em.Dot; break;
+        case 'comma': emphasis = ST_Em.Comma; break;
+        case 'circle': emphasis = ST_Em.Circle; break;
+        case 'underDot': emphasis = ST_Em.UnderDot; break;
+      }
     }
     
     // Language

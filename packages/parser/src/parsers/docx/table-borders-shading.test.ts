@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { parseTable } from "./table-parser";
 import { WORD_NAMESPACE } from './types';
+import { ST_Border, ST_Shd } from '@browser-document-viewer/ooxml-types';
 
 describe("Table Borders and Shading", () => {
   const ns = WORD_NAMESPACE;
@@ -40,32 +41,32 @@ describe("Table Borders and Shading", () => {
       expect(result).toBeDefined();
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 0.5, // 4 eighth-points = 0.5 points
         color: '#FF0000'
       });
       expect(result?.borders?.bottom).toEqual({
-        style: 'double',
+        style: ST_Border.Double,
         width: 1, // 8 eighth-points = 1 point
         color: '#00FF00'
       });
       expect(result?.borders?.left).toEqual({
-        style: 'dashed',
+        style: ST_Border.Dashed,
         width: 0.75, // 6 eighth-points = 0.75 points
         color: '#0000FF'
       });
       expect(result?.borders?.right).toEqual({
-        style: 'dotted',
+        style: ST_Border.Dotted,
         width: 0.25, // 2 eighth-points = 0.25 points
         color: '#000000'
       });
       expect(result?.borders?.insideH).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 0.5,
         color: '#808080'
       });
       expect(result?.borders?.insideV).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 0.5,
         color: '#C0C0C0'
       });
@@ -99,7 +100,7 @@ describe("Table Borders and Shading", () => {
 
       expect(result?.borders).toBeDefined();
       expect(result?.borders?.top).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 0.5
       });
       expect(result?.borders?.top?.color).toBeUndefined();
@@ -133,8 +134,8 @@ describe("Table Borders and Shading", () => {
       const result = parseTable(table);
 
       expect(result?.borders).toBeDefined();
-      expect(result?.borders?.top?.style).toBe('none');
-      expect(result?.borders?.bottom?.style).toBe('none');
+      expect(result?.borders?.top?.style).toBe(ST_Border.None);
+      expect(result?.borders?.bottom?.style).toBe(ST_Border.Nil);
     });
   });
 
@@ -195,7 +196,7 @@ describe("Table Borders and Shading", () => {
 
       expect(result?.shading).toBeDefined();
       expect(result?.shading).toEqual({
-        pattern: 'pct25',
+        pattern: ST_Shd.Pct25,
         fill: '#FFFF00',
         color: '#FF0000'
       });
@@ -277,32 +278,32 @@ describe("Table Borders and Shading", () => {
       expect(result?.rows[0]?.cells[0]?.borders).toBeDefined();
       const borders = result?.rows[0]?.cells[0]?.borders;
       expect(borders?.top).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 1, // 8 eighth-points = 1 point
         color: '#FF0000'
       });
       expect(borders?.bottom).toEqual({
-        style: 'double',
+        style: ST_Border.Double,
         width: 1.5, // 12 eighth-points = 1.5 points
         color: '#00FF00'
       });
       expect(borders?.left).toEqual({
-        style: 'dashed',
+        style: ST_Border.Dashed,
         width: 0.5,
         color: '#0000FF'
       });
       expect(borders?.right).toEqual({
-        style: 'dotted',
+        style: ST_Border.Dotted,
         width: 0.75,
         color: '#000000'
       });
       expect(borders?.tl2br).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 0.5,
         color: '#FF00FF'
       });
       expect(borders?.tr2bl).toEqual({
-        style: 'single',
+        style: ST_Border.Single,
         width: 0.5,
         color: '#00FFFF'
       });
@@ -336,7 +337,7 @@ describe("Table Borders and Shading", () => {
 
       expect(result?.rows[0]?.cells[0]?.shading).toBeDefined();
       expect(result?.rows[0]?.cells[0]?.shading).toEqual({
-        pattern: 'pct50',
+        pattern: ST_Shd.Pct50,
         fill: '#00FF00',
         color: '#FF0000'
       });
@@ -438,7 +439,7 @@ describe("Table Borders and Shading", () => {
       // Check cell-level properties (override table properties)
       const firstCell = result?.rows[0]?.cells[0];
       expect(firstCell?.borders?.top).toEqual({
-        style: 'double',
+        style: ST_Border.Double,
         width: 1,
         color: '#FF0000'
       });
