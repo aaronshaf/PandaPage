@@ -3,6 +3,9 @@ import type { ParsedDocument } from '@browser-document-viewer/parser';
 // Re-export the new DOM-based renderer
 export { DOMRenderer, type DOMRenderOptions } from './dom-renderer';
 
+// Export the enhanced DOM renderer
+export { EnhancedDOMRenderer, type EnhancedDOMRenderOptions } from './improved-dom-renderer';
+
 export interface HtmlRenderOptions {
   includeStyles?: boolean;
   pageSize?: 'letter' | 'a4';
