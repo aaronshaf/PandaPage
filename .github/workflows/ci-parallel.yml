@@ -3,18 +3,8 @@ name: CI (Parallel)
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.gitignore'
-      - 'LICENSE'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.gitignore'
-      - 'LICENSE'
 
 jobs:
   # Run linting and formatting checks in parallel
