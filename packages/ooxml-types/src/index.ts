@@ -51,7 +51,7 @@ export type { CT_R as CT_MathRun } from './math-types';
 export type { CT_TwipsMeasure as CT_MathTwipsMeasure } from './math-types';
 
 // Chart types with renamed conflict  
-export type { CT_Shape as CT_ChartShape } from './chart-types';
+export type { CT_Shape as CT_ChartShape } from './chart-formatting-types';
 
 // Specialized drawing types with renamed conflicts
 export type {

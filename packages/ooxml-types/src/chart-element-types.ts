@@ -354,4 +354,4 @@ import type {
   CT_BubbleScale,
   CT_SizeRepresents,
   CT_View3D
-} from './chart-misc-types';
+} from './chart-types';

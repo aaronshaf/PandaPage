@@ -183,3 +183,42 @@ export interface CT_ChartSpace {
   userShapes?: any; // CT_RelId
   extLst?: CT_ExtensionList;
 }
+
+// Additional chart types
+export interface CT_View3D {
+  rotX?: { val?: number };
+  hPercent?: { val?: number };
+  rotY?: { val?: number };
+  depthPercent?: { val?: number };
+  rAngAx?: { val?: boolean };
+  perspective?: { val?: number };
+  extLst?: CT_ExtensionList;
+}
+
+export interface CT_BubbleScale {
+  val?: number; // 0-300%
+}
+
+export interface CT_SizeRepresents {
+  val?: "area" | "w";
+}
+
+export interface CT_FirstSliceAng {
+  val?: number; // 0-360
+}
+
+export interface CT_HoleSize {
+  val?: number; // 10-90%
+}
+
+export interface CT_SplitType {
+  val?: "auto" | "cust" | "percent" | "pos" | "val";
+}
+
+export interface CT_CustSplit {
+  secondPiePt?: { val?: number }[];
+}
+
+export interface CT_SecondPieSize {
+  val?: number; // 5-200%
+}

@@ -2,16 +2,70 @@
 import type { ST_RelationshipId, ST_Guid, ST_String, ST_Percentage } from './shared-types';
 
 // Re-export all types from modular files for backward compatibility
+// First export base types that others depend on
 export * from './dml-media';
+
+// Then export types from modules that don't have conflicts
+export * from './dml-animation';
+
+// Export from dml-fonts and dml-colors (no conflicts between them)
 export * from './dml-fonts';  
 export * from './dml-colors';
+
+// Export from dml-shapes except types that conflict with other modules
 export * from './dml-shapes';
-export * from './dml-effects';
-export * from './dml-animation';
+
+// Finally export from dml-effects, explicitly re-exporting conflicting types
+export {
+  // Re-export everything except conflicting types
+  CT_EffectList,
+  CT_EffectContainer,
+  CT_EffectReference,
+  CT_EffectStyleItem,
+  CT_EffectStyleList,
+  CT_StyleMatrix,
+  CT_BaseStyles,
+  CT_Backdrop,
+  ST_BevelPresetType,
+  CT_Bevel,
+  CT_Shape3D,
+  CT_FlatText,
+  CT_Scene3D,
+  CT_InnerShadowEffect,
+  CT_OuterShadowEffect,
+  CT_PresetShadowEffect,
+  CT_ReflectionEffect,
+  CT_RelativeOffsetEffect,
+  CT_TransformEffect,
+  CT_FillOverlayEffect,
+  CT_GlowEffect,
+  CT_PathShadeProperties,
+  ST_PathShadeType,
+  ST_RectAlignment,
+  CT_SoftEdgesEffect,
+  CT_StretchInfoProperties,
+  CT_ShapeProperties,
+  CT_GroupShapeProperties,
+  CT_LineProperties,
+  CT_FontCollection,
+  CT_FontScheme,
+  CT_FontReference,
+  CT_StyleMatrixReference,
+  CT_ShapeStyle,
+  CT_ColorChangeEffect,
+  CT_ColorReplaceEffect,
+  EG_FillProperties,
+  CT_BlipFillProperties,
+  // Types that need to be re-exported under their original names
+  ST_PresetMaterialType
+} from './dml-effects';
 
 // Import commonly used types from extracted modules
 import type { 
-  CT_OfficeArtExtensionList,
+  CT_OfficeArtExtensionList
+} from './dml-media';
+
+import type {
   EG_ColorChoice
 } from './dml-colors';
 
@@ -344,8 +398,53 @@ export type ST_TextFontAlignType = "auto" | "t" | "ctr" | "base" | "b";
 export type ST_TextBulletSizePercent = ST_Percentage;
 export type ST_TextBulletSizePoint = number; // 1-4000
 
+// 3D Scene types
+export interface CT_Point3D {
+  x: ST_Coordinate;
+  y: ST_Coordinate; 
+  z: ST_Coordinate;
+}
+
+export interface CT_Vector3D {
+  dx: ST_Coordinate;
+  dy: ST_Coordinate;
+  dz: ST_Coordinate;
+}
+
+export interface CT_Camera {
+  prst: string; // ST_PresetCameraType
+  fov?: ST_Angle;
+  zoom?: ST_Percentage;
+  rot?: any; // CT_SphereCoords
+}
+
+export interface CT_LightRig {
+  rig: string; // ST_LightRigType
+  dir: string; // ST_LightRigDirection
+  rot?: any; // CT_SphereCoords
+}
+
+export interface CT_Scene3D {
+  camera: CT_Camera;
+  lightRig: CT_LightRig;
+  backdrop?: any; // CT_Backdrop
+  extLst?: CT_OfficeArtExtensionList;
+}
+
 // Essential types that may be referenced
-export type CT_Empty = {}
+export type CT_Empty = Record<string, never>
+export type CT_NonVisualContentPartProperties = Record<string, never>
+
+// Additional types needed by other modules
+export type ST_ColorSchemeIndex = number; // 0-based index
+export interface CT_CustomColor {
+  name: string;
+  color: EG_ColorChoice;
+}
+export interface CT_CustomColorList {
+  custClr?: CT_CustomColor[];
+}
+export type EG_EffectProperties = any; // Placeholder for effect properties group
 export interface CT_WholeE2oFormatting {
   ln?: any; // CT_LineProperties from dml-shapes
   effectLst?: CT_EffectList;
