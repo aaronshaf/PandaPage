@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Pre-commit hook to check file sizes and warn about files over 700 lines
+ * Pre-commit hook to check file sizes and warn about files over 500 lines
  * Suggests breaking large files into smaller, focused modules
  */
 
@@ -11,8 +11,8 @@ const { execSync } = require('child_process');
 
 // File size limits by extension - only checking TypeScript files
 const FILE_LIMITS = {
-  '.ts': 700,
-  '.tsx': 700,
+  '.ts': 500,
+  '.tsx': 500,
 };
 
 // Files to exclude from size checking
@@ -151,7 +151,7 @@ function countLines(filePath) {
 
 function getFileSizeLimit(filePath) {
   const ext = getFileExtension(filePath);
-  return FILE_LIMITS[ext] || 700; // Default to 700 lines
+  return FILE_LIMITS[ext] || 500; // Default to 500 lines
 }
 
 function getSuggestionsForBreakingUpFile(filePath, lineCount, limit) {
