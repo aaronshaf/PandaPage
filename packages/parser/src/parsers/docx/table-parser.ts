@@ -372,7 +372,7 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
   }
   
   // Get all table rows
-  const rowElements = tableElement.getElementsByTagNameNS(ns, "tr");
+  const rowElements = getElementsByTagNameNSFallback(tableElement, ns, "tr");
   
   for (let i = 0; i < rowElements.length; i++) {
     const rowElement = rowElements[i];
@@ -380,19 +380,31 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
     const cells: TableCell[] = [];
     
     // Get all table cells in this row
-    const cellElements = rowElement.getElementsByTagNameNS(ns, "tc");
+    const cellElements = getElementsByTagNameNSFallback(rowElement, ns, "tc");
     
     for (let j = 0; j < cellElements.length; j++) {
       const cellElement = cellElements[j];
       if (!cellElement) continue;
       const paragraphs: Paragraph[] = [];
       
-      // Get all paragraphs in this cell
-      const cellParagraphs = cellElement.getElementsByTagNameNS(ns, "p");
+      // Get all direct child paragraphs in this cell (not nested in tables)
+      const cellParagraphs = getElementsByTagNameNSFallback(cellElement, ns, "p");
       
       for (let k = 0; k < cellParagraphs.length; k++) {
         const pElement = cellParagraphs[k];
         if (!pElement) continue;
+        
+        // Skip paragraphs that are inside nested tables
+        let parent = pElement.parentElement;
+        let isNestedInTable = false;
+        while (parent && parent !== cellElement) {
+          if (parent.localName === 'tbl' || parent.tagName === 'w:tbl') {
+            isNestedInTable = true;
+            break;
+          }
+          parent = parent.parentElement;
+        }
+        if (isNestedInTable) continue;
         const paragraph = parseParagraph(pElement, relationships, undefined, undefined, stylesheet, theme);
         if (paragraph) {
           // Convert to Paragraph type (without list info for table cells)
@@ -420,7 +432,7 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
       }
       
       // Check for cell properties
-      const tcPr = cellElement ? cellElement.getElementsByTagNameNS(ns, "tcPr")[0] : undefined;
+      const tcPr = cellElement ? getElementByTagNameNSFallback(cellElement, ns, "tcPr") : undefined;
       let colspan: number | undefined;
       let rowspan: number | undefined;
       let verticalAlignment: TableCell['verticalAlignment'];
@@ -428,15 +440,16 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
       let cellBorders: TableCellBorders | undefined;
       let cellShading: TableShading | undefined;
       let cellMargin: TableCell['margin'] | undefined;
+      let cellWidth: number | undefined;
       
       if (tcPr) {
-        const gridSpan = tcPr.getElementsByTagNameNS(ns, "gridSpan")[0];
+        const gridSpan = getElementByTagNameNSFallback(tcPr, ns, "gridSpan");
         if (gridSpan) {
           const val = gridSpan.getAttribute("w:val");
           if (val) colspan = parseInt(val);
         }
         
-        const vMerge = tcPr.getElementsByTagNameNS(ns, "vMerge")[0];
+        const vMerge = getElementByTagNameNSFallback(tcPr, ns, "vMerge");
         if (vMerge) {
           // Note: DOCX vertical merge is complex, we'll handle basic cases
           const val = vMerge.getAttribute("w:val");
@@ -444,7 +457,7 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
         }
         
         // Vertical alignment
-        const vAlign = tcPr.getElementsByTagNameNS(ns, "vAlign")[0];
+        const vAlign = getElementByTagNameNSFallback(tcPr, ns, "vAlign");
         if (vAlign) {
           const val = vAlign.getAttribute("w:val");
           switch (val) {
@@ -455,7 +468,7 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
         }
         
         // Text direction
-        const textDirectionEl = tcPr.getElementsByTagNameNS(ns, "textDirection")[0];
+        const textDirectionEl = getElementByTagNameNSFallback(tcPr, ns, "textDirection");
         if (textDirectionEl) {
           const val = textDirectionEl.getAttribute("w:val");
           switch (val) {
@@ -465,6 +478,16 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
             case 'tbV': textDirection = 'tbV'; break;
             case 'lrTbV': textDirection = 'lrTbV'; break;
             case 'tbLrV': textDirection = 'tbLrV'; break;
+          }
+        }
+        
+        // Parse cell width
+        const tcW = getElementByTagNameNSFallback(tcPr, ns, "tcW");
+        if (tcW) {
+          const w = tcW.getAttribute("w:w");
+          const type = tcW.getAttribute("w:type");
+          if (w && type === "dxa") {
+            cellWidth = parseInt(w, 10);
           }
         }
         
@@ -521,6 +544,7 @@ export function parseTable(tableElement: Element, relationships?: Map<string, st
         paragraphs,
         ...(colspan && { colspan }),
         ...(rowspan && { rowspan }),
+        ...(cellWidth && { width: cellWidth }),
         ...(verticalAlignment && { verticalAlignment }),
         ...(textDirection && { textDirection }),
         ...(cellBorders && { borders: cellBorders }),
