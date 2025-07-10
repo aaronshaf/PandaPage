@@ -1,8 +1,8 @@
 // Style parsing functions for DOCX
 import { WORD_NAMESPACE } from './types';
 import type { DocxBorder, DocxShading, DocxParagraphBorders } from './types';
-import type { TextDirectionString, VerticalAlignmentString, LineSpacingRuleString, ST_Jc } from '@browser-document-viewer/ooxml-types';
-import { mapParagraphAlignment, mapBorderStyle } from './ooxml-mappers';
+import type { TextDirectionString, VerticalAlignmentString, LineSpacingRuleString, ST_Jc, ST_Em } from '@browser-document-viewer/ooxml-types';
+import { mapParagraphAlignment, mapBorderStyle, mapEmphasisMark } from './ooxml-mappers';
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from './xml-utils';
 
 export interface DocxStyle {
@@ -63,7 +63,7 @@ export interface DocxRunProperties {
   doubleStrikethrough?: boolean;
   kerning?: number; // Minimum font size for kerning (half-points)
   textScale?: number; // Horizontal scaling percentage
-  emphasis?: 'dot' | 'comma' | 'circle' | 'underDot';
+  emphasis?: ST_Em;
   lang?: string;
 }
 
@@ -423,8 +423,8 @@ function parseRunProperties(rPr: Element, ns: string): DocxRunProperties {
   const em = getElementByTagNameNSFallback(rPr, ns, 'em');
   if (em) {
     const val = em.getAttribute('w:val');
-    if (val && ['dot', 'comma', 'circle', 'underDot'].includes(val)) {
-      props.emphasis = val as 'dot' | 'comma' | 'circle' | 'underDot';
+    if (val) {
+      props.emphasis = mapEmphasisMark(val);
     }
   }
   
