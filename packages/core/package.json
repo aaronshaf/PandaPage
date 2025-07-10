@@ -53,6 +53,10 @@
     "@browser-document-viewer/parser": "workspace:*",
     "@browser-document-viewer/markdown-renderer": "workspace:*",
     "@browser-document-viewer/dom-renderer": "workspace:*",
+    "@browser-document-viewer/docx": "workspace:*",
+    "@browser-document-viewer/pptx": "workspace:*",
+    "@browser-document-viewer/pages": "workspace:*",
+    "@browser-document-viewer/key": "workspace:*",
     "effect": "^3.16.12",
     "fflate": "^0.8.2"
   },

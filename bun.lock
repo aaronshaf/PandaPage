@@ -25,6 +25,7 @@
         "@browser-document-viewer/markdown-renderer": "workspace:*",
         "@browser-document-viewer/ooxml-types": "workspace:*",
         "@browser-document-viewer/parser": "workspace:*",
+        "@browser-document-viewer/pptx": "workspace:*",
         "@effect/platform-browser": "^0.67.7",
         "@effect/schema": "^0.75.5",
         "effect": "^3.16.12",

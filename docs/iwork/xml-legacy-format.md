@@ -1,59 +1,76 @@
-# Legacy XML Format of Apple Pages Documents (2005-2013)
 
-Before 2013, Apple Pages documents utilized an XML-based format. Unlike the modern Protocol Buffer format, this legacy format was officially documented by Apple in the "iWork Programming Guide." Understanding this format is valuable for historical context and for parsing older `.pages` files.
+# Guide to the Legacy Apple iWork XML Format (Pre-2013)
 
-## 1. Document Structure: ZIP and XML
+Before its transition to a binary format in 2013, the Apple iWork suite used a transparent, XML-based file structure. This format was officially documented by Apple in the "iWork Programming Guide," making it accessible for third-party developers. This guide provides a detailed overview of that legacy XML structure.
 
-Similar to the modern format, legacy Pages documents were also essentially **ZIP archives**. However, instead of containing `Index.zip` with `.iwa` files, they contained XML files directly.
+## Document Bundle Structure
 
-A typical structure for a legacy Pages bundle (`document.pages/`) would look something like this:
+A legacy iWork document (`.pages`, `.numbers`, or `.keynote`) was a "bundle"—a directory that macOS presents as a single file. Its contents could be inspected by right-clicking and selecting "Show Package Contents."
 
+While the exact files varied slightly between applications, a typical structure for a Pages document was:
+
+*   **`index.xml.gz`**: The heart of the document. This was a gzipped XML file containing the entire document's content, structure, and layout. In iWork '09, this could also be an uncompressed `index.xml` file.
+*   **Media Assets**: A `Data` directory or simply files alongside the `index.xml.gz` holding all embedded images, videos, and other media.
+*   **`QuickLook/`**: A directory containing a `Thumbnail.jpg` and `Preview.pdf` for system-level previews.
+*   **`buildVersionHistory.plist`**: A property list file indicating which version of iWork created the document.
+
+For easier debugging, developers could use `defaults` commands to make iWork save the `index.xml` uncompressed and with human-readable formatting.
+
+## The Core XML Hierarchy (`index.xml`)
+
+The root element of the XML was typically `<sl:document>` for Pages, with namespaces like `sl` (Pages), `sf` (Shared Framework), and `sfa` (Shared Framework Additions) defining the elements.
+
+The structure was hierarchical, representing the objects in the document. Below is a simplified overview of the key elements found in a Pages XML file:
+
+```xml
+<sl:document>
+    <!-- Document-level metadata and settings -->
+    <sl:version-history>...</sl:version-history>
+    <sl:publication-info>...</sl:publication-info>
+    <sl:metadata>...</sl:metadata>
+    <sl:print-info>...</sl:print-info>
+
+    <!-- Stylesheet defining all document styles -->
+    <sl:stylesheet>...</sl:stylesheet>
+
+    <!-- Content sections -->
+    <sl:headers>...</sl:headers>
+    <sl:footers>...</sl:footers>
+    <sl:drawables>...</sl:drawables>
+    <sl:text-storage>...</sl:text-storage>
+
+    <!-- Window and view state -->
+    <sl:window-configs>...</sl:window-configs>
+</sl:document>
 ```
-document.pages/
-├── Contents/                # Contains the main XML files
-│   ├── document.xml         # Main document content and structure
-│   ├── styles.xml           # Document styles
-│   ├── metadata.xml         # Document metadata
-│   └── build-version.plist  # Version information
-├── Data/                    # Stores media assets (images, etc.)
-├── preview.jpg             # High-resolution document preview
-└── preview-micro.jpg       # Thumbnail preview
-```
 
-## 2. Key XML Files and Their Roles
+### Key Elements and Their Purpose
 
-*   **`document.xml`:** This was the core file, containing the main content of the Pages document. It defined the hierarchy of elements, including paragraphs, text runs, tables, shapes, and other drawable objects. The structure was typically nested, reflecting the visual layout of the document.
-*   **`styles.xml`:** This file defined all the styles used within the document. This included paragraph styles, character styles, table styles, and shape styles. Styles were crucial for maintaining consistent formatting and were often referenced by elements in `document.xml`.
-*   **`metadata.xml`:** Contained document-level metadata, similar to `IWORKMetadata` in the modern format. This included information like title, author, creation date, modification date, and keywords.
-*   **`build-version.plist`:** A property list file (XML-based) that provided information about the iWork application version that created or last saved the document.
+*   **`<sl:stylesheet>`**: Defined all document styles, including paragraph styles, character styles, list styles, and shape styles. Elements throughout the document would reference these styles by a unique identifier.
+*   **`<sl:text-storage>`**: The main container for the body text of the document. The `sf:kind` attribute specified its role (e.g., `body`, `header`, `footnote`, `textbox`).
+*   **`<sl:drawables>`**: Contained all "floating" objects not in the main text flow, such as images, shapes, and text boxes. These were organized into layers and groups.
+*   **`<sf:p>` (Paragraph)**: The basic unit of text. It referenced a paragraph style (`sf:style`).
+*   **`<sf:span>` (Span)**: Used for applying character-level styling (e.g., bold, italic, a different font) to a run of text within a paragraph.
+*   **`<sf:list>`**: Defined lists, with `<sf:li>` for list items. List styles were applied to control numbering, bullets, and indentation.
+*   **`<sf:table>`**: Represented tables, with complex internal structures for rows, columns, cells, and fills.
+*   **Specialized Text Elements**: The format included specific tags for dynamic content and formatting, such as:
+    *   `<sf:br/>` (line break), `<sf:pgbr/>` (page break), `<sf:colbr/>` (column break)
+    *   `<sf:date-time>`, `<sf:page-number>`, `<sf:page-count>`
+    *   `<sf:link href="...">`, `<sf:bookmark>`, `<sf:footnote>`
 
-## 3. XML Schema and Elements
+### Common Attributes
 
-The "iWork Programming Guide" provided a comprehensive XML schema, detailing the various elements and attributes used in the format. Key aspects included:
+*   **`sfa:ID`**: A unique string identifier for an element, allowing it to be referenced from other parts of the document.
+*   **`sfa:IDREF`**: A reference to an element's `sfa:ID`, used to avoid duplicating objects.
+*   **`sf:style`**: A reference to a style defined in the `<sl:stylesheet>`.
 
-*   **Element Definitions:** Specific XML tags for different document components (e.g., `<paragraph>`, `<text-run>`, `<table>`, `<shape>`).
-*   **Document Hierarchy:** How elements were nested to represent the logical and visual structure of the document.
-*   **Drawable Objects:** Definitions for graphical elements, including their geometry, fills, strokes, and transformations.
-*   **Text Formatting:** Elements and attributes for applying font properties, colors, alignment, and other text-specific formatting.
-*   **Style System:** How styles were defined, applied, and inherited throughout the document.
+## Parsing the Legacy Format
 
-## 4. Parsing the Legacy Format
+Parsing the legacy XML format is a standard procedure:
 
-Parsing the legacy XML format involved standard XML parsing techniques:
+1.  **Unzip the `.pages` file** to access its contents.
+2.  **Decompress `index.xml.gz`** if necessary.
+3.  **Use a standard XML parser** (like `libxml2`, which `libetonyek` uses) to read the `index.xml` file.
+4.  **Build a document model** by traversing the XML tree, resolving style references, and reconstructing the content in memory.
 
-1.  **Unzip the `.pages` file:** Extract all contents.
-2.  **Locate XML files:** Identify `document.xml`, `styles.xml`, etc.
-3.  **Parse XML:** Use an XML parser (e.g., `libxml2` which `libetonyek` uses for older formats) to read and interpret the structure and content of each XML file.
-4.  **Build Document Model:** Construct an in-memory representation of the document based on the parsed XML data.
-
-## 5. Comparison with Modern Format
-
-| Feature           | Legacy XML Format (2005-2013)         | Modern Protocol Buffers Format (2013+) |
-| :---------------- | :------------------------------------ | :------------------------------------- |
-| **Core Data**     | XML files (e.g., `document.xml`)      | Snappy-compressed Protocol Buffers (`.iwa` files) |
-| **Documentation** | Officially documented by Apple        | No official documentation; reverse-engineered |
-| **Compression**   | Standard ZIP compression for bundle   | ZIP for bundle, custom Snappy for `.iwa` |
-| **Parsing Speed** | Slower (XML parsing overhead)         | Significantly faster (binary parsing) |
-| **Complexity**    | Simpler, human-readable XML           | More complex binary format, requires `.proto` definitions |
-
-While the legacy XML format is less common now, understanding its structure provides valuable context for the evolution of the Pages file format and highlights the significant shift Apple made towards a more performant, binary-based approach.
+While this format is no longer in active use, understanding its structure provides valuable context for the evolution of iWork and is necessary for any tool aiming for comprehensive backward compatibility.

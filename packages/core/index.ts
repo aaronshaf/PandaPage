@@ -7,12 +7,10 @@ export {
   DocxParseError,
   type DocxRun,
   readDocx,
-} from "./src/formats/docx/docx-reader";
-
-export {
   convertDocxToMarkdown,
   docxToMarkdown,
-} from "./src/formats/docx/docx-to-markdown";
+  docxToMarkdownWithMetadata,
+} from "@browser-document-viewer/docx";
 // Keynote support
 export {
   type KeyContent,
@@ -20,11 +18,9 @@ export {
   KeyParseError,
   type KeySlide,
   readKey,
-} from "./src/formats/key/key-reader";
-export {
   convertKeyToMarkdown,
   keyToMarkdown,
-} from "./src/formats/key/key-to-markdown";
+} from "@browser-document-viewer/key";
 // Apple Pages support
 export {
   type PagesDocument,
@@ -32,11 +28,9 @@ export {
   PagesParseError,
   type PagesRun,
   readPages,
-} from "./src/formats/pages/pages-reader";
-export {
   convertPagesToMarkdown,
   pagesToMarkdown,
-} from "./src/formats/pages/pages-to-markdown";
+} from "@browser-document-viewer/pages";
 // PPTX support
 export {
   type PptxContent,
@@ -44,18 +38,16 @@ export {
   PptxParseError,
   type PptxSlide,
   readPptx,
-} from "./src/formats/pptx/pptx-reader";
-export {
   convertPptxToMarkdown,
   pptxToMarkdown,
-} from "./src/formats/pptx/pptx-to-markdown";
+} from "@browser-document-viewer/pptx";
 
 // Helper functions to render documents to markdown directly
 export async function renderDocx(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
       const { docxToMarkdown } = yield* Effect.promise(
-        () => import("./src/formats/docx/docx-to-markdown"),
+        () => import("@browser-document-viewer/docx"),
       );
       return yield* docxToMarkdown(buffer);
     }),
@@ -66,7 +58,7 @@ export async function renderDocxWithMetadata(buffer: ArrayBuffer): Promise<strin
   return Effect.runPromise(
     Effect.gen(function* () {
       const { docxToMarkdownWithMetadata } = yield* Effect.promise(
-        () => import("./src/formats/docx/docx-to-markdown"),
+        () => import("@browser-document-viewer/docx"),
       );
       return yield* docxToMarkdownWithMetadata(buffer);
     }),
@@ -77,7 +69,7 @@ export async function renderPages(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
       const { pagesToMarkdown } = yield* Effect.promise(
-        () => import("./src/formats/pages/pages-to-markdown"),
+        () => import("@browser-document-viewer/pages"),
       );
       return yield* pagesToMarkdown(buffer);
     }),
@@ -88,7 +80,7 @@ export async function renderPptx(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
       const { pptxToMarkdown } = yield* Effect.promise(
-        () => import("./src/formats/pptx/pptx-to-markdown"),
+        () => import("@browser-document-viewer/pptx"),
       );
       return yield* pptxToMarkdown(buffer);
     }),
@@ -99,7 +91,7 @@ export async function renderKey(buffer: ArrayBuffer): Promise<string> {
   return Effect.runPromise(
     Effect.gen(function* () {
       const { keyToMarkdown } = yield* Effect.promise(
-        () => import("./src/formats/key/key-to-markdown"),
+        () => import("@browser-document-viewer/key"),
       );
       return yield* keyToMarkdown(buffer);
     }),
@@ -116,10 +108,10 @@ export type {
   DocxTableRowProperties,
   DocxTableCellProperties,
   EnhancedDocxDocument
-} from "./src/formats/docx/types";
+} from "@browser-document-viewer/docx";
 
 // Re-export reader function
-export { readEnhancedDocx } from "./src/formats/docx/reader-enhanced";
+export { readEnhancedDocx } from "@browser-document-viewer/docx";
 
 // Re-export structured parsing
 export { 

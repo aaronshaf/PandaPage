@@ -1,59 +1,82 @@
-# Parsing Strategy for Apple Pages Documents
 
-Parsing Apple Pages documents, especially the modern (2013+) Protocol Buffer-based format, requires a multi-step strategy. This document outlines a high-level approach, drawing insights from existing implementations like `libetonyek`.
+# Comprehensive Parsing Strategy for Apple iWork Documents in TypeScript
 
-## 1. Deconstruct the Pages Bundle (ZIP Archive)
+This document outlines a detailed strategy for parsing modern Apple iWork files (Pages, Numbers, Keynote) within a TypeScript/JavaScript environment. The approach is informed by extensive analysis of existing documentation, reverse-engineering efforts by the community (notably SheetJS and the Document Liberation Project's `libetonyek`), and the known structure of iWork's proprietary format.
 
-Since a `.pages` file is a ZIP archive, the first step is to decompress it. The critical component within this archive is `Index.zip`, which contains the core document data.
+## Core Principles & Technologies
 
-**Steps:**
-1.  **Unzip the `.pages` file:** Extract its contents to a temporary directory.
-2.  **Locate `Index.zip`:** Find and extract `Index.zip` from the unzipped `.pages` content.
-3.  **Identify `.iwa` files:** Within the extracted `Index.zip`, identify the various `.iwa` files (e.g., `Document.iwa`, `DocumentStylesheet.iwa`, `Metadata.iwa`). These files hold the actual structured data.
+Modern iWork documents (`.pages`, `.numbers`, `.keynote` files created since 2013) are ZIP archives containing a proprietary, binary format known as **IWA (iWork Archive)**. Parsing these files requires a deep understanding of three core technologies:
 
-## 2. Decompress IWA Files (Custom Snappy)
+1.  **ZIP Decompression**: The top-level container is a standard ZIP archive.
+2.  **Custom Snappy Decompression**: The core data files (`.iwa`) are compressed with a non-standard variant of Google's Snappy algorithm.
+3.  **Protocol Buffers (Protobuf)**: The decompressed data consists of serialized Protobuf messages. The schemas (`.proto` files) for these messages are not public and must be reverse-engineered.
 
-Each `.iwa` file is compressed using Apple's custom Snappy implementation. This is a crucial step that often requires a specialized decompression routine, as confirmed by the `IWASnappyStream` class in `libetonyek`.
+## Step-by-Step Parsing Workflow
 
-**Steps:**
-1.  **Read `.iwa` file content:** Load the binary content of an `.iwa` file.
-2.  **Apply custom Snappy decompression:** Utilize a decompressor (like `IWASnappyStream::uncompressBlock`) that accounts for Apple's non-standard Snappy framing (i.e., no stream identifier). The decompressed stream might also be structured, potentially containing multiple logical substreams.
+### Step 1: Deconstruct the iWork Bundle
 
-## 3. Parse Protocol Buffer Messages and Resolve Objects
+The first step is to access the raw `.iwa` data files.
 
-The decompressed `.iwa` content is a stream of Protocol Buffer messages. To make sense of this binary data, you need the corresponding `.proto` definitions and a Protobuf parsing library. The `libetonyek` library uses `IWAMessage` to represent these messages and `IWAParser` to orchestrate their processing. SheetJS's implementation further clarifies the generic structure of these messages.
+1.  **Unzip the Container**: Use a JavaScript ZIP library (e.g., `jszip`) to load the `.pages`, `.numbers`, or `.keynote` file and access its contents in memory.
+2.  **Locate `Index.zip`**: Within the primary archive, find and unzip the nested `Index.zip` file. This archive contains the core document structure.
+3.  **Extract `.iwa` Files**: Read the various `.iwa` files (e.g., `Document.iwa`, `DocumentStylesheet.iwa`, `Metadata.iwa`, `Tables/DataList.iwa`) into memory as `Uint8Array` buffers. These files contain the structured data of the document.
+4.  **Map Media Assets**: The `Data/` directory in the main archive contains all embedded media (images, videos). These assets are referenced by ID from within the `.iwa` files. Create a map of these assets for later retrieval.
 
-**Steps:**
-1.  **Obtain `.proto` definitions:** Since Apple does not publish these, they must be reverse-engineered from iWork executables using tools like `proto-dump` or by analyzing tools like SheetJS's `packages/otorp/`. These definitions describe the structure of the messages (e.g., `DocumentArchive`, `StylesheetArchive`).
-2.  **Deserialize Protobuf data:** Use a Protobuf library (or `IWAMessage` in `libetonyek`, or SheetJS's `parse_shallow` function) to deserialize the binary data into structured objects. This involves mapping the raw bytes to generic `ProtoItem`s, which are then grouped into `ProtoField`s and finally into `ProtoMessage`s based on field numbers and wire types. `IWAMessage` provides methods to access various field types (e.g., `uint32`, `string`, `message`).
-3.  **Resolve Object IDs:** A critical step is resolving internal object IDs to their corresponding data. The `IWAObjectIndex` (in `libetonyek`) is central to this. It maps object IDs to their types and `IWAMessage` (or `ProtoMessage`) data, and also handles mapping file IDs to streams (e.g., for embedded media) and even colors.
-4.  **Dispatch and Process:** The `IWAParser` dispatches different types of objects (shapes, text, comments, styles) to specific parsing methods. It also provides helper methods to extract common iWork data types (e.g., `readRef`, `readPosition`, `readColor`, `readStroke`) from `IWAMessage` fields.
+### Step 2: Implement Custom Snappy Decompression
 
-## 4. Reconstruct Document Structure
+Apple's implementation of Snappy is non-standard because it **omits the stream identifier header**. This means standard Snappy libraries will fail.
 
-The parsed Protobuf messages represent various parts of the document (text, styles, images, tables, etc.). The next step is to assemble these into a coherent document model.
+1.  **Find or Build a Compatible Library**:
+    *   **Existing Implementations**: Investigate JavaScript Snappy libraries to see if any support a "raw" or "headerless" mode. The `snappyjs` library is a potential candidate but may require verification or modification.
+    *   **Port a C++ Implementation**: Analyze the `IWASnappyStream.cpp` from `libetonyek` or the implementation within SheetJS's parser. A direct port or a WebAssembly (Wasm) compilation of this logic is the most reliable path. The logic involves reading chunk headers and decompressing data blocks iteratively.
+2.  **Create a Decompression Utility**: Wrap the chosen library or custom code in a utility function: `decompressIWA(iwaBuffer: Uint8Array): Uint8Array`.
 
-**Steps:**
-1.  **Process `Document.iwa`:** This file typically contains the main document structure, including references to other components.
-2.  **Process `DocumentStylesheet.iwa`:** This file defines the styles used throughout the document. Styles are fundamental for rendering and formatting.
-3.  **Resolve object references:** Pages documents use an object indexing system (e.g., `IWAObjectIndex` in `libetonyek`) to refer to different parts of the document. You'll need to build a lookup mechanism to resolve these references.
-4.  **Build an in-memory document model:** Create a hierarchical representation of the document, linking text runs to styles, images to their data, and tables to their cells.
+### Step 3: Parse Protocol Buffer Messages
 
-## 5. Extract Content and Render (Optional)
+This is the most complex step, as it requires handling undocumented Protobuf schemas.
 
-Once the document model is built, you can extract specific content (e.g., plain text, images) or proceed to render the document.
+1.  **Acquire `.proto` Definitions**:
+    *   **Leverage Community Efforts**: The most practical approach is to use the `.proto` definitions that have already been reverse-engineered. The SheetJS project provides extensive documentation on the iWork message types and their fields.
+    *   **Manual Reverse Engineering (If Necessary)**: For unsupported features or new iWork versions, use tools like `proto-dump` to extract schemas from the iWork application binaries on macOS.
+2.  **Choose a Protobuf Library**: Use a reliable JavaScript Protobuf library like `protobuf.js`. It supports loading `.proto` definitions at runtime and can serialize/deserialize messages to and from `Uint8Array` buffers.
+3.  **Develop a Generic Message Parser**:
+    *   The decompressed `.iwa` stream is a series of Protobuf messages. Each message is preceded by a varint-encoded length.
+    *   Create a parser that iteratively reads the length, then reads that many bytes into a buffer, and deserializes it into a generic `ArchiveInfo` message (a top-level message containing metadata about the actual message type).
+    *   The `ArchiveInfo` message will contain an `identifier` field. This integer ID tells you the *actual* type of the message that follows (e.g., `2001` for `TSWP.StorageArchive`, `6002` for `TST.Tile`).
+4.  **Implement a Typed Message Dispatcher**:
+    *   Create a mapping from the integer `identifier` to the corresponding Protobuf message type (e.g., `2001: TSWP.StorageArchive`).
+    *   After parsing the generic `ArchiveInfo`, use this map to look up the correct message type and then deserialize the *actual* message payload using the specific `.proto` definition.
+    *   This creates a stream of fully-typed message objects.
 
-**Steps:**
-1.  **Iterate through document elements:** Traverse your in-memory document model.
-2.  **Extract text:** Identify text runs and concatenate them.
-3.  **Extract media:** Locate image and other media references and extract their binary data from the `Data/` directory within the original `.pages` bundle.
-4.  **Apply styles and layout:** For rendering, interpret the style properties and layout information to display the document accurately.
+### Step 4: Reconstruct the Document Model
 
-## Key Considerations and Challenges
+The parsed Protobuf messages are disconnected pieces of the document. They must be assembled into a coherent, hierarchical model.
 
-*   **Reverse Engineering:** The lack of official documentation for the modern format means continuous reverse engineering is necessary as Apple updates the format.
-*   **Version Compatibility:** Pages documents have evolved, and parsers need to account for different versions (e.g., `PAG1Parser` in `libetonyek` for older XML formats).
-*   **Complexity of Document Model:** The iWork document model is rich and complex, supporting a wide array of features (tables, charts, shapes, annotations), each requiring specific parsing logic.
-*   **Performance:** Efficiently handling large documents and binary data is crucial for a responsive parser.
+1.  **Establish an Object Index**: iWork uses a document-wide object indexing system. Messages frequently reference other messages by a unique integer ID.
+    *   As you parse the `.iwa` files, populate a `Map<number, ProtobufMessage>` that stores every message with an ID.
+    *   The `IWAObjectIndex` from `libetonyek` serves as a conceptual model for this. The `Document.iwa` file is the entry point and contains the root object references.
+2.  **Process Stylesheets**:
+    *   Parse `DocumentStylesheet.iwa` and `ThemeStylesheet.iwa` first. These contain the `TSS.StylesheetArchive` messages.
+    *   Populate a style map (`Map<number, TSS.StyleArchive>`) to resolve style references from content objects. Styles are fundamental to rendering and must be resolved early.
+3.  **Build the Content Tree**:
+    *   Start with the root object from `Document.iwa` (e.g., `TP.DocumentArchive` for Pages).
+    *   Traverse the message tree, following object ID references. For example, a `TP.DocumentArchive` will reference a `TSWP.StorageArchive` (the main text content), which in turn contains paragraphs, which contain text runs, each referencing a style ID.
+    *   Create a rich, in-memory document model (e.g., TypeScript classes like `Document`, `Paragraph`, `TextRun`, `Table`) that mirrors the iWork structure but is decoupled from the raw Protobuf objects. This model should resolve all ID references into direct object references.
 
-By following this strategy, developers can systematically approach the challenge of parsing Apple Pages documents and build robust applications for viewing or converting them.
+### Step 5: Render to HTML or Other Formats
+
+Once the document model is fully constructed, you can render it.
+
+1.  **Create Renderer Components**: Develop renderer components for each type of document node (e.g., `renderParagraph`, `renderTable`, `renderImage`).
+2.  **Apply Styles**: The renderers must interpret the resolved style objects. This involves mapping iWork's rich style properties (e.g., `TSS.StyleArchive`, `TSWP.ParagraphStyleProperties`, `TSD.StrokeArchive`) to CSS styles. This is a complex task that requires a detailed mapping of properties like font size, color, indentation, borders, and fills.
+3.  **Handle Media**: For image nodes, use the media asset map created in Step 1 to retrieve the image data from the `Data/` directory and render it using an `<img>` tag with a data URL or object URL.
+4.  **Generate Output**: Traverse the in-memory document model and call the appropriate renderers to generate the final HTML output.
+
+## Key Challenges & Recommendations
+
+*   **Complexity is High**: This is a significant undertaking. Start with a minimal goal, such as extracting plain text, before attempting full, styled rendering.
+*   **Leverage Existing Work**: Do not start from scratch. The SheetJS documentation and the `libetonyek` source code are invaluable resources. A deep study of their approach will save months of effort.
+*   **TypeScript is Essential**: The complexity of the iWork object model makes TypeScript's static typing indispensable for managing the data structures and ensuring correctness.
+*   **Testing is Critical**: Build a comprehensive test suite using a variety of real-world `.pages`, `.numbers`, and `.keynote` files. Include documents with tables, images, different text styles, and complex layouts.
+
+By following this structured approach, it is feasible to build a robust and accurate iWork document parser and renderer in a TypeScript environment.
