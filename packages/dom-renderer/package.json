@@ -1,5 +1,5 @@
 {
-  "name": "@browser-document-viewer/renderer-markdown",
+  "name": "@browser-document-viewer/dom-renderer",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",

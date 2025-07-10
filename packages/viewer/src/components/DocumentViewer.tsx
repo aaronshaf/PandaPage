@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import { DocxRenderer } from './DocxRenderer';
-import { renderToHtml } from '@browser-document-viewer/renderer-dom';
+import { renderToHtml } from '@browser-document-viewer/dom-renderer';
 import type { EnhancedDocxDocument, ParsedDocument } from '@browser-document-viewer/core';
 
 interface DocumentViewerProps {

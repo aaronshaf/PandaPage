@@ -30,10 +30,10 @@
     "paths": {
       "@browser-document-viewer/parser": ["./packages/parser/src/index.ts"],
       "@browser-document-viewer/parser/*": ["./packages/parser/src/*"],
-      "@browser-document-viewer/renderer-markdown": ["./packages/renderer-markdown/src/index.ts"],
-      "@browser-document-viewer/renderer-markdown/*": ["./packages/renderer-markdown/src/*"],
-      "@browser-document-viewer/renderer-dom": ["./packages/renderer-dom/src/index.ts"],
-      "@browser-document-viewer/renderer-dom/*": ["./packages/renderer-dom/src/*"],
+      "@browser-document-viewer/markdown-renderer": ["./packages/markdown-renderer/src/index.ts"],
+      "@browser-document-viewer/markdown-renderer/*": ["./packages/markdown-renderer/src/*"],
+      "@browser-document-viewer/dom-renderer": ["./packages/dom-renderer/src/index.ts"],
+      "@browser-document-viewer/dom-renderer/*": ["./packages/dom-renderer/src/*"],
       "@browser-document-viewer/core": ["./packages/core/src/index.ts"],
       "@browser-document-viewer/core/*": ["./packages/core/src/*"]
     }

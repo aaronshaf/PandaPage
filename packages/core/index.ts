@@ -184,8 +184,8 @@ export type {
   ParseOptions as ParserOptions
 } from "@browser-document-viewer/parser";
 
-export type { MarkdownRenderOptions } from "@browser-document-viewer/renderer-markdown";
-export type { HtmlRenderOptions } from "@browser-document-viewer/renderer-dom";
+export type { MarkdownRenderOptions } from "@browser-document-viewer/markdown-renderer";
+export type { HtmlRenderOptions } from "@browser-document-viewer/dom-renderer";
 
 // Worker support
 export {

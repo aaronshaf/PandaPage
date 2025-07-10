@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test';
 import { parseDocx } from '@browser-document-viewer/parser';
-import { DOMRenderer } from '@browser-document-viewer/renderer-dom';
+import { DOMRenderer } from '@browser-document-viewer/dom-renderer';
 import { Effect } from 'effect';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';

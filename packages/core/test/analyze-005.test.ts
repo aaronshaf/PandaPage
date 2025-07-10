@@ -2,7 +2,7 @@ import { describe, it } from 'bun:test';
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { parseDocxDocument } from '../src/wrappers';
-import { renderToMarkdown } from '../../renderer-markdown/src/index';
+import { renderToMarkdown } from '../../markdown-renderer/src/index';
 
 describe('005.docx Analysis', () => {
   it('should analyze 005.docx structure and content', async () => {
