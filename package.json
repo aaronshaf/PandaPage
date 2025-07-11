@@ -13,13 +13,12 @@
     "test": "bun test packages/",
     "test:all": "cd packages/core && bun test:all && cd ../viewer && bun test:e2e",
     "test:coverage": "bun test packages/ --coverage",
-    "test:unit": "cd packages/parser && bun test --coverage && cd ../markdown-renderer && bun test --coverage && cd ../dom-renderer && bun test --coverage && cd ../core && bun test --coverage test/*.test.ts",
     "typecheck": "cd packages/parser && bun run typecheck && cd ../markdown-renderer && bun run typecheck && cd ../dom-renderer && bun run typecheck && cd ../core && bun run typecheck",
     "test:e2e:headless": "cd packages/viewer && bun run build && npx playwright test --config=playwright.precommit.config.ts",
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
-    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun run test",
+    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun test packages/",
     "check-file-sizes": "node scripts/check-file-sizes.cjs",
     "prepare": "simple-git-hooks",
     "sync-docs": "bun scripts/sync-documents.js",
@@ -27,7 +26,7 @@
   },
   "simple-git-hooks": {
     "pre-commit": "bun run precommit",
-    "pre-push": "bun run lint && bun run typecheck && bun test packages/"
+    "pre-push": "bun run lint && bun run typecheck && bun run test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.6",
