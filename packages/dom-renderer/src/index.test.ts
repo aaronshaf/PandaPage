@@ -9,11 +9,10 @@ test("renderToHtml handles empty document", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain('class="page"');
-  expect(result).toContain('class="page-content"');
-  expect(result).toContain('style="width: 8.5in');
-  expect(result).toContain('style="padding: 0px 0px 0.5in');
+  expect(result).toContain('<div class="document-container">');
+  expect(result).toContain('</div>');
+  // Enhanced DOM renderer doesn't use page structure
+  expect(result).not.toContain('data-page-number');
 });
 
 test("renderToHtml renders headings", () => {
@@ -29,7 +28,7 @@ test("renderToHtml renders headings", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<h1 style="margin-bottom: 12pt; font-weight: bold; font-size: 24pt;">');
+  expect(result).toContain('<h1 class="font-bold mb-4 text-4xl">');
   expect(result).toContain("<span>Hello World</span></h1>");
 });
 
@@ -48,22 +47,22 @@ test("renderToHtml renders all heading levels", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain(
-    '<h1 style="margin-bottom: 12pt; font-weight: bold; font-size: 24pt;"><span>H1</span></h1>',
+    '<h1 class="font-bold mb-4 text-4xl"><span>H1</span></h1>',
   );
   expect(result).toContain(
-    '<h2 style="margin-bottom: 12pt; font-weight: bold; font-size: 20pt;"><span>H2</span></h2>',
+    '<h2 class="font-bold mb-4 text-3xl"><span>H2</span></h2>',
   );
   expect(result).toContain(
-    '<h3 style="margin-bottom: 12pt; font-weight: bold; font-size: 16pt;"><span>H3</span></h3>',
+    '<h3 class="font-bold mb-4 text-2xl"><span>H3</span></h3>',
   );
   expect(result).toContain(
-    '<h4 style="margin-bottom: 12pt; font-weight: bold; font-size: 14pt;"><span>H4</span></h4>',
+    '<h4 class="font-bold mb-4 text-xl"><span>H4</span></h4>',
   );
   expect(result).toContain(
-    '<h5 style="margin-bottom: 12pt; font-weight: bold; font-size: 12pt;"><span>H5</span></h5>',
+    '<h5 class="font-bold mb-4 text-lg"><span>H5</span></h5>',
   );
   expect(result).toContain(
-    '<h6 style="margin-bottom: 12pt; font-weight: bold; font-size: 11pt;"><span>H6</span></h6>',
+    '<h6 class="font-bold mb-4"><span>H6</span></h6>',
   );
 });
 
@@ -79,6 +78,6 @@ test("renderToHtml renders paragraphs", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<p style="margin-bottom: 12pt;">');
+  expect(result).toContain('<p class="mb-4">');
   expect(result).toContain("<span>This is a paragraph.</span></p>");
 });

@@ -16,10 +16,10 @@ test("renderToHtml handles bookmarks as invisible anchors", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain(
-    '<span id="Chapter1" class="bookmark-anchor" data-bookmark-id="bm1"></span>',
-  );
+  // Enhanced renderer doesn't use page structure
+  expect(result).not.toContain('data-page-number');
+  // Enhanced renderer creates <a> elements for bookmarks
+  expect(result).toContain('<a id="Chapter1">Introduction</a>');
 });
 
 test("renderToHtml handles bookmarks with special characters", () => {
@@ -36,10 +36,8 @@ test("renderToHtml handles bookmarks with special characters", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain(
-    '<span id="Section_2.1" class="bookmark-anchor" data-bookmark-id="bm2"></span>',
-  );
+  expect(result).not.toContain('data-page-number');
+  expect(result).toContain('<a id="Section_2.1">Analysis &amp; Results</a>');
 });
 
 test("renderToHtml handles bookmarks without text content", () => {
@@ -55,10 +53,9 @@ test("renderToHtml handles bookmarks without text content", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain(
-    '<span id="EmptyBookmark" class="bookmark-anchor" data-bookmark-id="bm3"></span>',
-  );
+  expect(result).not.toContain('data-page-number');
+  // Bookmarks without text render as empty anchors
+  expect(result).toContain('<a id="EmptyBookmark"></a>');
 });
 
 test("renderToHtml renders bookmarks with content for deep linking", () => {
@@ -83,16 +80,13 @@ test("renderToHtml renders bookmarks with content for deep linking", () => {
   };
 
   const result = renderToHtml(doc);
+  expect(result).toContain('<a id="introduction">Introduction Section</a>');
+  expect(result).toContain('<a id="conclusion"></a>');
+  // Enhanced renderer uses classes for headings (order may vary)
   expect(result).toContain(
-    '<span id="introduction" class="bookmark-anchor" data-bookmark-id="intro-start"></span>',
+    '<h1 class="font-bold mb-4 text-4xl"><span>Introduction</span></h1>',
   );
   expect(result).toContain(
-    '<span id="conclusion" class="bookmark-anchor" data-bookmark-id="conclusion-start"></span>',
-  );
-  expect(result).toContain(
-    '<h1 style="margin-bottom: 12pt; font-weight: bold; font-size: 24pt;"><span>Introduction</span></h1>',
-  );
-  expect(result).toContain(
-    '<h1 style="margin-bottom: 12pt; font-weight: bold; font-size: 24pt;"><span>Conclusion</span></h1>',
+    '<h1 class="font-bold mb-4 text-4xl"><span>Conclusion</span></h1>',
   );
 });

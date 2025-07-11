@@ -29,6 +29,7 @@ function escapeHtml(text: string): string {
 
 // Import the new DOM-based renderer
 import { DOMRenderer } from "./dom-renderer";
+import { EnhancedDOMRenderer } from "./improved-dom-renderer";
 
 export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
   // Use the enhanced DOM renderer for better footnote support

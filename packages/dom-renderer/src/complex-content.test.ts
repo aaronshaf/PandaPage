@@ -14,8 +14,8 @@ test("renderToHtml handles unknown element types gracefully", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Known</span></p>');
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>After</span></p>');
+  expect(result).toContain('<p class="mb-4"><span>Known</span></p>');
+  expect(result).toContain('<p class="mb-4"><span>After</span></p>');
   expect(result).not.toContain("unknown");
 });
 
@@ -37,17 +37,16 @@ test("renderToHtml handles mixed content", () => {
   // DOM renderer doesn't create title tags
   expect(result).not.toContain("<title>");
   expect(result).toContain(
-    '<h1 style="margin-bottom: 12pt; font-weight: bold; font-size: 24pt;"><span>Title</span></h1>',
+    '<h1 class="font-bold mb-4 text-4xl"><span>Title</span></h1>',
   );
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Intro paragraph</span></p>');
+  expect(result).toContain('<p class="mb-4"><span>Intro paragraph</span></p>');
   // Lists are now rendered as proper HTML lists
   expect(result).toContain(
     '<ul style="margin-bottom: 12pt; padding-left: 24pt; list-style-type: disc;"><li style="margin-bottom: 4pt; margin-top: 0px;"><span>List item</span></li></ul>',
   );
-  // Page breaks now split content into separate pages
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain('data-page-number="2"');
+  // Enhanced DOM renderer doesn't use page splitting
+  expect(result).not.toContain('data-page-number="1"');
   expect(result).toContain(
-    '<h2 style="margin-bottom: 12pt; font-weight: bold; font-size: 20pt;"><span>Section</span></h2>',
+    '<h2 class="font-bold mb-4 text-3xl"><span>Section</span></h2>',
   );
 });

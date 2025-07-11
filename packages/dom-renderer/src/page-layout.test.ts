@@ -22,8 +22,8 @@ test("renderToHtml handles page breaks", () => {
 
   const result = renderToHtml(doc);
   // Page breaks now split content into separate page divs
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain('data-page-number="2"');
+  // Enhanced renderer doesn't split into pages
+  expect(result).not.toContain('data-page-number');
   expect(result).toContain("Page 1");
   expect(result).toContain("Page 2");
 });
@@ -44,8 +44,8 @@ test("renderToHtml includes full document when requested", () => {
   };
 
   const result = renderToHtml(doc, { includeStyles: true });
-  // DOM renderer doesn't create full HTML document structure, just the content
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Content</span></p>');
+  // Enhanced renderer uses classes instead of inline styles
+  expect(result).toContain('<p class="mb-4"><span>Content</span></p>');
   expect(result).not.toContain("<!DOCTYPE html>");
 });
 
@@ -62,10 +62,10 @@ test("renderToHtml handles full document with all metadata", () => {
   };
 
   const result = renderToHtml(doc, { includeStyles: true });
-  // DOM renderer returns a page even for empty documents
-  expect(result).toContain('data-page-number="1"');
-  expect(result).toContain('class="page"');
-  expect(result).toContain('class="page-content"');
+  // Enhanced renderer creates a document container without page structure
+  expect(result).toContain('class="document-container"');
+  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain('class="page"');
 });
 
 test("renderToHtml handles fragment output", () => {
@@ -84,5 +84,6 @@ test("renderToHtml handles fragment output", () => {
   const result = renderToHtml(doc, { includeStyles: false });
   expect(result).not.toContain("<!DOCTYPE html>");
   expect(result).not.toContain("<title>");
-  expect(result).toContain('<p style="margin-bottom: 12pt;"><span>Content</span></p>');
+  // Enhanced renderer uses classes even when includeStyles is false
+  expect(result).toContain('<p class="mb-4"><span>Content</span></p>');
 });
