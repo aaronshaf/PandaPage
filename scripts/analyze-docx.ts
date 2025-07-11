@@ -90,7 +90,7 @@ async function analyzeDocx(filePath: string) {
 
       // Render to markdown
       console.log("\nRendering to Markdown...");
-      const markdown = renderToMarkdown(doc, { includeMetadata: true });
+      const markdown = renderToMarkdown(doc, { includeFrontmatter: true });
       const markdownPath = join(tmpDir, `${fileName}-output.md`);
       writeFileSync(markdownPath, markdown);
       console.log(`Markdown output: ${(markdown.length / 1024).toFixed(2)} KB`);

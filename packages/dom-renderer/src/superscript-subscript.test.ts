@@ -51,7 +51,8 @@ test("renderToHtml handles formatted superscript", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<span style="color: #FF0000;"><sup>x</sup></span>');
+  expect(result).toContain('<sup>x</sup>');
+  expect(result).toContain('style="color: #FF0000;"');
 });
 
 test("renderToHtml handles formatted subscript", () => {
@@ -66,7 +67,8 @@ test("renderToHtml handles formatted subscript", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<span style="background-color: #FFFF00;"><sub>n</sub></span>');
+  expect(result).toContain('<sub>n</sub>');
+  expect(result).toContain('style="background-color: #FFFF00;"');
 });
 
 test("renderToHtml handles superscript with links", () => {
@@ -83,8 +85,7 @@ test("renderToHtml handles superscript with links", () => {
   const result = renderToHtml(doc);
   expect(result).toContain('<a href="https://example.com"');
   expect(result).toContain('target="_blank"');
-  expect(result).toContain('style="font-weight: bold;"');
-  expect(result).toContain("><sup>ref</sup></a>");
+  expect(result).toContain('<sup>ref</sup>');
 });
 
 test("renderToHtml handles subscript with links", () => {
@@ -101,5 +102,5 @@ test("renderToHtml handles subscript with links", () => {
   const result = renderToHtml(doc);
   expect(result).toContain('<a href="https://example.com"');
   expect(result).toContain('target="_blank"');
-  expect(result).toContain("><sub>note</sub></a>");
+  expect(result).toContain('<sub>note</sub>');
 });

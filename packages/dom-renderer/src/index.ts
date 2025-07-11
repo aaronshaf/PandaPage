@@ -32,7 +32,6 @@ import { DOMRenderer } from "./dom-renderer";
 
 export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
   // Use the enhanced DOM renderer for better footnote support
-  const { EnhancedDOMRenderer } = require("./improved-dom-renderer");
   const renderer = new EnhancedDOMRenderer({
     renderMode: "view",
     enableDropcaps: true,
@@ -50,7 +49,6 @@ export function renderToHtml(document: ParsedDocument, options: HtmlRenderOption
 
 // Function for full document rendering using enhanced DOM-based renderer
 function renderFullDocumentEnhanced(document: ParsedDocument, options: HtmlRenderOptions): string {
-  const { EnhancedDOMRenderer } = require("./improved-dom-renderer");
   const renderer = new EnhancedDOMRenderer({
     renderMode: "view",
     enableDropcaps: true,

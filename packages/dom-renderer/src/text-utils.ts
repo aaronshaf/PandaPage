@@ -19,12 +19,93 @@ export function renderEnhancedTextRun(
     if (run.superscript) {
       const sup = doc.createElement("sup");
       sup.textContent = run.text || "";
+      
+      // Apply any additional styling by wrapping in a span if needed
+      if (run.color || run.backgroundColor || run.bold || run.italic || run.underline || run.strikethrough || run.link) {
+        const wrapper = doc.createElement("span");
+        
+        // Apply inline styles
+        if (run.color && run.color !== "auto") {
+          wrapper.style.color = run.color.startsWith("#") ? run.color : `#${run.color}`;
+        }
+        if (run.backgroundColor && run.backgroundColor !== "auto") {
+          wrapper.style.backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
+        }
+        
+        // Apply formatting classes
+        const wrapperClasses: string[] = [];
+        if (run.bold) wrapperClasses.push("font-bold");
+        if (run.italic) wrapperClasses.push("italic");
+        if (run.underline) wrapperClasses.push("underline");
+        if (run.strikethrough) wrapperClasses.push("line-through");
+        if (wrapperClasses.length > 0) {
+          wrapper.className = wrapperClasses.join(" ");
+        }
+        
+        // Handle links
+        if (run.link) {
+          const link = doc.createElement("a");
+          link.href = run.link;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.className = wrapper.className;
+          link.style.cssText = wrapper.style.cssText;
+          if (run.bold) {
+            link.style.fontWeight = "bold";
+          }
+          link.appendChild(sup);
+          return link;
+        }
+        
+        wrapper.appendChild(sup);
+        return wrapper;
+      }
+      
       return sup;
     }
 
     if (run.subscript) {
       const sub = doc.createElement("sub");
       sub.textContent = run.text || "";
+      
+      // Apply any additional styling by wrapping in a span if needed
+      if (run.color || run.backgroundColor || run.bold || run.italic || run.underline || run.strikethrough || run.link) {
+        const wrapper = doc.createElement("span");
+        
+        // Apply inline styles
+        if (run.color && run.color !== "auto") {
+          wrapper.style.color = run.color.startsWith("#") ? run.color : `#${run.color}`;
+        }
+        if (run.backgroundColor && run.backgroundColor !== "auto") {
+          wrapper.style.backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
+        }
+        
+        // Apply formatting classes
+        const wrapperClasses: string[] = [];
+        if (run.bold) wrapperClasses.push("font-bold");
+        if (run.italic) wrapperClasses.push("italic");
+        if (run.underline) wrapperClasses.push("underline");
+        if (run.strikethrough) wrapperClasses.push("line-through");
+        if (wrapperClasses.length > 0) {
+          wrapper.className = wrapperClasses.join(" ");
+        }
+        
+        // Handle links
+        if (run.link) {
+          const link = doc.createElement("a");
+          link.href = run.link;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.className = wrapper.className;
+          link.style.cssText = wrapper.style.cssText;
+          link.appendChild(sub);
+          return link;
+        }
+        
+        wrapper.appendChild(sub);
+        return wrapper;
+      }
+      
       return sub;
     }
 
