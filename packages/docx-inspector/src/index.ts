@@ -193,7 +193,7 @@ export class DocxInspector {
       let match;
 
       while ((match = relationshipRegex.exec(content)) !== null) {
-        const attrs = match[1];
+        const attrs = match[1] ?? "";
         const rel: DocxRelationship = {
           id: this.extractAttribute(attrs, "Id") || "",
           type: this.extractAttribute(attrs, "Type") || "",
@@ -223,7 +223,7 @@ export class DocxInspector {
       let match;
 
       while ((match = defaultRegex.exec(content)) !== null) {
-        const attrs = match[1];
+        const attrs = match[1] ?? "";
         const extension = this.extractAttribute(attrs, "Extension");
         const contentType = this.extractAttribute(attrs, "ContentType");
 
@@ -235,7 +235,7 @@ export class DocxInspector {
       // Parse Override elements
       const overrideRegex = /<Override\s+([^>]+)>/g;
       while ((match = overrideRegex.exec(content)) !== null) {
-        const attrs = match[1];
+        const attrs = match[1] ?? "";
         const partName = this.extractAttribute(attrs, "PartName");
         const contentType = this.extractAttribute(attrs, "ContentType");
 
@@ -253,7 +253,7 @@ export class DocxInspector {
   private extractAttribute(attrs: string, name: string): string | null {
     const regex = new RegExp(`${name}="([^"]*)"`, "i");
     const match = attrs.match(regex);
-    return match ? match[1] : null;
+    return match ? match[1] ?? null : null;
   }
 
   private analyzeDocumentStructure(files: DocxFile[]) {

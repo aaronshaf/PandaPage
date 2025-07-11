@@ -20,14 +20,18 @@ export * from "./common/xml-parser";
 export * from "./document-renderer";
 
 // Export DOCX types and utilities (avoiding duplicates from parser)
-export { 
-  type DocxReaderOptions,
-  type DocxMetadata,
-  type DocxStyleMap
+export type { 
+  DocxElement,
+  DocxParagraph,
+  DocxTable,
+  DocxTableRow,
+  DocxTableCell,
+  DocxTableProperties,
+  DocxMetadata,
+  EnhancedDocxDocument
 } from "./formats/docx/types";
 export { 
-  readDocx,
-  readEnhancedDocx
+  readDocx
 } from "./formats/docx/docx-reader";
 export { 
   docxToMarkdown,
@@ -52,13 +56,16 @@ export * from "./formats/key/key-to-markdown";
 export * from "./formats/pages/pages-reader";
 export * from "./formats/pages/pages-to-markdown";
 
-// Export worker utilities (avoiding duplicates)
-export { 
-  type WorkerTask,
-  type WorkerResult,
-  createWorkerManager
+// Export worker utilities
+export type { 
+  WorkerTask,
+  WorkerResult
+} from "./workers/worker-pool";
+export type {
+  WorkerParseOptions,
+  ProgressCallback
 } from "./workers/worker-manager";
 export {
-  type WorkerPoolConfig,
-  createWorkerPool
+  createWorkerPool,
+  type WorkerPoolConfig
 } from "./workers/worker-pool";

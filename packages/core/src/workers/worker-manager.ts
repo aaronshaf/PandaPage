@@ -157,7 +157,7 @@ export const parseDocumentSmart = <T>(
 export const streamDocumentParse = (
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: Omit<ParseOptions, "streaming">,
+  options?: Omit<WorkerParseOptions, "streaming">,
 ): Stream.Stream<string, WorkerParseError> =>
   Stream.async<string, WorkerParseError>((emit) => {
     const worker = createWorker(type);

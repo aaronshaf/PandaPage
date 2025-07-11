@@ -179,7 +179,7 @@ export type { HtmlRenderOptions } from "@browser-document-viewer/dom-renderer";
 
 // Worker support
 export {
-  type ParseOptions,
+  type WorkerParseOptions,
   type ProgressCallback,
   parseDocumentInWorker,
   parseDocumentSmart,

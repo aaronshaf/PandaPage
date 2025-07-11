@@ -2,19 +2,9 @@
 import type {
   ParsedDocument,
   DocumentElement,
-  Paragraph,
-  Heading,
-  Table,
-  TableRow,
-  TableCell,
-  TextRun,
   Image,
   Footnote,
   FootnoteReference,
-  Header,
-  Footer,
-  Bookmark,
-  PageBreak,
 } from "@browser-document-viewer/parser";
 import { createLazyImage } from "./image-utils";
 import {

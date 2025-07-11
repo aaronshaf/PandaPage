@@ -31,7 +31,7 @@ async function streamParseResults() {
   const outputDiv = document.querySelector("#output")!;
   const stream = streamDocumentParse("pptx", buffer, {
     chunkSize: 5000, // 5KB chunks
-    onProgress: (p) => console.log(`Streaming: ${(p * 100).toFixed(1)}%`),
+    onProgress: (p: number) => console.log(`Streaming: ${(p * 100).toFixed(1)}%`),
   });
 
   await Effect.runPromise(
