@@ -51,14 +51,14 @@ jobs:
           
           # Optional: Allow Claude to run specific commands
           allowed_tools: |
-            Bash(npm install)
-            Bash(npm run build)
-            Bash(npm run test:*)
-            Bash(npm run lint:*)
             Bash(bun install)
             Bash(bun run build)
             Bash(bun test)
+            Bash(bun run test:*)
             Bash(bun run coverage)
+            Bash(bun run lint)
+            Bash(bun run typecheck)
+            Bash(bun run check)
             Bash(git checkout -b *)
             Bash(git add *)
             Bash(git commit -m *)
