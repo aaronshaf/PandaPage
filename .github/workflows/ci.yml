@@ -172,7 +172,7 @@ jobs:
         path: packages
       
     - name: Run unit tests with coverage
-      run: bun run test:unit
+      run: bun run test:coverage
 
   # Run E2E tests only after all other checks pass
   e2e-tests:
