@@ -10,7 +10,7 @@
     "dev": "bun run --filter '*' dev",
     "build": "cd packages/viewer && bun run build",
     "clean": "find packages -name '.vite' -type d -exec rm -rf {} + 2>/dev/null || true && find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true",
-    "test": "bun test",
+    "test": "bun test packages/",
     "test:all": "cd packages/core && bun test:all && cd ../viewer && bun test:e2e",
     "test:coverage": "cd packages/parser && bun run test:coverage && cd ../markdown-renderer && bun run test:coverage && cd ../dom-renderer && bun run test:coverage && cd ../core && bun run test:coverage",
     "test:unit": "cd packages/parser && bun test --coverage && cd ../markdown-renderer && bun test --coverage && cd ../dom-renderer && bun test --coverage && cd ../core && bun test --coverage test/*.test.ts",

@@ -108,10 +108,11 @@ describe("005.docx Analysis", () => {
     const markdown = renderToMarkdown(doc);
     console.log(`Markdown size: ${(markdown.length / 1024).toFixed(2)} KB`);
 
-    // Save output for inspection
-    writeFileSync(join(__dirname, "../../../005-analysis.md"), markdown);
-    writeFileSync(join(__dirname, "../../../005-structure.json"), JSON.stringify(doc, null, 2));
+    // Save output for inspection in tmp directory
+    const tmpDir = process.env.TMPDIR || '/tmp';
+    writeFileSync(join(tmpDir, "005-analysis.md"), markdown);
+    writeFileSync(join(tmpDir, "005-structure.json"), JSON.stringify(doc, null, 2));
 
-    console.log("\nAnalysis complete. Check 005-analysis.md and 005-structure.json for details.");
+    console.log(`\nAnalysis complete. Check ${tmpDir}/005-analysis.md and ${tmpDir}/005-structure.json for details.`);
   });
 });
