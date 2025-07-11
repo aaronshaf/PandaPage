@@ -46,7 +46,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -94,7 +94,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -136,7 +136,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -178,7 +178,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -220,7 +220,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -259,7 +259,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -287,7 +287,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -319,7 +319,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -349,7 +349,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -377,7 +377,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -408,7 +408,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       // Should fail due to malformed metadata XML
       const result = await Effect.runPromiseExit(readPptx(arrayBuffer));
@@ -431,7 +431,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -447,7 +447,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       
@@ -483,7 +483,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       };
       
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength);
+      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
       
       const result = await Effect.runPromise(readPptx(arrayBuffer));
       

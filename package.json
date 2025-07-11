@@ -13,7 +13,7 @@
     "test": "bun test packages/",
     "test:all": "cd packages/core && bun test:all && cd ../viewer && bun test:e2e",
     "test:coverage": "bun test packages/ --coverage",
-    "typecheck": "cd packages/parser && bun run typecheck && cd ../markdown-renderer && bun run typecheck && cd ../dom-renderer && bun run typecheck && cd ../core && bun run typecheck",
+    "typecheck": "cd packages/parser && bun run typecheck && cd ../markdown-renderer && bun run typecheck && cd ../dom-renderer && bun run typecheck && cd ../core && bun run typecheck && cd ../viewer && bun run typecheck && cd ../key && bun run typecheck && cd ../pages && bun run typecheck && cd ../pptx && bun run typecheck && cd ../ooxml-types && bun run typecheck && cd ../ooxml-parser && bun run typecheck && cd ../document-types && bun run typecheck && cd ../docx && bun run typecheck && cd ../docx-inspector && bun run typecheck && cd ../shared-utils && bun run typecheck",
     "test:e2e:headless": "cd packages/viewer && bun run build && npx playwright test --config=playwright.precommit.config.ts",
     "format": "biome format --write .",
     "lint": "biome lint .",
