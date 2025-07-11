@@ -1,5 +1,9 @@
 name: CI
 
+# Branch Protection Setup:
+# Configure branch protection to require "CI Status" check instead of individual jobs.
+# This allows efficient sequential testing while providing a single status for PR merging.
+
 on:
   push:
     branches: [ main ]
@@ -228,11 +232,21 @@ jobs:
         path: packages/viewer/playwright-report/
         retention-days: 30
 
-  # Final check that all jobs passed
+  # Final status check for branch protection
   all-checks-passed:
-    name: All Checks Passed
+    name: CI Status
     runs-on: ubuntu-latest
+    if: always()
     needs: [lint, typecheck, unit-tests, e2e-tests]
     steps:
-    - name: All checks passed
-      run: echo "All CI checks have passed successfully!"
+    - name: Check all job statuses
+      run: |
+        if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+          echo "❌ One or more CI checks failed"
+          exit 1
+        elif [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+          echo "⚠️ One or more CI checks were cancelled"
+          exit 1
+        else
+          echo "✅ All CI checks passed successfully!"
+        fi
