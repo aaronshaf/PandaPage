@@ -76,3 +76,5 @@ async function syncDocuments() {
 if (import.meta.main) {
   await syncDocuments();
 }
+
+//
