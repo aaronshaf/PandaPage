@@ -2,8 +2,8 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, basename, extname } from "path";
 import { parseDocxDocument } from "../packages/core/index.ts";
-import { renderToMarkdown } from "../packages/renderer-markdown/src/index.ts";
-import { renderToHtml } from "../packages/renderer-dom/src/index.ts";
+import { renderToMarkdown } from "../packages/markdown-renderer/src/index.ts";
+import { renderToHtml } from "../packages/dom-renderer/src/index.ts";
 
 async function analyzeDocx(filePath: string) {
   const fileName = basename(filePath, extname(filePath));
@@ -21,10 +21,8 @@ async function analyzeDocx(filePath: string) {
     console.log(`File size: ${(buffer.length / 1024 / 1024).toFixed(2)} MB\n`);
 
     // Parse the document
-    const result = await parseDocxDocument(buffer);
-
-    if (result.success) {
-      const doc = result.document;
+    try {
+      const doc = await parseDocxDocument(buffer);
       console.log("Document structure:");
       console.log(`- Elements: ${doc.elements.length}`);
 
@@ -33,6 +31,7 @@ async function analyzeDocx(filePath: string) {
       let imageCount = 0;
       let tableCount = 0;
       let listCount = 0;
+      let footnoteCount = 0;
 
       doc.elements.forEach((el) => {
         elementTypes[el.type] = (elementTypes[el.type] || 0) + 1;
@@ -48,6 +47,10 @@ async function analyzeDocx(filePath: string) {
         if (el.type === "paragraph" && el.listInfo) {
           listCount++;
         }
+        
+        if (el.type === "footnote") {
+          footnoteCount++;
+        }
       });
 
       console.log("\nElement type breakdown:");
@@ -59,6 +62,7 @@ async function analyzeDocx(filePath: string) {
       console.log(`  - Images: ${imageCount}`);
       console.log(`  - Tables: ${tableCount}`);
       console.log(`  - List items: ${listCount}`);
+      console.log(`  - Footnotes: ${footnoteCount}`);
 
       // Check for complex content
       console.log("\nAnalyzing first few elements:");
@@ -75,6 +79,11 @@ async function analyzeDocx(filePath: string) {
         } else if (el.type === "table") {
           console.log(
             `  ${idx}: Table - ${el.rows.length} rows, ${el.rows[0]?.cells.length || 0} columns`,
+          );
+        } else if (el.type === "footnote") {
+          const footnoteText = el.content?.substring(0, 50) || "";
+          console.log(
+            `  ${idx}: Footnote ${el.id} - "${footnoteText}${footnoteText.length > 50 ? "..." : ""}"`,
           );
         }
       });
@@ -106,6 +115,7 @@ async function analyzeDocx(filePath: string) {
           images: imageCount,
           tables: tableCount,
           listItems: listCount,
+          footnotes: footnoteCount,
         },
         metadata: doc.metadata,
       };
@@ -113,6 +123,23 @@ async function analyzeDocx(filePath: string) {
       const reportPath = join(tmpDir, `${fileName}-analysis.json`);
       writeFileSync(reportPath, JSON.stringify(analysisReport, null, 2));
       console.log(`\nAnalysis report saved to: ${reportPath}`);
+
+      // Check for footnote references in text
+      console.log("\nFootnote references found:");
+      let footnoteRefs = 0;
+      doc.elements.forEach((el) => {
+        if (el.type === "paragraph" && el.runs) {
+          el.runs.forEach((run) => {
+            if (run.type === "footnoteReference") {
+              footnoteRefs++;
+              console.log(`  - Footnote reference: ${run.id}`);
+            }
+          });
+        }
+      });
+      if (footnoteRefs === 0) {
+        console.log("  - No footnote references found in text");
+      }
 
       // Check for potential issues
       console.log("\nPotential rendering issues:");
@@ -148,8 +175,8 @@ async function analyzeDocx(filePath: string) {
       }
 
       console.log(`\n✅ Analysis complete! All output files are in: ${tmpDir}`);
-    } else {
-      console.error("Failed to parse document:", result.error);
+    } catch (error) {
+      console.error("Failed to parse document:", error);
     }
   } catch (error) {
     console.error("Error analyzing document:", error);

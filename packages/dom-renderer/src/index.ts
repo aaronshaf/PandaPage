@@ -31,21 +31,31 @@ function escapeHtml(text: string): string {
 import { DOMRenderer } from "./dom-renderer";
 
 export function renderToHtml(document: ParsedDocument, options: HtmlRenderOptions = {}): string {
-  // Use the new DOM-based renderer
-  const renderer = new DOMRenderer();
+  // Use the enhanced DOM renderer for better footnote support
+  const { EnhancedDOMRenderer } = require("./improved-dom-renderer");
+  const renderer = new EnhancedDOMRenderer({
+    renderMode: "view",
+    enableDropcaps: true,
+    enableAdvancedFormatting: true,
+  });
 
   if (options.fullDocument) {
     // Return full HTML document with head/body
-    return renderFullDocument(document, options);
+    return renderFullDocumentEnhanced(document, options);
   }
 
-  // Return just the elements HTML without container div for backward compatibility
-  return renderer.renderToHTML(document, { includeContainer: false });
+  // Return just the elements HTML
+  return renderer.renderToHTML(document);
 }
 
-// Function for full document rendering using DOM-based renderer
-function renderFullDocument(document: ParsedDocument, options: HtmlRenderOptions): string {
-  const renderer = new DOMRenderer();
+// Function for full document rendering using enhanced DOM-based renderer
+function renderFullDocumentEnhanced(document: ParsedDocument, options: HtmlRenderOptions): string {
+  const { EnhancedDOMRenderer } = require("./improved-dom-renderer");
+  const renderer = new EnhancedDOMRenderer({
+    renderMode: "view",
+    enableDropcaps: true,
+    enableAdvancedFormatting: true,
+  });
   const elements = renderer.renderToHTML(document);
 
   // Include full HTML document with styles
