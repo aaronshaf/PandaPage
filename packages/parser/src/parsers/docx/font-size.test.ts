@@ -1,4 +1,5 @@
 import { expect, test, describe } from "bun:test";
+import "../../test-setup";
 import { parseRun } from "./paragraph-parser";
 import { WORD_NAMESPACE } from "./types";
 import { halfPointsToPoints } from "./unit-utils";

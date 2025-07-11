@@ -1,16 +1,8 @@
 import { test, expect } from "bun:test";
+import "../../test-setup";
 import { parseDrawing, createImageElement, getMimeType } from "./image-parser";
 
-// Use DOMParser from environment or import it
-const getDOMParser = async () => {
-  if (typeof DOMParser !== "undefined") {
-    return DOMParser;
-  }
-  const { DOMParser: XMLDOMParser } = await import("@xmldom/xmldom");
-  return XMLDOMParser;
-};
-
-test("parseDrawing extracts relationship ID from blip element", async () => {
+test("parseDrawing extracts relationship ID from blip element", () => {
   const drawingXml = `
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 
                xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
@@ -32,8 +24,7 @@ test("parseDrawing extracts relationship ID from blip element", async () => {
     </w:drawing>
   `;
 
-  const Parser = await getDOMParser();
-  const parser = new Parser();
+  const parser = new DOMParser();
   const doc = parser.parseFromString(drawingXml, "text/xml");
   const drawingElement = doc.documentElement;
 
@@ -53,7 +44,7 @@ test("parseDrawing extracts relationship ID from blip element", async () => {
   expect(result?.height).toBe(133);
 });
 
-test("parseDrawing returns null for drawing without blip", async () => {
+test("parseDrawing returns null for drawing without blip", () => {
   const drawingXml = `
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
       <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
@@ -63,8 +54,7 @@ test("parseDrawing returns null for drawing without blip", async () => {
     </w:drawing>
   `;
 
-  const Parser = await getDOMParser();
-  const parser = new Parser();
+  const parser = new DOMParser();
   const doc = parser.parseFromString(drawingXml, "text/xml");
   const drawingElement = doc.documentElement;
 
@@ -77,7 +67,7 @@ test("parseDrawing returns null for drawing without blip", async () => {
   expect(result).toBeNull();
 });
 
-test("parseDrawing handles missing dimensions", async () => {
+test("parseDrawing handles missing dimensions", () => {
   const drawingXml = `
     <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 
                xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
@@ -97,8 +87,7 @@ test("parseDrawing handles missing dimensions", async () => {
     </w:drawing>
   `;
 
-  const Parser = await getDOMParser();
-  const parser = new Parser();
+  const parser = new DOMParser();
   const doc = parser.parseFromString(drawingXml, "text/xml");
   const drawingElement = doc.documentElement;
 

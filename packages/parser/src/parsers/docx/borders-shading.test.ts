@@ -1,4 +1,5 @@
 import { describe, it, expect } from "bun:test";
+import "../../test-setup";
 import { parseParagraph } from "./paragraph-parser";
 import { parseStylesheet } from "./style-parser";
 import { WORD_NAMESPACE } from "./types";
