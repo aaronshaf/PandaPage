@@ -25,7 +25,10 @@ export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable
     debug.log("Parsing table element");
 
     const rows: DocxTableRow[] = [];
-    const trElements = tblElement.querySelectorAll(":scope > tr, :scope > w\\:tr");
+    // Use getElementsByTagName for better namespace support
+    const trElementsLower = Array.from(tblElement.getElementsByTagName("tr"));
+    const trElementsUpper = Array.from(tblElement.getElementsByTagName("W:TR"));
+    const trElements = [...trElementsLower, ...trElementsUpper];
 
     for (const trElement of trElements) {
       const row = yield* parseTableRowEnhanced(trElement);
@@ -33,7 +36,7 @@ export const parseTableEnhanced = (tblElement: Element): Effect.Effect<DocxTable
     }
 
     // Parse table properties if present
-    const tblPr = tblElement.querySelector(":scope > tblPr, :scope > w\\:tblPr");
+    const tblPr = tblElement.querySelector("tblPr, w\\:tblPr");
     const rawProperties = tblPr ? yield* parseTableProperties(tblPr) : undefined;
     const properties = rawProperties ? yield* validateTableProperties(rawProperties) : undefined;
 
@@ -54,7 +57,7 @@ export const parseTableRowEnhanced = (
     debug.log("Parsing table row");
 
     const cells: DocxTableCell[] = [];
-    const tcElements = trElement.querySelectorAll(":scope > tc, :scope > w\\:tc");
+    const tcElements = trElement.querySelectorAll("tc, w\\:tc");
 
     for (const tcElement of tcElements) {
       const cell = yield* parseTableCellEnhanced(tcElement);
@@ -62,7 +65,7 @@ export const parseTableRowEnhanced = (
     }
 
     // Parse row properties if present
-    const trPr = trElement.querySelector(":scope > trPr, :scope > w\\:trPr");
+    const trPr = trElement.querySelector("trPr, w\\:trPr");
     const rawProperties = trPr ? yield* parseTableRowProperties(trPr) : undefined;
     const properties = rawProperties ? yield* validateTableRowProperties(rawProperties) : undefined;
 
@@ -82,7 +85,7 @@ export const parseTableCellEnhanced = (
     debug.log("Parsing table cell");
 
     const content: DocxParagraph[] = [];
-    const pElements = tcElement.querySelectorAll(":scope > p, :scope > w\\:p");
+    const pElements = tcElement.querySelectorAll("p, w\\:p");
 
     for (const pElement of pElements) {
       try {
@@ -95,7 +98,7 @@ export const parseTableCellEnhanced = (
     }
 
     // Parse cell properties if present
-    const tcPr = tcElement.querySelector(":scope > tcPr, :scope > w\\:tcPr");
+    const tcPr = tcElement.querySelector("tcPr, w\\:tcPr");
     const rawProperties = tcPr ? yield* parseTableCellProperties(tcPr) : undefined;
     const properties = rawProperties
       ? yield* validateTableCellProperties(rawProperties)
@@ -117,7 +120,7 @@ export const parseTableProperties = (
     const properties: DocxTableProperties = {};
 
     // Parse table width
-    const tblW = tblPr.querySelector("tblW");
+    const tblW = tblPr.querySelector("tblW, w\\:tblW");
     if (tblW) {
       const w = tblW.getAttribute("w");
       const type = tblW.getAttribute("type");
@@ -127,7 +130,7 @@ export const parseTableProperties = (
     }
 
     // Parse table alignment
-    const jc = tblPr.querySelector("jc");
+    const jc = tblPr.querySelector("jc, w\\:jc");
     if (jc) {
       const val = jc.getAttribute("val");
       if (val === "left" || val === "center" || val === "right") {
@@ -136,7 +139,7 @@ export const parseTableProperties = (
     }
 
     // Parse table indentation (used for centering)
-    const tblInd = tblPr.querySelector("tblInd");
+    const tblInd = tblPr.querySelector("tblInd, w\\:tblInd");
     if (tblInd) {
       const w = tblInd.getAttribute("w");
       const type = tblInd.getAttribute("type");
@@ -146,13 +149,13 @@ export const parseTableProperties = (
     }
 
     // Parse table borders
-    const tblBorders = tblPr.querySelector("tblBorders");
+    const tblBorders = tblPr.querySelector("tblBorders, w\\:tblBorders");
     if (tblBorders) {
       properties.borders = yield* parseTableBorders(tblBorders);
     }
 
     // Parse background color
-    const shd = tblPr.querySelector("shd");
+    const shd = tblPr.querySelector("shd, w\\:shd");
     if (shd) {
       const fill = shd.getAttribute("fill");
       if (fill && fill !== "auto") {
@@ -173,7 +176,7 @@ export const parseTableRowProperties = (
     const properties: DocxTableRowProperties = {};
 
     // Parse row height
-    const trHeight = trPr.querySelector("trHeight");
+    const trHeight = trPr.querySelector("trHeight, w\\:trHeight");
     if (trHeight) {
       const val = trHeight.getAttribute("val");
       if (val) {
@@ -182,7 +185,7 @@ export const parseTableRowProperties = (
     }
 
     // Check if this is a header row
-    const tblHeader = trPr.querySelector("tblHeader");
+    const tblHeader = trPr.querySelector("tblHeader, w\\:tblHeader");
     if (tblHeader) {
       properties.isHeader = true;
     }
@@ -200,7 +203,7 @@ export const parseTableCellProperties = (
     const properties: DocxTableCellProperties = {};
 
     // Parse cell width
-    const tcW = tcPr.querySelector("tcW");
+    const tcW = tcPr.querySelector("tcW, w\\:tcW");
     if (tcW) {
       const w = tcW.getAttribute("w");
       const type = tcW.getAttribute("type");
@@ -210,7 +213,7 @@ export const parseTableCellProperties = (
     }
 
     // Parse vertical alignment
-    const vAlign = tcPr.querySelector("vAlign");
+    const vAlign = tcPr.querySelector("vAlign, w\\:vAlign");
     if (vAlign) {
       const val = vAlign.getAttribute("val");
       if (val === "top" || val === "center" || val === "bottom") {
@@ -219,13 +222,13 @@ export const parseTableCellProperties = (
     }
 
     // Parse cell borders
-    const tcBorders = tcPr.querySelector("tcBorders");
+    const tcBorders = tcPr.querySelector("tcBorders, w\\:tcBorders");
     if (tcBorders) {
       properties.borders = yield* parseTableBorders(tcBorders);
     }
 
     // Parse background color
-    const shd = tcPr.querySelector("shd");
+    const shd = tcPr.querySelector("shd, w\\:shd");
     if (shd) {
       const fill = shd.getAttribute("fill");
       if (fill && fill !== "auto") {
@@ -246,7 +249,7 @@ const parseTableBorders = (
     const borders: Record<string, string> = {};
 
     for (const side of ["top", "right", "bottom", "left"]) {
-      const borderElement = bordersElement.querySelector(side);
+      const borderElement = bordersElement.querySelector(`${side}, w\\:${side}`);
       if (borderElement) {
         const val = borderElement.getAttribute("val");
         const sz = borderElement.getAttribute("sz");

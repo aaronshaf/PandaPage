@@ -15,7 +15,7 @@ describe("Table Parser", () => {
     test("should parse table width in pixels", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "tblW") {
+          if (selector.includes("tblW")) {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "5000";
@@ -35,7 +35,7 @@ describe("Table Parser", () => {
     test("should parse table width in percentage", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "tblW") {
+          if (selector.includes("tblW")) {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "50";
@@ -55,7 +55,7 @@ describe("Table Parser", () => {
     test("should parse table alignment", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "jc") {
+          if (selector.includes("jc")) {
             return {
               getAttribute: (attr: string) => (attr === "val" ? "center" : null),
             };
@@ -71,7 +71,7 @@ describe("Table Parser", () => {
     test("should parse background color", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "shd") {
+          if (selector.includes("shd")) {
             return {
               getAttribute: (attr: string) => (attr === "fill" ? "FF0000" : null),
             };
@@ -98,7 +98,7 @@ describe("Table Parser", () => {
     test("should parse row height", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "trHeight") {
+          if (selector.includes("trHeight")) {
             return {
               getAttribute: (attr: string) => (attr === "val" ? "400" : null),
             };
@@ -114,7 +114,7 @@ describe("Table Parser", () => {
     test("should identify header rows", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "tblHeader") {
+          if (selector.includes("tblHeader")) {
             return {}; // Element exists
           }
           return null;
@@ -130,7 +130,7 @@ describe("Table Parser", () => {
     test("should parse cell width", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "tcW") {
+          if (selector.includes("tcW")) {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "2500";
@@ -150,7 +150,7 @@ describe("Table Parser", () => {
     test("should parse vertical alignment", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "vAlign") {
+          if (selector.includes("vAlign")) {
             return {
               getAttribute: (attr: string) => (attr === "val" ? "center" : null),
             };
@@ -166,7 +166,7 @@ describe("Table Parser", () => {
     test("should parse cell background color", async () => {
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "shd") {
+          if (selector.includes("shd")) {
             return {
               getAttribute: (attr: string) => (attr === "fill" ? "00FF00" : null),
             };
@@ -286,7 +286,9 @@ describe("Table Parser", () => {
   describe("Border parsing", () => {
     test("should parse table borders correctly", async () => {
       const mockBordersElement = {
-        querySelector: (side: string) => {
+        querySelector: (selector: string) => {
+          // Extract the side from selectors like "top, w\:top"
+          const side = selector.split(",")[0]?.trim() ?? "";
           if (["top", "right", "bottom", "left"].includes(side)) {
             return {
               getAttribute: (attr: string) => {
@@ -303,7 +305,7 @@ describe("Table Parser", () => {
 
       const mockElement = {
         querySelector: (selector: string) => {
-          if (selector === "tblBorders") {
+          if (selector.includes("tblBorders")) {
             return mockBordersElement;
           }
           return null;
@@ -321,7 +323,9 @@ describe("Table Parser", () => {
 
     test("should handle different border styles", async () => {
       const createBorderElement = (style: string) => ({
-        querySelector: (side: string) => {
+        querySelector: (selector: string) => {
+          // Extract the side from selectors like "top, w\:top"
+          const side = selector.split(",")[0]?.trim() ?? "";
           if (side === "top") {
             return {
               getAttribute: (attr: string) => {
@@ -339,7 +343,7 @@ describe("Table Parser", () => {
       // Test dashed border
       const dashedElement = {
         querySelector: (selector: string) =>
-          selector === "tblBorders" ? createBorderElement("dashed") : null,
+          selector.includes("tblBorders") ? createBorderElement("dashed") : null,
       } as unknown as Element;
 
       const dashedProps = await Effect.runPromise(parseTableProperties(dashedElement));
@@ -348,7 +352,7 @@ describe("Table Parser", () => {
       // Test dotted border
       const dottedElement = {
         querySelector: (selector: string) =>
-          selector === "tblBorders" ? createBorderElement("dotted") : null,
+          selector.includes("tblBorders") ? createBorderElement("dotted") : null,
       } as unknown as Element;
 
       const dottedProps = await Effect.runPromise(parseTableProperties(dottedElement));
