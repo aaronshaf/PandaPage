@@ -4,8 +4,6 @@
  * for common use cases while maintaining type safety.
  */
 
-import type { ST_Border, ST_Shd, ST_Em, ST_Jc, ST_Underline } from "./wml";
-
 /**
  * Common border style values as string literal union.
  * Extracted from ST_Border enum for compatibility with string-based APIs.

@@ -118,7 +118,7 @@ export function setupPageTracking(options: PageTrackingOptions): () => void {
       isScrolling = false;
     };
 
-    const handleScroll = (event: Event) => {
+    const handleScroll = () => {
       if (!isScrolling) {
         isScrolling = true;
         animationFrameId = requestAnimationFrame(handleScrollRaf);

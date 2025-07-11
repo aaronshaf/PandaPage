@@ -3,7 +3,6 @@ import type { Header, Footer, Paragraph, Table } from "../../types/document";
 import { parseParagraph } from "./paragraph-parser";
 import { parseTable } from "./table-parser";
 import { convertToDocumentElement } from "./element-converter";
-import { WORD_NAMESPACE } from "./types";
 import type { DocxStylesheet } from "./style-parser";
 import type { DocxTheme } from "./theme-parser";
 

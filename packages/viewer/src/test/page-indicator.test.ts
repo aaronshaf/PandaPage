@@ -3,13 +3,7 @@ import { describe, it, expect } from "bun:test";
 describe("Page Indicator Fix", () => {
   it("should ensure all page elements have print-page class", () => {
     // Test that the CSS selector .print-page will work correctly
-    const testHTML = `
-      <div class="document-scroll-container">
-        <div class="print-page" data-page-number="1">Page 1 content</div>
-        <div class="print-page" data-page-number="2">Page 2 content</div>
-        <div class="print-page" data-page-number="3">Page 3 content</div>
-      </div>
-    `;
+    // Test HTML structure removed - not used in test
 
     // Mock the DOM structure for testing
     const mockPages = [
@@ -45,13 +39,13 @@ describe("Page Indicator Fix", () => {
       const rect = pageRects[i];
 
       // Consider a page "current" if its center is closest to container center
-      if (rect.top <= containerMiddle && rect.bottom > containerMiddle) {
+      if (rect && rect.top <= containerMiddle && rect.bottom > containerMiddle) {
         currentVisiblePage = i + 1;
         break;
       }
 
       // If we're past the container middle, this is probably the current page
-      if (rect.top <= containerMiddle) {
+      if (rect && rect.top <= containerMiddle) {
         currentVisiblePage = i + 1;
       }
     }

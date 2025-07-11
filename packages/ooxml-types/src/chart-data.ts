@@ -1,5 +1,5 @@
 // chart-data.ts - Chart data and data source types
-import type { ST_String, ST_Lang, ST_Xstring } from "./shared-types";
+import type { ST_Lang, ST_Xstring } from "./shared-types";
 import type { CT_TextBody } from "./dml-main";
 
 // Basic data types

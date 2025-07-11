@@ -2,7 +2,7 @@
 import type { ST_String } from "./shared-types";
 
 // Import extension types from dml-media
-import type { CT_OfficeArtExtension, CT_OfficeArtExtensionList } from "./dml-media";
+import type { CT_OfficeArtExtensionList } from "./dml-media";
 
 // Import color types from dml-colors
 import type { EG_ColorChoice } from "./dml-colors";

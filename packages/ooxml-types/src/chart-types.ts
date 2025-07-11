@@ -1,11 +1,10 @@
 // chart-types.ts - Re-export chart data types and define remaining chart types
 export * from "./chart-data";
 
-import type { ST_String, ST_PositiveUniversalMeasure } from "./shared-types";
-import type { CT_ShapeProperties, CT_TextBody, CT_Color } from "./dml-main";
+import type { ST_String } from "./shared-types";
+import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
 import type {
   CT_Boolean,
-  CT_Double,
   CT_UnsignedInt,
   CT_ExtensionList,
   CT_NumDataSource,

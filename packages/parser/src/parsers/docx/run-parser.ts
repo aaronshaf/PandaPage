@@ -1,6 +1,5 @@
 // Run parsing functions
 import type { DocxRun } from "./types";
-import { WORD_NAMESPACE } from "./types";
 import { parseFieldRun } from "./field-parser";
 import type { FieldParsingContext } from "./field-context";
 import { parseDrawing } from "./image-parser";

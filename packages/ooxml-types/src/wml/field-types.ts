@@ -4,7 +4,6 @@
  */
 
 import type { ST_OnOff, ST_String } from "../shared/common-types";
-import type { ST_DecimalNumber } from "../shared/measurement-types";
 import type { ST_RelationshipId } from "../shared/relationship-types";
 import type {
   CT_DecimalNumber,

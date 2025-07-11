@@ -9,7 +9,6 @@ import type {
   CT_Double,
   CT_ExtensionList,
   CT_NumDataSource,
-  CT_AxDataSource,
 } from "./chart-data-types";
 
 // Number formatting

@@ -15,15 +15,8 @@ import type {
   ST_RelationshipId,
   ST_CalendarType,
 } from "./shared-types";
+import type { CT_Inline, CT_Anchor } from "./wordprocessing-drawing-types";
 import type {
-  CT_GvmlGroupShape,
-  CT_GvmlGraphicalObjectFrame,
-  CT_Inline,
-  CT_Anchor,
-} from "./wordprocessing-drawing-types";
-import type { EG_OMathMathElements } from "./math-types";
-import type {
-  ST_LongHexNumber,
   CT_DecimalNumber,
   CT_String as CT_StringWml,
   CT_OnOff,

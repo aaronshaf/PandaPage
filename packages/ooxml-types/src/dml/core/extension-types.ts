@@ -3,7 +3,7 @@
  * @see ECMA-376 Part 1, Section 20.1.2 (Extensions)
  */
 
-import type { ST_String, ST_Guid } from "../../shared-types";
+import type { ST_String } from "../../shared-types";
 
 /**
  * Office Art Extension

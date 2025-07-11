@@ -20,7 +20,6 @@ import { createLazyImage } from "./image-utils";
 import {
   createFootnoteReference,
   createFootnoteSection,
-  getFootnoteDisplayNumber,
 } from "./footnote-utils";
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";

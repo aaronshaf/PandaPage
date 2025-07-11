@@ -4,18 +4,15 @@
  */
 
 import type { ST_OnOff, ST_String, ST_Lang } from "../shared/common-types";
-import type { ST_RelationshipId } from "../shared/relationship-types";
 import type {
   CT_OnOff,
   CT_String,
-  CT_Lang,
   CT_HpsMeasure,
   CT_SignedHpsMeasure,
   CT_SignedTwipsMeasure,
   CT_Empty,
   ST_LongHexNumber,
   ST_ShortHexNumber,
-  ST_UcharHexNumber,
 } from "./basic-types";
 import type {
   CT_Highlight,
@@ -24,7 +21,6 @@ import type {
   CT_TextEffect,
   CT_TextScale,
   CT_FitText,
-  ST_UniversalMeasure,
 } from "./text-formatting-types";
 import type { CT_Border, CT_Shd } from "./border-shading-types";
 

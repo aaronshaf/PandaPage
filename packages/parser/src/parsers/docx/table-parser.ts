@@ -12,8 +12,6 @@ import type {
 import { parseParagraph } from "./paragraph-parser";
 import {
   WORD_NAMESPACE,
-  type DocxTableProperties,
-  type DocxTableCellProperties,
   type DocxTableBorder,
   type DocxTableBorders,
   type DocxTableCellBorders,

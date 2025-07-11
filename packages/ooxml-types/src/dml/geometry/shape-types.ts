@@ -9,7 +9,6 @@ import type {
   CT_Point2D,
   CT_PositiveSize2D,
 } from "./geometry-types";
-import type { CT_Path2DList } from "./path-types";
 
 /**
  * Shape geometry container

@@ -7,7 +7,6 @@ import type {
   CT_Double,
   CT_UnsignedInt,
   CT_ExtensionList,
-  CT_StrRef,
   CT_Tx as CT_TxImport,
 } from "./chart-data-types";
 

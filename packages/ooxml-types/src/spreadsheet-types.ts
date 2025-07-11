@@ -8,11 +8,9 @@
 export * from "./sml/index";
 
 // Import types needed for remaining complex types
-import type { ST_Xstring, ST_Guid } from "./shared-types";
+import type { ST_Xstring } from "./shared-types";
 import type { CT_ExtensionList } from "./chart-types";
-import type { CT_Marker } from "./spreadsheet-drawing-types";
-import type { CT_ShapeProperties, CT_TextBody } from "./dml-main";
-import type { CT_XStringElement, ST_CellRef, ST_Ref } from "./sml/cell-types";
+import type { ST_CellRef } from "./sml/cell-types";
 import type { ST_DxfId } from "./sml/filter-types";
 
 // ========================================

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { marked } from "marked";
+import { Effect } from "effect";
 import {
-  renderDocxWithMetadata,
-  renderPages,
+  docxToMarkdownWithMetadata,
+  pagesToMarkdown,
   parseDocxToStructured,
   parseDocxDocument,
   renderToMarkdown,
@@ -80,7 +81,7 @@ const App: React.FC = () => {
       return `${getBasePath()}/${docId}`;
     }
     // Use first sample document as default
-    return sampleDocuments.length > 0 ? `${getBasePath()}/${sampleDocuments[0].id}` : "";
+    return sampleDocuments.length > 0 && sampleDocuments[0] ? `${getBasePath()}/${sampleDocuments[0].id}` : "";
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -265,17 +266,17 @@ const App: React.FC = () => {
 
     // Try to extract from frontmatter metadata
     const frontmatterMatch = result.match(/^---\n([\s\S]*?)\n---/);
-    if (frontmatterMatch) {
+    if (frontmatterMatch && frontmatterMatch[1]) {
       const frontmatter = frontmatterMatch[1];
       const titleMatch = frontmatter.match(/title:\s*["']?(.+?)["']?$/m);
-      if (titleMatch) {
+      if (titleMatch && titleMatch[1]) {
         return cleanTextForTitle(titleMatch[1]);
       }
     }
 
     // Try to get first heading
     const headings = extractHeadings(removeFrontmatter(result));
-    if (headings.length > 0) {
+    if (headings.length > 0 && headings[0]) {
       return cleanTextForTitle(headings[0].text);
     }
 
@@ -331,7 +332,7 @@ const App: React.FC = () => {
     if (docId && sampleDocuments.some((doc) => doc.id === docId)) {
       return `${getBasePath()}/${docId}`;
     }
-    return sampleDocuments.length > 0 ? `${getBasePath()}/${sampleDocuments[0].id}` : "";
+    return sampleDocuments.length > 0 && sampleDocuments[0] ? `${getBasePath()}/${sampleDocuments[0].id}` : "";
   };
 
   // Update URL hash with current document and view mode
@@ -484,12 +485,12 @@ const App: React.FC = () => {
               "Failed to parse structured DOCX, falling back to simple parser:",
               structuredError,
             );
-            markdown = await renderDocxWithMetadata(arrayBuffer);
+            markdown = await Effect.runPromise(docxToMarkdownWithMetadata(arrayBuffer));
             setStructuredDocument(null);
           }
         }
       } else if (fileName.endsWith(".pages")) {
-        markdown = await renderPages(arrayBuffer);
+        markdown = await Effect.runPromise(pagesToMarkdown(arrayBuffer));
         setParsedDocument(null);
         setStructuredDocument(null);
       } else {

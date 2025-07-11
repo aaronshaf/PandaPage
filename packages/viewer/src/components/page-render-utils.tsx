@@ -67,15 +67,8 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
 
     // Split elements by page breaks
     for (const element of allElements) {
-      if (element.type === "pageBreak") {
-        // Found a page break - finish current page
-        if (currentPage.length > 0) {
-          pages.push(currentPage);
-          currentPage = [];
-        }
-      } else {
-        currentPage.push(element);
-      }
+      // For now, put all elements on one page since DocxElement doesn't include pageBreak
+      currentPage.push(element);
     }
 
     // Add the last page if it has content

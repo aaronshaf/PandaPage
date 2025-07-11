@@ -2,11 +2,11 @@ import type { ParsedDocument } from "@browser-document-viewer/parser";
 
 export function applyPageStyles(
   pageDiv: HTMLElement,
-  parsedDoc: ParsedDocument,
-  pageIndex: number,
+  _parsedDoc: ParsedDocument,
+  _pageIndex: number,
 ): void {
   // For now, apply default page styles until document sections are available
-  // TODO: Use parsedDoc.sections[pageIndex] when available
+  // TODO: Use _parsedDoc.sections[_pageIndex] when available
   const defaultPageWidth = "8.5in";
   const defaultPageHeight = "11in";
   const defaultMargin = "1in";
@@ -26,7 +26,7 @@ export function applyPageStyles(
 
 export function applyContentStyles(
   contentDiv: HTMLElement,
-  parsedDoc: ParsedDocument,
+  _parsedDoc: ParsedDocument,
   pageIndex: number,
 ): void {
   // Remove padding from content - it should extend to the page margins
@@ -42,7 +42,7 @@ export function applyContentStyles(
   }
 
   // TODO: When document sections are available, calculate content area based on page dimensions
-  // const section = parsedDoc.sections?.[pageIndex];
+  // const section = _parsedDoc.sections?.[pageIndex];
   // if (section?.properties?.pageSize && section.properties.margins) {
   //   const pageWidth = section.properties.pageSize.width;
   //   const pageHeight = section.properties.pageSize.height;

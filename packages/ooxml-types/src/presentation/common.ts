@@ -1,5 +1,5 @@
 // common.ts - Common types used across presentation modules
-import type { ST_RelationshipId, ST_Guid } from "../shared-types";
+import type { ST_RelationshipId } from "../shared-types";
 import type {
   EG_Media,
   CT_TextFont,

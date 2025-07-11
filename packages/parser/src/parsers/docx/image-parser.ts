@@ -275,7 +275,6 @@ function parseImageEffects(drawingElement: Element, ns: any): ImageEffects | und
 
       const blurRad = reflection.getAttribute("blurRad");
       const dist = reflection.getAttribute("dist");
-      const algn = reflection.getAttribute("algn");
 
       if (blurRad) reflectionEffect.blur = parseInt(blurRad) / 12700;
       if (dist) reflectionEffect.distance = parseInt(dist) / 12700;
