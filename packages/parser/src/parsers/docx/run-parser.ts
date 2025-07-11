@@ -71,59 +71,76 @@ export function parseRunElement(
       }
     }
   } else {
-    // Check for field codes
-    const fldCharElements = getElementsByTagNameNSFallback(element, ns, "fldChar");
-    const instrTextElements = getElementsByTagNameNSFallback(element, ns, "instrText");
-
-    if (fldCharElements.length > 0) {
-      const fldChar = fldCharElements[0];
-      const fldCharType = fldChar?.getAttribute("w:fldCharType");
-
-      if (fldCharType === "begin") {
-        updateFieldState({
-          inField: true,
-          fieldInstruction: "",
-          skipFieldValue: false,
-          fieldRunProperties:
-            getElementByTagNameNSFallback(element, ns, "rPr")?.cloneNode(true) || null,
-        });
-      } else if (fldCharType === "separate") {
-        // After separator, skip the field value runs until we hit end
-        updateFieldState({ ...fieldState, skipFieldValue: true });
-      } else if (fldCharType === "end" && fieldState.inField) {
-        // Field complete - create a run with the field code
-        if (fieldState.fieldInstruction.trim()) {
-          const fieldRun = parseFieldRun(
-            fieldState.fieldInstruction,
-            fieldState.fieldRunProperties,
-            ns,
-            fieldContext,
-          );
-          if (fieldRun) {
-            runs.push(fieldRun);
-          }
+    // Check for endnote references
+    const endnoteRefElements = getElementsByTagNameNSFallback(element, ns, "endnoteReference");
+    if (endnoteRefElements.length > 0) {
+      const endnoteRef = endnoteRefElements[0];
+      if (endnoteRef) {
+        const endnoteId = endnoteRef.getAttribute("w:id");
+        if (endnoteId) {
+          // Add a superscript run for the endnote reference
+          runs.push({
+            text: endnoteId, // Use the endnote ID as the reference text
+            superscript: true,
+            _endnoteRef: endnoteId, // Mark this as an endnote reference
+          });
         }
-        updateFieldState({
-          inField: false,
-          skipFieldValue: false,
-          fieldInstruction: "",
-          fieldRunProperties: null,
-        });
       }
-    } else if (instrTextElements.length > 0 && fieldState.inField && !fieldState.skipFieldValue) {
-      // Collect field instruction text
-      const instrText = instrTextElements[0];
-      if (instrText) {
-        updateFieldState({
-          ...fieldState,
-          fieldInstruction: fieldState.fieldInstruction + (instrText.textContent || ""),
-        });
-      }
-    } else if (!fieldState.inField && !fieldState.skipFieldValue) {
-      // Direct run element (not part of a field)
-      const run = parseRun(element, ns, undefined, stylesheet, theme);
-      if (run && run.text) {
-        runs.push(run);
+    } else {
+      // Check for field codes
+      const fldCharElements = getElementsByTagNameNSFallback(element, ns, "fldChar");
+      const instrTextElements = getElementsByTagNameNSFallback(element, ns, "instrText");
+
+      if (fldCharElements.length > 0) {
+        const fldChar = fldCharElements[0];
+        const fldCharType = fldChar?.getAttribute("w:fldCharType");
+
+        if (fldCharType === "begin") {
+          updateFieldState({
+            inField: true,
+            fieldInstruction: "",
+            skipFieldValue: false,
+            fieldRunProperties:
+              getElementByTagNameNSFallback(element, ns, "rPr")?.cloneNode(true) || null,
+          });
+        } else if (fldCharType === "separate") {
+          // After separator, skip the field value runs until we hit end
+          updateFieldState({ ...fieldState, skipFieldValue: true });
+        } else if (fldCharType === "end" && fieldState.inField) {
+          // Field complete - create a run with the field code
+          if (fieldState.fieldInstruction.trim()) {
+            const fieldRun = parseFieldRun(
+              fieldState.fieldInstruction,
+              fieldState.fieldRunProperties,
+              ns,
+              fieldContext,
+            );
+            if (fieldRun) {
+              runs.push(fieldRun);
+            }
+          }
+          updateFieldState({
+            inField: false,
+            skipFieldValue: false,
+            fieldInstruction: "",
+            fieldRunProperties: null,
+          });
+        }
+      } else if (instrTextElements.length > 0 && fieldState.inField && !fieldState.skipFieldValue) {
+        // Collect field instruction text
+        const instrText = instrTextElements[0];
+        if (instrText) {
+          updateFieldState({
+            ...fieldState,
+            fieldInstruction: fieldState.fieldInstruction + (instrText.textContent || ""),
+          });
+        }
+      } else if (!fieldState.inField && !fieldState.skipFieldValue) {
+        // Direct run element (not part of a field)
+        const run = parseRun(element, ns, undefined, stylesheet, theme);
+        if (run && run.text) {
+          runs.push(run);
+        }
       }
     }
   }

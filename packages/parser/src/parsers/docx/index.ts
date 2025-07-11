@@ -5,6 +5,7 @@ import type {
   DocumentElement,
   Image,
   Footnote,
+  Endnote,
   Header,
   Footer,
 } from "../../types/document";
@@ -17,7 +18,7 @@ import { parseSectionProperties } from "./section-properties";
 import { parseParagraph } from "./paragraph-parser";
 import { parseTable } from "./table-parser";
 import { parseHeaderFooter } from "./header-footer-parser";
-import { parseFootnotes } from "./footnote-parser";
+import { parseFootnotes, parseEndnotes } from "./footnote-parser";
 import { parseBookmarks } from "./bookmark-parser";
 import { createFieldContext } from "./field-context";
 import { convertToDocumentElement } from "./element-converter";
@@ -258,6 +259,21 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
 
+    // Parse endnotes
+    const endnotes: Endnote[] = [];
+    const endnotesFile = zip.file("word/endnotes.xml");
+    if (endnotesFile) {
+      const endnotesXml = yield* Effect.tryPromise({
+        try: () => endnotesFile.async("text"),
+        catch: () => "",
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+
+      if (endnotesXml) {
+        const parsedEndnotes = parseEndnotes(endnotesXml, relationshipsMap, stylesheet, theme);
+        endnotes.push(...parsedEndnotes);
+      }
+    }
+
     // Parse all document body elements in order
     const elements: DocumentElement[] = [];
 
@@ -277,15 +293,17 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       bodyNodeList = doc.getElementsByTagName("w:body");
     }
     if (bodyNodeList.length === 0) {
-      // Add footnotes at the end and return
+      // Add footnotes and endnotes at the end and return
       elements.push(...footnotes);
+      elements.push(...endnotes);
       return { metadata, elements, headers: headerInfo, footers: footerInfo };
     }
 
     const body = bodyNodeList[0];
     if (!body) {
-      // Add footnotes at the end and return
+      // Add footnotes and endnotes at the end and return
       elements.push(...footnotes);
+      elements.push(...endnotes);
       return { metadata, elements, headers: headerInfo, footers: footerInfo };
     }
 
@@ -381,8 +399,9 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
 
-    // Add footnotes at the end
+    // Add footnotes and endnotes at the end
     elements.push(...footnotes);
+    elements.push(...endnotes);
 
     return {
       metadata,

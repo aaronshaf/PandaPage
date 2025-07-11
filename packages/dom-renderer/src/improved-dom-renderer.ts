@@ -11,6 +11,8 @@ import type {
   Image,
   Footnote,
   FootnoteReference,
+  Endnote,
+  EndnoteReference,
   Header,
   Footer,
   Bookmark,
@@ -21,6 +23,9 @@ import {
   createFootnoteReference,
   createFootnoteSection,
   getFootnoteDisplayNumber,
+  createEndnoteReference,
+  createEndnoteSection,
+  getEndnoteDisplayNumber,
 } from "./footnote-utils";
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";
@@ -41,6 +46,7 @@ export class EnhancedDOMRenderer {
   private currentPageNumber: number = 1;
   private totalPages: number = 1;
   private footnoteMap: Map<string, Footnote> = new Map();
+  private endnoteMap: Map<string, Endnote> = new Map();
   private options: EnhancedDOMRenderOptions;
 
   constructor(options: EnhancedDOMRenderOptions = {}) {
@@ -80,8 +86,18 @@ export class EnhancedDOMRenderer {
     return createFootnoteReference(ref, this.doc, this.footnoteMap);
   }
 
+  private renderEndnoteReference(ref: EndnoteReference): HTMLElement {
+    return createEndnoteReference(ref, this.doc, this.endnoteMap);
+  }
+
   private renderFootnoteSection(): HTMLElement | null {
     return createFootnoteSection(this.footnoteMap, this.doc, (element) =>
+      this.renderElement(element),
+    );
+  }
+
+  private renderEndnoteSection(): HTMLElement | null {
+    return createEndnoteSection(this.endnoteMap, this.doc, (element) =>
       this.renderElement(element),
     );
   }
@@ -92,10 +108,12 @@ export class EnhancedDOMRenderer {
 
     addEnhancedStyles(this.doc);
 
-    // Collect footnotes
+    // Collect footnotes and endnotes
     parsedDoc.elements.forEach((element) => {
       if (element.type === "footnote") {
         this.footnoteMap.set(element.id, element);
+      } else if (element.type === "endnote") {
+        this.endnoteMap.set(element.id, element);
       }
     });
 
@@ -114,6 +132,12 @@ export class EnhancedDOMRenderer {
     const footnoteSection = this.renderFootnoteSection();
     if (footnoteSection) {
       container.appendChild(footnoteSection);
+    }
+
+    // Add endnote section
+    const endnoteSection = this.renderEndnoteSection();
+    if (endnoteSection) {
+      container.appendChild(endnoteSection);
     }
 
     return container;
@@ -176,6 +200,13 @@ export class EnhancedDOMRenderer {
 
       case "footnote":
         // Footnotes are rendered in a separate section
+        return null;
+
+      case "endnoteReference":
+        return this.renderEndnoteReference(element);
+
+      case "endnote":
+        // Endnotes are rendered in a separate section
         return null;
 
       case "bookmark":

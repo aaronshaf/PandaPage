@@ -9,6 +9,8 @@ import type {
   TableCell,
   TextRun,
   Image,
+  Footnote,
+  Endnote,
 } from "@browser-document-viewer/parser";
 
 export interface MarkdownRenderOptions {
@@ -54,6 +56,17 @@ function safeBase64Encode(data: ArrayBuffer | any): string {
 
 function renderTextRun(run: TextRun): string {
   let text = run.text || "";
+
+  // Handle footnote and endnote references
+  if (run._footnoteRef) {
+    text = `[^${run._footnoteRef}]`;
+    return text;
+  }
+  
+  if (run._endnoteRef) {
+    text = `[^${run._endnoteRef}]`;
+    return text;
+  }
 
   // Apply formatting
   if (run.bold) text = `**${text}**`;
@@ -247,8 +260,26 @@ function renderElement(element: DocumentElement, options: MarkdownRenderOptions)
       return "\n---\n";
 
     case "footnote":
-      // Simple footnote rendering
-      return `<sup>${element.id || "1"}</sup>`;
+      // Render footnote content
+      if (element.elements && element.elements.length > 0) {
+        const content = element.elements
+          .map(elem => renderElement(elem, options))
+          .filter(Boolean)
+          .join(' ');
+        return `[^${element.id}]: ${content}`;
+      }
+      return `[^${element.id}]: `;
+
+    case "endnote":
+      // Render endnote content
+      if (element.elements && element.elements.length > 0) {
+        const content = element.elements
+          .map(elem => renderElement(elem, options))
+          .filter(Boolean)
+          .join(' ');
+        return `[^${element.id}]: ${content}`;
+      }
+      return `[^${element.id}]: `;
 
     default:
       return null;

@@ -72,6 +72,35 @@ export function addStyles(): void {
       flex: 1;
     }
     
+    .endnote-marker {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .endnote-marker:hover {
+      text-decoration: underline;
+    }
+    
+    .endnote-section {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #ccc;
+    }
+    
+    .endnote-item {
+      margin-bottom: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .endnote-number {
+      font-weight: 600;
+      color: #374151;
+      min-width: 1.5rem;
+      flex-shrink: 0;
+    }
+    
     .bookmark-anchor {
       display: inline-block;
       width: 0;

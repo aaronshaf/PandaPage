@@ -1,5 +1,5 @@
-// Footnote parsing functions
-import type { Footnote, Paragraph, Table } from "../../types/document";
+// Footnote and endnote parsing functions
+import type { Footnote, Endnote, Paragraph, Table } from "../../types/document";
 import { parseParagraph } from "./paragraph-parser";
 import { parseTable } from "./table-parser";
 import { convertToDocumentElement } from "./element-converter";
@@ -101,4 +101,100 @@ export function parseFootnotes(
   }
 
   return footnotes;
+}
+
+/**
+ * Parse endnotes from endnotes.xml
+ * @param xml - Endnotes XML string
+ * @param relationships - Map of relationship IDs to URLs
+ * @param stylesheet - Document stylesheet for style resolution
+ * @param theme - Document theme for color and font resolution
+ * @returns Array of parsed endnotes
+ */
+export function parseEndnotes(
+  xml: string,
+  relationships?: Map<string, string>,
+  stylesheet?: DocxStylesheet,
+  theme?: DocxTheme,
+): Endnote[] {
+  let doc: Document;
+  if (typeof DOMParser === "undefined") {
+    // @ts-ignore
+    const { DOMParser: XMLDOMParser } = require("@xmldom/xmldom");
+    const parser = new XMLDOMParser();
+    doc = parser.parseFromString(xml, "text/xml");
+  } else {
+    const parser = new DOMParser();
+    doc = parser.parseFromString(xml, "text/xml");
+  }
+
+  // Check for parsing errors
+  const parserError = doc.getElementsByTagName("parsererror");
+  if (parserError.length > 0) {
+    console.error("XML parsing error in endnotes:", parserError[0]?.textContent);
+    return [];
+  }
+
+  const endnotes: Endnote[] = [];
+
+  // Get all endnote elements
+  const endnoteElements = doc.getElementsByTagNameNS(WORD_NAMESPACE, "endnote");
+
+  for (let i = 0; i < endnoteElements.length; i++) {
+    const endnoteElement = endnoteElements[i];
+    if (!endnoteElement) continue;
+
+    const id = endnoteElement.getAttribute("w:id");
+    const type = endnoteElement.getAttribute("w:type");
+
+    // Skip separator, continuationSeparator, and continuationNotice endnotes
+    if (type === "separator" || type === "continuationSeparator" || type === "continuationNotice") {
+      continue;
+    }
+
+    if (id) {
+      const elements: (Paragraph | Table)[] = [];
+
+      // Parse all paragraphs and tables in this endnote
+      for (let j = 0; j < endnoteElement.childNodes.length; j++) {
+        const child = endnoteElement.childNodes[j];
+        if (!child || child.nodeType !== 1) continue;
+
+        const element = child as Element;
+        const tagName = element.tagName;
+
+        if (tagName === "w:p") {
+          const paragraph = parseParagraph(
+            element,
+            relationships,
+            undefined,
+            undefined,
+            stylesheet,
+            theme,
+          );
+          if (paragraph) {
+            const docElement = convertToDocumentElement(paragraph);
+            if (docElement.type === "paragraph" || docElement.type === "heading") {
+              elements.push(docElement as Paragraph);
+            }
+          }
+        } else if (tagName === "w:tbl") {
+          const table = parseTable(element, relationships, theme, stylesheet);
+          if (table) {
+            elements.push(table);
+          }
+        }
+      }
+
+      if (elements.length > 0) {
+        endnotes.push({
+          type: "endnote",
+          id,
+          elements,
+        });
+      }
+    }
+  }
+
+  return endnotes;
 }

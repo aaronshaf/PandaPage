@@ -32,6 +32,7 @@ export interface TextRun {
   highlightColor?: ST_HighlightColor; // OOXML highlight color
   link?: string;
   _footnoteRef?: string;
+  _endnoteRef?: string;
   _fieldCode?: string;
   // Advanced text formatting
   characterSpacing?: number; // Twips
@@ -406,6 +407,18 @@ export interface Footnote {
   elements: (Paragraph | Table)[];
 }
 
+export interface EndnoteReference {
+  type: "endnoteReference";
+  id: string;
+  text: string; // The reference number or marker
+}
+
+export interface Endnote {
+  type: "endnote";
+  id: string;
+  elements: (Paragraph | Table)[];
+}
+
 export type DocumentElement =
   | Paragraph
   | Heading
@@ -417,6 +430,8 @@ export type DocumentElement =
   | Bookmark
   | FootnoteReference
   | Footnote
+  | EndnoteReference
+  | Endnote
   | DrawingObject
   | Shape
   | Chart
