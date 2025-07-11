@@ -1,4 +1,5 @@
 import { describe, it, expect } from "bun:test";
+import "../../test-setup";
 import { parseTable } from "./table-parser";
 import { WORD_NAMESPACE } from "./types";
 import { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";

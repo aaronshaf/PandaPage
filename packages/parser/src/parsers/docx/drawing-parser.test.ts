@@ -1,19 +1,11 @@
 import { Effect } from "effect";
 import { describe, it, expect } from "bun:test";
+import "../../test-setup";
 import { parseDrawingObject } from "./drawing-parser";
-
-// Use DOMParser from environment or import it
-const getDOMParser = async () => {
-  if (typeof DOMParser !== "undefined") {
-    return DOMParser;
-  }
-  const { DOMParser: XMLDOMParser } = await import("@xmldom/xmldom");
-  return XMLDOMParser;
-};
 
 describe("Drawing Parser", () => {
   describe("parseDrawingObject", () => {
-    it("should parse inline drawing with image", async () => {
+    it("should parse inline drawing with image", () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
@@ -48,8 +40,7 @@ describe("Drawing Parser", () => {
         </w:drawing>
       `;
 
-      const DOMParserClass = await getDOMParser();
-      const parser = new DOMParserClass();
+      const parser = new DOMParser();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
 
@@ -67,7 +58,7 @@ describe("Drawing Parser", () => {
       }
     });
 
-    it("should parse anchored drawing with positioning", async () => {
+    it("should parse anchored drawing with positioning", () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" 
@@ -108,8 +99,7 @@ describe("Drawing Parser", () => {
         </w:drawing>
       `;
 
-      const DOMParserClass = await getDOMParser();
-      const parser = new DOMParserClass();
+      const parser = new DOMParser();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
 
@@ -133,7 +123,7 @@ describe("Drawing Parser", () => {
       expect(result?.distanceFromText?.right).toBeCloseTo(9);
     });
 
-    it("should parse image with transform and effects", async () => {
+    it("should parse image with transform and effects", () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
@@ -174,8 +164,7 @@ describe("Drawing Parser", () => {
         </w:drawing>
       `;
 
-      const DOMParserClass = await getDOMParser();
-      const parser = new DOMParserClass();
+      const parser = new DOMParser();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
 
@@ -203,7 +192,7 @@ describe("Drawing Parser", () => {
       // expect(image?.effects?.glow?.color).toBe("#FF0000");
     });
 
-    it("should return null for drawing without supported content", async () => {
+    it("should return null for drawing without supported content", () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
@@ -218,8 +207,7 @@ describe("Drawing Parser", () => {
         </w:drawing>
       `;
 
-      const DOMParserClass = await getDOMParser();
-      const parser = new DOMParserClass();
+      const parser = new DOMParser();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
 
@@ -229,15 +217,14 @@ describe("Drawing Parser", () => {
       expect(result).toBeNull();
     });
 
-    it("should return null for invalid drawing structure", async () => {
+    it("should return null for invalid drawing structure", () => {
       const xml = `
         <w:drawing xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
           <!-- Missing inline/anchor -->
         </w:drawing>
       `;
 
-      const DOMParserClass = await getDOMParser();
-      const parser = new DOMParserClass();
+      const parser = new DOMParser();
       const doc = parser.parseFromString(xml, "text/xml");
       const drawingElement = doc.documentElement;
 

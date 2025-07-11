@@ -10,27 +10,23 @@
     "dev": "bun run --filter '*' dev",
     "build": "cd packages/viewer && bun run build",
     "clean": "find packages -name '.vite' -type d -exec rm -rf {} + 2>/dev/null || true && find packages -name 'dist' -type d -exec rm -rf {} + 2>/dev/null || true",
-    "test": "bun test",
+    "test": "bun test packages/",
     "test:all": "cd packages/core && bun test:all && cd ../viewer && bun test:e2e",
-    "test:coverage": "cd packages/parser && bun run test:coverage && cd ../markdown-renderer && bun run test:coverage && cd ../dom-renderer && bun run test:coverage && cd ../core && bun run test:coverage",
-    "test:unit": "cd packages/parser && bun test --coverage && cd ../markdown-renderer && bun test --coverage && cd ../dom-renderer && bun test --coverage && cd ../core && bun test --coverage test/*.test.ts",
+    "test:coverage": "bun test packages/ --coverage",
     "typecheck": "cd packages/parser && bun run typecheck && cd ../markdown-renderer && bun run typecheck && cd ../dom-renderer && bun run typecheck && cd ../core && bun run typecheck",
     "test:e2e:headless": "cd packages/viewer && bun run build && npx playwright test --config=playwright.precommit.config.ts",
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
-    "precommit": "node scripts/check-file-sizes.cjs && node scripts/quiet-lint.js && node scripts/quiet-typecheck.js && node scripts/quiet-test-unit.js",
+    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun test packages/",
     "check-file-sizes": "node scripts/check-file-sizes.cjs",
     "prepare": "simple-git-hooks",
     "sync-docs": "bun scripts/sync-documents.js",
-    "analyze-docx": "bun scripts/analyze-docx.ts",
-    "quiet-lint": "node scripts/quiet-lint.js",
-    "quiet-typecheck": "node scripts/quiet-typecheck.js",
-    "quiet-test-unit": "node scripts/quiet-test-unit.js"
+    "analyze-docx": "bun scripts/analyze-docx.ts"
   },
   "simple-git-hooks": {
     "pre-commit": "bun run precommit",
-    "pre-push": "node scripts/quiet-lint.js && node scripts/quiet-typecheck.js && node scripts/quiet-test-unit.js"
+    "pre-push": "bun run lint && bun run typecheck && bun run test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.6",

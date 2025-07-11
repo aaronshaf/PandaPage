@@ -8,7 +8,11 @@ try {
   const output = execSync(testCommand, { stdio: 'pipe', encoding: 'utf-8' });
   
   // Check if any test failed or coverage threshold not met
-  const hasFailure = output.includes('fail') || output.includes('FAIL') || 
+  // Look for actual test failures, not "0 fail" in summary
+  const failMatch = output.match(/(\d+) fail/);
+  const hasFail = failMatch && parseInt(failMatch[1]) > 0;
+  
+  const hasFailure = hasFail || output.includes('FAIL') || 
                      output.includes('coverage threshold') || output.includes('Coverage threshold');
   
   if (hasFailure) {

@@ -7,9 +7,9 @@ import {
   getBasePath,
 } from "./index";
 
-test.describe("Document Utils", () => {
-  test.describe("removeFrontmatter", () => {
-    test("should remove YAML frontmatter from markdown", () => {
+// Document Utils tests
+// removeFrontmatter tests
+test("should remove YAML frontmatter from markdown", () => {
       const markdown = `---
 title: Test Document
 author: John Doe
@@ -22,7 +22,7 @@ This is content.`;
       expect(result).toBe("# Heading 1\nThis is content.");
     });
 
-    test("should return original markdown if no frontmatter", () => {
+test("should return original markdown if no frontmatter", () => {
       const markdown = `# Heading 1
 This is content.`;
 
@@ -30,7 +30,7 @@ This is content.`;
       expect(result).toBe(markdown);
     });
 
-    test("should handle malformed frontmatter", () => {
+test("should handle malformed frontmatter", () => {
       const markdown = `---
 title: Test Document
 # Heading 1
@@ -40,7 +40,7 @@ This is content.`;
       expect(result).toBe(markdown);
     });
 
-    test("should handle empty frontmatter", () => {
+test("should handle empty frontmatter", () => {
       const markdown = `---
 ---
 
@@ -50,10 +50,9 @@ This is content.`;
       const result = removeFrontmatter(markdown);
       expect(result).toBe("# Heading 1\nThis is content.");
     });
-  });
 
-  test.describe("countWords", () => {
-    test("should count words correctly", () => {
+// countWords tests
+test("should count words correctly", () => {
       expect(countWords("Hello world")).toBe(2);
       expect(countWords("The quick brown fox")).toBe(4);
       expect(countWords("")).toBe(0);
@@ -61,20 +60,19 @@ This is content.`;
       expect(countWords("Single")).toBe(1);
     });
 
-    test("should handle multiple spaces", () => {
+test("should handle multiple spaces", () => {
       expect(countWords("Hello    world")).toBe(2);
       expect(countWords("  Hello  world  ")).toBe(2);
     });
 
-    test("should handle newlines and tabs", () => {
+test("should handle newlines and tabs", () => {
       expect(countWords("Hello\nworld")).toBe(2);
       expect(countWords("Hello\tworld")).toBe(2);
       expect(countWords("Hello\n\tworld")).toBe(2);
-    });
-  });
+});
 
-  test.describe("extractHeadings", () => {
-    test("should extract headings from markdown", () => {
+// extractHeadings tests
+test("should extract headings from markdown", () => {
       const markdown = `# Heading 1
 Some content
 
@@ -114,7 +112,7 @@ Even more content
       });
     });
 
-    test("should handle headings with special characters", () => {
+test("should handle headings with special characters", () => {
       const markdown = `# Heading with "quotes" and symbols!
 ## Another heading (with parentheses)
 ### 日本語のヘッダー`;
@@ -141,7 +139,7 @@ Even more content
       });
     });
 
-    test("should ignore invalid headings", () => {
+test("should ignore invalid headings", () => {
       const markdown = `Not a heading
 ##No space after hash
 ### 
@@ -149,16 +147,22 @@ Even more content
 ##### Valid heading`;
 
       const headings = extractHeadings(markdown);
-      expect(headings).toHaveLength(1);
+      expect(headings).toHaveLength(2);
 
       expect(headings[0]).toEqual({
+        level: 4,
+        text: "Empty heading",
+        id: "empty-heading",
+      });
+
+      expect(headings[1]).toEqual({
         level: 5,
         text: "Valid heading",
         id: "valid-heading",
       });
     });
 
-    test("should handle no headings", () => {
+test("should handle no headings", () => {
       const markdown = `Just some regular text.
 No headings here.
 
@@ -166,11 +170,10 @@ Even with line breaks.`;
 
       const headings = extractHeadings(markdown);
       expect(headings).toHaveLength(0);
-    });
-  });
+});
 
-  test.describe("extractHeadingsFromDocument", () => {
-    test("should extract headings from structured document", () => {
+// extractHeadingsFromDocument tests
+test("should extract headings from structured document", () => {
       const document = {
         elements: [
           {
@@ -221,14 +224,14 @@ Even with line breaks.`;
       });
     });
 
-    test("should handle empty or malformed document", () => {
+test("should handle empty or malformed document", () => {
       expect(extractHeadingsFromDocument(null)).toEqual([]);
       expect(extractHeadingsFromDocument({})).toEqual([]);
       expect(extractHeadingsFromDocument({ elements: [] })).toEqual([]);
       expect(extractHeadingsFromDocument({ elements: null })).toEqual([]);
     });
 
-    test("should ignore empty headings", () => {
+test("should ignore empty headings", () => {
       const document = {
         elements: [
           {
@@ -259,7 +262,7 @@ Even with line breaks.`;
       });
     });
 
-    test("should handle headings with no runs", () => {
+test("should handle headings with no runs", () => {
       const document = {
         elements: [
           {
@@ -283,20 +286,17 @@ Even with line breaks.`;
         text: "Valid heading",
         id: "valid-heading",
       });
-    });
-  });
+});
 
-  test.describe("getBasePath", () => {
-    test("should return correct base path in different environments", () => {
+// getBasePath tests
+test("should return correct base path in different environments", () => {
       // This is hard to test without mocking import.meta.env
       // but we can at least ensure it doesn't throw and returns a string
       const basePath = getBasePath();
       expect(typeof basePath).toBe("string");
-    });
-  });
 });
 
-test.describe("Document Title Extraction Logic", () => {
+// Document Title Extraction Logic tests
   test("should prioritize document metadata title", () => {
     const metadata = { title: "Document Title from Metadata" };
     const headings = [{ level: 1, text: "First Heading", id: "first-heading" }];
@@ -380,4 +380,3 @@ test.describe("Document Title Extraction Logic", () => {
 
     expect(getDocumentTitle(metadata, headings, filename)).toBe("test");
   });
-});

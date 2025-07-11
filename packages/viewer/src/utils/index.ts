@@ -11,13 +11,30 @@ export const getBasePath = () => {
 // Remove YAML frontmatter from markdown for rendering
 export const removeFrontmatter = (markdown: string): string => {
   // Check if markdown starts with frontmatter (---)
-  if (markdown.startsWith("---\n")) {
-    const endIndex = markdown.indexOf("\n---\n", 4);
-    if (endIndex !== -1) {
-      // Return content after the closing ---
-      return markdown.substring(endIndex + 5).trim();
+  if (!markdown.startsWith("---\n") && !markdown.startsWith("---\r\n")) {
+    return markdown;
+  }
+  
+  // Find the closing --- (must be on its own line)
+  const lines = markdown.split(/\r?\n/);
+  
+  // Start from line 1 (skip the opening ---)
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i] === "---") {
+      // Found closing marker, return content after it
+      // Get remaining lines after the closing ---
+      const remainingLines = lines.slice(i + 1);
+      
+      // Skip one empty line if present (common after frontmatter)
+      if (remainingLines.length > 0 && remainingLines[0] === "") {
+        return remainingLines.slice(1).join("\n");
+      }
+      
+      return remainingLines.join("\n");
     }
   }
+  
+  // No closing marker found, return original
   return markdown;
 };
 

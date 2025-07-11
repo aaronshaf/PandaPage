@@ -14,7 +14,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests for ooxml-types package\"",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",

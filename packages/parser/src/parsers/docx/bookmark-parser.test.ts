@@ -1,4 +1,5 @@
 import { describe, it, expect } from "bun:test";
+import "../../test-setup";
 import { parseBookmarks, findBookmarkEnd, extractBookmarkText } from "./bookmark-parser";
 import { WORD_NAMESPACE } from "./types";
 
