@@ -60,3 +60,13 @@ When creating commits and pull requests:
 - Don't include implementation plans in PR descriptions
 - Focus on what changed and why, not how
 - Make messages easy to read and understand
+
+## Git Hooks Policy
+
+**IMPORTANT: Git hooks must never be bypassed.**
+
+- Never skip pre-commit hooks
+- Never skip pre-push hooks
+- Never use the `--no-verify` flag with git commands
+- No exceptions to these rules
+- Hooks exist to maintain code quality and prevent issues from entering the repository
