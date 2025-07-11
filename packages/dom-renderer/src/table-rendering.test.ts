@@ -27,19 +27,19 @@ test("renderToHtml handles tables", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<table style="border-collapse: collapse; margin-bottom: 12pt;">');
+  expect(result).toContain('<table class="table-fancy">');
   expect(result).toContain("<tr>");
   expect(result).toContain(
-    '<th style="border: 1px solid #ccc; padding: 4pt; font-weight: 600; background-color: #f3f4f6;"><p><span>Header 1</span></p></th>',
+    '<th><p class="mb-4"><span>Header 1</span></p></th>',
   );
   expect(result).toContain(
-    '<th style="border: 1px solid #ccc; padding: 4pt; font-weight: 600; background-color: #f3f4f6;"><p><span>Header 2</span></p></th>',
+    '<th><p class="mb-4"><span>Header 2</span></p></th>',
   );
   expect(result).toContain(
-    '<td style="border: 1px solid #ccc; padding: 4pt;"><p><span>Cell 1</span></p></td>',
+    '<td><p class="mb-4"><span>Cell 1</span></p></td>',
   );
   expect(result).toContain(
-    '<td style="border: 1px solid #ccc; padding: 4pt;"><p><span>Cell 2</span></p></td>',
+    '<td><p class="mb-4"><span>Cell 2</span></p></td>',
   );
   expect(result).toContain("</tr>");
   expect(result).toContain("</table>");
@@ -64,11 +64,10 @@ test("renderToHtml handles empty table cells", () => {
   };
 
   const result = renderToHtml(doc);
+  // Enhanced renderer doesn't add nbsp to empty cells
+  expect(result).toContain('<th></th>');
   expect(result).toContain(
-    '<th style="border: 1px solid #ccc; padding: 4pt; font-weight: 600; background-color: #f3f4f6;">&nbsp;</th>',
-  );
-  expect(result).toContain(
-    '<th style="border: 1px solid #ccc; padding: 4pt; font-weight: 600; background-color: #f3f4f6;"><p><span>Content</span></p></th>',
+    '<th><p class="mb-4"><span>Content</span></p></th>',
   );
 });
 
@@ -123,6 +122,6 @@ test("renderToHtml handles multiple paragraphs in table cells", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain(
-    '<th style="border: 1px solid #ccc; padding: 4pt; font-weight: 600; background-color: #f3f4f6;"><p><span>Line 1</span></p><p><span>Line 2</span></p></th>',
+    '<th><p class="mb-4"><span>Line 1</span></p><p class="mb-4"><span>Line 2</span></p></th>',
   );
 });

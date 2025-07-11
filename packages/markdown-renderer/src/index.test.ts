@@ -514,3 +514,165 @@ test("renderToMarkdown handles unknown element types gracefully", () => {
   const result = renderToMarkdown(doc);
   expect(result).toBe("Known\n\nAfter");
 });
+
+test("renderToMarkdown handles footnote references", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "This is some text" },
+          { text: "1", _footnoteRef: "footnote1" } as any,
+          { text: " with a footnote reference." },
+        ],
+      },
+    ],
+  };
+
+  const result = renderToMarkdown(doc);
+  expect(result).toBe("This is some text[^footnote1] with a footnote reference.");
+});
+
+test("renderToMarkdown handles footnote content", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [{ text: "Main text." }],
+      },
+      {
+        type: "footnote",
+        id: "footnote1",
+        elements: [
+          {
+            type: "paragraph",
+            runs: [{ text: "This is the footnote content." }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = renderToMarkdown(doc);
+  expect(result).toContain("Main text.");
+  expect(result).toContain("---");
+  expect(result).toContain("[^footnote1]: This is the footnote content.");
+});
+
+test("renderToMarkdown handles multiple footnotes", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "Text with first" },
+          { text: "1", _footnoteRef: "fn1" } as any,
+          { text: " and second" },
+          { text: "2", _footnoteRef: "fn2" } as any,
+          { text: " footnote." },
+        ],
+      },
+      {
+        type: "footnote",
+        id: "fn1",
+        elements: [
+          {
+            type: "paragraph",
+            runs: [{ text: "First footnote text." }],
+          },
+        ],
+      },
+      {
+        type: "footnote",
+        id: "fn2",
+        elements: [
+          {
+            type: "paragraph",
+            runs: [{ text: "Second footnote text." }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = renderToMarkdown(doc);
+  expect(result).toContain("Text with first[^fn1] and second[^fn2] footnote.");
+  expect(result).toContain("[^fn1]: First footnote text.");
+  expect(result).toContain("[^fn2]: Second footnote text.");
+});
+
+test("renderToMarkdown handles footnotes with complex content", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [
+          { text: "Text with complex footnote" },
+          { text: "1", _footnoteRef: "complex" } as any,
+        ],
+      },
+      {
+        type: "footnote",
+        id: "complex",
+        elements: [
+          {
+            type: "paragraph",
+            runs: [
+              { text: "Bold", bold: true },
+              { text: " and " },
+              { text: "italic", italic: true },
+              { text: " text." },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = renderToMarkdown(doc);
+  expect(result).toContain("Text with complex footnote[^complex]");
+  expect(result).toContain("[^complex]: **Bold** and *italic* text.");
+});
+
+test("renderToMarkdown handles footnotes section placement", () => {
+  const doc: ParsedDocument = {
+    metadata: {},
+    elements: [
+      {
+        type: "paragraph",
+        runs: [{ text: "First paragraph." }],
+      },
+      {
+        type: "paragraph",
+        runs: [{ text: "Second paragraph." }],
+      },
+      {
+        type: "footnote",
+        id: "fn1",
+        elements: [
+          {
+            type: "paragraph",
+            runs: [{ text: "Footnote at the end." }],
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = renderToMarkdown(doc);
+  const lines = result.split('\n');
+  
+  // Check that footnotes come after main content
+  expect(result).toContain("First paragraph.");
+  expect(result).toContain("Second paragraph.");
+  expect(result).toContain("---");
+  expect(result).toContain("[^fn1]: Footnote at the end.");
+  
+  // Check that footnotes are at the end
+  const footnoteSection = result.split("---")[1];
+  expect(footnoteSection).toContain("[^fn1]:");
+});

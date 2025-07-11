@@ -39,6 +39,11 @@ function safeBase64Encode(data: ArrayBuffer): string {
 }
 
 function renderTextRun(run: TextRun): string {
+  // Check if this is a footnote reference
+  if ((run as any)._footnoteRef) {
+    return `[^${(run as any)._footnoteRef}]`;
+  }
+
   let text = run.text;
 
   // Apply formatting
@@ -266,6 +271,13 @@ function renderElement(element: DocumentElement, context: RenderContext): string
       return `![${element.alt || "Image"}](data:image/placeholder;base64,)`;
     case "pageBreak":
       return "---";
+    case "footnote":
+      // Render footnote with proper markdown formatting
+      const footnoteContent = element.elements
+        ?.map((el) => renderElement(el, childContext))
+        .join("\n\n")
+        .trim();
+      return `[^${element.id}]: ${footnoteContent || ""}`;
     default:
       return "";
   }
@@ -293,6 +305,7 @@ export function renderToMarkdown(
   options: MarkdownRenderOptions = {},
 ): string {
   const lines: string[] = [];
+  const footnotes: string[] = [];
 
   // Initialize render context with safety limits
   const context: RenderContext = {
@@ -310,17 +323,25 @@ export function renderToMarkdown(
   // Render each element
   document.elements.forEach((element: DocumentElement) => {
     try {
-      const rendered = renderElement(element, context);
-      if (rendered) {
-        lines.push(rendered);
+      if (element.type === "footnote") {
+        // Collect footnotes to render at the end
+        const rendered = renderElement(element, context);
+        if (rendered) {
+          footnotes.push(rendered);
+        }
+      } else {
+        const rendered = renderElement(element, context);
+        if (rendered) {
+          lines.push(rendered);
 
-        // Add spacing after blocks
-        if (
-          element.type === "paragraph" ||
-          element.type === "heading" ||
-          element.type === "table"
-        ) {
-          lines.push("");
+          // Add spacing after blocks
+          if (
+            element.type === "paragraph" ||
+            element.type === "heading" ||
+            element.type === "table"
+          ) {
+            lines.push("");
+          }
         }
       }
     } catch (error) {
@@ -328,6 +349,17 @@ export function renderToMarkdown(
       lines.push("[Error rendering element]");
     }
   });
+
+  // Add footnotes at the end if any exist
+  if (footnotes.length > 0) {
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+    footnotes.forEach((footnote) => {
+      lines.push(footnote);
+      lines.push("");
+    });
+  }
 
   // Remove trailing empty lines
   while (lines.length > 0 && lines[lines.length - 1] === "") {

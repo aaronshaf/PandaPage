@@ -25,6 +25,7 @@ import {
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";
 import { renderEnhancedTable } from "./table-utils";
+import { groupListItems, renderList } from "./list-renderer";
 
 export interface EnhancedDOMRenderOptions {
   document?: Document;
@@ -98,8 +99,11 @@ export class EnhancedDOMRenderer {
       }
     });
 
+    // Group consecutive list items into proper list structures
+    const elementsWithLists = groupListItems(parsedDoc.elements);
+
     // Render elements
-    parsedDoc.elements.forEach((element) => {
+    elementsWithLists.forEach((element) => {
       const rendered = this.renderElement(element);
       if (rendered) {
         container.appendChild(rendered);
@@ -189,6 +193,9 @@ export class EnhancedDOMRenderer {
           return div;
         }
         return null;
+
+      case "list" as any:
+        return renderList(element as any, this.doc, this.currentPageNumber, this.totalPages);
 
       default:
         return null;
