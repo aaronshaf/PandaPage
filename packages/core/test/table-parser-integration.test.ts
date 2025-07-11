@@ -23,6 +23,37 @@ describe("Table Parser Integration Tests", () => {
     test("should parse complete table structure", async () => {
       // Create a mock table element that simulates the DOM structure
       const mockTable = {
+        getElementsByTagName: (tagName: string) => {
+          if (tagName === "tr") {
+            // Return mock row elements for lowercase tr
+            return [
+              {
+                querySelectorAll: (cellSelector: string) => {
+                  if (cellSelector.includes("tc") || cellSelector.includes("w\\:tc")) {
+                    return [
+                      {
+                        querySelector: (propSelector: string) => null,
+                        querySelectorAll: (pSelector: string) => {
+                          if (pSelector.includes("p") || pSelector.includes("w\\:p")) {
+                            return [];
+                          }
+                          return [];
+                        },
+                      },
+                    ];
+                  }
+                  return [];
+                },
+                querySelector: (propSelector: string) => null,
+              },
+            ];
+          }
+          if (tagName === "W:TR") {
+            // Return empty for uppercase variant to avoid duplication
+            return [];
+          }
+          return [];
+        },
         querySelectorAll: (selector: string) => {
           if (selector.includes("tr") || selector.includes("w\\:tr")) {
             // Return mock row elements
@@ -65,9 +96,8 @@ describe("Table Parser Integration Tests", () => {
     test("should parse table indentation", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          const cleanSelector = selector.replace(/w\\:/g, "");
-
-          if (cleanSelector === "tblInd") {
+          // Handle compound selectors like "tblInd, w\:tblInd"
+          if (selector.includes("tblInd")) {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "1440";
@@ -87,9 +117,8 @@ describe("Table Parser Integration Tests", () => {
     test("should parse table indentation percentage", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          const cleanSelector = selector.replace(/w\\:/g, "");
-
-          if (cleanSelector === "tblInd") {
+          // Handle compound selectors like "tblInd, w\:tblInd"
+          if (selector.includes("tblInd")) {
             return {
               getAttribute: (attr: string) => {
                 if (attr === "w") return "20";
@@ -118,18 +147,19 @@ describe("Table Parser Integration Tests", () => {
 
       const mockTblPr = {
         querySelector: (selector: string) => {
-          const cleanSelector = selector.replace(/w\\:/g, "");
-
-          if (cleanSelector === "tblBorders") {
+          // Handle compound selectors like "tblBorders, w\:tblBorders"
+          if (selector.includes("tblBorders")) {
             return {
               querySelector: (borderSelector: string) => {
-                if (borderSelector === "top")
+                // Extract the side from selectors like "top, w\:top"
+                const side = borderSelector.split(",")[0]?.trim() ?? "";
+                if (side === "top")
                   return mockBorderElement("top", "single", "4", "000000");
-                if (borderSelector === "right")
+                if (side === "right")
                   return mockBorderElement("right", "dashed", "8", "FF0000");
-                if (borderSelector === "bottom")
+                if (side === "bottom")
                   return mockBorderElement("bottom", "dotted", "16", "00FF00");
-                if (borderSelector === "left")
+                if (side === "left")
                   return mockBorderElement("left", "double", "24", "0000FF");
                 return null;
               },
@@ -151,10 +181,12 @@ describe("Table Parser Integration Tests", () => {
     test("should handle borders with auto color", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          if (selector === "tblBorders") {
+          if (selector.includes("tblBorders")) {
             return {
               querySelector: (borderSelector: string) => {
-                if (borderSelector === "top") {
+                // Extract the side from selectors like "top, w\:top"
+                const side = borderSelector.split(",")[0]?.trim() ?? "";
+                if (side === "top") {
                   return {
                     getAttribute: (attr: string) => {
                       if (attr === "val") return "single";
@@ -179,10 +211,12 @@ describe("Table Parser Integration Tests", () => {
     test("should handle borders without size", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          if (selector === "tblBorders") {
+          if (selector.includes("tblBorders")) {
             return {
               querySelector: (borderSelector: string) => {
-                if (borderSelector === "top") {
+                // Extract the side from selectors like "top, w\:top"
+                const side = borderSelector.split(",")[0]?.trim() ?? "";
+                if (side === "top") {
                   return {
                     getAttribute: (attr: string) => {
                       if (attr === "val") return "single";
@@ -206,10 +240,12 @@ describe("Table Parser Integration Tests", () => {
     test("should ignore none borders", async () => {
       const mockTblPr = {
         querySelector: (selector: string) => {
-          if (selector === "tblBorders") {
+          if (selector.includes("tblBorders")) {
             return {
               querySelector: (borderSelector: string) => {
-                if (borderSelector === "top") {
+                // Extract the side from selectors like "top, w\:top"
+                const side = borderSelector.split(",")[0]?.trim() ?? "";
+                if (side === "top") {
                   return {
                     getAttribute: (attr: string) => {
                       if (attr === "val") return "none";
@@ -217,7 +253,7 @@ describe("Table Parser Integration Tests", () => {
                     },
                   };
                 }
-                if (borderSelector === "right") {
+                if (side === "right") {
                   return {
                     getAttribute: (attr: string) => {
                       if (attr === "val") return "single";
@@ -245,10 +281,12 @@ describe("Table Parser Integration Tests", () => {
     test("should parse cell borders", async () => {
       const mockTcPr = {
         querySelector: (selector: string) => {
-          if (selector === "tcBorders") {
+          if (selector.includes("tcBorders")) {
             return {
               querySelector: (borderSelector: string) => {
-                if (borderSelector === "top" || borderSelector === "bottom") {
+                // Extract the side from selectors like "top, w\:top"
+                const side = borderSelector.split(",")[0]?.trim() ?? "";
+                if (side === "top" || side === "bottom") {
                   return {
                     getAttribute: (attr: string) => {
                       if (attr === "val") return "single";
@@ -291,7 +329,7 @@ describe("Table Parser Integration Tests", () => {
           if (selector.includes("trPr")) {
             return {
               querySelector: (heightSelector: string) => {
-                if (heightSelector === "trHeight") {
+                if (heightSelector.includes("trHeight")) {
                   return {
                     getAttribute: (attr: string) => (attr === "val" ? "500" : null),
                   };
@@ -375,7 +413,7 @@ describe("Table Parser Integration Tests", () => {
           if (selector.includes("tcPr")) {
             return {
               querySelector: (propSelector: string) => {
-                if (propSelector === "tcW") {
+                if (propSelector.includes("tcW")) {
                   return {
                     getAttribute: (attr: string) => {
                       if (attr === "w") return "2500";

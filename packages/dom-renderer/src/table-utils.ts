@@ -1,4 +1,4 @@
-import type { Table, TableRow, TableCell } from "@browser-document-viewer/parser";
+import type { Table } from "@browser-document-viewer/parser";
 
 export function renderEnhancedTable(
   table: Table,

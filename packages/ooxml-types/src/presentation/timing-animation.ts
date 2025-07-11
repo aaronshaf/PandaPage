@@ -11,7 +11,6 @@ import type {
   CT_AnimationGraphicalObjectBuildProperties,
   ST_Angle,
   CT_Color,
-  CT_Point2D,
 } from "../dml-main";
 import type { CT_Empty } from "./common";
 import type { CT_ExtensionListModify } from "./transitions";

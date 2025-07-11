@@ -3,16 +3,11 @@
  * @see ECMA-376 Part 1, §17.6 (Sections)
  */
 
-import type { ST_OnOff, ST_String } from "../shared/common-types";
+import type { ST_OnOff } from "../shared/common-types";
 import type { ST_DecimalNumber } from "../shared/measurement-types";
 import type { ST_RelationshipId } from "../shared/relationship-types";
 import type { ST_TwipsMeasure } from "../shared/measurement-types";
-import type {
-  ST_SignedTwipsMeasure,
-  CT_DecimalNumber,
-  CT_OnOff,
-  ST_LongHexNumber,
-} from "./basic-types";
+import type { ST_SignedTwipsMeasure, ST_LongHexNumber } from "./basic-types";
 import type { CT_Border } from "./border-shading-types";
 
 /**

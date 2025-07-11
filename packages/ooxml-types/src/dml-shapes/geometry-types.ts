@@ -9,7 +9,6 @@ import type {
   ST_PositiveCoordinate,
   CT_AdjPoint2D,
 } from "./coordinate-types";
-import type { CT_OfficeArtExtensionList } from "../dml-media";
 
 // Shape type enum
 export enum ST_ShapeType {

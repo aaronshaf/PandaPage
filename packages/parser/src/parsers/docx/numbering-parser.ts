@@ -113,7 +113,7 @@ export const parseNumberingXml = (
         const styleNameToFind = format.styleLink || format.numStyleLink;
 
         // Find the abstract format that has this style name
-        for (const [refAbstractNumId, refFormat] of abstractFormatsTemp) {
+        for (const [, refFormat] of abstractFormatsTemp) {
           if (refFormat.styleLink === styleNameToFind && refFormat.levels.size > 0) {
             // Copy the levels from the referenced format
             format.levels = new Map(refFormat.levels);

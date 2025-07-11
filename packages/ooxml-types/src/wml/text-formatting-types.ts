@@ -3,16 +3,9 @@
  * @see ECMA-376 Part 1, §17.18 (Text Formatting)
  */
 
-import type { ST_OnOff, ST_String, ST_HexColorRGB } from "../shared/common-types";
-import type { ST_UniversalMeasure } from "../shared/measurement-types";
+import type { ST_HexColorRGB } from "../shared/common-types";
 import type { ST_TwipsMeasure } from "../shared/measurement-types";
-import type {
-  ST_UcharHexNumber,
-  ST_HpsMeasure,
-  CT_HpsMeasure,
-  CT_SignedTwipsMeasure,
-} from "./basic-types";
-import type { ST_TextAlignment, CT_TextAlignment } from "./paragraph-types";
+import type { ST_UcharHexNumber, CT_HpsMeasure } from "./basic-types";
 
 /**
  * Highlight colors.

@@ -2,25 +2,14 @@
 import type {
   ParsedDocument,
   DocumentElement,
-  Paragraph,
-  Heading,
-  Table,
-  TableRow,
-  TableCell,
-  TextRun,
   Image,
   Footnote,
   FootnoteReference,
-  Header,
-  Footer,
-  Bookmark,
-  PageBreak,
 } from "@browser-document-viewer/parser";
 import { createLazyImage } from "./image-utils";
 import {
   createFootnoteReference,
   createFootnoteSection,
-  getFootnoteDisplayNumber,
 } from "./footnote-utils";
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";

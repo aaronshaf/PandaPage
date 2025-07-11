@@ -41,7 +41,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   showOutline,
   setShowOutline,
   extractHeadings,
-  extractContent,
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);

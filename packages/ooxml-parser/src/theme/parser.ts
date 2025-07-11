@@ -1,6 +1,30 @@
 import { Effect } from "effect";
-import { DocxParseError } from "./types";
-import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from "./xml-utils";
+
+// Define DocxParseError locally for now
+export class DocxParseError {
+  readonly _tag = "DocxParseError";
+  constructor(public readonly message: string) {}
+}
+
+// Helper functions for namespace-aware element access
+function getElementByTagNameNSFallback(element: Element, ns: string, localName: string): Element | null {
+  // Try with namespace first
+  const elements = element.getElementsByTagNameNS(ns, localName);
+  if (elements.length > 0) return elements[0] as Element;
+  
+  // Fallback to local name
+  const fallbackElements = element.getElementsByTagName(localName);
+  return fallbackElements.length > 0 ? fallbackElements[0] as Element : null;
+}
+
+function getElementsByTagNameNSFallback(element: Element, ns: string, localName: string): Element[] {
+  // Try with namespace first
+  let elements = Array.from(element.getElementsByTagNameNS(ns, localName));
+  if (elements.length > 0) return elements as Element[];
+  
+  // Fallback to local name
+  return Array.from(element.getElementsByTagName(localName)) as Element[];
+}
 
 // DrawingML namespace for themes
 export const DRAWINGML_NAMESPACE = "http://schemas.openxmlformats.org/drawingml/2006/main";

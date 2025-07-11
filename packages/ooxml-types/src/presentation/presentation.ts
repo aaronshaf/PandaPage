@@ -1,6 +1,6 @@
 // presentation.ts - Main presentation types
 import type { ST_Percentage, ST_RelationshipId, ST_ConformanceClass } from "../shared-types";
-import type { CT_PositiveSize2D, CT_TextListStyle, CT_TextFont, CT_Color } from "../dml-main";
+import type { CT_PositiveSize2D, CT_TextListStyle, CT_Color } from "../dml-main";
 import type { CT_Empty } from "./common";
 import type {
   CT_SlideIdList,

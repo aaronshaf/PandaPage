@@ -3,18 +3,11 @@
  * @see ECMA-376 Part 1, §17.3 (Paragraphs)
  */
 
-import type { ST_OnOff, ST_String } from "../shared/common-types";
+import type { ST_OnOff } from "../shared/common-types";
 import type { ST_DecimalNumber } from "../shared/measurement-types";
 import type { ST_TwipsMeasure } from "../shared/measurement-types";
-import type { ST_HexColor, ST_ThemeColor } from "./text-formatting-types";
 import type { CT_Border, CT_Shd } from "./border-shading-types";
-import type {
-  ST_SignedTwipsMeasure,
-  CT_DecimalNumber,
-  ST_UcharHexNumber,
-  CT_TwipsMeasure,
-  CT_OnOff,
-} from "./basic-types";
+import type { ST_SignedTwipsMeasure, CT_DecimalNumber, CT_OnOff } from "./basic-types";
 
 /**
  * Paragraph justification/alignment.

@@ -47,7 +47,9 @@ export interface ParsedFieldCode {
 
 /**
  * Field code switch definitions
+ * @internal Documentation of valid switches for each field type
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FIELD_SWITCHES: Record<string, string[]> = {
   REF: [
     "\\f", // Include footnote mark

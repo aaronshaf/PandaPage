@@ -1,13 +1,6 @@
 // slides.ts - Slide-related types for presentations
 import type { ST_RelationshipId } from "../shared-types";
-import type {
-  CT_ColorMapping,
-  CT_ColorMappingOverride,
-  CT_TextListStyle,
-  CT_PositiveSize2D,
-  ST_BlackWhiteMode,
-} from "../dml-main";
-import type { CT_Empty } from "./common";
+import type { CT_ColorMapping, CT_ColorMappingOverride, CT_TextListStyle } from "../dml-main";
 import type { CT_ExtensionListModify, CT_SlideTransition } from "./transitions";
 import type { CT_SlideTiming } from "./timing-animation";
 import type { CT_CommonSlideData } from "./common";

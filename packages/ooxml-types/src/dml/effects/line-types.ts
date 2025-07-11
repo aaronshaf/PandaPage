@@ -7,7 +7,6 @@ import type { ST_Coordinate32 } from "../core/coordinate-types";
 import type { ST_Percentage } from "../../shared/measurement-types";
 import type { CT_OfficeArtExtensionList } from "../core/extension-types";
 import type {
-  CT_FillProperties,
   CT_SolidColorFillProperties,
   CT_GradientFillProperties,
   CT_PatternFillProperties,

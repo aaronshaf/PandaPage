@@ -20,7 +20,7 @@ import type {
   CT_RelativeRect,
 } from "./dml-shapes";
 
-import type { ST_BlackWhiteMode, EG_ColorChoice, CT_Color, CT_ColorScheme } from "./dml-colors";
+import type { EG_ColorChoice, CT_Color, CT_ColorScheme } from "./dml-colors";
 
 import type { CT_OfficeArtExtensionList } from "./dml-media";
 

@@ -1,6 +1,5 @@
 // Bookmark parsing functions
 import type { Bookmark } from "../../types/document";
-import { WORD_NAMESPACE } from "./types";
 
 /**
  * Parse bookmarks from an element

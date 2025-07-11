@@ -300,7 +300,6 @@ function detectHeading(
   // Additional filters to reduce false positives
   const hasQuotes = text.includes('"') || text.includes('"') || text.includes('"');
   const hasCommas = text.includes(",");
-  const hasColons = text.includes(":");
   const hasNumbers = /\d/.test(text);
   const hasParentheses = text.includes("(") || text.includes(")");
   const looksLikeCitation = hasQuotes && hasCommas && (hasNumbers || hasParentheses);

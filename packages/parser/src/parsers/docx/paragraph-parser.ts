@@ -13,7 +13,6 @@ import {
   parseHyperlink,
   parseStructuredDocumentTag,
   parseRun,
-  type FieldParsingState,
 } from "./run-parser";
 import { parseParagraphBorders, parseShading } from "./border-parser";
 

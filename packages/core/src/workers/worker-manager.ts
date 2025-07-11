@@ -7,7 +7,7 @@ import { createTransferableTask, shouldUseWorker } from "./worker-pool";
 export type ProgressCallback = (progress: number) => void;
 
 // Parse options with worker support
-export interface ParseOptions {
+export interface WorkerParseOptions {
   useWorker?: boolean;
   streaming?: boolean;
   onProgress?: ProgressCallback;
@@ -17,7 +17,7 @@ export interface ParseOptions {
 // Validate and apply defaults to parse options
 export const validateParseOptions = (
   options: unknown,
-): Effect.Effect<ParseOptions, WorkerParseError> =>
+): Effect.Effect<WorkerParseOptions, WorkerParseError> =>
   Effect.try({
     try: () => {
       // Simplified validation without schema for now
@@ -65,7 +65,7 @@ const createWorker = (type: WorkerTask["type"]): Worker => {
 export const parseDocumentInWorker = <T>(
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: ParseOptions,
+  options?: WorkerParseOptions,
 ): Effect.Effect<T, WorkerParseError> =>
   Effect.tryPromise({
     try: () =>
@@ -139,7 +139,7 @@ export const parseDocumentInWorker = <T>(
 export const parseDocumentSmart = <T>(
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: ParseOptions,
+  options?: WorkerParseOptions,
 ): Effect.Effect<T, WorkerParseError | Error> => {
   const useWorker = options?.useWorker ?? shouldUseWorker(buffer.byteLength);
 
@@ -157,7 +157,7 @@ export const parseDocumentSmart = <T>(
 export const streamDocumentParse = (
   type: WorkerTask["type"],
   buffer: ArrayBuffer,
-  options?: Omit<ParseOptions, "streaming">,
+  options?: Omit<WorkerParseOptions, "streaming">,
 ): Stream.Stream<string, WorkerParseError> =>
   Stream.async<string, WorkerParseError>((emit) => {
     const worker = createWorker(type);

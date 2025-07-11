@@ -10,8 +10,6 @@ test("should determine current page based on element positions", () => {
         { getBoundingClientRect: () => ({ top: 240, bottom: 340, height: 100 }) },
       ];
 
-      const mockContainer = { getBoundingClientRect: () => ({ top: 0, height: 200 }) };
-      const containerMiddle = 100; // top (0) + height (200) / 2
 
       // This simulates the page detection logic from DocumentViewer
       const getCurrentPage = (pages: any[], containerMiddle: number) => {

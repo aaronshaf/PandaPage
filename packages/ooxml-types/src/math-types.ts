@@ -1,5 +1,5 @@
 // math-types.ts
-import type { ST_OnOff, ST_String, ST_TwipsMeasure, ST_XAlign, ST_YAlign } from "./shared-types";
+import type { ST_TwipsMeasure, ST_XAlign, ST_YAlign } from "./shared-types";
 import type { CT_OnOff, CT_String } from "./wml/basic-types";
 
 // Re-export common types for backward compatibility

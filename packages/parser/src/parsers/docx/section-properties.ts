@@ -1,6 +1,6 @@
 // Section properties parsing for headers and footers
 import type { Header, Footer, HeaderFooterInfo } from "../../types/document";
-import { WORD_NAMESPACE, RELS_NAMESPACE } from "./types";
+import { WORD_NAMESPACE } from "./types";
 
 /**
  * Parse section properties to determine header/footer assignments

@@ -5,7 +5,6 @@
 
 import type { ST_Guid, ST_String } from "../../shared/common-types";
 import type { ST_Percentage, ST_PositivePercentage } from "../../shared/measurement-types";
-import type { CT_OfficeArtExtensionList } from "../core/extension-types";
 
 /**
  * Effect style item.

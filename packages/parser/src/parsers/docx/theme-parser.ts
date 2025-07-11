@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 import { DocxParseError } from "./types";
-import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from "./xml-utils";
+import { getElementByTagNameNSFallback } from "./xml-utils";
 
 // DrawingML namespace for themes
 export const DRAWINGML_NAMESPACE = "http://schemas.openxmlformats.org/drawingml/2006/main";
