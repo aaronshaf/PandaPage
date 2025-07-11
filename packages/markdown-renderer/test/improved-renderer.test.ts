@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, mkdtempSync } from "fs";
 import { join } from "path";
+import { tmpdir } from "os";
 import { parseDocxDocument } from "../../core/src/wrappers";
 import { renderToMarkdownImproved } from "../src/improved-renderer";
 import { renderToMarkdown } from "../src/index";
@@ -52,10 +53,12 @@ describe("Improved Markdown Renderer", () => {
     // Both renderers should handle images
     expect(improvedImages.length).toBeGreaterThan(0);
 
-    // Save outputs for comparison
-    writeFileSync(join(__dirname, "../../../005-improved.md"), improvedOutput);
+    // Save outputs for comparison in temp directory
+    const tempDir = mkdtempSync(join(tmpdir(), "markdown-renderer-test-"));
+    const outputPath = join(tempDir, "005-improved.md");
+    writeFileSync(outputPath, improvedOutput);
 
-    console.log("\nImproved rendering complete. Check 005-improved.md for results.");
+    console.log(`\nImproved rendering complete. Check ${outputPath} for results.`);
   });
 
   it("should skip empty paragraphs when option is enabled", () => {

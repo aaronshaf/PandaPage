@@ -217,8 +217,12 @@ describe("EnhancedDOMRenderer", () => {
     expect(html).toContain("text-color");
     expect(html.length).toBeGreaterThan(10000); // Should be substantial
 
-    // Save output for inspection
-    const { writeFileSync } = await import("fs");
-    writeFileSync(join(__dirname, "../../../005-enhanced-dom.html"), html);
+    // Save output for inspection in temp directory
+    const { writeFileSync, mkdtempSync } = await import("fs");
+    const { tmpdir } = await import("os");
+    const tempDir = mkdtempSync(join(tmpdir(), "dom-renderer-test-"));
+    const outputPath = join(tempDir, "005-enhanced-dom.html");
+    writeFileSync(outputPath, html);
+    console.log(`Test output saved to: ${outputPath}`);
   });
 });
