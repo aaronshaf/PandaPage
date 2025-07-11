@@ -19,10 +19,20 @@ export * from "./common/xml-parser";
 // Export document renderer
 export * from "./document-renderer";
 
-// Export DOCX types and utilities
-export * from "./formats/docx/types";
-export * from "./formats/docx/docx-reader";
-export * from "./formats/docx/docx-to-markdown";
+// Export DOCX types and utilities (avoiding duplicates from parser)
+export { 
+  type DocxReaderOptions,
+  type DocxMetadata,
+  type DocxStyleMap
+} from "./formats/docx/types";
+export { 
+  readDocx,
+  readEnhancedDocx
+} from "./formats/docx/docx-reader";
+export { 
+  docxToMarkdown,
+  docxToMarkdownWithMetadata
+} from "./formats/docx/docx-to-markdown";
 export * from "./formats/docx/docx-to-structured";
 export * from "./formats/docx/table-parser";
 export * from "./formats/docx/form-field-parser";
@@ -42,6 +52,13 @@ export * from "./formats/key/key-to-markdown";
 export * from "./formats/pages/pages-reader";
 export * from "./formats/pages/pages-to-markdown";
 
-// Export worker utilities
-export * from "./workers/worker-manager";
-export * from "./workers/worker-pool";
+// Export worker utilities (avoiding duplicates)
+export { 
+  type WorkerTask,
+  type WorkerResult,
+  createWorkerManager
+} from "./workers/worker-manager";
+export {
+  type WorkerPoolConfig,
+  createWorkerPool
+} from "./workers/worker-pool";
