@@ -37,6 +37,31 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
     tempDiv.innerHTML = htmlContent;
     const pageElements = tempDiv.querySelectorAll(".page");
 
+    // If no page elements found, treat the entire content as a single page
+    if (pageElements.length === 0) {
+      const singlePage = (
+        <article
+          key={0}
+          className="print-page"
+          data-testid="parsed-document-page-1"
+          data-page-number={1}
+          data-page-type="parsed-document"
+          data-content-type="dom-rendered"
+          data-total-pages={1}
+          id="page-1"
+          aria-label="Page 1 of 1"
+          role="document"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
+      );
+      
+      if (totalPages !== 1) {
+        setTimeout(() => setTotalPages(1), 0);
+      }
+      
+      return [singlePage];
+    }
+
     // Update total pages when pages change
     if (pageElements.length !== totalPages) {
       setTimeout(() => setTotalPages(pageElements.length), 0);
