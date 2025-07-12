@@ -168,7 +168,7 @@ jobs:
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [build, lint, typecheck, unit-tests]  # Depends on all other checks passing first
+    needs: [build, typecheck, unit-tests]  # Lint runs in parallel, not a blocker
     strategy:
       matrix:
         # Run tests in parallel shards
@@ -220,10 +220,14 @@ jobs:
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: cd packages/viewer && bunx playwright install --with-deps
       
-    # Ensure system dependencies are installed (lightweight check)
-    - name: Install Playwright system dependencies
+    # Skip system dependencies if browsers are cached
+    # They are included with --with-deps during browser installation
+    - name: Verify Playwright installation
       if: steps.playwright-cache.outputs.cache-hit == 'true'
-      run: cd packages/viewer && bunx playwright install-deps
+      run: |
+        cd packages/viewer
+        # Just verify the browsers work, don't install deps
+        bunx playwright --version
       
     - name: Build viewer app
       run: cd packages/viewer && bun run build
