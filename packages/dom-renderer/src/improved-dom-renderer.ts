@@ -14,7 +14,7 @@ import {
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";
 import { getHeadingStyles } from "./style-utils";
-import { renderEnhancedTable } from "./table-utils";
+import { renderEnhancedTable, renderComplexTable } from "./table-utils";
 import { groupListItems, renderList } from "./list-renderer";
 
 export interface EnhancedDOMRenderOptions {
@@ -144,7 +144,7 @@ export class EnhancedDOMRenderer {
         return h;
 
       case "table":
-        return renderEnhancedTable(element, this.doc, (para) =>
+        return renderComplexTable(element, this.doc, (para) =>
           renderEnhancedParagraph(
             para,
             this.doc,
