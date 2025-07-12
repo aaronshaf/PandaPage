@@ -44,3 +44,6 @@ tmp
 **/test-results/
 **/playwright-report/
 TODO.md
+
+# Vercel
+.vercel
