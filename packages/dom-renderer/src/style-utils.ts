@@ -66,9 +66,37 @@ export function getTextRunStyles(run: TextRun): string {
     styles.push("text-decoration-line: line-through", "text-decoration-style: double");
   }
   
-  // Font properties
+  // Font properties - build font stack for complex scripts
   if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
-  if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
+  
+  // Build font family stack prioritizing the most appropriate fonts
+  if (run.fontFamily || run.fontFamilyEastAsia || run.fontFamilyAscii || run.fontFamilyHAnsi || run.fontFamilyCs) {
+    const fontStack: string[] = [];
+    
+    // Add the selected primary font
+    if (run.fontFamily) {
+      fontStack.push(`"${run.fontFamily}"`);
+    }
+    
+    // Add fallbacks for different script types
+    if (run.fontFamilyEastAsia && run.fontFamilyEastAsia !== run.fontFamily) {
+      fontStack.push(`"${run.fontFamilyEastAsia}"`);
+    }
+    if (run.fontFamilyAscii && run.fontFamilyAscii !== run.fontFamily) {
+      fontStack.push(`"${run.fontFamilyAscii}"`);
+    }
+    if (run.fontFamilyHAnsi && run.fontFamilyHAnsi !== run.fontFamily) {
+      fontStack.push(`"${run.fontFamilyHAnsi}"`);
+    }
+    if (run.fontFamilyCs && run.fontFamilyCs !== run.fontFamily) {
+      fontStack.push(`"${run.fontFamilyCs}"`);
+    }
+    
+    // Add generic fallbacks
+    fontStack.push("sans-serif");
+    
+    styles.push(`font-family: ${fontStack.join(", ")}`);
+  }
   
   // Colors
   const color = formatColor(run.color);

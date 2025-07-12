@@ -29,6 +29,7 @@ export type FieldCodeType =
   | "NOTEREF"
   | "XE" // Index entry
   | "TC" // Table of contents entry
+  | "FORMULA" // Table formulas like =sum(above)
   | "UNKNOWN";
 
 /**
@@ -43,6 +44,7 @@ export interface ParsedFieldCode {
   sequenceName?: string;
   styleName?: string;
   hyperlink?: string;
+  formula?: string; // Formula expression for table calculations
 }
 
 /**
@@ -113,6 +115,17 @@ const FIELD_SWITCHES: Record<string, string[]> = {
  */
 export function parseFieldInstruction(instruction: string): ParsedFieldCode {
   const trimmed = instruction.trim();
+
+  // Check if this is a formula (starts with =)
+  if (trimmed.startsWith("=")) {
+    return {
+      type: "FORMULA",
+      instruction: trimmed,
+      switches: new Map(),
+      arguments: [],
+      formula: trimmed,
+    };
+  }
 
   // Extract field type (first word)
   const parts = trimmed.split(/\s+/);
@@ -253,6 +266,7 @@ function isKnownFieldType(fieldType: string): boolean {
     "NOTEREF",
     "XE",
     "TC",
+    "FORMULA",
   ];
   return knownTypes.includes(fieldType);
 }
@@ -340,9 +354,97 @@ export function createFieldPlaceholder(
     case "FILENAME":
       return "[Filename]";
 
+    case "FORMULA":
+      return evaluateFormula(fieldCode.formula || "", context);
+
     default:
       return `{${fieldCode.type}}`;
   }
+}
+
+/**
+ * Evaluate a table formula expression
+ * @param formula - The formula expression (e.g., "=sum(above)")
+ * @param context - Context for evaluation
+ * @returns Calculated result as string
+ */
+function evaluateFormula(
+  formula: string,
+  context?: {
+    bookmarks?: Map<string, string>;
+    sequences?: Map<string, number>;
+    metadata?: any;
+    currentDate?: Date;
+    tableValues?: number[]; // Values from table cells for calculation
+  },
+): string {
+  // Simple formula evaluation for common table formulas
+  const cleanFormula = formula.toLowerCase().replace(/\s+/g, "");
+
+  // Handle =sum(above) - sum all values above current cell
+  if (cleanFormula.includes("sum(above)")) {
+    if (context?.tableValues && context.tableValues.length > 0) {
+      const sum = context.tableValues.reduce((total, value) => total + value, 0);
+      return sum.toString();
+    }
+    return "0"; // Default if no values
+  }
+
+  // Handle =sum(left) - sum all values to the left of current cell
+  if (cleanFormula.includes("sum(left)")) {
+    if (context?.tableValues && context.tableValues.length > 0) {
+      const sum = context.tableValues.reduce((total, value) => total + value, 0);
+      return sum.toString();
+    }
+    return "0";
+  }
+
+  // Handle =sum(below) - sum all values below current cell
+  if (cleanFormula.includes("sum(below)")) {
+    if (context?.tableValues && context.tableValues.length > 0) {
+      const sum = context.tableValues.reduce((total, value) => total + value, 0);
+      return sum.toString();
+    }
+    return "0";
+  }
+
+  // Handle =sum(right) - sum all values to the right of current cell
+  if (cleanFormula.includes("sum(right)")) {
+    if (context?.tableValues && context.tableValues.length > 0) {
+      const sum = context.tableValues.reduce((total, value) => total + value, 0);
+      return sum.toString();
+    }
+    return "0";
+  }
+
+  // Handle =average(above), =count(above), etc.
+  if (cleanFormula.includes("average(above)")) {
+    if (context?.tableValues && context.tableValues.length > 0) {
+      const sum = context.tableValues.reduce((total, value) => total + value, 0);
+      const average = sum / context.tableValues.length;
+      return average.toFixed(2);
+    }
+    return "0";
+  }
+
+  if (cleanFormula.includes("count(above)")) {
+    return (context?.tableValues?.length || 0).toString();
+  }
+
+  // Simple arithmetic expressions like =A1+B1 (not implemented - would need cell references)
+  if (cleanFormula.match(/^=\d+[\+\-\*\/]\d+$/)) {
+    try {
+      // Basic arithmetic evaluation (be careful with eval!)
+      const expression = cleanFormula.substring(1); // Remove =
+      const result = Function(`"use strict"; return (${expression})`)();
+      return result.toString();
+    } catch {
+      return formula; // Return original if evaluation fails
+    }
+  }
+
+  // Default: return the formula as-is if we can't evaluate it
+  return formula;
 }
 
 /**

@@ -273,6 +273,10 @@ export function parseRun(
   let fontSize: string | undefined;
   let fontSizeCs: string | undefined;
   let fontFamily: string | undefined;
+  let fontFamilyAscii: string | undefined;
+  let fontFamilyEastAsia: string | undefined;
+  let fontFamilyHAnsi: string | undefined;
+  let fontFamilyCs: string | undefined;
   let color: string | undefined;
   let backgroundColor: string | undefined;
 
@@ -326,17 +330,40 @@ export function parseRun(
     const szCsElement = getElementByTagNameNSFallback(runProps, ns, "szCs");
     fontSizeCs = szCsElement?.getAttribute("w:val") || undefined;
 
-    // Font family
+    // Font family - handle multiple font attributes for complex scripts
     const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
-    const fontAscii = fontElement?.getAttribute("w:ascii");
-    if (fontAscii) {
-      // Check if it's a theme font reference (starts with +)
-      if (fontAscii.startsWith("+") && theme) {
-        const resolvedFont = resolveThemeFont(fontAscii, theme);
-        fontFamily = resolvedFont || fontAscii;
-      } else {
-        fontFamily = fontAscii;
+    if (fontElement) {
+      // Store all font variants
+      const fontAscii = fontElement.getAttribute("w:ascii");
+      const fontEastAsia = fontElement.getAttribute("w:eastAsia");
+      const fontHAnsi = fontElement.getAttribute("w:hAnsi");
+      const fontCs = fontElement.getAttribute("w:cs");
+
+      // Resolve theme fonts if needed
+      if (fontAscii) {
+        fontFamilyAscii = fontAscii.startsWith("+") && theme 
+          ? resolveThemeFont(fontAscii, theme) || fontAscii
+          : fontAscii;
       }
+      if (fontEastAsia) {
+        fontFamilyEastAsia = fontEastAsia.startsWith("+") && theme 
+          ? resolveThemeFont(fontEastAsia, theme) || fontEastAsia
+          : fontEastAsia;
+      }
+      if (fontHAnsi) {
+        fontFamilyHAnsi = fontHAnsi.startsWith("+") && theme 
+          ? resolveThemeFont(fontHAnsi, theme) || fontHAnsi
+          : fontHAnsi;
+      }
+      if (fontCs) {
+        fontFamilyCs = fontCs.startsWith("+") && theme 
+          ? resolveThemeFont(fontCs, theme) || fontCs
+          : fontCs;
+      }
+
+      // Select the most appropriate font based on content
+      // For now, prioritize eastAsia for better CJK support, then ascii
+      fontFamily = fontFamilyEastAsia || fontFamilyAscii || fontFamilyHAnsi || fontFamilyCs;
     }
 
     // Color
@@ -476,6 +503,10 @@ export function parseRun(
       fontSize,
       fontSizeCs,
       fontFamily,
+      fontFamilyAscii,
+      fontFamilyEastAsia,
+      fontFamilyHAnsi,
+      fontFamilyCs,
       color,
       backgroundColor,
       characterSpacing,
@@ -514,6 +545,10 @@ export function parseRun(
       fontSize: resolvedRunProps.fontSize,
       fontSizeCs: resolvedRunProps.fontSizeCs,
       fontFamily: resolvedRunProps.fontFamily,
+      fontFamilyAscii: resolvedRunProps.fontFamilyAscii,
+      fontFamilyEastAsia: resolvedRunProps.fontFamilyEastAsia,
+      fontFamilyHAnsi: resolvedRunProps.fontFamilyHAnsi,
+      fontFamilyCs: resolvedRunProps.fontFamilyCs,
       color: resolvedRunProps.color,
       backgroundColor: resolvedRunProps.backgroundColor,
       link: linkUrl,
@@ -545,6 +580,10 @@ export function parseRun(
     fontSize,
     fontSizeCs,
     fontFamily,
+    fontFamilyAscii,
+    fontFamilyEastAsia,
+    fontFamilyHAnsi,
+    fontFamilyCs,
     color,
     backgroundColor,
     link: linkUrl,
