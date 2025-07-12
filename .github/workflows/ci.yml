@@ -199,14 +199,31 @@ jobs:
     # Cache Playwright browsers
     - name: Cache Playwright browsers
       uses: actions/cache@v4
+      id: playwright-cache
       with:
         path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-        key: ${{ runner.os }}-playwright-${{ hashFiles('packages/viewer/package.json') }}
+        key: ${{ runner.os }}-playwright-${{ hashFiles('packages/viewer/package.json', 'packages/viewer/playwright.config.ts') }}-${{ hashFiles('**/bun.lockb') }}
         restore-keys: |
+          ${{ runner.os }}-playwright-${{ hashFiles('packages/viewer/package.json', 'packages/viewer/playwright.config.ts') }}-
           ${{ runner.os }}-playwright-
       
+    # Get Playwright version for conditional installation
+    - name: Get Playwright version
+      id: playwright-version
+      run: |
+        cd packages/viewer
+        PLAYWRIGHT_VERSION=$(bunx playwright --version | awk '{print $2}')
+        echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+      
+    # Only install if cache miss or version mismatch
     - name: Install Playwright browsers
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: cd packages/viewer && bunx playwright install --with-deps
+      
+    # Ensure system dependencies are installed (lightweight check)
+    - name: Install Playwright system dependencies
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      run: cd packages/viewer && bunx playwright install-deps
       
     - name: Build viewer app
       run: cd packages/viewer && bun run build
