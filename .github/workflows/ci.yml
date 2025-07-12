@@ -83,7 +83,7 @@ jobs:
       run: bun install --frozen-lockfile
       
     - name: Run Biome lint (check only)
-      run: biome lint . --diagnostic-level=error
+      run: bunx biome lint . --diagnostic-level=error
       
     - name: Check file sizes
       run: bun run check-file-sizes
