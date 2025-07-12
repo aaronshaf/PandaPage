@@ -27,7 +27,7 @@ test("renderToHtml handles tables", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<table class="table-fancy">');
+  expect(result).toContain('<table');
   expect(result).toContain("<tr>");
   expect(result).toContain(
     '<th><p style="margin-bottom: 12px;"><span>Header 1</span></p></th>',

@@ -1,6 +1,6 @@
 import type { Table } from "@browser-document-viewer/parser";
 import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
-import { renderEnhancedTable as renderEnhancedTableWithVisualFidelity } from "./enhanced-table-utils";
+import { renderEnhancedTableDOM } from "./enhanced-table-dom-utils";
 
 /**
  * Render table with enhanced visual fidelity for complex OOXML features
@@ -13,31 +13,7 @@ export function renderComplexTable(
 ): HTMLElement {
   // Check if table has complex formatting that requires enhanced rendering
   if (table.borders || table.shading || hasComplexCellFormatting(table)) {
-    // Create a temporary container to hold the HTML string result
-    const tempDiv = doc.createElement('div');
-    tempDiv.innerHTML = renderEnhancedTableWithVisualFidelity(table);
-    const enhancedTable = tempDiv.querySelector('table');
-    
-    if (enhancedTable) {
-      // Replace simplified paragraph rendering with proper DOM-based rendering
-      const cells = enhancedTable.querySelectorAll('td, th');
-      cells.forEach((cell, index) => {
-        // Find corresponding cell in original table structure
-        const { rowIndex, cellIndex } = getCellIndices(index, table);
-        const originalCell = table.rows[rowIndex]?.cells[cellIndex];
-        
-        if (originalCell?.paragraphs) {
-          // Clear the cell and re-render with proper DOM
-          cell.innerHTML = '';
-          originalCell.paragraphs.forEach((para) => {
-            const p = renderParagraph(para);
-            cell.appendChild(p);
-          });
-        }
-      });
-      
-      return enhancedTable as HTMLElement;
-    }
+    return renderEnhancedTableDOM(table, doc, renderParagraph);
   }
   
   // Fallback to simple table rendering
@@ -52,7 +28,9 @@ export function renderEnhancedTable(
   // Always use the original DOM-based renderer for compatibility with existing tests and functionality
   // The enhanced table renderer can be used separately for documents with complex table formatting
   const tableEl = doc.createElement("table");
-  tableEl.className = "table-fancy";
+  // Apply basic table styles inline
+  tableEl.style.borderCollapse = "collapse";
+  tableEl.style.width = "100%";
 
   // Track merged cells to avoid rendering them multiple times
   const mergedCells = new Set<string>();
@@ -72,7 +50,6 @@ export function renderEnhancedTable(
       // Handle cell merging
       if (cell.rowspan && cell.rowspan > 1) {
         cellEl.rowSpan = cell.rowspan;
-        cellEl.classList.add("cell-merged");
 
         // Mark cells that are covered by this merged cell
         for (let i = 1; i < cell.rowspan; i++) {
@@ -82,7 +59,6 @@ export function renderEnhancedTable(
 
       if (cell.colspan && cell.colspan > 1) {
         cellEl.colSpan = cell.colspan;
-        cellEl.classList.add("cell-merged");
 
         // Mark cells that are covered by this merged cell
         for (let j = 1; j < cell.colspan; j++) {

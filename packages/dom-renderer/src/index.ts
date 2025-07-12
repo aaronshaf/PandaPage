@@ -6,6 +6,9 @@ export { DOMRenderer, type DOMRenderOptions } from "./dom-renderer";
 // Export the enhanced DOM renderer
 export { EnhancedDOMRenderer, type EnhancedDOMRenderOptions } from "./improved-dom-renderer";
 
+// Export table utilities
+export { renderEnhancedTableDOM, applyTableStyles, applyCellStyles } from "./enhanced-table-dom-utils";
+
 export interface HtmlRenderOptions {
   includeStyles?: boolean;
   pageSize?: "letter" | "a4";

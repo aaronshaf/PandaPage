@@ -42,7 +42,7 @@ describe("Table Utils", () => {
       const result = renderEnhancedTable(table, document, mockRenderParagraph);
 
       expect(result.tagName).toBe("TABLE");
-      expect(result.className).toBe("table-fancy");
+      expect(result.tagName).toBe("TABLE");
       expect(result.children.length).toBe(2); // Two rows
 
       // Check header row
@@ -66,7 +66,7 @@ describe("Table Utils", () => {
       const result = renderEnhancedTable(table, document, mockRenderParagraph);
 
       expect(result.tagName).toBe("TABLE");
-      expect(result.className).toBe("table-fancy");
+      expect(result.tagName).toBe("TABLE");
       expect(result.children.length).toBe(0);
     });
 
@@ -112,7 +112,7 @@ describe("Table Utils", () => {
       const firstCell = firstRow.children[0] as HTMLTableCellElement;
 
       expect(firstCell.rowSpan).toBe(2);
-      expect(firstCell.classList.contains("cell-merged")).toBe(true);
+      // Verify cell has proper rowspan/colspan attributes instead of CSS classes
 
       // Second row should only have one cell (the merged cell is skipped)
       const secondRow = result.children[1] as HTMLTableRowElement;
@@ -147,7 +147,7 @@ describe("Table Utils", () => {
       const firstCell = firstRow.children[0] as HTMLTableCellElement;
 
       expect(firstCell.colSpan).toBe(2);
-      expect(firstCell.classList.contains("cell-merged")).toBe(true);
+      // Verify cell has proper rowspan/colspan attributes instead of CSS classes
 
       // First row should only have one cell (the second cell is merged)
       expect(firstRow.children.length).toBe(1);
@@ -184,7 +184,7 @@ describe("Table Utils", () => {
 
       expect(firstCell.rowSpan).toBe(2);
       expect(firstCell.colSpan).toBe(2);
-      expect(firstCell.classList.contains("cell-merged")).toBe(true);
+      // Verify cell has proper rowspan/colspan attributes instead of CSS classes
 
       // The merged cell spans 2 columns, so the second cell (index 1) is skipped
       // First row should have 1 cell rendered (the merged cell, second cell is skipped)
