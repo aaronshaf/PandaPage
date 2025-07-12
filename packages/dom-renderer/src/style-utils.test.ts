@@ -275,7 +275,7 @@ describe("Style Utils", () => {
       
       expect(result).toContain("margin-top: 16px"); // 240 twips
       expect(result).toContain("margin-bottom: 8px"); // 120 twips
-      expect(result).toContain("line-height: 0.75"); // 360/480 where 480 = 32px font * 15 factor
+      expect(result).toContain("line-height: 1.50"); // 360 twips auto = 360/240 = 1.5x
     });
 
     it("should apply exact line spacing", () => {
@@ -289,7 +289,7 @@ describe("Style Utils", () => {
         }
       };
       const result = getHeadingStyles(heading);
-      expect(result).toContain("line-height: 32px"); // 480 twips to pixels
+      expect(result).toContain("line-height: 24pt"); // 480 twips exact = 24pt
     });
 
     it("should apply minimum line spacing", () => {
@@ -303,7 +303,7 @@ describe("Style Utils", () => {
         }
       };
       const result = getHeadingStyles(heading);
-      expect(result).toContain("line-height: 1.2"); // Math.max(1.2, 16/32)
+      expect(result).toContain("line-height: 12pt"); // 240 twips atLeast = 12pt
     });
 
     it("should apply default margins when no spacing defined", () => {
@@ -352,7 +352,7 @@ describe("Style Utils", () => {
 
   describe("getParagraphStyles", () => {
     it("should apply default margin when no spacing defined", () => {
-      const paragraph: Paragraph = { type: "paragraph", runs: [] };
+      const paragraph: Paragraph = { type: "paragraph", runs: [{ text: "Hello" }] };
       const result = getParagraphStyles(paragraph);
       expect(result).toBe("margin-bottom: 12px");
     });
@@ -360,14 +360,14 @@ describe("Style Utils", () => {
     it("should handle line spacing calculations", () => {
       const paragraph: Paragraph = { 
         type: "paragraph", 
-        runs: [],
+        runs: [{ text: "Hello" }],
         spacing: {
           line: 480,
           lineRule: "auto"
         }
       };
       const result = getParagraphStyles(paragraph);
-      expect(result).toContain("line-height: 0.13333333333333333"); // twipsToPixels(480)/240 = 32/240
+      expect(result).toContain("line-height: 2.00"); // 480 twips auto = 480/240 = 2.0x
     });
 
     it("should handle list indentation", () => {
