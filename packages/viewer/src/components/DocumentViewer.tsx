@@ -43,6 +43,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   extractHeadings,
 }) => {
   const [totalPages, setTotalPages] = useState(0);
+  const [renderedPages, setRenderedPages] = useState<React.ReactElement[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showPageIndicator, setShowPageIndicator] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -120,6 +121,23 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
     return () => clearTimeout(timer);
   }, [showPrimaryNav]);
+
+  // Handle page rendering in print mode
+  useEffect(() => {
+    if (viewMode === "print" && result) {
+      const renderResult = renderPrintPages({
+        parsedDocument,
+        structuredDocument,
+        result,
+        viewMode,
+        removeFrontmatter,
+        splitIntoPages,
+      });
+      
+      setRenderedPages(renderResult.pages);
+      setTotalPages(renderResult.totalPages);
+    }
+  }, [viewMode, result, parsedDocument, structuredDocument, removeFrontmatter, splitIntoPages]);
 
   if (!result) {
     return loading && showSpinner ? (
@@ -261,16 +279,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               } as React.CSSProperties & { "--print-scale": number }
             }
           >
-            {renderPrintPages({
-              parsedDocument,
-              structuredDocument,
-              result,
-              viewMode,
-              removeFrontmatter,
-              splitIntoPages,
-              setTotalPages,
-              totalPages,
-            })}
+            {renderedPages}
           </div>
         </div>
       )}

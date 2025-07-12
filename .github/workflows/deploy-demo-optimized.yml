@@ -2,7 +2,7 @@ name: Deploy Demo to GitHub Pages (Optimized)
 
 on:
   workflow_run:
-    workflows: ["CI (Optimized)"]
+    workflows: ["CI"]
     types: [completed]
     branches: [ main ]
 

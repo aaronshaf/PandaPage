@@ -11,11 +11,14 @@ interface PageRenderOptions {
   viewMode: "read" | "print";
   removeFrontmatter: (markdown: string) => string;
   splitIntoPages: (html: string) => string[];
-  setTotalPages: (total: number) => void;
+}
+
+interface PageRenderResult {
+  pages: React.ReactElement[];
   totalPages: number;
 }
 
-export function renderPrintPages(options: PageRenderOptions): React.ReactElement[] {
+export function renderPrintPages(options: PageRenderOptions): PageRenderResult {
   const {
     parsedDocument,
     structuredDocument,
@@ -23,8 +26,6 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
     viewMode,
     removeFrontmatter,
     splitIntoPages,
-    setTotalPages,
-    totalPages,
   } = options;
 
   if (parsedDocument) {
@@ -39,6 +40,12 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
 
     // If no page elements found, treat the entire content as a single page
     if (pageElements.length === 0) {
+      // Check if there's actually no content or just no pagination
+      const hasContent = htmlContent.trim().length > 0 && htmlContent !== '<div class="document-container"></div>';
+      
+      // Log warning to help debug rendering issues
+      console.warn('No .page elements found in DOM-rendered content. This may indicate a rendering issue.');
+      
       const singlePage = (
         <article
           key={0}
@@ -51,23 +58,42 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
           id="page-1"
           aria-label="Page 1 of 1"
           role="document"
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-        />
+        >
+          {!hasContent && (
+            <div 
+              className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4"
+              role="alert"
+            >
+              <div className="flex items-start">
+                <svg className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <h3 className="font-medium">Document Rendering Warning</h3>
+                  <p className="text-sm mt-1">
+                    The document appears to be empty or could not be rendered properly.
+                  </p>
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer font-medium">Debug Information</summary>
+                    <pre className="mt-2 bg-yellow-100 p-2 rounded overflow-x-auto">
+{`Content length: ${htmlContent.length} characters
+HTML content: ${htmlContent.substring(0, 200)}${htmlContent.length > 200 ? '...' : ''}
+Renderer: DOM (parsed document)`}
+                    </pre>
+                  </details>
+                </div>
+              </div>
+            </div>
+          )}
+          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+        </article>
       );
       
-      if (totalPages !== 1) {
-        setTimeout(() => setTotalPages(1), 0);
-      }
-      
-      return [singlePage];
+      return { pages: [singlePage], totalPages: 1 };
     }
 
-    // Update total pages when pages change
-    if (pageElements.length !== totalPages) {
-      setTimeout(() => setTotalPages(pageElements.length), 0);
-    }
-
-    return Array.from(pageElements).map((pageElement, index) => (
+    // Return pages without updating state during render
+    const pageList = Array.from(pageElements).map((pageElement, index) => (
       <article
         key={index}
         className="print-page"
@@ -82,6 +108,8 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
         dangerouslySetInnerHTML={{ __html: pageElement.innerHTML }}
       />
     ));
+    
+    return { pages: pageList, totalPages: pageElements.length };
   }
 
   if (structuredDocument?.elements) {
@@ -106,11 +134,8 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
       pages.push(allElements);
     }
 
-    if (pages.length !== totalPages) {
-      setTimeout(() => setTotalPages(pages.length), 0);
-    }
 
-    return pages.map((pageElements, index) => (
+    const pageList = pages.map((pageElements, index) => (
       <article
         key={index}
         className="print-page"
@@ -126,18 +151,16 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
         <DocxRenderer elements={pageElements} viewMode={viewMode} />
       </article>
     ));
+    
+    return { pages: pageList, totalPages: pages.length };
   }
 
   // For markdown, use the existing pagination
   const htmlContent = marked.parse(removeFrontmatter(result));
   const pages = splitIntoPages(htmlContent as string);
 
-  // Update total pages when pages change
-  if (pages.length !== totalPages) {
-    setTimeout(() => setTotalPages(pages.length), 0);
-  }
 
-  return pages.map((pageContent, index) => (
+  const pageList = pages.map((pageContent, index) => (
     <article
       key={index}
       data-testid={`markdown-page-container-${index + 1}`}
@@ -173,4 +196,6 @@ export function renderPrintPages(options: PageRenderOptions): React.ReactElement
       </footer>
     </article>
   ));
+  
+  return { pages: pageList, totalPages: pages.length };
 }
