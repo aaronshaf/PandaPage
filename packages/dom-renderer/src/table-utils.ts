@@ -1,6 +1,6 @@
 import type { Table } from "@browser-document-viewer/parser";
 import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
-import { renderEnhancedTable as renderEnhancedTableWithVisualFidelity } from "./enhanced-table-utils";
+import { renderEnhancedTableDOM } from "./enhanced-table-dom-utils";
 
 /**
  * Render table with enhanced visual fidelity for complex OOXML features
@@ -13,31 +13,7 @@ export function renderComplexTable(
 ): HTMLElement {
   // Check if table has complex formatting that requires enhanced rendering
   if (table.borders || table.shading || hasComplexCellFormatting(table)) {
-    // Create a temporary container to hold the HTML string result
-    const tempDiv = doc.createElement('div');
-    tempDiv.innerHTML = renderEnhancedTableWithVisualFidelity(table);
-    const enhancedTable = tempDiv.querySelector('table');
-    
-    if (enhancedTable) {
-      // Replace simplified paragraph rendering with proper DOM-based rendering
-      const cells = enhancedTable.querySelectorAll('td, th');
-      cells.forEach((cell, index) => {
-        // Find corresponding cell in original table structure
-        const { rowIndex, cellIndex } = getCellIndices(index, table);
-        const originalCell = table.rows[rowIndex]?.cells[cellIndex];
-        
-        if (originalCell?.paragraphs) {
-          // Clear the cell and re-render with proper DOM
-          cell.innerHTML = '';
-          originalCell.paragraphs.forEach((para) => {
-            const p = renderParagraph(para);
-            cell.appendChild(p);
-          });
-        }
-      });
-      
-      return enhancedTable as HTMLElement;
-    }
+    return renderEnhancedTableDOM(table, doc, renderParagraph);
   }
   
   // Fallback to simple table rendering

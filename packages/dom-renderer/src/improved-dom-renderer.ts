@@ -14,7 +14,7 @@ import {
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";
 import { getHeadingStyles } from "./style-utils";
-import { renderEnhancedTable, renderComplexTable } from "./table-utils";
+import { renderComplexTable } from "./table-utils";
 import { groupListItems, renderList } from "./list-renderer";
 
 export interface EnhancedDOMRenderOptions {
