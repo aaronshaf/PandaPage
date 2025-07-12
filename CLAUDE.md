@@ -52,6 +52,17 @@
 5. Focus on testing public APIs and critical paths
 6. Add integration tests for complex workflows
 
+## Git Hooks Policy
+
+**IMPORTANT: Never bypass git hooks under any circumstances.**
+
+- Never skip pre-commit hooks
+- Never skip pre-push hooks  
+- Never use the `--no-verify` flag with git commands
+- No exceptions to these rules
+
+Git hooks exist to maintain code quality, run tests, and enforce standards. Bypassing them can introduce bugs, security vulnerabilities, and inconsistent code formatting into the repository.
+
 ## Commit and PR Guidelines
 
 When creating commits and pull requests:
