@@ -21,10 +21,10 @@ describe("Line Spacing Fixes", () => {
       expect(convertLineSpacing(360, "auto")).toBe("1.50"); // 1.5x spacing
     });
 
-    it("should clamp extreme auto values", () => {
-      expect(convertLineSpacing(120, "auto")).toBe("0.80"); // Too tight, clamped to min
-      expect(convertLineSpacing(800, "auto")).toBe("3.00"); // Too loose, clamped to max
-      expect(consoleSpy).toHaveBeenCalledTimes(2);
+    it("should handle any auto values without clamping", () => {
+      expect(convertLineSpacing(120, "auto")).toBe("0.50"); // 120/240 = 0.5x
+      expect(convertLineSpacing(800, "auto")).toBe("3.33"); // 800/240 = 3.33x
+      expect(consoleSpy).not.toHaveBeenCalled(); // No warnings
     });
 
     it("should handle exact spacing in points", () => {
@@ -88,53 +88,53 @@ describe("Line Spacing Fixes", () => {
     });
   });
 
-  describe("getParagraphStyles - extreme spacing validation", () => {
-    it("should cap extreme line spacing values", () => {
-      const paragraphWithExtremeSpacing: Paragraph = {
+  describe("getParagraphStyles - faithful line spacing rendering", () => {
+    it("should render actual 005.docx line spacing values faithfully", () => {
+      const paragraphWithDocumentSpacing: Paragraph = {
         type: "paragraph",
-        runs: [{ text: "Hello world" }],
+        runs: [{ text: "D" }], // Single letter like in 005.docx
         spacing: {
-          line: 951, // Extreme value from 005.docx
+          line: 951, // Actual value from 005.docx
           lineRule: "exact"
         }
       };
       
-      const result = getParagraphStyles(paragraphWithExtremeSpacing);
-      expect(result).toBe("line-height: 36pt"); // Capped at 720 twips = 36pt
-      expect(consoleSpy).toHaveBeenCalledWith("Extreme line spacing detected (951 twips), capping at maximum");
+      const result = getParagraphStyles(paragraphWithDocumentSpacing);
+      expect(result).toBe("line-height: 47.55pt"); // Faithful rendering: 951 twips = 47.55pt
+      expect(consoleSpy).not.toHaveBeenCalled(); // No validation warnings
     });
 
-    it("should allow reasonable spacing values", () => {
-      const paragraphWithReasonableSpacing: Paragraph = {
+    it("should handle any line spacing values without validation", () => {
+      const paragraphWithLargeSpacing: Paragraph = {
         type: "paragraph",
         runs: [{ text: "Hello world" }],
         spacing: {
-          line: 360, // Reasonable value
+          line: 1440, // Very large value (72pt)
           lineRule: "exact"
         }
       };
       
-      const result = getParagraphStyles(paragraphWithReasonableSpacing);
-      expect(result).toBe("line-height: 18pt");
+      const result = getParagraphStyles(paragraphWithLargeSpacing);
+      expect(result).toBe("line-height: 72pt"); // 1440 twips = 72pt
       expect(consoleSpy).not.toHaveBeenCalled();
     });
   });
 
-  describe("getHeadingStyles - extreme spacing validation", () => {
-    it("should cap extreme heading line spacing values", () => {
-      const headingWithExtremeSpacing: Heading = {
+  describe("getHeadingStyles - faithful line spacing rendering", () => {
+    it("should render heading line spacing values faithfully", () => {
+      const headingWithDocumentSpacing: Heading = {
         type: "heading",
         level: 1,
         runs: [{ text: "Heading" }],
         spacing: {
-          line: 951,
+          line: 951, // Any spacing value should be rendered faithfully
           lineRule: "exact"
         }
       };
       
-      const result = getHeadingStyles(headingWithExtremeSpacing);
-      expect(result).toContain("line-height: 36pt"); // Capped value
-      expect(consoleSpy).toHaveBeenCalledWith("Extreme heading line spacing detected (951 twips), capping at maximum");
+      const result = getHeadingStyles(headingWithDocumentSpacing);
+      expect(result).toContain("line-height: 47.55pt"); // Faithful: 951 twips = 47.55pt
+      expect(consoleSpy).not.toHaveBeenCalled(); // No validation warnings
     });
   });
 
@@ -144,9 +144,9 @@ describe("Line Spacing Fixes", () => {
       expect(result).toBe("1.15"); // Should be readable, not too tight
     });
 
-    it("should handle extreme 005.docx spacing (951 twips exact)", () => {
+    it("should handle actual 005.docx spacing (951 twips exact) faithfully", () => {
       const result = convertLineSpacing(951, "exact");
-      expect(result).toBe("47.55pt"); // Raw value, but will be capped in style functions
+      expect(result).toBe("47.55pt"); // Faithful rendering of document values
     });
   });
 });

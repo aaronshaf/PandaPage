@@ -33,6 +33,9 @@ export function halfPointsToPt(halfPoints: string | number): string {
   return `${halfPointsToPoints(value)}pt`;
 }
 
+// Standard line spacing value in twips (normal = 240 twips = 1.0x)
+const NORMAL_LINE_SPACING_TWIPS = 240;
+
 /**
  * Convert line spacing based on line rule
  * @param value - The line spacing value in twips
@@ -51,17 +54,7 @@ export function convertLineSpacing(value: number, lineRule?: "auto" | "exact" | 
     default:
       // Auto means the value is in 240ths of a line (relative to font size)
       // Normal line spacing is 240 twips, so divide by 240 to get a unitless multiplier
-      const ratio = value / 240;
-      
-      // Ensure reasonable bounds for auto line spacing
-      const minRatio = 0.8; // Don't go below 80% (too cramped)
-      const maxRatio = 3.0; // Don't go above 300% (too spaced)
-      const clampedRatio = Math.max(minRatio, Math.min(maxRatio, ratio));
-      
-      if (clampedRatio !== ratio) {
-        console.warn(`Line spacing ratio ${ratio.toFixed(2)} is extreme, clamping to ${clampedRatio.toFixed(2)}`);
-      }
-      
-      return clampedRatio.toFixed(2);
+      const ratio = value / NORMAL_LINE_SPACING_TWIPS;
+      return ratio.toFixed(2);
   }
 }
