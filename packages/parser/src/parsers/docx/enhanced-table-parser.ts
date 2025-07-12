@@ -157,8 +157,8 @@ function parseEnhancedShading(shdElement: Element | null): TableShading | undefi
 function parseEnhancedTableCell(
   cellElement: Element,
   relationships: Map<string, string>,
-  theme: DocxTheme | null,
-  stylesheet: DocxStylesheet | null,
+  theme: DocxTheme | undefined,
+  stylesheet: DocxStylesheet | undefined,
 ): TableCell {
   const cell: TableCell = {
     paragraphs: [],
@@ -167,9 +167,29 @@ function parseEnhancedTableCell(
   // Parse paragraphs in the cell
   const paragraphElements = getElementsByTagNameNSFallback(cellElement, "w", "p");
   for (const pElement of paragraphElements) {
-    const paragraph = parseParagraph(pElement, relationships, theme, stylesheet);
+    const paragraph = parseParagraph(pElement, relationships, undefined, undefined, stylesheet, theme);
     if (paragraph) {
-      cell.paragraphs.push(paragraph);
+      // Convert DocxParagraph to Paragraph type
+      const convertedParagraph: Paragraph = {
+        type: "paragraph",
+        runs: paragraph.runs.map(run => ({
+          text: run.text,
+          bold: run.bold,
+          italic: run.italic,
+          underline: run.underline,
+          strikethrough: run.strikethrough,
+          superscript: run.superscript,
+          subscript: run.subscript,
+          fontSize: run.fontSize ? Math.round(parseInt(run.fontSize) / 2) : undefined,
+          fontFamily: run.fontFamily,
+          color: run.color ? `#${run.color}` : undefined,
+          backgroundColor: run.backgroundColor,
+          link: run.link,
+        })),
+        style: paragraph.style,
+        alignment: paragraph.alignment,
+      };
+      cell.paragraphs.push(convertedParagraph);
     }
   }
 
@@ -245,8 +265,8 @@ function parseEnhancedTableCell(
 function parseEnhancedTableRow(
   rowElement: Element,
   relationships: Map<string, string>,
-  theme: DocxTheme | null,
-  stylesheet: DocxStylesheet | null,
+  theme: DocxTheme | undefined,
+  stylesheet: DocxStylesheet | undefined,
 ): TableRow {
   const row: TableRow = {
     cells: [],
@@ -268,8 +288,8 @@ function parseEnhancedTableRow(
 export function parseEnhancedTable(
   tableElement: Element,
   relationships: Map<string, string>,
-  theme: DocxTheme | null,
-  stylesheet: DocxStylesheet | null,
+  theme: DocxTheme | undefined,
+  stylesheet: DocxStylesheet | undefined,
 ): Table | null {
   const table: Table = {
     type: "table",

@@ -148,6 +148,7 @@ function getCellIndices(flatIndex: number, table: Table): { rowIndex: number; ce
   
   for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
     const row = table.rows[rowIndex];
+    if (!row) continue;
     for (let cellIndex = 0; cellIndex < row.cells.length; cellIndex++) {
       if (currentIndex === flatIndex) {
         return { rowIndex, cellIndex };

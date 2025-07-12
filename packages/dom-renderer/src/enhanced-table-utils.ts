@@ -231,6 +231,7 @@ export function renderEnhancedTable(table: Table): string {
   // Render table rows
   for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
     const row = table.rows[rowIndex];
+    if (!row) continue;
     html += `<tr>`;
 
     for (const cell of row.cells) {

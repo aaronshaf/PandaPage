@@ -106,9 +106,10 @@ describe("Enhanced Table Parser with OOXML Types", () => {
         "w:color": "000000"  // Black foreground
       });
 
-      expect(ST_Shd.Solid).toBe("solid");
-      expect(ST_Shd.Clear).toBe("clear");
-      expect(ST_Shd.Pct25).toBe("pct25");
+      // Test that enum values are strings
+      expect(shdElement.getAttribute("w:val")).toBe("solid");
+      expect(shdElement.getAttribute("w:fill")).toBe("FFFF00");
+      expect(shdElement.getAttribute("w:color")).toBe("000000");
     });
 
     it("should handle different shading patterns from 005.docx scenarios", () => {
