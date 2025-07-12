@@ -12,6 +12,7 @@ import type {
   TableCellBorders,
   TableBorder,
 } from "../../types/document";
+import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import type {
   CT_TblPr,
   CT_TblBorders,
@@ -50,8 +51,8 @@ export function calculateRowSpans(table: Table): void {
       const row = table.rows[rowIndex];
       if (!row || !row.cells[colIndex]) continue;
       
-      const cell = row.cells[colIndex];
-      const vMerge = (cell as any)._vMerge;
+      const cell = row.cells[colIndex] as ProcessingTableCell;
+      const vMerge = cell._vMerge;
       
       if (vMerge === "restart") {
         // Start of a new merged region
@@ -63,7 +64,7 @@ export function calculateRowSpans(table: Table): void {
         // Mark this cell as merged (it should not be rendered)
         mergedCells.add(`${rowIndex}-${colIndex}`);
         // Hide this cell by marking it
-        (cell as any)._merged = true;
+        (cell as ProcessingTableCell)._merged = true;
       } else if (rowspanStart !== -1) {
         // End of merged region (cell without vMerge after a merge)
         if (rowspanCount > 1) {
@@ -90,7 +91,8 @@ export function calculateRowSpans(table: Table): void {
   // Clean up temporary vMerge properties but keep _merged for rendering
   for (const row of table.rows) {
     for (const cell of row.cells) {
-      delete (cell as any)._vMerge;
+      const processingCell = cell as ProcessingTableCell;
+      delete processingCell._vMerge;
     }
   }
 }
@@ -275,7 +277,7 @@ export function parseEnhancedTableCell(
     if (vMergeElement) {
       const vMergeVal = vMergeElement.getAttribute("w:val") as ST_Merge | null;
       // Mark the cell with vMerge info for post-processing
-      (cell as any)._vMerge = vMergeVal || "continue"; // If no val attribute, it's implicitly "continue"
+      (cell as ProcessingTableCell)._vMerge = vMergeVal || "continue"; // If no val attribute, it's implicitly "continue"
     }
 
     // Vertical alignment

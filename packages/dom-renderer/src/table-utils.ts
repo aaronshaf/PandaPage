@@ -1,4 +1,5 @@
 import type { Table } from "@browser-document-viewer/parser";
+import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import { renderEnhancedTable as renderEnhancedTableWithVisualFidelity } from "./enhanced-table-utils";
 
 /**
@@ -63,7 +64,7 @@ export function renderEnhancedTable(
       const cellKey = `${rowIndex}-${cellIndex}`;
 
       // Skip if this cell is part of a merged cell or marked as merged
-      if (mergedCells.has(cellKey) || (cell as any)._merged) return;
+      if (mergedCells.has(cellKey) || (cell as ProcessingTableCell)._merged) return;
 
       const isHeader = rowIndex === 0;
       const cellEl = doc.createElement(isHeader ? "th" : "td");

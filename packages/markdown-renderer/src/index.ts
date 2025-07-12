@@ -40,8 +40,8 @@ function safeBase64Encode(data: ArrayBuffer): string {
 
 function renderTextRun(run: TextRun): string {
   // Check if this is a footnote reference
-  if ((run as any)._footnoteRef) {
-    return `[^${(run as any)._footnoteRef}]`;
+  if (run._footnoteRef) {
+    return `[^${run._footnoteRef}]`;
   }
 
   let text = run.text;
