@@ -1,5 +1,5 @@
 {
-  "buildCommand": "export PATH=\"$HOME/.bun/bin:$PATH\" && pwd && ls -la && NODE_ENV=development bun run build",
+  "buildCommand": "export PATH=\"$HOME/.bun/bin:$PATH\" && NODE_ENV=development bun run build && ls -la packages/viewer/dist",
   "outputDirectory": "packages/viewer/dist",
   "installCommand": "curl -fsSL https://bun.sh/install | bash && export PATH=\"$HOME/.bun/bin:$PATH\" && bun install",
   "framework": null,
