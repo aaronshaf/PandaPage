@@ -16,6 +16,7 @@ import { parseMetadata } from "./metadata-parser";
 import { parseSectionProperties } from "./section-properties";
 import { parseParagraph } from "./paragraph-parser";
 import { parseTable } from "./table-parser";
+import { parseEnhancedTable } from "./enhanced-table-parser";
 import { parseHeaderFooter } from "./header-footer-parser";
 import { parseFootnotes } from "./footnote-parser";
 import { parseBookmarks } from "./bookmark-parser";
@@ -337,8 +338,8 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
           }
         }
       } else if (localName === "tbl") {
-        // Parse table with relationships for hyperlink resolution
-        const table = parseTable(element, relationshipsMap, theme);
+        // Parse table with enhanced support for borders, shading, and cell spanning
+        const table = parseEnhancedTable(element, relationshipsMap, theme, stylesheet);
         if (table) {
           elements.push(table);
         }
