@@ -1,8 +1,25 @@
 import type { Paragraph, Heading, TextRun } from "@browser-document-viewer/parser";
 
+// DPI assumption for all conversions - standard web display DPI
+const WEB_DPI = 96;
+
+// Standard line spacing in twips (1 line = 240 twips at normal spacing)
+const NORMAL_LINE_SPACING_TWIPS = 240;
+
+// List indentation per level in pixels
+const LIST_INDENT_PER_LEVEL = 40;
+
 // Convert twips to pixels (1 twip = 1/1440 inch, assuming 96 DPI)
 export function twipsToPixels(twips: number): number {
-  return Math.round((twips / 1440) * 96);
+  return Math.round((twips / 1440) * WEB_DPI);
+}
+
+// Format color value to ensure proper hex format
+export function formatColor(color: string | undefined): string | null {
+  if (!color || color === "auto") {
+    return null;
+  }
+  return color.startsWith("#") ? color : `#${color}`;
 }
 
 // Convert points to pixels (1 point = 1/72 inch, assuming 96 DPI)
@@ -20,28 +37,14 @@ export function getTextRunStyles(run: TextRun): string {
     if (typeof run.underline === "boolean") {
       styles.push("text-decoration: underline");
     } else {
-      // Handle specific underline styles from OOXML
-      switch (run.underline) {
-        case "single":
-          styles.push("text-decoration: underline");
-          break;
-        case "double":
-          styles.push("text-decoration: underline double");
-          break;
-        case "thick":
-          styles.push("text-decoration: underline", "text-decoration-thickness: 2px");
-          break;
-        case "dotted":
-          styles.push("text-decoration: underline dotted");
-          break;
-        case "dash":
-          styles.push("text-decoration: underline dashed");
-          break;
-        case "wave":
-          styles.push("text-decoration: underline wavy");
-          break;
-        default:
-          styles.push("text-decoration: underline");
+      // Handle specific underline styles from OOXML using type-safe mapping
+      const underlineStyle = UNDERLINE_STYLES[run.underline as UnderlineStyle];
+      if (underlineStyle) {
+        styles.push(underlineStyle);
+      } else {
+        // Default fallback for unknown underline types
+        console.warn(`Unknown underline style: ${run.underline}, using default underline`);
+        styles.push("text-decoration: underline");
       }
     }
   }
@@ -50,12 +53,12 @@ export function getTextRunStyles(run: TextRun): string {
   
   if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
   if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
-  if (run.color && run.color !== "auto") {
-    const color = run.color.startsWith("#") ? run.color : `#${run.color}`;
+  const color = formatColor(run.color);
+  if (color) {
     styles.push(`color: ${color}`);
   }
-  if (run.backgroundColor && run.backgroundColor !== "auto") {
-    const backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
+  const backgroundColor = formatColor(run.backgroundColor);
+  if (backgroundColor) {
     styles.push(`background-color: ${backgroundColor}`);
   }
   
@@ -75,21 +78,36 @@ export function getTextRunStyles(run: TextRun): string {
   return styles.join("; ");
 }
 
+// Type-safe heading level to font size mapping
+const HEADING_FONT_SIZES = {
+  1: 32, // ~24pt
+  2: 28, // ~21pt
+  3: 24, // ~18pt
+  4: 20, // ~15pt
+  5: 18, // ~13.5pt
+  6: 16, // ~12pt
+} as const;
+
+type HeadingLevel = keyof typeof HEADING_FONT_SIZES;
+
+// Type-safe underline styles mapping
+const UNDERLINE_STYLES = {
+  single: "text-decoration: underline",
+  double: "text-decoration: underline double", 
+  thick: "text-decoration: underline; text-decoration-thickness: 2px",
+  dotted: "text-decoration: underline dotted",
+  dash: "text-decoration: underline dashed",
+  wave: "text-decoration: underline wavy",
+} as const;
+
+type UnderlineStyle = keyof typeof UNDERLINE_STYLES;
+
 // Get heading styles based on level and document properties
 export function getHeadingStyles(heading: Heading): string {
   const styles: string[] = [];
   
-  // Base font sizes for heading levels (in pixels)
-  const headingSizes = {
-    1: 32, // ~24pt
-    2: 28, // ~21pt
-    3: 24, // ~18pt
-    4: 20, // ~15pt
-    5: 18, // ~13.5pt
-    6: 16, // ~12pt
-  };
-
-  styles.push(`font-size: ${headingSizes[heading.level]}px`);
+  const fontSize = HEADING_FONT_SIZES[heading.level as HeadingLevel] ?? HEADING_FONT_SIZES[1];
+  styles.push(`font-size: ${fontSize}px`);
   styles.push("font-weight: bold");
   
   // Apply spacing if defined
@@ -100,13 +118,13 @@ export function getHeadingStyles(heading: Heading): string {
       const lineHeight = heading.spacing.lineRule === "exact" 
         ? `${twipsToPixels(heading.spacing.line)}px`
         : heading.spacing.lineRule === "atLeast"
-        ? `${Math.max(1.2, twipsToPixels(heading.spacing.line) / headingSizes[heading.level])}`
-        : `${twipsToPixels(heading.spacing.line) / headingSizes[heading.level]}`;
+        ? `${Math.max(1.2, twipsToPixels(heading.spacing.line) / fontSize)}`
+        : `${twipsToPixels(heading.spacing.line) / fontSize}`;
       styles.push(`line-height: ${lineHeight}`);
     }
   } else {
     // Default margins
-    styles.push(`margin-bottom: ${headingSizes[heading.level] * 0.5}px`);
+    styles.push(`margin-bottom: ${fontSize * 0.5}px`);
   }
 
   // Apply alignment
@@ -152,7 +170,7 @@ export function getParagraphStyles(paragraph: Paragraph): string {
         ? `${twipsToPixels(paragraph.spacing.line)}px`
         : paragraph.spacing.lineRule === "atLeast"
         ? `${Math.max(1.2, twipsToPixels(paragraph.spacing.line) / 16)}`
-        : `${twipsToPixels(paragraph.spacing.line) / 240}`; // 240 twips = 1 line at normal spacing
+        : `${twipsToPixels(paragraph.spacing.line) / NORMAL_LINE_SPACING_TWIPS}`;
       styles.push(`line-height: ${lineHeight}`);
     }
   } else {
@@ -189,7 +207,7 @@ export function getParagraphStyles(paragraph: Paragraph): string {
 
   // Apply list indentation
   if (paragraph.listInfo) {
-    const indent = paragraph.listInfo.level * 40; // 40px per level
+    const indent = paragraph.listInfo.level * LIST_INDENT_PER_LEVEL;
     styles.push(`margin-left: ${indent}px`);
   }
 

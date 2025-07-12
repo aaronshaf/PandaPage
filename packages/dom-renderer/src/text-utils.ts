@@ -1,5 +1,5 @@
 import type { TextRun, Paragraph } from "@browser-document-viewer/parser";
-import { getTextRunStyles, getParagraphStyles } from "./style-utils";
+import { getTextRunStyles, getParagraphStyles, formatColor } from "./style-utils";
 
 export function renderEnhancedTextRun(
   run: TextRun,
@@ -25,11 +25,13 @@ export function renderEnhancedTextRun(
         const wrapper = doc.createElement("span");
         
         // Apply inline styles
-        if (run.color && run.color !== "auto") {
-          wrapper.style.color = run.color.startsWith("#") ? run.color : `#${run.color}`;
+        const color = formatColor(run.color);
+        if (color) {
+          wrapper.style.color = color;
         }
-        if (run.backgroundColor && run.backgroundColor !== "auto") {
-          wrapper.style.backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
+        const backgroundColor = formatColor(run.backgroundColor);
+        if (backgroundColor) {
+          wrapper.style.backgroundColor = backgroundColor;
         }
         
         // Apply inline styles
@@ -65,11 +67,13 @@ export function renderEnhancedTextRun(
         const wrapper = doc.createElement("span");
         
         // Apply inline styles
-        if (run.color && run.color !== "auto") {
-          wrapper.style.color = run.color.startsWith("#") ? run.color : `#${run.color}`;
+        const color = formatColor(run.color);
+        if (color) {
+          wrapper.style.color = color;
         }
-        if (run.backgroundColor && run.backgroundColor !== "auto") {
-          wrapper.style.backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
+        const backgroundColor = formatColor(run.backgroundColor);
+        if (backgroundColor) {
+          wrapper.style.backgroundColor = backgroundColor;
         }
         
         // Apply inline styles
