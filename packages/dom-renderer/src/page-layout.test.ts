@@ -44,8 +44,8 @@ test("renderToHtml includes full document when requested", () => {
   };
 
   const result = renderToHtml(doc, { includeStyles: true });
-  // Enhanced renderer uses classes instead of inline styles
-  expect(result).toContain('<p class="mb-4"><span>Content</span></p>');
+  // Enhanced renderer now uses inline styles
+  expect(result).toContain('<p style="margin-bottom: 12px;"><span>Content</span></p>');
   expect(result).not.toContain("<!DOCTYPE html>");
 });
 
@@ -84,6 +84,6 @@ test("renderToHtml handles fragment output", () => {
   const result = renderToHtml(doc, { includeStyles: false });
   expect(result).not.toContain("<!DOCTYPE html>");
   expect(result).not.toContain("<title>");
-  // Enhanced renderer uses classes even when includeStyles is false
-  expect(result).toContain('<p class="mb-4"><span>Content</span></p>');
+  // Enhanced renderer uses inline styles even when includeStyles is false
+  expect(result).toContain('<p style="margin-bottom: 12px;"><span>Content</span></p>');
 });

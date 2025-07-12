@@ -30,16 +30,16 @@ test("renderToHtml handles tables", () => {
   expect(result).toContain('<table class="table-fancy">');
   expect(result).toContain("<tr>");
   expect(result).toContain(
-    '<th><p class="mb-4"><span>Header 1</span></p></th>',
+    '<th><p style="margin-bottom: 12px;"><span>Header 1</span></p></th>',
   );
   expect(result).toContain(
-    '<th><p class="mb-4"><span>Header 2</span></p></th>',
+    '<th><p style="margin-bottom: 12px;"><span>Header 2</span></p></th>',
   );
   expect(result).toContain(
-    '<td><p class="mb-4"><span>Cell 1</span></p></td>',
+    '<td><p style="margin-bottom: 12px;"><span>Cell 1</span></p></td>',
   );
   expect(result).toContain(
-    '<td><p class="mb-4"><span>Cell 2</span></p></td>',
+    '<td><p style="margin-bottom: 12px;"><span>Cell 2</span></p></td>',
   );
   expect(result).toContain("</tr>");
   expect(result).toContain("</table>");
@@ -67,7 +67,7 @@ test("renderToHtml handles empty table cells", () => {
   // Enhanced renderer doesn't add nbsp to empty cells
   expect(result).toContain('<th></th>');
   expect(result).toContain(
-    '<th><p class="mb-4"><span>Content</span></p></th>',
+    '<th><p style="margin-bottom: 12px;"><span>Content</span></p></th>',
   );
 });
 
@@ -122,6 +122,6 @@ test("renderToHtml handles multiple paragraphs in table cells", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain(
-    '<th><p class="mb-4"><span>Line 1</span></p><p class="mb-4"><span>Line 2</span></p></th>',
+    '<th><p style="margin-bottom: 12px;"><span>Line 1</span></p><p style="margin-bottom: 12px;"><span>Line 2</span></p></th>',
   );
 });

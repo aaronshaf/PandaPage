@@ -37,10 +37,10 @@ describe("EnhancedDOMRenderer", () => {
 
     const html = renderer.renderToHTML(doc);
 
-    expect(html).toContain("text-color-red");
-    expect(html).toContain("text-color-green");
-    expect(html).toContain("text-color-blue");
-    expect(html).toContain("highlight-yellow");
+    expect(html).toContain('style="color: #FF0000;"');
+    expect(html).toContain('style="color: #92D050;"');
+    expect(html).toContain('style="color: #0070C0;"');
+    expect(html).toContain('style="background-color: #ffff00;"');
   });
 
   it("should render advanced text effects", () => {
@@ -62,11 +62,11 @@ describe("EnhancedDOMRenderer", () => {
 
     const html = renderer.renderToHTML(doc);
 
-    expect(html).toContain("text-shadow");
-    expect(html).toContain("text-outline");
-    expect(html).toContain("text-emboss");
-    expect(html).toContain("small-caps");
-    expect(html).toContain("all-caps");
+    expect(html).toContain("text-shadow: 1px 1px 2px rgba(0,0,0,0.5)");
+    expect(html).toContain("-webkit-text-stroke: 1px currentColor");
+    expect(html).toContain("color: transparent"); // For outline effect
+    expect(html).toContain("font-variant: small-caps");
+    expect(html).toContain("text-transform: uppercase");
   });
 
   it("should render dropcaps for appropriate paragraphs", () => {
@@ -88,8 +88,9 @@ describe("EnhancedDOMRenderer", () => {
 
     const html = renderer.renderToHTML(doc);
 
-    expect(html).toContain("dropcap");
-    expect(html).toContain('<span class="dropcap dropcap-3">D</span>');
+    expect(html).toContain("float: left");
+    expect(html).toContain("font-size: 3em");
+    expect(html).toContain('<span style="float: left; font-size: 3em; line-height: 0.8; margin: 0px 0.1em 0px 0px; font-weight: bold;">D</span>');
   });
 
   it("should render enhanced tables with proper styling", () => {
@@ -214,7 +215,7 @@ describe("EnhancedDOMRenderer", () => {
     // Check for various formatting features
     expect(html).toContain("document-container");
     expect(html).toContain("table-fancy");
-    expect(html).toContain("text-color");
+    expect(html).toContain('style="color: #');
     expect(html.length).toBeGreaterThan(10000); // Should be substantial
 
     // Save output for inspection in temp directory

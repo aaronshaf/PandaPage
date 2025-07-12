@@ -13,6 +13,7 @@ import {
 } from "./footnote-utils";
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";
+import { getHeadingStyles } from "./style-utils";
 import { renderEnhancedTable } from "./table-utils";
 import { groupListItems, renderList } from "./list-renderer";
 
@@ -126,13 +127,12 @@ export class EnhancedDOMRenderer {
         const headingLevel = element.level ?? 1;
         const level = Math.min(6, Math.max(1, headingLevel));
         const h = this.doc.createElement(`h${level}`);
-        const headingClasses = ["font-bold", "mb-4"];
-        if (headingLevel === 1) headingClasses.push("text-4xl");
-        else if (headingLevel === 2) headingClasses.push("text-3xl");
-        else if (headingLevel === 3) headingClasses.push("text-2xl");
-        else if (headingLevel === 4) headingClasses.push("text-xl");
-        else if (headingLevel === 5) headingClasses.push("text-lg");
-        h.className = headingClasses.join(" ");
+        
+        // Apply inline styles from heading properties
+        const headingStyles = getHeadingStyles(element);
+        if (headingStyles) {
+          h.style.cssText = headingStyles;
+        }
 
         if (element.runs) {
           element.runs.forEach((run) => {

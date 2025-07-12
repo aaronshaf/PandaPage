@@ -23,13 +23,13 @@ test("renderToHtml handles text formatting", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<span>Normal </span><span class="font-bold">bold</span>');
-  expect(result).toContain('<span> and </span><span class="italic">italic</span>');
+  expect(result).toContain('<span>Normal </span><span style="font-weight: bold;">bold</span>');
+  expect(result).toContain('<span> and </span><span style="font-style: italic;">italic</span>');
   expect(result).toContain(
-    '<span> and </span><span class="underline">underline</span>',
+    '<span> and </span><span style="text-decoration: underline;">underline</span>',
   );
   expect(result).toContain(
-    '<span> and </span><span class="line-through">strikethrough</span>',
+    '<span> and </span><span style="text-decoration-line: line-through;">strikethrough</span>',
   );
 });
 
@@ -50,10 +50,10 @@ test("renderToHtml handles combined formatting", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain(
-    '<span class="font-bold italic">bold+italic</span>',
+    '<span style="font-weight: bold; font-style: italic;">bold+italic</span>',
   );
   expect(result).toContain(
-    '<span class="font-bold italic underline line-through">all</span>',
+    '<span style="font-weight: bold; font-style: italic; text-decoration: underline; text-decoration-line: line-through;">all</span>',
   );
 });
 
@@ -127,7 +127,7 @@ test("renderToHtml handles formatted links", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain('<a href="https://example.com"');
-  expect(result).toContain('class="font-bold"');
+  expect(result).toContain('style="font-weight: bold;"');
   expect(result).toContain('target="_blank"');
   expect(result).toContain(">bold link</a>");
 });
@@ -152,11 +152,11 @@ test("renderToHtml handles font styling", () => {
   };
 
   const result = renderToHtml(doc);
-  // Enhanced renderer uses classes for common colors and doesn't render font-family/size inline
-  expect(result).toContain('<span>arial text</span>');
-  expect(result).toContain('<span>large text</span>');
-  expect(result).toContain('class="text-color-red"');
-  expect(result).toContain('<span>highlighted</span>');
+  // Enhanced renderer now uses inline styles for all formatting
+  expect(result).toContain('<span style="font-family: Arial;">arial text</span>');
+  expect(result).toContain('<span style="font-size: 18pt;">large text</span>');
+  expect(result).toContain('style="color: #FF0000;"');
+  expect(result).toContain('<span style="background-color: #FFFF00;">highlighted</span>');
 });
 
 test("renderToHtml handles background colors", () => {
@@ -175,9 +175,9 @@ test("renderToHtml handles background colors", () => {
   };
 
   const result = renderToHtml(doc);
-  // Enhanced renderer doesn't currently apply background colors inline
-  expect(result).toContain('<span>yellow highlight</span>');
-  expect(result).toContain('<span>green background</span>');
+  // Enhanced renderer now applies background colors inline
+  expect(result).toContain('<span style="background-color: #FFFF00;">yellow highlight</span>');
+  expect(result).toContain('<span style="background-color: #00FF00;">green background</span>');
 });
 
 test("renderToHtml handles complex color combinations", () => {
@@ -192,8 +192,8 @@ test("renderToHtml handles complex color combinations", () => {
   };
 
   const result = renderToHtml(doc);
-  // Enhanced renderer handles color but not background-color inline
-  expect(result).toContain('class="text-color-white"');
+  // Enhanced renderer handles both color and background-color inline
+  expect(result).toContain('style="color: #FFFFFF; background-color: #000000;"');
 });
 
 test("renderToHtml handles multiple style combinations", () => {
