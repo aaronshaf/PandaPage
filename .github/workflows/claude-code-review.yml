@@ -1,17 +1,23 @@
 name: Claude Code Review
 
+# This workflow runs after the CI workflow completes successfully
+# This ensures Claude Code review only runs on code that passes all checks
+# (lint, typecheck, unit tests, E2E tests)
 on:
-  pull_request:
-    types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - '**'  # Run on all branches
 
 jobs:
   claude-review:
+    # Only run if the CI workflow succeeded and it's a pull request
+    # This prevents Claude from reviewing code that has failing tests or type errors
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
@@ -27,10 +33,29 @@ jobs:
       actions: read       # For reading CI results
     
     steps:
+      # Get PR details from the workflow run
+      - name: Get PR details
+        id: pr-details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowRun = context.payload.workflow_run;
+            const prNumber = workflowRun.pull_requests[0]?.number;
+            
+            if (!prNumber) {
+              core.setFailed('No pull request found for this workflow run');
+              return;
+            }
+            
+            core.setOutput('pr_number', prNumber);
+            console.log(`Found PR #${prNumber}`);
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          # Check out the PR branch
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Run Claude Code Review
         id: claude-review
