@@ -62,8 +62,8 @@ export function renderEnhancedTable(
     row.cells.forEach((cell, cellIndex) => {
       const cellKey = `${rowIndex}-${cellIndex}`;
 
-      // Skip if this cell is part of a merged cell
-      if (mergedCells.has(cellKey)) return;
+      // Skip if this cell is part of a merged cell or marked as merged
+      if (mergedCells.has(cellKey) || (cell as any)._merged) return;
 
       const isHeader = rowIndex === 0;
       const cellEl = doc.createElement(isHeader ? "th" : "td");
