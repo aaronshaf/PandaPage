@@ -164,11 +164,11 @@ jobs:
     - name: Run unit tests with coverage
       run: bun run test:coverage
 
-  # Run E2E tests only after all other checks pass
+  # Run E2E tests after build completes
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    needs: [build, typecheck, unit-tests]  # Lint runs in parallel, not a blocker
+    needs: [build]  # Only depends on build artifacts
     strategy:
       matrix:
         # Run tests in parallel shards
