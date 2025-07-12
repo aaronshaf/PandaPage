@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bun install && NODE_ENV=development bun run build",
+  "buildCommand": "bun install && cd packages/viewer && NODE_ENV=development bun run build",
   "outputDirectory": "packages/viewer/dist",
   "installCommand": "curl -fsSL https://bun.sh/install | bash && export PATH=\"$HOME/.bun/bin:$PATH\" && bun install",
   "framework": null,
