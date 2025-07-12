@@ -52,7 +52,7 @@ test("renderToHtml handles formatted superscript", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain('<sup>x</sup>');
-  expect(result).toContain('style="color: #FF0000;"');
+  expect(result).toContain('style="font-weight: bold; color: #FF0000;"');
 });
 
 test("renderToHtml handles formatted subscript", () => {
@@ -68,7 +68,7 @@ test("renderToHtml handles formatted subscript", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain('<sub>n</sub>');
-  expect(result).toContain('style="background-color: #FFFF00;"');
+  expect(result).toContain('style="font-style: italic; background-color: #FFFF00;"');
 });
 
 test("renderToHtml handles superscript with links", () => {

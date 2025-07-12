@@ -34,7 +34,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document);
 
-      expect(result.className).toContain("font-bold");
+      expect(result.style.fontWeight).toBe("bold");
       expect(result.textContent).toBe("Bold text");
     });
 
@@ -46,7 +46,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document);
 
-      expect(result.className).toContain("italic");
+      expect(result.style.fontStyle).toBe("italic");
     });
 
     it("should render underlined text", () => {
@@ -57,7 +57,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document);
 
-      expect(result.className).toContain("underline");
+      expect(result.style.textDecoration).toContain("underline");
     });
 
     it("should render strikethrough text", () => {
@@ -68,7 +68,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document);
 
-      expect(result.className).toContain("line-through");
+      expect(result.style.textDecorationLine).toBe("line-through");
     });
 
     it("should render superscript with advanced formatting", () => {
@@ -122,14 +122,14 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.className).toContain("text-shadow");
-      expect(result.className).toContain("text-outline");
-      expect(result.className).toContain("text-emboss");
-      expect(result.className).toContain("text-imprint");
-      expect(result.className).toContain("small-caps");
-      expect(result.className).toContain("all-caps");
-      expect(result.className).toContain("double-strikethrough");
-      expect(result.className).toContain("hidden-text");
+      expect(result.style.textShadow).toContain("1px 1px 2px rgba(0,0,0,0.5)");
+      expect(result.style.color).toBe("transparent");
+      expect(result.style.webkitTextStroke).toBe("1px currentColor");
+      // emboss and imprint effects are handled via textShadow
+      expect(result.style.fontVariant).toBe("small-caps");
+      expect(result.style.textTransform).toBe("uppercase");
+      expect(result.style.textDecorationLine).toBe("line-through");
+      expect(result.style.display).toBe("none");
     });
 
     it("should render color with predefined color map", () => {
@@ -140,7 +140,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.className).toContain("text-color-red");
+      expect(result.style.color).toBe("rgb(255, 0, 0)");
     });
 
     it("should render color with hex prefix", () => {
@@ -151,7 +151,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.className).toContain("text-color-blue");
+      expect(result.style.color).toBe("rgb(0, 112, 192)");
     });
 
     it("should render custom color with inline style", () => {
@@ -187,7 +187,6 @@ describe("Text Utils", () => {
       const result = renderEnhancedTextRun(run, document, true) as HTMLElement;
 
       expect(result.style.color).toBe("");
-      expect(result.className).not.toContain("text-color");
     });
 
     it("should render highlight colors", () => {
@@ -198,7 +197,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.className).toContain("highlight-yellow");
+      expect(result.style.backgroundColor).toBe("rgb(255, 255, 0)");
     });
 
     it("should not render none highlight", () => {
@@ -209,7 +208,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.className).not.toContain("highlight");
+      expect(result.style.backgroundColor).toBe("");
     });
 
     it("should render combined formatting", () => {
@@ -224,11 +223,11 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.className).toContain("font-bold");
-      expect(result.className).toContain("italic");
-      expect(result.className).toContain("underline");
-      expect(result.className).toContain("text-color-red");
-      expect(result.className).toContain("highlight-yellow");
+      expect(result.style.fontWeight).toBe("bold");
+      expect(result.style.fontStyle).toBe("italic");
+      expect(result.style.textDecoration).toContain("underline");
+      expect(result.style.color).toBe("rgb(255, 0, 0)");
+      expect(result.style.backgroundColor).toBe("rgb(255, 255, 0)");
     });
 
     it("should render link with proper attributes", () => {
@@ -244,7 +243,7 @@ describe("Text Utils", () => {
       expect((result as HTMLAnchorElement).href).toBe("https://example.com/");
       expect((result as HTMLAnchorElement).target).toBe("_blank");
       expect((result as HTMLAnchorElement).rel).toBe("noopener noreferrer");
-      expect(result.className).toContain("font-bold");
+      expect(result.style.fontWeight).toBe("bold");
       expect(result.textContent).toBe("Link text");
     });
 
@@ -257,7 +256,7 @@ describe("Text Utils", () => {
       const result = renderEnhancedTextRun(run, document);
 
       expect(result.textContent).toBe("");
-      expect(result.className).toContain("font-bold");
+      expect(result.style.fontWeight).toBe("bold");
     });
   });
 
@@ -294,7 +293,7 @@ describe("Text Utils", () => {
       );
 
       expect(result.tagName).toBe("P");
-      expect(result.className).toContain("mb-4");
+      expect(result.style.marginBottom).toBe("12px");
       expect(result.children.length).toBe(1);
       expect(result.children[0]?.textContent).toBe("Hello world");
     });
@@ -314,7 +313,7 @@ describe("Text Utils", () => {
         mockRenderImage,
       );
 
-      expect(result.className).toContain("text-center");
+      expect(result.style.textAlign).toBe("center");
     });
 
     it("should render paragraph with end alignment", () => {
@@ -332,7 +331,7 @@ describe("Text Utils", () => {
         mockRenderImage,
       );
 
-      expect(result.className).toContain("text-right");
+      expect(result.style.textAlign).toBe("right");
     });
 
     it("should render paragraph with justify alignment", () => {
@@ -350,7 +349,7 @@ describe("Text Utils", () => {
         mockRenderImage,
       );
 
-      expect(result.className).toContain("text-justify");
+      expect(result.style.textAlign).toBe("justify");
     });
 
     it("should render paragraph with heading styles", () => {
@@ -368,8 +367,8 @@ describe("Text Utils", () => {
         mockRenderImage,
       );
 
-      expect(result.className).toContain("text-4xl");
-      expect(result.className).toContain("font-bold");
+      expect(result.style.fontSize).toBe("32px");
+      expect(result.style.fontWeight).toBe("bold");
     });
 
     it("should render paragraph with title style", () => {
@@ -387,9 +386,9 @@ describe("Text Utils", () => {
         mockRenderImage,
       );
 
-      expect(result.className).toContain("text-4xl");
-      expect(result.className).toContain("font-bold");
-      expect(result.className).toContain("text-center");
+      expect(result.style.fontSize).toBe("32px");
+      expect(result.style.fontWeight).toBe("bold");
+      expect(result.style.textAlign).toBe("center");
     });
 
     it("should render dropcap when enabled", () => {
@@ -413,7 +412,8 @@ describe("Text Utils", () => {
 
       expect(result.children.length).toBe(2); // dropcap + remaining text
       const dropcap = result.children[0] as HTMLElement;
-      expect(dropcap.className).toContain("dropcap");
+      expect(dropcap.style.float).toBe("left");
+      expect(dropcap.style.fontSize).toBe("3em");
       expect(dropcap.textContent).toBe("T");
 
       const remainingText = result.children[1] as HTMLElement;
@@ -561,7 +561,8 @@ describe("Text Utils", () => {
 
       expect(result.children.length).toBe(3); // dropcap + remaining first run + second run
       const dropcap = result.children[0] as HTMLElement;
-      expect(dropcap.className).toContain("dropcap");
+      expect(dropcap.style.float).toBe("left");
+      expect(dropcap.style.fontSize).toBe("3em");
       expect(dropcap.textContent).toBe("T");
     });
   });

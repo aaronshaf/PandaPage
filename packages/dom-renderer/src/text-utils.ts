@@ -1,4 +1,5 @@
 import type { TextRun, Paragraph } from "@browser-document-viewer/parser";
+import { getTextRunStyles, getParagraphStyles } from "./style-utils";
 
 export function renderEnhancedTextRun(
   run: TextRun,
@@ -6,13 +7,12 @@ export function renderEnhancedTextRun(
   enableAdvancedFormatting: boolean = true,
 ): HTMLElement {
   const span = doc.createElement("span");
-  const classes: string[] = [];
-
-  // Basic formatting
-  if (run.bold) classes.push("font-bold");
-  if (run.italic) classes.push("italic");
-  if (run.underline) classes.push("underline");
-  if (run.strikethrough) classes.push("line-through");
+  
+  // Apply inline styles from text run properties
+  const baseStyles = getTextRunStyles(run);
+  if (baseStyles) {
+    span.style.cssText = baseStyles;
+  }
 
   // Advanced formatting
   if (enableAdvancedFormatting) {
@@ -32,14 +32,10 @@ export function renderEnhancedTextRun(
           wrapper.style.backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
         }
         
-        // Apply formatting classes
-        const wrapperClasses: string[] = [];
-        if (run.bold) wrapperClasses.push("font-bold");
-        if (run.italic) wrapperClasses.push("italic");
-        if (run.underline) wrapperClasses.push("underline");
-        if (run.strikethrough) wrapperClasses.push("line-through");
-        if (wrapperClasses.length > 0) {
-          wrapper.className = wrapperClasses.join(" ");
+        // Apply inline styles
+        const textStyles = getTextRunStyles(run);
+        if (textStyles) {
+          wrapper.style.cssText = textStyles;
         }
         
         // Handle links
@@ -48,11 +44,7 @@ export function renderEnhancedTextRun(
           link.href = run.link;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.className = wrapper.className;
           link.style.cssText = wrapper.style.cssText;
-          if (run.bold) {
-            link.style.fontWeight = "bold";
-          }
           link.appendChild(sup);
           return link;
         }
@@ -80,14 +72,10 @@ export function renderEnhancedTextRun(
           wrapper.style.backgroundColor = run.backgroundColor.startsWith("#") ? run.backgroundColor : `#${run.backgroundColor}`;
         }
         
-        // Apply formatting classes
-        const wrapperClasses: string[] = [];
-        if (run.bold) wrapperClasses.push("font-bold");
-        if (run.italic) wrapperClasses.push("italic");
-        if (run.underline) wrapperClasses.push("underline");
-        if (run.strikethrough) wrapperClasses.push("line-through");
-        if (wrapperClasses.length > 0) {
-          wrapper.className = wrapperClasses.join(" ");
+        // Apply inline styles
+        const textStyles = getTextRunStyles(run);
+        if (textStyles) {
+          wrapper.style.cssText = textStyles;
         }
         
         // Handle links
@@ -96,7 +84,7 @@ export function renderEnhancedTextRun(
           link.href = run.link;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.className = wrapper.className;
+          // Style already applied through cssText
           link.style.cssText = wrapper.style.cssText;
           link.appendChild(sub);
           return link;
@@ -109,63 +97,31 @@ export function renderEnhancedTextRun(
       return sub;
     }
 
-    // Text effects
-    if (run.shadow) classes.push("text-shadow");
-    if (run.outline) classes.push("text-outline");
-    if (run.emboss) classes.push("text-emboss");
-    if (run.imprint) classes.push("text-imprint");
-    if (run.smallCaps) classes.push("small-caps");
-    if (run.caps) classes.push("all-caps");
-    if (run.doubleStrikethrough) classes.push("double-strikethrough");
-    if (run.hidden) classes.push("hidden-text");
+    // Additional text effects already handled in style-utils
 
-    // Color support
-    if (run.color && run.color !== "auto") {
-      const colorMap: Record<string, string> = {
-        FF0000: "red",
-        "92D050": "green",
-        "0070C0": "blue",
-        FFD700: "yellow",
-        FFA500: "orange",
-        "9B59B6": "purple",
-        FF69B4: "pink",
-        "808080": "gray",
-        "000000": "black",
-        FFFFFF: "white",
-      };
-
-      const colorClass = colorMap[run.color.replace("#", "").toUpperCase()];
-      if (colorClass) {
-        classes.push(`text-color-${colorClass}`);
-      } else {
-        span.style.color = run.color.startsWith("#") ? run.color : `#${run.color}`;
-      }
-    }
+    // Colors are already handled in style-utils
 
     // Highlight support
     if (run.highlightColor && run.highlightColor !== "none") {
-      const highlightMap: Record<string, string> = {
-        yellow: "yellow",
-        green: "green",
-        cyan: "cyan",
-        magenta: "magenta",
-        blue: "blue",
-        red: "red",
-        darkGray: "gray",
-        lightGray: "gray",
+      const highlightColors: Record<string, string> = {
+        yellow: "#ffff00",
+        green: "#00ff00",
+        cyan: "#00ffff",
+        magenta: "#ff00ff",
+        blue: "#0000ff",
+        red: "#ff0000",
+        darkGray: "#808080",
+        lightGray: "#d3d3d3",
       };
 
-      const highlightClass = highlightMap[run.highlightColor];
-      if (highlightClass) {
-        classes.push(`highlight-${highlightClass}`);
+      const highlightColor = highlightColors[run.highlightColor];
+      if (highlightColor) {
+        span.style.backgroundColor = highlightColor;
       }
     }
   }
 
-  // Apply classes
-  if (classes.length > 0) {
-    span.className = classes.join(" ");
-  }
+  // No more classes to apply - all styling is inline
 
   // Handle links
   if (run.link) {
@@ -173,7 +129,7 @@ export function renderEnhancedTextRun(
     link.href = run.link;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.className = span.className;
+    link.style.cssText = span.style.cssText;
     link.textContent = run.text || "";
     return link;
   }
@@ -193,37 +149,12 @@ export function renderEnhancedParagraph(
   renderImage: (image: any) => HTMLElement,
 ): HTMLElement {
   const p = doc.createElement("p");
-  const classes: string[] = ["mb-4"];
-
-  // Handle alignment
-  if (paragraph.alignment) {
-    const alignMap: Record<string, string> = {
-      center: "text-center",
-      end: "text-right",
-      both: "text-justify",
-      distribute: "text-justify",
-    };
-    const alignClass = alignMap[paragraph.alignment];
-    if (alignClass) classes.push(alignClass);
+  
+  // Apply inline styles from paragraph properties
+  const styles = getParagraphStyles(paragraph);
+  if (styles) {
+    p.style.cssText = styles;
   }
-
-  // Apply style-based classes
-  if (paragraph.style) {
-    const styleMap: Record<string, string> = {
-      Heading1: "text-4xl font-bold",
-      Heading2: "text-3xl font-bold",
-      Heading3: "text-2xl font-bold",
-      Heading4: "text-xl font-semibold",
-      Heading5: "text-lg font-semibold",
-      Heading6: "text-base font-semibold",
-      Title: "text-4xl font-bold text-center",
-      Subtitle: "text-2xl text-center text-gray-600",
-    };
-    const styleClass = styleMap[paragraph.style];
-    if (styleClass) classes.push(...styleClass.split(" "));
-  }
-
-  p.className = classes.join(" ");
 
   // Check for dropcap (first character styling)
   if (
@@ -246,7 +177,7 @@ export function renderEnhancedParagraph(
       if (isLikelyDropcap) {
         // Create dropcap
         const dropcap = doc.createElement("span");
-        dropcap.className = "dropcap dropcap-3";
+        dropcap.style.cssText = "float: left; font-size: 3em; line-height: 0.8; margin: 0 0.1em 0 0; font-weight: bold;";
         dropcap.textContent = text.charAt(0);
         p.appendChild(dropcap);
 

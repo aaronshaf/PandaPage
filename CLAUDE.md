@@ -1,5 +1,15 @@
 # Project Guidelines for Claude
 
+## Styling Policy
+
+**IMPORTANT: Document Rendering Must Use Inline Styles**
+
+- When rendering document content (pages, text, tables, etc.), always use inline styles based on the parsed document properties
+- Tailwind CSS classes should ONLY be used for the viewer "chrome" (toolbar, buttons, navigation, etc.)
+- Never use Tailwind classes like `font-bold`, `text-4xl`, `mb-4` for rendering document content
+- All document styling should come from the document's own properties (fontSize, color, spacing, etc.)
+- Use the style utility functions to convert document properties to CSS styles
+
 ## View Modes
 
 ### Read Mode

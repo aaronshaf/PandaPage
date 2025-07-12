@@ -28,7 +28,7 @@ test("renderToHtml renders headings", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<h1 class="font-bold mb-4 text-4xl">');
+  expect(result).toContain('<h1 style="font-size: 32px; font-weight: bold; margin-bottom: 16px;">');
   expect(result).toContain("<span>Hello World</span></h1>");
 });
 
@@ -47,22 +47,22 @@ test("renderToHtml renders all heading levels", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain(
-    '<h1 class="font-bold mb-4 text-4xl"><span>H1</span></h1>',
+    '<h1 style="font-size: 32px; font-weight: bold; margin-bottom: 16px;"><span>H1</span></h1>',
   );
   expect(result).toContain(
-    '<h2 class="font-bold mb-4 text-3xl"><span>H2</span></h2>',
+    '<h2 style="font-size: 28px; font-weight: bold; margin-bottom: 14px;"><span>H2</span></h2>',
   );
   expect(result).toContain(
-    '<h3 class="font-bold mb-4 text-2xl"><span>H3</span></h3>',
+    '<h3 style="font-size: 24px; font-weight: bold; margin-bottom: 12px;"><span>H3</span></h3>',
   );
   expect(result).toContain(
-    '<h4 class="font-bold mb-4 text-xl"><span>H4</span></h4>',
+    '<h4 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;"><span>H4</span></h4>',
   );
   expect(result).toContain(
-    '<h5 class="font-bold mb-4 text-lg"><span>H5</span></h5>',
+    '<h5 style="font-size: 18px; font-weight: bold; margin-bottom: 9px;"><span>H5</span></h5>',
   );
   expect(result).toContain(
-    '<h6 class="font-bold mb-4"><span>H6</span></h6>',
+    '<h6 style="font-size: 16px; font-weight: bold; margin-bottom: 8px;"><span>H6</span></h6>',
   );
 });
 
@@ -78,6 +78,6 @@ test("renderToHtml renders paragraphs", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<p class="mb-4">');
+  expect(result).toContain('<p style="margin-bottom: 12px;">');
   expect(result).toContain("<span>This is a paragraph.</span></p>");
 });

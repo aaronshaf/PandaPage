@@ -7,6 +7,14 @@ import type {
   TextRun,
   Image,
 } from "@browser-document-viewer/parser";
+import {
+  getTextRunStyles,
+  getHeadingStyles,
+  getParagraphStyles,
+  getImageStyles,
+  getTableStyles,
+  getTableCellStyles,
+} from "./style-utils";
 
 export interface DomRenderOptions {
   includeStyles?: boolean;
@@ -58,25 +66,10 @@ function renderTextRun(run: TextRun, doc: Document): Node | Node[] {
     // Add text content
     baseNode.textContent = run.text;
 
-    // Apply styles
-    const styles: string[] = [];
-    const classes: string[] = [];
-
-    if (run.bold) classes.push("font-bold");
-    if (run.italic) classes.push("italic");
-    if (run.underline) classes.push("underline");
-    if (run.strikethrough) classes.push("line-through");
-
-    if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
-    if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
-    if (run.color) styles.push(`color: ${run.color}`);
-    if (run.backgroundColor) styles.push(`background-color: ${run.backgroundColor}`);
-
-    if (styles.length > 0) {
-      baseNode.style.cssText = styles.join("; ");
-    }
-    if (classes.length > 0) {
-      baseNode.className = classes.join(" ");
+    // Apply inline styles from text run properties
+    const styles = getTextRunStyles(run);
+    if (styles) {
+      baseNode.style.cssText = styles;
     }
   }
 
@@ -106,30 +99,17 @@ function renderParagraph(paragraph: Paragraph, doc: Document): HTMLElement {
 
   if (paragraph.listInfo) {
     element = doc.createElement("li");
-    const indent = paragraph.listInfo.level * 2;
-    element.className = `mb-4 ml-${indent * 4}`;
-
     if (paragraph.listInfo.type === "number" && paragraph.listInfo.text) {
       element.setAttribute("value", paragraph.listInfo.text);
     }
   } else {
     element = doc.createElement("p");
-    element.className = "mb-4";
   }
 
-  // Apply alignment
-  if (paragraph.alignment) {
-    switch (paragraph.alignment) {
-      case "center":
-        element.classList.add("text-center");
-        break;
-      case "end":
-        element.classList.add("text-right");
-        break;
-      case "both":
-        element.classList.add("text-justify");
-        break;
-    }
+  // Apply inline styles from paragraph properties
+  const styles = getParagraphStyles(paragraph);
+  if (styles) {
+    element.style.cssText = styles;
   }
 
   // Render runs
@@ -155,42 +135,12 @@ function renderParagraph(paragraph: Paragraph, doc: Document): HTMLElement {
 
 function renderHeading(heading: Heading, doc: Document): HTMLElement {
   const element = doc.createElement(`h${heading.level}`);
-  const classes = ["mb-4"];
-
-  // Add size classes based on heading level
-  switch (heading.level) {
-    case 1:
-      classes.push("text-4xl", "font-bold");
-      break;
-    case 2:
-      classes.push("text-3xl", "font-bold");
-      break;
-    case 3:
-      classes.push("text-2xl", "font-semibold");
-      break;
-    case 4:
-      classes.push("text-xl", "font-semibold");
-      break;
-    case 5:
-      classes.push("text-lg", "font-medium");
-      break;
-    case 6:
-      classes.push("text-base", "font-medium");
-      break;
+  
+  // Apply inline styles from heading properties
+  const styles = getHeadingStyles(heading);
+  if (styles) {
+    element.style.cssText = styles;
   }
-
-  if (heading.alignment) {
-    switch (heading.alignment) {
-      case "center":
-        classes.push("text-center");
-        break;
-      case "end":
-        classes.push("text-right");
-        break;
-    }
-  }
-
-  element.className = classes.join(" ");
 
   // Render runs
   heading.runs.forEach((run) => {
@@ -215,7 +165,7 @@ function renderHeading(heading: Heading, doc: Document): HTMLElement {
 
 function renderTable(table: Table, doc: Document): HTMLElement {
   const tableElement = doc.createElement("table");
-  tableElement.className = "border-collapse mb-4";
+  tableElement.style.cssText = getTableStyles();
 
   table.rows.forEach((row, rowIndex) => {
     const tr = doc.createElement("tr");
@@ -223,8 +173,7 @@ function renderTable(table: Table, doc: Document): HTMLElement {
     row.cells.forEach((cell) => {
       const tag = rowIndex === 0 ? "th" : "td";
       const cellElement = doc.createElement(tag);
-      cellElement.className =
-        rowIndex === 0 ? "border px-4 py-2 font-semibold" : "border px-4 py-2";
+      cellElement.style.cssText = getTableCellStyles(rowIndex === 0);
 
       if (cell.colspan) cellElement.setAttribute("colspan", cell.colspan.toString());
       if (cell.rowspan) cellElement.setAttribute("rowspan", cell.rowspan.toString());
@@ -256,7 +205,7 @@ function renderImage(image: Image, doc: Document): HTMLElement {
 
   img.src = `data:${image.mimeType};base64,${base64}`;
   img.alt = image.alt || "";
-  img.className = "max-w-full h-auto mb-4";
+  img.style.cssText = getImageStyles();
 
   if (image.width !== undefined) img.width = image.width;
   if (image.height !== undefined) img.height = image.height;
@@ -268,7 +217,7 @@ function renderHeader(header: DocumentElement, doc: Document): HTMLElement | nul
   if (header.type !== "header") return null;
 
   const element = doc.createElement("header");
-  element.className = "header mb-4 pb-2 border-b border-gray-300";
+  element.style.cssText = "margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #d1d5db";
 
   header.elements.forEach((el: any) => {
     let childElement: HTMLElement | null = null;
@@ -289,7 +238,7 @@ function renderFooter(footer: DocumentElement, doc: Document): HTMLElement | nul
   if (footer.type !== "footer") return null;
 
   const element = doc.createElement("footer");
-  element.className = "footer mt-4 pt-2 border-t border-gray-300";
+  element.style.cssText = "margin-top: 12px; padding-top: 8px; border-top: 1px solid #d1d5db";
 
   footer.elements.forEach((el: any) => {
     let childElement: HTMLElement | null = null;
@@ -311,7 +260,7 @@ function renderBookmark(bookmark: DocumentElement, doc: Document): HTMLElement |
 
   const span = doc.createElement("span");
   span.id = bookmark.name;
-  span.className = "bookmark-anchor";
+  span.style.cssText = "position: relative";
   span.setAttribute("data-bookmark-id", bookmark.id);
 
   return span;

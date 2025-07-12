@@ -82,11 +82,11 @@ test("renderToHtml renders bookmarks with content for deep linking", () => {
   const result = renderToHtml(doc);
   expect(result).toContain('<a id="introduction">Introduction Section</a>');
   expect(result).toContain('<a id="conclusion"></a>');
-  // Enhanced renderer uses classes for headings (order may vary)
+  // Enhanced renderer uses inline styles for headings (order may vary)
   expect(result).toContain(
-    '<h1 class="font-bold mb-4 text-4xl"><span>Introduction</span></h1>',
+    '<h1 style="font-size: 32px; font-weight: bold; margin-bottom: 16px;"><span>Introduction</span></h1>',
   );
   expect(result).toContain(
-    '<h1 class="font-bold mb-4 text-4xl"><span>Conclusion</span></h1>',
+    '<h1 style="font-size: 32px; font-weight: bold; margin-bottom: 16px;"><span>Conclusion</span></h1>',
   );
 });
