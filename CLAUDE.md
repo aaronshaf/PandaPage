@@ -62,6 +62,34 @@
 5. Focus on testing public APIs and critical paths
 6. Add integration tests for complex workflows
 
+## OOXML Types Usage Policy
+
+**IMPORTANT: Always use OOXML types from @browser-document-viewer/ooxml-types package**
+
+When working with DOCX, PPTX, or any OOXML-related functionality:
+
+- Import and use types from `@browser-document-viewer/ooxml-types` package
+- These types are derived directly from the official OOXML schema
+- Examples: `ST_Underline`, `ST_Jc`, `ST_HighlightColor`, `ST_VerticalAlignRun`, etc.
+- Never hardcode string literals for OOXML values - use the typed constants
+- This ensures type safety, better IDE support, and schema compliance
+- When adding new OOXML features, check if types already exist before creating custom ones
+
+Examples of correct usage:
+```typescript
+import { ST_Underline, ST_Jc, ST_HighlightColor } from "@browser-document-viewer/ooxml-types";
+
+// Correct - using typed constants
+alignment: ST_Jc.Center
+underline: ST_Underline.Single
+highlightColor: ST_HighlightColor.Yellow
+
+// Incorrect - hardcoded strings
+alignment: "center"
+underline: "single"  
+highlightColor: "yellow"
+```
+
 ## Git Hooks Policy
 
 **IMPORTANT: Never bypass git hooks under any circumstances.**
