@@ -28,7 +28,7 @@ test("Worker threshold calculations", () => {
 });
 
 test("Task ID generation uniqueness", () => {
-  const generateId = () => Math.random().toString(36).substr(2, 9);
+  const generateId = () => Math.random().toString(36).substring(2, 11);
 
   const ids = new Set();
   for (let i = 0; i < 1000; i++) {

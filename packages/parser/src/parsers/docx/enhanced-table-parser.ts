@@ -31,9 +31,74 @@ import type { DocxStylesheet } from "./style-parser";
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from "./xml-utils";
 
 /**
+ * Calculate rowspans for cells with vMerge properties
+ * This processes the table after parsing to properly set rowspan values
+ */
+export function calculateRowSpans(table: Table): void {
+  const numCols = Math.max(...table.rows.map(row => row.cells.length));
+  
+  // Track which cells are part of a vertical merge
+  const mergedCells = new Set<string>();
+  
+  // Process each column
+  for (let colIndex = 0; colIndex < numCols; colIndex++) {
+    let rowspanStart = -1;
+    let rowspanCount = 0;
+    
+    // Process each row in the column
+    for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
+      const row = table.rows[rowIndex];
+      if (!row || !row.cells[colIndex]) continue;
+      
+      const cell = row.cells[colIndex];
+      const vMerge = (cell as any)._vMerge;
+      
+      if (vMerge === "restart") {
+        // Start of a new merged region
+        rowspanStart = rowIndex;
+        rowspanCount = 1;
+      } else if (vMerge === "continue" && rowspanStart !== -1) {
+        // Continuation of a merged region
+        rowspanCount++;
+        // Mark this cell as merged (it should not be rendered)
+        mergedCells.add(`${rowIndex}-${colIndex}`);
+        // Hide this cell by marking it
+        (cell as any)._merged = true;
+      } else if (rowspanStart !== -1) {
+        // End of merged region (cell without vMerge after a merge)
+        if (rowspanCount > 1) {
+          // Set the rowspan on the starting cell
+          const startCell = table.rows[rowspanStart]?.cells[colIndex];
+          if (startCell) {
+            startCell.rowspan = rowspanCount;
+          }
+        }
+        rowspanStart = -1;
+        rowspanCount = 0;
+      }
+    }
+    
+    // Handle case where merge extends to the last row
+    if (rowspanStart !== -1 && rowspanCount > 1) {
+      const startCell = table.rows[rowspanStart]?.cells[colIndex];
+      if (startCell) {
+        startCell.rowspan = rowspanCount;
+      }
+    }
+  }
+  
+  // Clean up temporary vMerge properties but keep _merged for rendering
+  for (const row of table.rows) {
+    for (const cell of row.cells) {
+      delete (cell as any)._vMerge;
+    }
+  }
+}
+
+/**
  * Parse enhanced table border element with full OOXML type support
  */
-function parseEnhancedTableBorder(borderElement: Element | null): TableBorder | undefined {
+export function parseEnhancedTableBorder(borderElement: Element | null): TableBorder | undefined {
   if (!borderElement) return undefined;
 
   const border: TableBorder = {};
@@ -154,7 +219,7 @@ function parseEnhancedShading(shdElement: Element | null): TableShading | undefi
 /**
  * Parse enhanced table cell with comprehensive OOXML support
  */
-function parseEnhancedTableCell(
+export function parseEnhancedTableCell(
   cellElement: Element,
   relationships: Map<string, string>,
   theme: DocxTheme | undefined,
@@ -209,12 +274,8 @@ function parseEnhancedTableCell(
     const vMergeElement = getElementByTagNameNSFallback(tcPrElement, "w", "vMerge");
     if (vMergeElement) {
       const vMergeVal = vMergeElement.getAttribute("w:val") as ST_Merge | null;
-      if (vMergeVal === "restart") {
-        // This cell starts a new merged region
-        // We need to calculate rowspan by counting subsequent cells with vMerge="continue"
-        // For now, mark as spanning cell (implementation can be enhanced)
-        cell.rowspan = 1; // Will be calculated properly in full implementation
-      }
+      // Mark the cell with vMerge info for post-processing
+      (cell as any)._vMerge = vMergeVal || "continue"; // If no val attribute, it's implicitly "continue"
     }
 
     // Vertical alignment
@@ -361,6 +422,9 @@ export function parseEnhancedTable(
     const row = parseEnhancedTableRow(rowElement, relationships, theme, stylesheet);
     table.rows.push(row);
   }
+
+  // Post-process to calculate rowspans for vMerge
+  calculateRowSpans(table);
 
   return table.rows.length > 0 ? table : null;
 }

@@ -5,6 +5,7 @@
 
 import type { Table, TableCell, TableBorder, TableShading } from "@browser-document-viewer/parser";
 import type { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
+import { validateColor, validateCSSValue, validateNumeric, validateBorderStyle } from "./css-validation";
 
 /**
  * Convert OOXML border style to CSS border style
@@ -152,8 +153,10 @@ export function generateBorderCSS(border: TableBorder): string {
   }
 
   const style = convertBorderStyleToCSS(border.style);
-  const width = border.width ? `${border.width}pt` : "1pt";
-  const color = border.color || "#000000";
+  const validatedWidth = validateNumeric(border.width, 0.5, 20, 1);
+  const width = `${validatedWidth}pt`;
+  const validatedColor = validateColor(border.color || "#000000");
+  const color = validatedColor || "#000000";
 
   return `${width} ${style} ${color}`;
 }
@@ -162,7 +165,7 @@ export function generateBorderCSS(border: TableBorder): string {
  * Enhanced table rendering with comprehensive visual support
  */
 export function renderEnhancedTable(table: Table): string {
-  const tableId = `table-${Math.random().toString(36).substr(2, 9)}`;
+  const tableId = `table-${Math.random().toString(36).substring(2, 11)}`;
   
   // Generate table-level styles
   const tableStyles: string[] = [
@@ -235,6 +238,8 @@ export function renderEnhancedTable(table: Table): string {
     html += `<tr>`;
 
     for (const cell of row.cells) {
+      // Skip cells marked as merged
+      if ((cell as any)._merged) continue;
       html += renderEnhancedTableCell(cell, rowIndex === 0);
     }
 
@@ -316,7 +321,10 @@ export function renderEnhancedTableCell(cell: TableCell, isHeaderRow: boolean = 
 
   // Apply cell width
   if (cell.width) {
-    cellStyles.push(`width: ${cell.width}px`);
+    const validatedWidth = validateCSSValue(cell.width);
+    if (validatedWidth) {
+      cellStyles.push(`width: ${validatedWidth}`);
+    }
   }
 
   // Apply text direction
