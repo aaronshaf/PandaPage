@@ -4,11 +4,17 @@ import { convertLineSpacing } from "./units";
 // DPI assumption for all conversions - standard web display DPI
 const WEB_DPI = 96;
 
-// Standard line spacing in twips (1 line = 240 twips at normal spacing)
-const NORMAL_LINE_SPACING_TWIPS = 240;
-
 // List indentation per level in pixels
 const LIST_INDENT_PER_LEVEL = 40;
+
+// Helper function to apply line spacing if present and content exists
+function applyLineSpacing(spacing: { line?: number; lineRule?: "auto" | "exact" | "atLeast" } | undefined, hasContent: boolean): string | null {
+  if (spacing?.line && hasContent) {
+    const lineHeight = convertLineSpacing(spacing.line, spacing.lineRule);
+    return `line-height: ${lineHeight}`;
+  }
+  return null;
+}
 
 // Convert twips to pixels (1 twip = 1/1440 inch, assuming 96 DPI)
 export function twipsToPixels(twips: number): number {
@@ -124,21 +130,8 @@ export function getHeadingStyles(heading: Heading): string {
   if (heading.spacing) {
     if (heading.spacing.before) styles.push(`margin-top: ${twipsToPixels(heading.spacing.before)}px`);
     if (heading.spacing.after) styles.push(`margin-bottom: ${twipsToPixels(heading.spacing.after)}px`);
-    if (heading.spacing.line) {
-      // Validate spacing values to prevent extreme layouts
-      const lineSpacingTwips = heading.spacing.line;
-      const maxReasonableSpacing = 720; // 0.5 inch in twips
-      
-      if (lineSpacingTwips <= maxReasonableSpacing) {
-        const lineHeight = convertLineSpacing(lineSpacingTwips, heading.spacing.lineRule);
-        styles.push(`line-height: ${lineHeight}`);
-      } else {
-        // For extreme values, cap at reasonable maximum
-        console.warn(`Extreme heading line spacing detected (${lineSpacingTwips} twips), capping at maximum`);
-        const lineHeight = convertLineSpacing(maxReasonableSpacing, heading.spacing.lineRule);
-        styles.push(`line-height: ${lineHeight}`);
-      }
-    }
+    const lineSpacingStyle = applyLineSpacing(heading.spacing, true);
+    if (lineSpacingStyle) styles.push(lineSpacingStyle);
   } else {
     // Default margins
     styles.push(`margin-bottom: ${fontSize * 0.5}px`);
@@ -188,21 +181,8 @@ export function getParagraphStyles(paragraph: Paragraph): string {
     if (paragraph.spacing.after) styles.push(`margin-bottom: ${twipsToPixels(paragraph.spacing.after)}px`);
     
     // Only apply line spacing for paragraphs with content
-    if (paragraph.spacing.line && hasContent) {
-      // Validate spacing values to prevent extreme layouts
-      const lineSpacingTwips = paragraph.spacing.line;
-      const maxReasonableSpacing = 720; // 0.5 inch in twips
-      
-      if (lineSpacingTwips <= maxReasonableSpacing) {
-        const lineHeight = convertLineSpacing(lineSpacingTwips, paragraph.spacing.lineRule);
-        styles.push(`line-height: ${lineHeight}`);
-      } else {
-        // For extreme values, cap at reasonable maximum
-        console.warn(`Extreme line spacing detected (${lineSpacingTwips} twips), capping at maximum`);
-        const lineHeight = convertLineSpacing(maxReasonableSpacing, paragraph.spacing.lineRule);
-        styles.push(`line-height: ${lineHeight}`);
-      }
-    }
+    const lineSpacingStyle = applyLineSpacing(paragraph.spacing, hasContent);
+    if (lineSpacingStyle) styles.push(lineSpacingStyle);
   } else if (hasContent) {
     // Default margin only for paragraphs with content
     styles.push("margin-bottom: 12px");
