@@ -1,6 +1,7 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from "bun:test";
 import { parseEnhancedTable, parseEnhancedTableBorder, calculateRowSpans, parseEnhancedTableCell } from "./enhanced-table-parser";
 import type { Table, TableBorder, TableShading } from "../../types/document";
+import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
 import { JSDOM } from "jsdom";
 
@@ -223,8 +224,8 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       expect(table?.rows[0].cells[1].rowspan).toBe(3);
       
       // Check that cells at 1,1 and 2,1 are marked as merged
-      expect((table?.rows[1].cells[1] as any)._merged).toBe(true);
-      expect((table?.rows[2].cells[1] as any)._merged).toBe(true);
+      expect((table?.rows[1].cells[1] as ProcessingTableCell)._merged).toBe(true);
+      expect((table?.rows[2].cells[1] as ProcessingTableCell)._merged).toBe(true);
       
       // Restore mocks
       jest.restoreAllMocks();
@@ -358,7 +359,7 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       expect(table?.rows[0].cells[0].rowspan).toBe(2);
       
       // Cell in second row should be marked as merged
-      expect((table?.rows[1].cells[0] as any)._merged).toBe(true);
+      expect((table?.rows[1].cells[0] as ProcessingTableCell)._merged).toBe(true);
       
       // Other cells should not have rowspan
       expect(table?.rows[0].cells[1].rowspan).toBeUndefined();

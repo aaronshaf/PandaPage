@@ -4,6 +4,7 @@
  */
 
 import type { Table, TableCell, TableBorder, TableShading } from "@browser-document-viewer/parser";
+import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import type { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
 import { validateColor, validateCSSValue, validateNumeric, validateBorderStyle } from "./css-validation";
 
@@ -239,7 +240,7 @@ export function renderEnhancedTable(table: Table): string {
 
     for (const cell of row.cells) {
       // Skip cells marked as merged
-      if ((cell as any)._merged) continue;
+      if ((cell as ProcessingTableCell)._merged) continue;
       html += renderEnhancedTableCell(cell, rowIndex === 0);
     }
 
