@@ -8,7 +8,6 @@ export { EnhancedDOMRenderer, type EnhancedDOMRenderOptions } from "./improved-d
 
 // Export table utilities
 export { renderEnhancedTableDOM, applyTableStyles, applyCellStyles } from "./enhanced-table-dom-utils";
-export { injectTableStyles, getTableStylesCSS } from "./inject-table-styles";
 
 export interface HtmlRenderOptions {
   includeStyles?: boolean;

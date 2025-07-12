@@ -28,7 +28,9 @@ export function renderEnhancedTable(
   // Always use the original DOM-based renderer for compatibility with existing tests and functionality
   // The enhanced table renderer can be used separately for documents with complex table formatting
   const tableEl = doc.createElement("table");
-  tableEl.className = "table-fancy";
+  // Apply basic table styles inline
+  tableEl.style.borderCollapse = "collapse";
+  tableEl.style.width = "100%";
 
   // Track merged cells to avoid rendering them multiple times
   const mergedCells = new Set<string>();
@@ -48,7 +50,6 @@ export function renderEnhancedTable(
       // Handle cell merging
       if (cell.rowspan && cell.rowspan > 1) {
         cellEl.rowSpan = cell.rowspan;
-        cellEl.classList.add("cell-merged");
 
         // Mark cells that are covered by this merged cell
         for (let i = 1; i < cell.rowspan; i++) {
@@ -58,7 +59,6 @@ export function renderEnhancedTable(
 
       if (cell.colspan && cell.colspan > 1) {
         cellEl.colSpan = cell.colspan;
-        cellEl.classList.add("cell-merged");
 
         // Mark cells that are covered by this merged cell
         for (let j = 1; j < cell.colspan; j++) {

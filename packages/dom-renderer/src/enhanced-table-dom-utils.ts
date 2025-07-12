@@ -17,11 +17,7 @@ export function applyTableStyles(
   table: Table,
   doc: Document
 ): void {
-  // Add CSS classes
-  tableEl.classList.add("doc-table", "doc-table-enhanced");
-  if (table.borders || table.shading) {
-    tableEl.classList.add("doc-table-fancy");
-  }
+  // No CSS classes - all styling via inline styles from document properties
 
   // Apply base styles
   tableEl.style.borderCollapse = "separate";
@@ -146,11 +142,9 @@ export function applyCellStyles(
   // Apply cell spanning
   if (cell.colspan && cell.colspan > 1) {
     cellEl.colSpan = cell.colspan;
-    cellEl.classList.add("cell-merged");
   }
   if (cell.rowspan && cell.rowspan > 1) {
     cellEl.rowSpan = cell.rowspan;
-    cellEl.classList.add("cell-merged");
   }
 
   // Apply vertical alignment
@@ -234,22 +228,26 @@ export function applyCellStyles(
       case "lrV":
         cellEl.style.writingMode = "vertical-lr";
         cellEl.style.textOrientation = "mixed";
-        cellEl.classList.add("vertical-text");
+        cellEl.style.height = "150px";
+        cellEl.style.whiteSpace = "nowrap";
         break;
       case "tbV":
         cellEl.style.writingMode = "vertical-rl";
         cellEl.style.textOrientation = "upright";
-        cellEl.classList.add("vertical-text");
+        cellEl.style.height = "150px";
+        cellEl.style.whiteSpace = "nowrap";
         break;
       case "lrTbV":
         cellEl.style.writingMode = "vertical-lr";
         cellEl.style.textOrientation = "upright";
-        cellEl.classList.add("vertical-text-lr");
+        cellEl.style.height = "150px";
+        cellEl.style.whiteSpace = "nowrap";
         break;
       case "tbLrV":
         cellEl.style.writingMode = "vertical-rl";
         cellEl.style.textOrientation = "mixed";
-        cellEl.classList.add("vertical-text");
+        cellEl.style.height = "150px";
+        cellEl.style.whiteSpace = "nowrap";
         break;
       default:
         cellEl.style.direction = "ltr";
@@ -262,7 +260,9 @@ export function applyCellStyles(
  */
 export function createTableWrapper(doc: Document): HTMLDivElement {
   const wrapper = doc.createElement("div");
-  wrapper.classList.add("doc-table-wrapper");
+  wrapper.style.overflowX = "auto";
+  (wrapper.style as any).WebkitOverflowScrolling = "touch";
+  wrapper.style.margin = "1em 0";
   return wrapper;
 }
 
