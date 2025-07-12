@@ -24,22 +24,26 @@ export function formatColor(color: string | undefined): string | null {
 
 // Convert points to pixels (1 point = 1/72 inch, assuming 96 DPI)
 export function pointsToPixels(points: number): number {
-  return Math.round((points / 72) * 96);
+  return Math.round((points / 72) * WEB_DPI);
 }
 
 // Get text run styles as CSS
 export function getTextRunStyles(run: TextRun): string {
   const styles: string[] = [];
 
+  // Basic text formatting
   if (run.bold) styles.push("font-weight: bold");
   if (run.italic) styles.push("font-style: italic");
+  
+  // Handle underline with defensive type checking
   if (run.underline) {
     if (typeof run.underline === "boolean") {
       styles.push("text-decoration: underline");
     } else {
-      // Handle specific underline styles from OOXML using type-safe mapping
-      const underlineStyle = UNDERLINE_STYLES[run.underline as UnderlineStyle];
-      if (underlineStyle) {
+      // Safely check if the underline style exists in our mapping
+      const underlineKey = run.underline as string;
+      if (underlineKey in UNDERLINE_STYLES) {
+        const underlineStyle = UNDERLINE_STYLES[underlineKey as UnderlineStyle];
         styles.push(underlineStyle);
       } else {
         // Default fallback for unknown underline types
@@ -48,19 +52,23 @@ export function getTextRunStyles(run: TextRun): string {
       }
     }
   }
-  if (run.strikethrough) styles.push("text-decoration-line: line-through");
-  if (run.doubleStrikethrough) styles.push("text-decoration-line: line-through", "text-decoration-style: double");
   
+  // Strike-through formatting
+  if (run.strikethrough) styles.push("text-decoration-line: line-through");
+  if (run.doubleStrikethrough) {
+    styles.push("text-decoration-line: line-through", "text-decoration-style: double");
+  }
+  
+  // Font properties
   if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
   if (run.fontFamily) styles.push(`font-family: ${run.fontFamily}`);
+  
+  // Colors
   const color = formatColor(run.color);
-  if (color) {
-    styles.push(`color: ${color}`);
-  }
+  if (color) styles.push(`color: ${color}`);
+  
   const backgroundColor = formatColor(run.backgroundColor);
-  if (backgroundColor) {
-    styles.push(`background-color: ${backgroundColor}`);
-  }
+  if (backgroundColor) styles.push(`background-color: ${backgroundColor}`);
   
   // Advanced text formatting
   if (run.characterSpacing) styles.push(`letter-spacing: ${twipsToPixels(run.characterSpacing)}px`);
@@ -70,6 +78,7 @@ export function getTextRunStyles(run: TextRun): string {
   if (run.hidden) styles.push("display: none");
   if (run.textScale) styles.push(`transform: scaleX(${run.textScale / 100})`);
   if (run.shadow) styles.push("text-shadow: 1px 1px 2px rgba(0,0,0,0.5)");
+  
   if (run.outline) {
     styles.push("color: transparent");
     styles.push("-webkit-text-stroke: 1px currentColor");
