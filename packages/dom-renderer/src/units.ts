@@ -42,15 +42,26 @@ export function halfPointsToPt(halfPoints: string | number): string {
 export function convertLineSpacing(value: number, lineRule?: "auto" | "exact" | "atLeast"): string {
   switch (lineRule) {
     case "exact":
-      // Exact line height in points
+      // Exact line height in points - use absolute unit
       return twipsToPt(value);
     case "atLeast":
-      // Minimum line height
+      // Minimum line height in points - use absolute unit
       return twipsToPt(value);
     case "auto":
     default:
-      // Auto means the value is in 240ths of a line
-      // Normal line height is 240, so divide by 240 to get a multiplier
-      return (value / 240).toFixed(2);
+      // Auto means the value is in 240ths of a line (relative to font size)
+      // Normal line spacing is 240 twips, so divide by 240 to get a unitless multiplier
+      const ratio = value / 240;
+      
+      // Ensure reasonable bounds for auto line spacing
+      const minRatio = 0.8; // Don't go below 80% (too cramped)
+      const maxRatio = 3.0; // Don't go above 300% (too spaced)
+      const clampedRatio = Math.max(minRatio, Math.min(maxRatio, ratio));
+      
+      if (clampedRatio !== ratio) {
+        console.warn(`Line spacing ratio ${ratio.toFixed(2)} is extreme, clamping to ${clampedRatio.toFixed(2)}`);
+      }
+      
+      return clampedRatio.toFixed(2);
   }
 }

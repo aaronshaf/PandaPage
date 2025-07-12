@@ -1,4 +1,5 @@
 import type { Paragraph, Heading, TextRun } from "@browser-document-viewer/parser";
+import { convertLineSpacing } from "./units";
 
 // DPI assumption for all conversions - standard web display DPI
 const WEB_DPI = 96;
@@ -124,12 +125,19 @@ export function getHeadingStyles(heading: Heading): string {
     if (heading.spacing.before) styles.push(`margin-top: ${twipsToPixels(heading.spacing.before)}px`);
     if (heading.spacing.after) styles.push(`margin-bottom: ${twipsToPixels(heading.spacing.after)}px`);
     if (heading.spacing.line) {
-      const lineHeight = heading.spacing.lineRule === "exact" 
-        ? `${twipsToPixels(heading.spacing.line)}px`
-        : heading.spacing.lineRule === "atLeast"
-        ? `${Math.max(1.2, twipsToPixels(heading.spacing.line) / fontSize)}`
-        : `${twipsToPixels(heading.spacing.line) / fontSize}`;
-      styles.push(`line-height: ${lineHeight}`);
+      // Validate spacing values to prevent extreme layouts
+      const lineSpacingTwips = heading.spacing.line;
+      const maxReasonableSpacing = 720; // 0.5 inch in twips
+      
+      if (lineSpacingTwips <= maxReasonableSpacing) {
+        const lineHeight = convertLineSpacing(lineSpacingTwips, heading.spacing.lineRule);
+        styles.push(`line-height: ${lineHeight}`);
+      } else {
+        // For extreme values, cap at reasonable maximum
+        console.warn(`Extreme heading line spacing detected (${lineSpacingTwips} twips), capping at maximum`);
+        const lineHeight = convertLineSpacing(maxReasonableSpacing, heading.spacing.lineRule);
+        styles.push(`line-height: ${lineHeight}`);
+      }
     }
   } else {
     // Default margins
@@ -170,20 +178,33 @@ export function getHeadingStyles(heading: Heading): string {
 export function getParagraphStyles(paragraph: Paragraph): string {
   const styles: string[] = [];
 
+  // Check if paragraph has content (non-empty runs)
+  const hasContent = paragraph.runs && paragraph.runs.length > 0 && 
+    paragraph.runs.some(run => run.text && run.text.trim().length > 0);
+
   // Apply spacing if defined
   if (paragraph.spacing) {
     if (paragraph.spacing.before) styles.push(`margin-top: ${twipsToPixels(paragraph.spacing.before)}px`);
     if (paragraph.spacing.after) styles.push(`margin-bottom: ${twipsToPixels(paragraph.spacing.after)}px`);
-    if (paragraph.spacing.line) {
-      const lineHeight = paragraph.spacing.lineRule === "exact" 
-        ? `${twipsToPixels(paragraph.spacing.line)}px`
-        : paragraph.spacing.lineRule === "atLeast"
-        ? `${Math.max(1.2, twipsToPixels(paragraph.spacing.line) / 16)}`
-        : `${twipsToPixels(paragraph.spacing.line) / NORMAL_LINE_SPACING_TWIPS}`;
-      styles.push(`line-height: ${lineHeight}`);
+    
+    // Only apply line spacing for paragraphs with content
+    if (paragraph.spacing.line && hasContent) {
+      // Validate spacing values to prevent extreme layouts
+      const lineSpacingTwips = paragraph.spacing.line;
+      const maxReasonableSpacing = 720; // 0.5 inch in twips
+      
+      if (lineSpacingTwips <= maxReasonableSpacing) {
+        const lineHeight = convertLineSpacing(lineSpacingTwips, paragraph.spacing.lineRule);
+        styles.push(`line-height: ${lineHeight}`);
+      } else {
+        // For extreme values, cap at reasonable maximum
+        console.warn(`Extreme line spacing detected (${lineSpacingTwips} twips), capping at maximum`);
+        const lineHeight = convertLineSpacing(maxReasonableSpacing, paragraph.spacing.lineRule);
+        styles.push(`line-height: ${lineHeight}`);
+      }
     }
-  } else {
-    // Default margin
+  } else if (hasContent) {
+    // Default margin only for paragraphs with content
     styles.push("margin-bottom: 12px");
   }
 
