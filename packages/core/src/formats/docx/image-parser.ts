@@ -210,7 +210,12 @@ const IMAGE_FORMATS = {
   jpeg: { mimeType: 'image/jpeg', magic: [0xFF, 0xD8, 0xFF] },
   gif: { mimeType: 'image/gif', magic: [0x47, 0x49, 0x46] },
   bmp: { mimeType: 'image/bmp', magic: [0x42, 0x4D] },
-  webp: { mimeType: 'image/webp', magic: [0x52, 0x49, 0x46, 0x46] },
+  webp: { 
+    mimeType: 'image/webp', 
+    magic: [0x52, 0x49, 0x46, 0x46], // RIFF
+    secondaryMagic: [0x57, 0x45, 0x42, 0x50], // WEBP at offset 8
+    secondaryOffset: 8 
+  },
 } as const;
 
 /**
@@ -232,6 +237,23 @@ const detectImageFormat = (data: Uint8Array): string | null => {
           break;
         }
       }
+      
+      // Check secondary magic bytes if present (e.g., for WebP)
+      if (matches && 'secondaryMagic' in info && info.secondaryMagic && info.secondaryOffset) {
+        const secondaryMagic = info.secondaryMagic;
+        const offset = info.secondaryOffset;
+        if (data.length >= offset + secondaryMagic.length) {
+          for (let i = 0; i < secondaryMagic.length; i++) {
+            if (data[offset + i] !== secondaryMagic[i]) {
+              matches = false;
+              break;
+            }
+          }
+        } else {
+          matches = false;
+        }
+      }
+      
       if (matches) {
         return format;
       }
@@ -265,7 +287,7 @@ export const extractImageFromZip = (
           debug.log(`Image too large: ${imageData.length} bytes (max: ${MAX_IMAGE_SIZE})`);
           return yield* Effect.fail({
             _tag: "DocxParseError" as const,
-            message: `Image too large: ${(imageData.length / 1024 / 1024).toFixed(2)}MB (max: ${MAX_IMAGE_SIZE / 1024 / 1024}MB)`,
+            message: `Image exceeds size limit: ${(imageData.length / 1024 / 1024).toFixed(1)}MB (maximum: ${MAX_IMAGE_SIZE / 1024 / 1024}MB)`,
           });
         }
         
@@ -282,6 +304,8 @@ export const extractImageFromZip = (
             // Use btoa in browser, Buffer in Node.js
             if (typeof btoa !== 'undefined') {
               // Browser environment
+              // TODO: For large images, consider using FileReader.readAsDataURL() 
+              // or streaming approaches to avoid loading entire image into memory
               let binary = '';
               for (let i = 0; i < imageData.length; i++) {
                 binary += String.fromCharCode(imageData[i]!);
