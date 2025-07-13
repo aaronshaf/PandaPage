@@ -15,12 +15,16 @@ export interface DocxRun {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean | ST_Underline; // Support both boolean and specific underline styles
+  underlineColor?: string; // Underline color (hex format)
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
   fontSize?: string; // Regular font size in half-points (w:sz)
   fontSizeCs?: string; // Complex script font size in half-points (w:szCs)
-  fontFamily?: string;
+  fontFamily?: string; // ASCII font (w:ascii)
+  fontFamilyCs?: string; // Complex script font (w:cs)
+  fontFamilyHAnsi?: string; // High ANSI font (w:hAnsi)
+  fontFamilyEastAsia?: string; // East Asian font (w:eastAsia)
   color?: string; // Hex color (ST_HexColorRGB format)
   backgroundColor?: string; // Background color from highlighting
   highlightColor?: ST_HighlightColor; // Text highlighting
@@ -45,6 +49,8 @@ export interface DocxRun {
   textScale?: number; // Horizontal scaling percentage (w:w)
   emphasis?: ST_Em; // w:em - East Asian emphasis marks
   lang?: ST_Lang; // Language code (w:lang)
+  bidi?: boolean; // Bidirectional text (w:bidi attribute on w:lang)
+  rtl?: boolean; // Right-to-left text direction (w:rtl)
   verticalAlign?: ST_VerticalAlignRun; // Vertical alignment (superscript/subscript/baseline)
 }
 

@@ -267,12 +267,16 @@ export function parseRun(
   let bold = false;
   let italic = false;
   let underline = false;
+  let underlineColor: string | undefined;
   let strikethrough = false;
   let superscript = false;
   let subscript = false;
   let fontSize: string | undefined;
   let fontSizeCs: string | undefined;
   let fontFamily: string | undefined;
+  let fontFamilyCs: string | undefined;
+  let fontFamilyHAnsi: string | undefined;
+  let fontFamilyEastAsia: string | undefined;
   let color: string | undefined;
   let backgroundColor: string | undefined;
 
@@ -291,6 +295,8 @@ export function parseRun(
   let textScale: number | undefined;
   let emphasis: ST_Em | undefined;
   let lang: string | undefined;
+  let bidi = false;
+  let rtl = false;
 
   if (runProps) {
     // Bold - check both b and bCs, OR logic (either can make text bold)
@@ -303,8 +309,25 @@ export function parseRun(
     const hasICs = parseOnOffValue(runProps, ns, "iCs");
     italic = hasI || hasICs; // OR logic: italic is true if either is present and enabled
 
-    // Underline - check for u element (note: this is more complex than OnOff)
-    underline = hasChildElementNS(runProps, ns, "u");
+    // Underline - check for u element and its properties
+    const underlineElement = getElementByTagNameNSFallback(runProps, ns, "u");
+    if (underlineElement) {
+      // Check underline style
+      const underlineVal = underlineElement.getAttribute("w:val");
+      if (underlineVal === "none") {
+        underline = false;
+      } else {
+        // If no val attribute or val is not "none", it's underlined
+        underline = true;
+      }
+      
+      // Check underline color
+      const underlineColorAttr = underlineElement.getAttribute("w:color");
+      if (underlineColorAttr && underlineColorAttr !== "auto") {
+        // Convert to hex format if needed
+        underlineColor = underlineColorAttr.startsWith("#") ? underlineColorAttr : `#${underlineColorAttr}`;
+      }
+    }
 
     // Strikethrough
     strikethrough = parseOnOffValue(runProps, ns, "strike");
@@ -328,14 +351,50 @@ export function parseRun(
 
     // Font family
     const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
-    const fontAscii = fontElement?.getAttribute("w:ascii");
-    if (fontAscii) {
-      // Check if it's a theme font reference (starts with +)
-      if (fontAscii.startsWith("+") && theme) {
-        const resolvedFont = resolveThemeFont(fontAscii, theme);
-        fontFamily = resolvedFont || fontAscii;
-      } else {
-        fontFamily = fontAscii;
+    if (fontElement) {
+      // ASCII font (w:ascii)
+      const fontAscii = fontElement.getAttribute("w:ascii");
+      if (fontAscii) {
+        // Check if it's a theme font reference (starts with +)
+        if (fontAscii.startsWith("+") && theme) {
+          const resolvedFont = resolveThemeFont(fontAscii, theme);
+          fontFamily = resolvedFont || fontAscii;
+        } else {
+          fontFamily = fontAscii;
+        }
+      }
+      
+      // Complex script font (w:cs)
+      const fontCs = fontElement.getAttribute("w:cs");
+      if (fontCs) {
+        if (fontCs.startsWith("+") && theme) {
+          const resolvedFont = resolveThemeFont(fontCs, theme);
+          fontFamilyCs = resolvedFont || fontCs;
+        } else {
+          fontFamilyCs = fontCs;
+        }
+      }
+      
+      // High ANSI font (w:hAnsi)
+      const fontHAnsi = fontElement.getAttribute("w:hAnsi");
+      if (fontHAnsi) {
+        if (fontHAnsi.startsWith("+") && theme) {
+          const resolvedFont = resolveThemeFont(fontHAnsi, theme);
+          fontFamilyHAnsi = resolvedFont || fontHAnsi;
+        } else {
+          fontFamilyHAnsi = fontHAnsi;
+        }
+      }
+      
+      // East Asian font (w:eastAsia)
+      const fontEastAsia = fontElement.getAttribute("w:eastAsia");
+      if (fontEastAsia) {
+        if (fontEastAsia.startsWith("+") && theme) {
+          const resolvedFont = resolveThemeFont(fontEastAsia, theme);
+          fontFamilyEastAsia = resolvedFont || fontEastAsia;
+        } else {
+          fontFamilyEastAsia = fontEastAsia;
+        }
       }
     }
 
@@ -350,6 +409,32 @@ export function parseRun(
         color = resolvedColor || colorVal;
       } else {
         color = colorVal;
+      }
+    }
+
+    // Check for w14:textFill element for advanced color properties
+    // This is used in Office 2010+ for gradient fills and advanced color effects
+    const textFillElements = runProps.getElementsByTagName("w14:textFill");
+    if (textFillElements.length > 0 && !color) {
+      const textFillElement = textFillElements[0];
+      if (textFillElement) {
+        // Check for solid fill
+        const solidFillElements = textFillElement.getElementsByTagName("w14:solidFill");
+        if (solidFillElements.length > 0) {
+          const solidFillElement = solidFillElements[0];
+          if (solidFillElement) {
+            // Check for srgbClr
+            const srgbClrElements = solidFillElement.getElementsByTagName("w14:srgbClr");
+            if (srgbClrElements.length > 0) {
+              const srgbClrElement = srgbClrElements[0];
+              const srgbVal = srgbClrElement?.getAttribute("w14:val");
+              if (srgbVal) {
+                // Convert RRGGBB to #RRGGBB
+                color = srgbVal.startsWith("#") ? srgbVal : `#${srgbVal}`;
+              }
+            }
+          }
+        }
       }
     }
 
@@ -444,10 +529,26 @@ export function parseRun(
       }
     }
 
+    // RTL (Right-to-Left) text direction
+    const rtlElement = getElementByTagNameNSFallback(runProps, ns, "rtl");
+    if (rtlElement) {
+      const rtlVal = rtlElement.getAttribute("w:val");
+      // If w:val is "1" or missing/empty (default is true), text is RTL
+      rtl = rtlVal === "1" || rtlVal === null || rtlVal === "";
+    }
+
     // Language - but don't apply language attributes to punctuation-only text
     // This prevents issues where quotation marks get incorrectly tagged with Arabic or other language codes
     const langElement = getElementByTagNameNSFallback(runProps, ns, "lang");
     const langValue = langElement?.getAttribute("w:val");
+
+    // Check for bidirectional text attribute
+    if (langElement) {
+      const bidiValue = langElement.getAttribute("w:bidi");
+      if (bidiValue) {
+        bidi = true; // Presence of w:bidi attribute indicates bidirectional text
+      }
+    }
 
     // Only apply language if it's not punctuation-only text or if it's a sensible language for punctuation
     if (langValue && !isPunctuationOnly(text)) {
@@ -470,12 +571,16 @@ export function parseRun(
       bold,
       italic,
       underline,
+      underlineColor,
       strikethrough,
       superscript,
       subscript,
       fontSize,
       fontSizeCs,
       fontFamily,
+      fontFamilyCs,
+      fontFamilyHAnsi,
+      fontFamilyEastAsia,
       color,
       backgroundColor,
       characterSpacing,
@@ -492,6 +597,8 @@ export function parseRun(
       textScale,
       emphasis,
       lang,
+      bidi,
+      rtl,
     };
 
     // Apply style cascade (no paragraph style ID here, just run properties)
@@ -508,12 +615,16 @@ export function parseRun(
       bold: resolvedRunProps.bold ?? false,
       italic: resolvedRunProps.italic ?? false,
       underline: resolvedRunProps.underline ?? false,
+      underlineColor: resolvedRunProps.underlineColor,
       strikethrough: resolvedRunProps.strikethrough ?? false,
       superscript: resolvedRunProps.superscript ?? false,
       subscript: resolvedRunProps.subscript ?? false,
       fontSize: resolvedRunProps.fontSize,
       fontSizeCs: resolvedRunProps.fontSizeCs,
       fontFamily: resolvedRunProps.fontFamily,
+      fontFamilyCs: resolvedRunProps.fontFamilyCs,
+      fontFamilyHAnsi: resolvedRunProps.fontFamilyHAnsi,
+      fontFamilyEastAsia: resolvedRunProps.fontFamilyEastAsia,
       color: resolvedRunProps.color,
       backgroundColor: resolvedRunProps.backgroundColor,
       link: linkUrl,
@@ -531,6 +642,8 @@ export function parseRun(
       textScale: resolvedRunProps.textScale,
       emphasis: resolvedRunProps.emphasis,
       lang: resolvedRunProps.lang,
+      bidi: resolvedRunProps.bidi ?? false,
+      rtl: resolvedRunProps.rtl ?? false,
     };
   }
 
@@ -539,12 +652,16 @@ export function parseRun(
     bold,
     italic,
     underline,
+    underlineColor,
     strikethrough,
     superscript,
     subscript,
     fontSize,
     fontSizeCs,
     fontFamily,
+    fontFamilyCs,
+    fontFamilyHAnsi,
+    fontFamilyEastAsia,
     color,
     backgroundColor,
     link: linkUrl,
@@ -562,5 +679,7 @@ export function parseRun(
     textScale,
     emphasis,
     lang,
+    bidi,
+    rtl,
   };
 }

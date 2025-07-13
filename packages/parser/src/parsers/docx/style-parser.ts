@@ -48,12 +48,16 @@ export interface DocxRunProperties {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  underlineColor?: string; // Underline color (hex format)
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
   fontSize?: string; // half-points (w:sz)
   fontSizeCs?: string; // complex script font size in half-points (w:szCs)
-  fontFamily?: string;
+  fontFamily?: string; // ASCII font (w:ascii)
+  fontFamilyCs?: string; // Complex script font (w:cs)
+  fontFamilyHAnsi?: string; // High ANSI font (w:hAnsi)
+  fontFamilyEastAsia?: string; // East Asian font (w:eastAsia)
   color?: string;
   backgroundColor?: string;
   // Advanced text formatting
@@ -71,6 +75,8 @@ export interface DocxRunProperties {
   textScale?: number; // Horizontal scaling percentage
   emphasis?: ST_Em;
   lang?: string;
+  bidi?: boolean; // Bidirectional text (w:bidi attribute on w:lang)
+  rtl?: boolean; // Right-to-left text direction (w:rtl)
 }
 
 export interface DocxStylesheet {
