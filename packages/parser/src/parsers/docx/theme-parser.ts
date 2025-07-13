@@ -229,3 +229,30 @@ export function resolveThemeFont(fontRef: string, theme: DocxTheme): string | un
 
   return undefined;
 }
+
+/**
+ * Resolve theme font attribute reference (e.g., "minorHAnsi", "majorEastAsia")
+ * @param themeRef - Theme reference (e.g., "minorHAnsi", "majorEastAsia", "minorBidi")
+ * @param theme - Document theme
+ * @returns Resolved font name or undefined
+ */
+export function resolveThemeFontAttribute(themeRef: string, theme: DocxTheme): string | undefined {
+  // Map theme font attributes to theme font categories
+  const themeMap: Record<string, { type: "major" | "minor"; script: string }> = {
+    // Minor fonts
+    minorHAnsi: { type: "minor", script: "latin" },
+    minorAscii: { type: "minor", script: "latin" },
+    minorEastAsia: { type: "minor", script: "ea" },
+    minorBidi: { type: "minor", script: "cs" },
+    // Major fonts
+    majorHAnsi: { type: "major", script: "latin" },
+    majorAscii: { type: "major", script: "latin" },
+    majorEastAsia: { type: "major", script: "ea" },
+    majorBidi: { type: "major", script: "cs" },
+  };
+
+  const mapping = themeMap[themeRef];
+  if (!mapping) return undefined;
+
+  return theme.fonts[mapping.type].get(mapping.script);
+}
