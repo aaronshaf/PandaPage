@@ -172,7 +172,7 @@ export const parseDocumentXmlWithDom = (
                 const colorElement = colorElements[0];
                 if (colorElement) {
                   const colorVal = colorElement.getAttribute("w:val");
-                  if (colorVal && colorVal !== "auto" && colorVal !== "000000") {
+                  if (colorVal && colorVal !== "auto") {
                     // Basic hex color validation and conversion
                     if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
                       color = `#${colorVal}`;
