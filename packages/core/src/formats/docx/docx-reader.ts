@@ -101,8 +101,19 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
         numbering = yield* parseNumberingXmlWithDom(numberingContent);
       }
 
+      // Try to get relationships for hyperlinks
+      let relationshipsContent: string | undefined;
+      let relationshipsXml = unzipped["word/_rels/document.xml.rels"];
+      if (!relationshipsXml) {
+        relationshipsXml = unzipped["_rels/document.xml.rels"];
+      }
+      if (relationshipsXml) {
+        relationshipsContent = strFromU8(relationshipsXml);
+        debug.log("Relationships XML length:", relationshipsContent.length);
+      }
+
       // Parse the XML to extract text using DOM parser instead of regex
-      const paragraphs = yield* parseDocumentXmlWithDom(xmlContent);
+      const paragraphs = yield* parseDocumentXmlWithDom(xmlContent, relationshipsContent);
 
       return { paragraphs, numbering };
     } catch (error) {

@@ -6,6 +6,10 @@ import {
   paragraphContainsFields,
   type DocxField,
 } from "./form-field-parser";
+import {
+  loadHyperlinkRelationships,
+} from "./hyperlink-integration";
+import type { HyperlinkRelationship } from "./hyperlink-parser";
 import type { DocxParagraph, DocxRun, DocxParseError } from "./docx-reader";
 
 // Get XMLSerializer for both browser and Node.js environments
@@ -28,15 +32,109 @@ function getXMLSerializer(): XMLSerializer {
 }
 
 /**
+ * Extract run data (text and formatting) from a run element
+ */
+function extractRunData(runElement: Element): DocxRun {
+  // Parse the run content to extract text and special elements in order
+  let runText = "";
+
+  // Process text elements
+  const textElements = runElement.getElementsByTagName("w:t");
+  for (const textElement of textElements) {
+    runText += textElement.textContent || "";
+  }
+
+  // Process tab elements
+  const tabElements = runElement.getElementsByTagName("w:tab");
+  for (const tabElement of tabElements) {
+    runText += "\t";
+  }
+
+  // Process break elements
+  const breakElements = runElement.getElementsByTagName("w:br");
+  for (const breakElement of breakElements) {
+    const type = breakElement.getAttribute("w:type");
+    if (type === "page") {
+      // Page break
+      runText += "\u000C"; // Form feed character (page break)
+    } else {
+      // Regular line break
+      runText += "\n";
+    }
+  }
+
+  // Check for formatting in run properties using getElementsByTagName
+  const rPrElements = runElement.getElementsByTagName("w:rPr");
+  let bold = false;
+  let italic = false;
+  let underline = false;
+  let color: string | undefined;
+
+  if (rPrElements.length > 0) {
+    const rPr = rPrElements[0];
+    if (rPr) {
+      bold = rPr.getElementsByTagName("w:b").length > 0;
+      italic = rPr.getElementsByTagName("w:i").length > 0;
+
+      // Check for underline - need to verify the w:val attribute
+      const underlineElements = rPr.getElementsByTagName("w:u");
+      if (underlineElements.length > 0) {
+        const underlineElement = underlineElements[0];
+        if (underlineElement) {
+          const val = underlineElement.getAttribute("w:val");
+          const colorAttr = underlineElement.getAttribute("w:color");
+
+          if (val) {
+            // If w:val is present, only apply underline if it's not "none" or "0"
+            underline = val !== "none" && val !== "0";
+          } else if (!colorAttr) {
+            // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
+            underline = true;
+          }
+          // If w:color but no w:val, it's likely for color styling only, not underline
+        }
+      }
+
+      // Check for text color
+      const colorElements = rPr.getElementsByTagName("w:color");
+      if (colorElements.length > 0) {
+        const colorElement = colorElements[0];
+        if (colorElement) {
+          const colorVal = colorElement.getAttribute("w:val");
+          if (colorVal && colorVal !== "auto") {
+            // Basic hex color validation and conversion
+            if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
+              color = `#${colorVal}`;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    text: runText,
+    ...(bold && { bold }),
+    ...(italic && { italic }),
+    ...(underline && { underline }),
+    ...(color && { color }),
+  };
+}
+
+/**
  * Parse document.xml content using proper DOM parsing instead of regex
  * This replaces the problematic regex-based parsing that fails with nested XML
  */
 export const parseDocumentXmlWithDom = (
   xmlContent: string,
+  relationshipsXml?: string,
 ): Effect.Effect<DocxParagraph[], DocxParseError> =>
   Effect.gen(function* () {
     const paragraphs: DocxParagraph[] = [];
     const wordNamespaceURI = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+
+    // Load hyperlink relationships if provided
+    const relationships = yield* loadHyperlinkRelationships(relationshipsXml);
 
     // Parse XML with proper DOM parser using existing utilities
     const doc = yield* parseXmlString(xmlContent).pipe(
@@ -100,97 +198,42 @@ export const parseDocumentXmlWithDom = (
         }
       }
 
-      // Extract runs within the paragraph
+      // Extract runs within the paragraph in document order
       const runs: DocxRun[] = [];
-      const runElements = pElement.getElementsByTagName("w:r");
-
-      for (const runElement of runElements) {
-        // Parse the run content to extract text and special elements in order
-        let runText = "";
-
-        // Process text elements
-        const textElements = runElement.getElementsByTagName("w:t");
-        for (const textElement of textElements) {
-          runText += textElement.textContent || "";
-        }
-
-        // Process tab elements
-        const tabElements = runElement.getElementsByTagName("w:tab");
-        for (const tabElement of tabElements) {
-          runText += "\t";
-        }
-
-        // Process break elements
-        const breakElements = runElement.getElementsByTagName("w:br");
-        for (const breakElement of breakElements) {
-          const type = breakElement.getAttribute("w:type");
-          if (type === "page") {
-            // Page break
-            runText += "\u000C"; // Form feed character (page break)
-          } else {
-            // Regular line break
-            runText += "\n";
+      
+      // Process all child elements in order to maintain document structure
+      for (const child of pElement.children) {
+        if (child.tagName === "w:hyperlink") {
+          // Process hyperlink element
+          const rId = child.getAttribute("r:id");
+          const anchor = child.getAttribute("w:anchor");
+          
+          let hyperlinkUrl: string | undefined;
+          if (rId && relationships.has(rId)) {
+            hyperlinkUrl = relationships.get(rId)?.target;
+          } else if (anchor) {
+            hyperlinkUrl = `#${anchor}`;
           }
-        }
-
-        if (runText) {
-          // Check for formatting in run properties using getElementsByTagName
-          const rPrElements = runElement.getElementsByTagName("w:rPr");
-          let bold = false;
-          let italic = false;
-          let underline = false;
-          let color: string | undefined;
-
-          if (rPrElements.length > 0) {
-            const rPr = rPrElements[0];
-            if (rPr) {
-              bold = rPr.getElementsByTagName("w:b").length > 0;
-              italic = rPr.getElementsByTagName("w:i").length > 0;
-
-              // Check for underline - need to verify the w:val attribute
-              const underlineElements = rPr.getElementsByTagName("w:u");
-              if (underlineElements.length > 0) {
-                const underlineElement = underlineElements[0];
-                if (underlineElement) {
-                  const val = underlineElement.getAttribute("w:val");
-                  const colorAttr = underlineElement.getAttribute("w:color");
-
-                  if (val) {
-                    // If w:val is present, only apply underline if it's not "none" or "0"
-                    underline = val !== "none" && val !== "0";
-                  } else if (!colorAttr) {
-                    // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
-                    underline = true;
-                  }
-                  // If w:color but no w:val, it's likely for color styling only, not underline
-                }
-              }
-
-              // Check for text color
-              const colorElements = rPr.getElementsByTagName("w:color");
-              if (colorElements.length > 0) {
-                const colorElement = colorElements[0];
-                if (colorElement) {
-                  const colorVal = colorElement.getAttribute("w:val");
-                  if (colorVal && colorVal !== "auto") {
-                    // Basic hex color validation and conversion
-                    if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
-                      color = `#${colorVal}`;
-                    }
-                  }
-                }
-              }
+          
+          // Get runs within the hyperlink
+          const hyperlinkRunElements = child.getElementsByTagName("w:r");
+          for (const runElement of hyperlinkRunElements) {
+            const runData = extractRunData(runElement);
+            if (runData.text) {
+              runs.push({
+                ...runData,
+                ...(hyperlinkUrl && { hyperlink: hyperlinkUrl }),
+              });
             }
           }
-
-          runs.push({
-            text: runText,
-            ...(bold && { bold }),
-            ...(italic && { italic }),
-            ...(underline && { underline }),
-            ...(color && { color }),
-          });
+        } else if (child.tagName === "w:r") {
+          // Process regular run element
+          const runData = extractRunData(child);
+          if (runData.text) {
+            runs.push(runData);
+          }
         }
+        // Other elements (w:pPr, etc.) are processed elsewhere
       }
 
       if (runs.length > 0 || fields) {
