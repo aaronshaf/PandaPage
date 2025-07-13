@@ -48,6 +48,7 @@ export interface DocxRunProperties {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  underlineColor?: string; // Underline color (hex format)
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
@@ -76,6 +77,8 @@ export interface DocxRunProperties {
   textScale?: number; // Horizontal scaling percentage
   emphasis?: ST_Em;
   lang?: string;
+  bidi?: boolean; // Bidirectional text (w:bidi attribute on w:lang)
+  rtl?: boolean; // Right-to-left text direction (w:rtl)
 }
 
 export interface DocxStylesheet {

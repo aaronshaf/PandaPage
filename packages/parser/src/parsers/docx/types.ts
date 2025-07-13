@@ -15,6 +15,7 @@ export interface DocxRun {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean | ST_Underline; // Support both boolean and specific underline styles
+  underlineColor?: string; // Underline color (hex format)
   strikethrough?: boolean;
   superscript?: boolean;
   subscript?: boolean;
@@ -50,6 +51,8 @@ export interface DocxRun {
   textScale?: number; // Horizontal scaling percentage (w:w)
   emphasis?: ST_Em; // w:em - East Asian emphasis marks
   lang?: ST_Lang; // Language code (w:lang)
+  bidi?: boolean; // Bidirectional text (w:bidi attribute on w:lang)
+  rtl?: boolean; // Right-to-left text direction (w:rtl)
   verticalAlign?: ST_VerticalAlignRun; // Vertical alignment (superscript/subscript/baseline)
 }
 
