@@ -38,6 +38,9 @@ test("createFieldPlaceholder evaluates sum(above) formula", () => {
   };
 
   const context = {
+    bookmarks: new Map(),
+    sequences: new Map(),
+    currentDate: new Date(),
     tableValues: [10, 20, 30]
   };
 
@@ -55,6 +58,9 @@ test("createFieldPlaceholder evaluates average(above) formula", () => {
   };
 
   const context = {
+    bookmarks: new Map(),
+    sequences: new Map(),
+    currentDate: new Date(),
     tableValues: [10, 20, 30]
   };
 
@@ -72,6 +78,9 @@ test("createFieldPlaceholder evaluates count(above) formula", () => {
   };
 
   const context = {
+    bookmarks: new Map(),
+    sequences: new Map(),
+    currentDate: new Date(),
     tableValues: [10, 20, 30, 40, 50]
   };
 
@@ -115,6 +124,9 @@ test("createFieldPlaceholder returns default for empty table values", () => {
   };
 
   const context = {
+    bookmarks: new Map(),
+    sequences: new Map(),
+    currentDate: new Date(),
     tableValues: []
   };
 

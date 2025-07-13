@@ -153,7 +153,7 @@ test("renderToHtml handles font styling", () => {
 
   const result = renderToHtml(doc);
   // Enhanced renderer now uses inline styles for all formatting
-  expect(result).toContain('<span style="font-family: Arial;">arial text</span>');
+  expect(result).toContain('<span style="font-family: Arial, sans-serif;">arial text</span>');
   expect(result).toContain('<span style="font-size: 18pt;">large text</span>');
   expect(result).toContain('style="color: #FF0000;"');
   expect(result).toContain('<span style="background-color: #FFFF00;">highlighted</span>');

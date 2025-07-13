@@ -37,7 +37,7 @@ test("parseParagraph extracts drawing elements", () => {
   ]);
 
   const paragraph = parseParagraph(
-    paragraphElement, 
+    paragraphElement! as unknown as Element, 
     undefined, 
     imageRelationships,
     { /* mock zip */ }
@@ -106,7 +106,7 @@ test("parseParagraph handles multiple drawings", () => {
   ]);
 
   const paragraph = parseParagraph(
-    paragraphElement, 
+    paragraphElement! as unknown as Element, 
     undefined, 
     imageRelationships,
     { /* mock zip */ }

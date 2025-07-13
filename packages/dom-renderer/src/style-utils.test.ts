@@ -169,7 +169,7 @@ describe("Style Utils", () => {
       };
       const result = getTextRunStyles(run);
       expect(result).toContain("font-size: 14pt");
-      expect(result).toContain("font-family: Arial");
+      expect(result).toContain("font-family: \"Arial\"");
     });
 
     it("should handle colors", () => {

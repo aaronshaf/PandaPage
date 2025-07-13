@@ -432,7 +432,7 @@ function evaluateFormula(
   }
 
   // Simple arithmetic expressions like =A1+B1 (not implemented - would need cell references)
-  if (cleanFormula.match(/^=\d+[\+\-\*\/]\d+$/)) {
+  if (cleanFormula.match(/^=\d+[+\-*/]\d+$/)) {
     try {
       // Basic arithmetic evaluation (be careful with eval!)
       const expression = cleanFormula.substring(1); // Remove =

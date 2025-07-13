@@ -8,7 +8,7 @@ describe("006.docx Analysis", () => {
   it("should analyze 006.docx structure and content", async () => {
     const docPath = join(__dirname, "../../../documents/006.docx");
     const buffer = readFileSync(docPath);
-    const effectResult = readEnhancedDocx(buffer);
+    const effectResult = readEnhancedDocx(buffer.buffer);
     const result = await Effect.runPromise(effectResult);
     
     console.log("Parse result:", result);
@@ -55,10 +55,10 @@ describe("006.docx Analysis", () => {
         console.log(`\nTable at index ${index}:`, JSON.stringify(element, null, 2).substring(0, 500) + "...");
         
         // Check for formulas in cells
-        element.rows.forEach(row => {
-          row.cells.forEach(cell => {
-            cell.paragraphs.forEach(para => {
-              const text = para.runs?.map(r => r.text).join("") || "";
+        element.rows.forEach((row: any) => {
+          row.cells.forEach((cell: any) => {
+            cell.paragraphs.forEach((para: any) => {
+              const text = para.runs?.map((r: any) => r.text).join("") || "";
               if (text.includes("=sum") || text.includes("SEQ")) {
                 tableWithFormulas++;
               }
@@ -89,7 +89,7 @@ describe("006.docx Analysis", () => {
       } else if (element.type === "table") {
         console.log(`  ${index}: table with ${element.rows.length} rows`);
       } else {
-        console.log(`  ${index}: ${element.type}`);
+        console.log(`  ${index}: ${(element as any).type}`);
       }
     });
     

@@ -16,7 +16,7 @@ test("parseRun handles complex script fonts (eastAsia)", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("東京");
@@ -36,7 +36,7 @@ test("parseRun handles multiple font attributes", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("Mixed text 漢字");
@@ -59,7 +59,7 @@ test("parseRun handles ASCII font when no eastAsia font", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("English text");
@@ -81,7 +81,7 @@ test("parseRun handles complex script font priority", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("العربية");
@@ -103,14 +103,19 @@ test("parseRun handles theme fonts with eastAsia", () => {
 
   const theme = {
     fonts: {
+      major: new Map([
+        ["latin", "Calibri Light"],
+        ["ea", "Yu Gothic Light"]
+      ]),
       minor: new Map([
         ["latin", "Calibri"],
         ["ea", "Yu Gothic"] // ea = east asia
       ])
-    }
+    },
+    colors: new Map() // Required by DocxTheme interface
   };
 
-  const run = parseRun(runElement, ns, undefined, undefined, theme);
+  const run = parseRun(runElement! as unknown as Element, ns, undefined, undefined, theme);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("Theme fonts test");

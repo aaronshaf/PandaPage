@@ -16,7 +16,7 @@ test("parseRun handles character spacing from w:spacing", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("Text with spacing");
@@ -35,7 +35,7 @@ test("parseRun handles negative character spacing", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("Condensed text");
@@ -57,7 +57,7 @@ test("parseRun handles character spacing with other formatting", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const runElement = doc.documentElement;
 
-  const run = parseRun(runElement, ns);
+  const run = parseRun(runElement! as unknown as Element, ns);
 
   expect(run).not.toBeNull();
   expect(run?.text).toBe("Bold italic spaced text");

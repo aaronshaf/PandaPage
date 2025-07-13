@@ -16,7 +16,7 @@ test("parseParagraph handles fldSimple field codes", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const paragraphElement = doc.documentElement;
 
-  const paragraph = parseParagraph(paragraphElement);
+  const paragraph = parseParagraph(paragraphElement! as unknown as Element);
 
   expect(paragraph).not.toBeNull();
   expect(paragraph?.runs.length).toBe(1);
@@ -48,8 +48,10 @@ test("parseParagraph handles complex field codes with fldChar", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const paragraphElement = doc.documentElement;
 
-  const paragraph = parseParagraph(paragraphElement, undefined, undefined, undefined, undefined, undefined, {
+  const paragraph = parseParagraph(paragraphElement! as unknown as Element, undefined, undefined, undefined, undefined, undefined, {
+    bookmarks: new Map(),
     sequences: new Map(),
+    currentDate: new Date(),
   });
 
   expect(paragraph).not.toBeNull();
@@ -72,12 +74,12 @@ test("parseParagraph handles HYPERLINK field codes", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const paragraphElement = doc.documentElement;
 
-  const paragraph = parseParagraph(paragraphElement);
+  const paragraph = parseParagraph(paragraphElement! as unknown as Element);
 
   expect(paragraph).not.toBeNull();
   expect(paragraph?.runs.length).toBe(1);
   expect(paragraph?.runs[0]?.text).toBe("https://example.com");
-  expect(paragraph.runs[0]?.link).toBe("https://example.com");
+  expect(paragraph?.runs[0]?.link).toBe("https://example.com");
   expect((paragraph?.runs[0] as any)?._fieldCode).toBe("HYPERLINK");
 });
 
@@ -95,8 +97,10 @@ test("parseParagraph handles REF field codes with bookmarks", () => {
   const paragraphElement = doc.documentElement;
 
   const bookmarks = new Map([["_Ref12345678", "Section 1.2"]]);
-  const paragraph = parseParagraph(paragraphElement, undefined, undefined, undefined, undefined, undefined, {
+  const paragraph = parseParagraph(paragraphElement! as unknown as Element, undefined, undefined, undefined, undefined, undefined, {
     bookmarks,
+    sequences: new Map(),
+    currentDate: new Date(),
   });
 
   expect(paragraph).not.toBeNull();
@@ -121,7 +125,9 @@ test("parseParagraph handles DATE field codes", () => {
   const paragraphElement = doc.documentElement;
 
   const testDate = new Date("2023-12-25");
-  const paragraph = parseParagraph(paragraphElement, undefined, undefined, undefined, undefined, undefined, {
+  const paragraph = parseParagraph(paragraphElement! as unknown as Element, undefined, undefined, undefined, undefined, undefined, {
+    bookmarks: new Map(),
+    sequences: new Map(),
     currentDate: testDate,
   });
 
