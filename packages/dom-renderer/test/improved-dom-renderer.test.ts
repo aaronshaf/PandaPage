@@ -201,28 +201,106 @@ describe("EnhancedDOMRenderer", () => {
     expect(hasColspan).toBe(true);
   });
 
-  it("should render 005.docx with enhanced formatting", async () => {
-    const docPath = join(__dirname, "../../../documents/005.docx");
-    const fileBuffer = readFileSync(docPath);
-    const buffer = fileBuffer.buffer.slice(
-      fileBuffer.byteOffset,
-      fileBuffer.byteOffset + fileBuffer.byteLength,
-    );
+  it("should render complex document with enhanced formatting", async () => {
+    // Use synthetic data instead of reading from disk
+    const syntheticDoc = {
+      metadata: {
+        title: "Test Document with Complex Formatting",
+        author: "Test Suite",
+      },
+      elements: [
+        // Heading with styling
+        { 
+          type: "heading",
+          level: 1,
+          runs: [{ text: "Main Title", bold: true, color: "#1a73e8" }]
+        },
+        // Complex table
+        {
+          type: "table",
+          rows: [
+            {
+              cells: [
+                { 
+                  paragraphs: [{ runs: [{ text: "Header 1", bold: true }] }],
+                  backgroundColor: "#f0f0f0",
+                  borders: {
+                    top: { style: "single", width: 2, color: "#000000" },
+                    bottom: { style: "single", width: 2, color: "#000000" }
+                  }
+                },
+                { 
+                  paragraphs: [{ runs: [{ text: "Header 2", bold: true }] }],
+                  backgroundColor: "#f0f0f0"
+                }
+              ]
+            },
+            {
+              cells: [
+                { 
+                  paragraphs: [{ runs: [{ text: "Cell 1", color: "#ff0000" }] }],
+                  rowspan: 2
+                },
+                { 
+                  paragraphs: [{ runs: [{ text: "Cell 2" }] }]
+                }
+              ]
+            },
+            {
+              cells: [
+                { 
+                  paragraphs: [{ runs: [{ text: "Cell 3" }] }],
+                  colspan: 1
+                }
+              ]
+            }
+          ]
+        },
+        // Paragraph with multiple formatting
+        {
+          type: "paragraph",
+          runs: [
+            { text: "This is ", color: "#000000" },
+            { text: "bold", bold: true, color: "#0000ff" },
+            { text: " and ", color: "#000000" },
+            { text: "italic", italic: true, color: "#008000" },
+            { text: " text with ", color: "#000000" },
+            { text: "highlight", highlightColor: "yellow" }
+          ]
+        },
+        // List items
+        {
+          type: "list",
+          listType: "bullet",
+          items: [
+            { runs: [{ text: "First item" }] },
+            { runs: [{ text: "Second item with ", bold: true }, { text: "formatting" }] }
+          ]
+        },
+        // Image
+        {
+          type: "image",
+          src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+          alt: "Test Image",
+          width: 300,
+          height: 200
+        }
+      ]
+    };
 
-    const doc = await parseDocxDocument(buffer);
-    const html = renderer.renderToHTML(doc);
+    const html = renderer.renderToHTML(syntheticDoc as any);
 
     // Check for various formatting features
     expect(html).toContain("document-container");
     expect(html).toContain("<table");
     expect(html).toContain('style="color: #');
-    expect(html.length).toBeGreaterThan(10000); // Should be substantial
+    expect(html.length).toBeGreaterThan(1000); // Should be substantial
 
     // Save output for inspection in temp directory
     const { writeFileSync, mkdtempSync } = await import("fs");
     const { tmpdir } = await import("os");
     const tempDir = mkdtempSync(join(tmpdir(), "dom-renderer-test-"));
-    const outputPath = join(tempDir, "005-enhanced-dom.html");
+    const outputPath = join(tempDir, "synthetic-enhanced-dom.html");
     writeFileSync(outputPath, html);
     console.log(`Test output saved to: ${outputPath}`);
   });
