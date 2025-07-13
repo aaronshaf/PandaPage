@@ -67,8 +67,9 @@ describe("Image Utils", () => {
       const figure = createLazyImage(image, doc);
       const img = figure.querySelector("img") as HTMLImageElement;
       
-      expect(img.width).toBe(300);
-      expect(img.height).toBe(200);
+      // Now using CSS dimensions for high-DPI support
+      expect(img.style.width).toBe("300px");
+      expect(img.style.height).toBe("200px");
     });
 
     it("should create lazy loading attributes", () => {

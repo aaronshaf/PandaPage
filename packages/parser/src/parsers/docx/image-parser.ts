@@ -87,10 +87,11 @@ export function parseDrawing(drawingElement: Element): DrawingInfo | null {
       const cx = extent.getAttribute("cx");
       const cy = extent.getAttribute("cy");
 
-      // Convert EMUs (English Metric Units) to pixels
-      // 1 pixel = 9525 EMUs
-      if (cx) width = Math.round(parseInt(cx) / 9525);
-      if (cy) height = Math.round(parseInt(cy) / 9525);
+      // Convert EMUs (English Metric Units) to CSS pixels
+      // 1 EMU = 1/914400 inch, using 96 DPI for CSS pixels
+      // This ensures consistent sizing across different displays
+      if (cx) width = Math.round((parseInt(cx) / 914400) * 96);
+      if (cy) height = Math.round((parseInt(cy) / 914400) * 96);
     }
   }
 

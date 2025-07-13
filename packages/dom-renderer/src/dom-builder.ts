@@ -207,8 +207,13 @@ function renderImage(image: Image, doc: Document): HTMLElement {
   img.alt = image.alt || "";
   img.style.cssText = getImageStyles();
 
-  if (image.width !== undefined) img.width = image.width;
-  if (image.height !== undefined) img.height = image.height;
+  // Use CSS dimensions for proper high-DPI display support
+  if (image.width !== undefined) {
+    img.style.width = `${image.width}px`;
+  }
+  if (image.height !== undefined) {
+    img.style.height = `${image.height}px`;
+  }
 
   return img;
 }

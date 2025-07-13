@@ -416,7 +416,7 @@ describe("Style Utils", () => {
   describe("getImageStyles", () => {
     it("should return standard image styles", () => {
       const result = getImageStyles();
-      expect(result).toBe("max-width: 100%; height: auto; margin-bottom: 12px");
+      expect(result).toBe("max-width: 100%; height: auto; margin-bottom: 12px; object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges");
     });
   });
 

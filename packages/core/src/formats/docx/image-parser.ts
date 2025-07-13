@@ -196,9 +196,16 @@ export const parseDrawingElement = (
 
 /**
  * Convert EMUs (English Metric Units) to pixels for display
- * 1 EMU = 1/914400 inch, assuming 96 DPI
+ * 1 EMU = 1/914400 inch
+ * 
+ * This function now returns CSS pixels (not device pixels) to ensure
+ * consistent sizing across different DPI displays. The browser will
+ * automatically handle high-DPI rendering when these values are used
+ * in CSS width/height properties.
  */
 export const emusToPixels = (emus: number): number => {
+  // Use standard 96 DPI for CSS pixels
+  // The browser handles device pixel ratio automatically
   return Math.round((emus / 914400) * 96);
 };
 

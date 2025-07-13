@@ -411,12 +411,19 @@ export function renderImage(
     img.alt = image.alt || "Image failed to load";
   }
 
-  if (image.width) img.width = image.width;
-  if (image.height) img.height = image.height;
+  // Use CSS dimensions instead of HTML attributes for proper high-DPI support
+  // This ensures the browser correctly handles retina/high-DPI displays
+  if (image.width) {
+    img.style.width = `${image.width}px`;
+  }
+  if (image.height) {
+    img.style.height = `${image.height}px`;
+  }
   if (image.alt) img.alt = image.alt;
 
+  // Ensure responsive behavior while maintaining aspect ratio
   img.style.maxWidth = "100%";
-  img.style.height = "auto";
+  img.style.objectFit = "contain";
   img.style.marginBottom = "12pt";
 
   return img;

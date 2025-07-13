@@ -70,12 +70,13 @@ export function createLazyImage(image: Image, doc: Document): HTMLElement {
     figure.setAttribute("aria-label", "Document image");
   }
 
+  // Use CSS dimensions for proper high-DPI display support
   if (image.width) {
-    img.width = image.width;
+    img.style.width = `${image.width}px`;
   }
 
   if (image.height) {
-    img.height = image.height;
+    img.style.height = `${image.height}px`;
   }
 
   figure.appendChild(img);

@@ -300,9 +300,11 @@ export function getParagraphStyles(paragraph: Paragraph): string {
   return styles.join("; ");
 }
 
-// Get image styles
+// Get image styles with high-DPI support
 export function getImageStyles(): string {
-  return "max-width: 100%; height: auto; margin-bottom: 12px";
+  // Use object-fit to maintain aspect ratio on high-DPI displays
+  // The image-rendering property ensures crisp rendering on retina screens
+  return "max-width: 100%; height: auto; margin-bottom: 12px; object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges";
 }
 
 // Get table styles
