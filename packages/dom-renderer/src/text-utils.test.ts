@@ -122,7 +122,7 @@ describe("Text Utils", () => {
 
       const result = renderEnhancedTextRun(run, document, true);
 
-      expect(result.style.textShadow).toContain("1px 1px 2px rgba(0,0,0,0.5)");
+      expect(result.style.textShadow).toContain("-1px -1px 0 rgba(255,255,255,0.8), 1px 1px 0 rgba(0,0,0,0.3)");
       expect(result.style.color).toBe("transparent");
       expect(result.style.webkitTextStroke).toBe("1px currentColor");
       // emboss and imprint effects are handled via textShadow

@@ -6,6 +6,7 @@ import {
   type DocxField,
 } from "./form-field-parser";
 import { parseDocumentXmlWithDom, parseNumberingXmlWithDom } from "./dom-parser";
+import { parseXmlString } from "../../common/xml-parser";
 
 // Error types
 export class DocxParseError {
@@ -31,6 +32,18 @@ export interface DocxRun {
   italic?: boolean;
   underline?: boolean;
   hyperlink?: string;
+  // Image properties for drawing elements
+  image?: {
+    relationshipId: string;
+    width?: number;
+    height?: number;
+    name?: string;
+    description?: string;
+    // Image data when available
+    data?: ArrayBuffer;
+    mimeType?: string;
+    imagePath?: string;
+  };
 }
 
 export interface DocxDocument {
@@ -100,8 +113,61 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
         numbering = yield* parseNumberingXmlWithDom(numberingContent);
       }
 
+      // Try to get relationships for image parsing
+      let relationships: Map<string, {id: string, type: string, target: string}> = new Map();
+      let relationshipsXml = unzipped["word/_rels/document.xml.rels"];
+      if (!relationshipsXml) {
+        relationshipsXml = unzipped["_rels/document.xml.rels"];
+      }
+      if (relationshipsXml) {
+        const relationshipsContent = strFromU8(relationshipsXml);
+        relationships = yield* parseRelationshipsFromXml(relationshipsContent);
+      }
+
       // Parse the XML to extract text using DOM parser instead of regex
       const paragraphs = yield* parseDocumentXmlWithDom(xmlContent);
+
+      // Extract image data for runs with images
+      for (const paragraph of paragraphs) {
+        for (const run of paragraph.runs) {
+          if (run.image && run.image.relationshipId) {
+            const relationship = relationships.get(run.image.relationshipId);
+            if (relationship && relationship.target) {
+              try {
+                // Get image file from ZIP
+                const imagePath = relationship.target.startsWith("media/") 
+                  ? relationship.target 
+                  : `media/${relationship.target}`;
+                const imageFile = unzipped[`word/${imagePath}`] || unzipped[imagePath];
+                
+                if (imageFile) {
+                  run.image.data = imageFile.buffer.slice(imageFile.byteOffset, imageFile.byteOffset + imageFile.byteLength) as ArrayBuffer;
+                  run.image.imagePath = imagePath;
+                  
+                  // Determine MIME type from extension
+                  const extension = imagePath.split(".").pop()?.toLowerCase();
+                  const mimeTypes: Record<string, string> = {
+                    png: "image/png",
+                    jpg: "image/jpeg",
+                    jpeg: "image/jpeg",
+                    gif: "image/gif",
+                    bmp: "image/bmp",
+                    tiff: "image/tiff",
+                    tif: "image/tiff",
+                    svg: "image/svg+xml",
+                    webp: "image/webp",
+                    wmf: "image/wmf",
+                    emf: "image/emf"
+                  };
+                  run.image.mimeType = mimeTypes[extension || ""] || "image/png";
+                }
+              } catch (error) {
+                debug.log(`Failed to extract image data for ${run.image.relationshipId}: ${error}`);
+              }
+            }
+          }
+        }
+      }
 
       return { paragraphs, numbering };
     } catch (error) {
@@ -248,3 +314,38 @@ export const parseNumbering = (numberingRoot: Element): DocxNumbering => {
 
   return { instances, abstractFormats };
 };
+
+// Parse relationships XML to extract image references
+const parseRelationshipsFromXml = (
+  xmlContent: string,
+): Effect.Effect<Map<string, {id: string, type: string, target: string}>, DocxParseError> =>
+  Effect.gen(function* () {
+    const relationships = new Map<string, {id: string, type: string, target: string}>();
+    
+    // Parse XML with proper DOM parser using existing utilities
+    const doc = yield* parseXmlString(xmlContent).pipe(
+      Effect.mapError((error) => ({
+        _tag: "DocxParseError" as const,
+        message: `XML parsing error: ${error.message}`,
+      })),
+    );
+
+    // Get all relationship elements
+    const relationshipElements = doc.getElementsByTagName("Relationship");
+    
+    for (let i = 0; i < relationshipElements.length; i++) {
+      const rel = relationshipElements[i];
+      if (!rel) continue;
+      
+      const id = rel.getAttribute("Id");
+      const type = rel.getAttribute("Type");
+      const target = rel.getAttribute("Target");
+
+      if (id && type && target) {
+        relationships.set(id, { id, type, target });
+      }
+    }
+
+    debug.log(`Parsed ${relationships.size} relationships`);
+    return relationships;
+  });

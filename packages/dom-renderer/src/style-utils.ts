@@ -1,4 +1,5 @@
 import type { Paragraph, Heading, TextRun } from "@browser-document-viewer/parser";
+import { ST_Em } from "@browser-document-viewer/ooxml-types";
 import { convertLineSpacing } from "./units";
 
 // DPI assumption for all conversions - standard web display DPI
@@ -117,6 +118,44 @@ export function getTextRunStyles(run: TextRun): string {
   if (run.outline) {
     styles.push("color: transparent");
     styles.push("-webkit-text-stroke: 1px currentColor");
+  }
+  
+  // Advanced text effects
+  if (run.emboss) {
+    styles.push("text-shadow: 1px 1px 0 rgba(255,255,255,0.8), -1px -1px 0 rgba(0,0,0,0.3)");
+  }
+  if (run.imprint) {
+    styles.push("text-shadow: -1px -1px 0 rgba(255,255,255,0.8), 1px 1px 0 rgba(0,0,0,0.3)");
+  }
+  
+  // Emphasis marks (for East Asian typography)
+  if (run.emphasis) {
+    // CSS doesn't have direct support for emphasis marks, but we can approximate
+    switch (run.emphasis) {
+      case ST_Em.Dot:
+        styles.push("text-emphasis: dot");
+        styles.push("-webkit-text-emphasis: dot");
+        break;
+      case ST_Em.Circle:
+        styles.push("text-emphasis: circle");
+        styles.push("-webkit-text-emphasis: circle");
+        break;
+      case ST_Em.Comma:
+      case ST_Em.UnderDot:
+        // Fallback for unsupported emphasis types
+        styles.push("position: relative");
+        break;
+    }
+  }
+  
+  // Kerning (if specified)
+  if (run.kerning !== undefined) {
+    // Convert half-points to em units for font-kerning
+    if (run.kerning > 0) {
+      styles.push("font-kerning: normal");
+    } else {
+      styles.push("font-kerning: none");
+    }
   }
 
   return styles.join("; ");

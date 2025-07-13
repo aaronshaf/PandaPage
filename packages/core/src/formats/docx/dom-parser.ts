@@ -8,6 +8,136 @@ import {
 } from "./form-field-parser";
 import type { DocxParagraph, DocxRun, DocxParseError } from "./docx-reader";
 
+/**
+ * Parse drawing element to extract image information
+ */
+function parseDrawingFromElement(drawingElement: Element): { relationshipId: string; width?: number; height?: number; name?: string; description?: string } | undefined {
+  try {
+    // Find the blip element which contains the relationship ID
+    let blipElements = drawingElement.getElementsByTagName("a:blip");
+    if (blipElements.length === 0) {
+      // Try without namespace prefix
+      blipElements = drawingElement.getElementsByTagName("blip");
+    }
+    if (blipElements.length === 0) return undefined;
+
+    const blip = blipElements[0];
+    if (!blip) return undefined;
+    
+    // Get relationship ID
+    const relationshipId = blip.getAttribute("r:embed") || blip.getAttribute("embed");
+    if (!relationshipId) return undefined;
+
+    // Extract dimensions from extent element
+    let width: number | undefined;
+    let height: number | undefined;
+    let extentElements = drawingElement.getElementsByTagName("wp:extent");
+    if (extentElements.length === 0) {
+      extentElements = drawingElement.getElementsByTagName("extent");
+    }
+
+    if (extentElements.length > 0) {
+      const extent = extentElements[0];
+      if (extent) {
+        const cx = extent.getAttribute("cx");
+        const cy = extent.getAttribute("cy");
+
+        // Convert EMUs (English Metric Units) to pixels
+        // 1 pixel = 9525 EMUs
+        if (cx) width = Math.round(parseInt(cx, 10) / 9525);
+        if (cy) height = Math.round(parseInt(cy, 10) / 9525);
+      }
+    }
+
+    // Extract name and description
+    let name: string | undefined;
+    let description: string | undefined;
+    let docPrElements = drawingElement.getElementsByTagName("wp:docPr");
+    if (docPrElements.length === 0) {
+      docPrElements = drawingElement.getElementsByTagName("docPr");
+    }
+
+    if (docPrElements.length > 0) {
+      const docPr = docPrElements[0];
+      if (docPr) {
+        name = docPr.getAttribute("name") || undefined;
+        description = docPr.getAttribute("descr") || undefined;
+      }
+    }
+
+    return {
+      relationshipId,
+      width,
+      height,
+      name,
+      description,
+    };
+  } catch (error) {
+    debug.log(`Error parsing drawing element: ${error}`);
+    return undefined;
+  }
+}
+
+/**
+ * Parse VML object element to extract legacy image information
+ */
+function parseVmlObjectFromElement(objectElement: Element): { relationshipId: string; width?: number; height?: number; name?: string; description?: string } | undefined {
+  try {
+    // Find v:imagedata element which contains the relationship ID for VML objects
+    let imagedataElements = objectElement.getElementsByTagName("v:imagedata");
+    if (imagedataElements.length === 0) {
+      // Try without namespace prefix
+      imagedataElements = objectElement.getElementsByTagName("imagedata");
+    }
+    if (imagedataElements.length === 0) return undefined;
+
+    const imagedata = imagedataElements[0];
+    if (!imagedata) return undefined;
+    
+    // Get relationship ID from VML imagedata
+    const relationshipId = imagedata.getAttribute("r:id") || imagedata.getAttribute("id");
+    if (!relationshipId) return undefined;
+
+    // VML objects often don't have explicit dimensions in the same way as modern drawings
+    // They may have style attributes or other dimension properties
+    let width: number | undefined;
+    let height: number | undefined;
+    
+    // Try to extract dimensions from style attribute
+    const style = objectElement.getAttribute("style");
+    if (style) {
+      const widthMatch = style.match(/width:\s*([0-9.]+)pt/);
+      const heightMatch = style.match(/height:\s*([0-9.]+)pt/);
+      
+      if (widthMatch && widthMatch[1]) {
+        // Convert points to pixels (1 point = 1.33 pixels approximately)
+        width = Math.round(parseFloat(widthMatch[1]) * 1.33);
+      }
+      if (heightMatch && heightMatch[1]) {
+        height = Math.round(parseFloat(heightMatch[1]) * 1.33);
+      }
+    }
+
+    // Extract title or description from imagedata or object
+    let name: string | undefined;
+    let description: string | undefined;
+    
+    name = imagedata.getAttribute("title") || objectElement.getAttribute("title") || undefined;
+    description = imagedata.getAttribute("alt") || objectElement.getAttribute("alt") || undefined;
+
+    return {
+      relationshipId,
+      width,
+      height,
+      name,
+      description,
+    };
+  } catch (error) {
+    debug.log(`Error parsing VML object element: ${error}`);
+    return undefined;
+  }
+}
+
 // Get XMLSerializer for both browser and Node.js environments
 function getXMLSerializer(): XMLSerializer {
   // Browser environment
@@ -133,7 +263,25 @@ export const parseDocumentXmlWithDom = (
           }
         }
 
-        if (runText) {
+        // Process drawing elements (images)
+        const drawingElements = runElement.getElementsByTagName("w:drawing");
+        let imageInfo: { relationshipId: string; width?: number; height?: number; name?: string; description?: string } | undefined;
+        
+        for (const drawingElement of drawingElements) {
+          imageInfo = parseDrawingFromElement(drawingElement);
+          if (imageInfo) break; // Use first valid image
+        }
+        
+        // Process VML object elements (legacy images) if no modern drawing found
+        if (!imageInfo) {
+          const objectElements = runElement.getElementsByTagName("w:object");
+          for (const objectElement of objectElements) {
+            imageInfo = parseVmlObjectFromElement(objectElement);
+            if (imageInfo) break; // Use first valid VML image
+          }
+        }
+
+        if (runText || imageInfo) {
           // Check for formatting in run properties using getElementsByTagName
           const rPrElements = runElement.getElementsByTagName("w:rPr");
           let bold = false;
@@ -168,10 +316,11 @@ export const parseDocumentXmlWithDom = (
           }
 
           runs.push({
-            text: runText,
+            text: runText || "", // Empty text for image-only runs
             ...(bold && { bold }),
             ...(italic && { italic }),
             ...(underline && { underline }),
+            ...(imageInfo && { image: imageInfo }),
           });
         }
       }
