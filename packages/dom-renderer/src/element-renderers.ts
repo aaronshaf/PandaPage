@@ -4,6 +4,10 @@ import { twipsToPt, convertLineSpacing } from "./units";
 
 // Safe base64 encoding to prevent stack overflow with large images
 function safeBase64Encode(buffer: ArrayBuffer): string {
+  if (!buffer) {
+    throw new Error("ArrayBuffer is required for base64 encoding");
+  }
+  
   const bytes = new Uint8Array(buffer);
   const maxSize = 10 * 1024 * 1024; // 10MB limit
 
@@ -361,47 +365,55 @@ export function renderImage(
     "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y5ZmFmYiIgc3Ryb2tlPSIjZTFlNWU5Ii8+PHRleHQgeD0iMTAwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOWNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Loading...</vdGV4dD48L3N2Zz4=";
 
   try {
-    // Convert ArrayBuffer to base64 safely
-    const imgData = safeBase64Encode(image.data);
-    const realSrc = `data:${image.mimeType};base64,${imgData}`;
+    // Check if image has data
+    if (!image.data || image.data.byteLength === 0) {
+      // Create a placeholder for images without data
+      img.src =
+        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIgc3Ryb2tlPSIjZGRkIi8+PHRleHQgeD0iMTAwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ObyBJbWFnZSBEYXRhPC90ZXh0Pjwvc3ZnPg==";
+      img.alt = image.alt || "Image without data";
+    } else {
+      // Convert ArrayBuffer to base64 safely
+      const imgData = safeBase64Encode(image.data);
+      const realSrc = `data:${image.mimeType};base64,${imgData}`;
 
-    if (shouldLazyLoad) {
-      // Set up lazy loading
-      img.src = placeholderSrc;
-      img.setAttribute("data-src", realSrc);
-      img.loading = "lazy";
-      img.className = "lazy-image";
+      if (shouldLazyLoad) {
+        // Set up lazy loading
+        img.src = placeholderSrc;
+        img.setAttribute("data-src", realSrc);
+        img.loading = "lazy";
+        img.className = "lazy-image";
 
-      // Add intersection observer for better lazy loading control
-      if (typeof window !== "undefined" && "IntersectionObserver" in window) {
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                const lazyImg = entry.target as HTMLImageElement;
-                const src = lazyImg.getAttribute("data-src");
-                if (src) {
-                  lazyImg.src = src;
-                  lazyImg.removeAttribute("data-src");
-                  lazyImg.classList.remove("lazy-image");
-                  observer.unobserve(lazyImg);
+        // Add intersection observer for better lazy loading control
+        if (typeof window !== "undefined" && "IntersectionObserver" in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  const lazyImg = entry.target as HTMLImageElement;
+                  const src = lazyImg.getAttribute("data-src");
+                  if (src) {
+                    lazyImg.src = src;
+                    lazyImg.removeAttribute("data-src");
+                    lazyImg.classList.remove("lazy-image");
+                    observer.unobserve(lazyImg);
+                  }
                 }
-              }
-            });
-          },
-          {
-            rootMargin: "100px", // Start loading 100px before the image comes into view
-          },
-        );
+              });
+            },
+            {
+              rootMargin: "100px", // Start loading 100px before the image comes into view
+            },
+          );
 
-        // Observe the image after a short delay to allow DOM insertion
-        setTimeout(() => observer.observe(img), 100);
+          // Observe the image after a short delay to allow DOM insertion
+          setTimeout(() => observer.observe(img), 100);
+        } else {
+          // Fallback for browsers without IntersectionObserver
+          img.src = realSrc;
+        }
       } else {
-        // Fallback for browsers without IntersectionObserver
         img.src = realSrc;
       }
-    } else {
-      img.src = realSrc;
     }
   } catch (error) {
     console.error("Error encoding image data:", error);

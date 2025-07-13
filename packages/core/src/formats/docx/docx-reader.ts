@@ -28,6 +28,7 @@ export interface DocxParagraph {
 }
 
 export interface DocxRun {
+  type?: "text" | "image";
   text: string;
   bold?: boolean;
   italic?: boolean;

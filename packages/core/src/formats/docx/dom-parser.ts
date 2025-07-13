@@ -75,12 +75,16 @@ function extractRunData(runElement: Element, imageRelationships: Map<string, Ima
     if (drawingElements.length > 0) {
       const drawingElement = drawingElements[0];
       if (drawingElement) {
-        const serializer = getXMLSerializer();
-        if (serializer) {
-          const drawingXml = serializer.serializeToString(drawingElement);
+        // Use @xmldom/xmldom's XMLSerializer to avoid DOM implementation mismatch
+        const XMLSerializer = require('@xmldom/xmldom').XMLSerializer;
+        const serializer = new XMLSerializer();
+        const drawingXml = serializer.serializeToString(drawingElement);
+        
+        if (drawingXml && drawingXml.trim()) {
           const parsedImage = yield* parseDrawingElement(drawingXml, imageRelationships);
           if (parsedImage) {
             image = parsedImage;
+            console.log(`DEBUG: Found image in run - ${parsedImage.width}x${parsedImage.height}`);
             // For image runs, we typically don't have text content
             if (!runText.trim()) {
               runText = ""; // Ensure clean text for image-only runs
@@ -139,7 +143,11 @@ function extractRunData(runElement: Element, imageRelationships: Map<string, Ima
       }
     }
 
+    const runType = image ? "image" : "text";
+    console.log(`DEBUG: Creating run with type="${runType}", image=${!!image}, text="${runText.substring(0, 20)}"`);
+    
     return {
+      type: runType,
       text: runText,
       ...(bold && { bold }),
       ...(italic && { italic }),
@@ -265,7 +273,9 @@ export const parseDocumentXmlWithDom = (
           }
         } else if (child.tagName === "w:r") {
           // Process regular run element
+          console.log(`DEBUG: Processing run element`);
           const runData = yield* extractRunData(child, imageRelationships);
+          console.log(`DEBUG: Run data result - type=${runData.type}, text="${runData.text?.substring(0, 20)}", image=${!!runData.image}`);
           if (runData.text || runData.image) {
             runs.push(runData);
           }

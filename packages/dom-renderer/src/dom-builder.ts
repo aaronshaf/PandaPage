@@ -195,16 +195,25 @@ function renderTable(table: Table, doc: Document): HTMLElement {
 function renderImage(image: Image, doc: Document): HTMLElement {
   const img = doc.createElement("img");
 
-  // Convert ArrayBuffer to base64
-  const bytes = new Uint8Array(image.data);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]!);
-  }
-  const base64 = btoa(binary);
+  // Check if image has data
+  if (!image.data || image.data.byteLength === 0) {
+    // Create a placeholder for images without data
+    img.src =
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIgc3Ryb2tlPSIjZGRkIi8+PHRleHQgeD0iMTAwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ObyBJbWFnZSBEYXRhPC90ZXh0Pjwvc3ZnPg==";
+    img.alt = image.alt || "Image without data";
+  } else {
+    // Convert ArrayBuffer to base64
+    const bytes = new Uint8Array(image.data);
+    let binary = "";
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]!);
+    }
+    const base64 = btoa(binary);
 
-  img.src = `data:${image.mimeType};base64,${base64}`;
-  img.alt = image.alt || "";
+    img.src = `data:${image.mimeType};base64,${base64}`;
+    img.alt = image.alt || "";
+  }
+  
   img.style.cssText = getImageStyles();
 
   // Use CSS dimensions for proper high-DPI display support

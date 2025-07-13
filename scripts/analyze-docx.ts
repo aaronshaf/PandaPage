@@ -42,6 +42,11 @@ async function analyzeDocx(filePath: string) {
           });
         }
 
+        // Also check for images in paragraph images array
+        if (el.type === "paragraph" && el.images) {
+          imageCount += el.images.length;
+        }
+
         if (el.type === "table") tableCount++;
 
         if (el.type === "paragraph" && el.listInfo) {
