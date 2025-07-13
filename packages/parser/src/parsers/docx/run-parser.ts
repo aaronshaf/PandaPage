@@ -135,7 +135,7 @@ export function parseRunElement(
     if (!drawingElement) continue;
     const drawingInfo = parseDrawing(drawingElement);
 
-    if (drawingInfo && imageRelationships && zip) {
+    if (drawingInfo && imageRelationships) {
       const imageRel = imageRelationships.get(drawingInfo.relationshipId);
       if (imageRel) {
         // Store drawing info and relationship for later async processing
