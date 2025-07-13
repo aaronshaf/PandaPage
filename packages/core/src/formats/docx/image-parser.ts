@@ -1,0 +1,265 @@
+import { Effect } from "effect";
+import { debug } from "../../common/debug";
+import { parseXmlString } from "../../common/xml-parser";
+import type { DocxParseError } from "./docx-reader";
+
+/**
+ * Image relationship data from document.xml.rels
+ */
+export interface ImageRelationship {
+  id: string;
+  target: string; // Path to image file like "media/image1.png"
+  targetMode?: string;
+}
+
+/**
+ * Parsed image information from drawing element
+ */
+export interface DocxImage {
+  relationshipId: string;
+  width?: number; // in EMUs (English Metric Units)
+  height?: number; // in EMUs  
+  title?: string;
+  description?: string;
+  filePath?: string; // Resolved file path from relationship
+  base64Data?: string; // Base64 encoded image data
+}
+
+/**
+ * Parse image relationships from document.xml.rels using DOM parsing
+ */
+export const parseImageRelationships = (
+  relsXml: string,
+): Effect.Effect<Map<string, ImageRelationship>, DocxParseError> =>
+  Effect.gen(function* () {
+    debug.log("Parsing image relationships with DOM parsing");
+
+    const relationships = new Map<string, ImageRelationship>();
+
+    // Parse XML with DOM parser
+    const doc = yield* parseXmlString(relsXml).pipe(
+      Effect.mapError(
+        (error) => ({
+          _tag: "DocxParseError" as const,
+          message: `Failed to parse relationships XML: ${error.message}`,
+        }),
+      ),
+    );
+
+    // Get all Relationship elements
+    const relationshipElements = doc.getElementsByTagName("Relationship");
+
+    for (const element of relationshipElements) {
+      const type = element.getAttribute("Type");
+
+      // Check if it's an image relationship
+      if (
+        type === "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+      ) {
+        const id = element.getAttribute("Id");
+        const target = element.getAttribute("Target");
+        const targetMode = element.getAttribute("TargetMode");
+
+        if (id && target) {
+          relationships.set(id, {
+            id,
+            target,
+            ...(targetMode && { targetMode }),
+          });
+        }
+      }
+    }
+
+    debug.log(`Found ${relationships.size} image relationships`);
+    return relationships;
+  });
+
+/**
+ * Parse a drawing element to extract image information using DOM parsing
+ */
+export const parseDrawingElement = (
+  drawingXml: string,
+  imageRelationships: Map<string, ImageRelationship>,
+): Effect.Effect<DocxImage | null, DocxParseError> =>
+  Effect.gen(function* () {
+    // Add namespace declarations if missing
+    let xmlContent = drawingXml;
+    if (!xmlContent.includes("xmlns:w=")) {
+      xmlContent = xmlContent.replace(
+        /<w:drawing([^>]*)>/,
+        '<w:drawing$1 xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
+      );
+    }
+
+    // Parse XML with DOM parser
+    const doc = yield* parseXmlString(xmlContent).pipe(
+      Effect.mapError(
+        (error) => ({
+          _tag: "DocxParseError" as const,
+          message: `Failed to parse drawing XML: ${error.message}`,
+        }),
+      ),
+    );
+
+    // Look for picture elements within the drawing
+    let picElements = doc.getElementsByTagName("pic:pic");
+    if (picElements.length === 0) {
+      picElements = doc.getElementsByTagName("pic");
+    }
+
+    if (picElements.length === 0) {
+      debug.log("No picture elements found in drawing");
+      return null;
+    }
+
+    const picElement = picElements[0];
+    if (!picElement) {
+      return null;
+    }
+
+    // Extract relationship ID from blip element
+    let blipElements = picElement.getElementsByTagName("a:blip");
+    if (blipElements.length === 0) {
+      blipElements = picElement.getElementsByTagName("blip");
+    }
+
+    if (blipElements.length === 0) {
+      debug.log("No blip elements found in picture");
+      return null;
+    }
+
+    const blipElement = blipElements[0];
+    if (!blipElement) {
+      return null;
+    }
+
+    const relationshipId = blipElement.getAttribute("r:embed") || blipElement.getAttribute("embed");
+    if (!relationshipId) {
+      debug.log("No relationship ID found in blip element");
+      return null;
+    }
+
+    // Get dimensions from extent element
+    let width: number | undefined;
+    let height: number | undefined;
+
+    const extentElements = doc.getElementsByTagName("wp:extent");
+    if (extentElements.length > 0) {
+      const extentElement = extentElements[0];
+      if (extentElement) {
+        const cxAttr = extentElement.getAttribute("cx");
+        const cyAttr = extentElement.getAttribute("cy");
+        if (cxAttr) width = parseInt(cxAttr, 10);
+        if (cyAttr) height = parseInt(cyAttr, 10);
+      }
+    }
+
+    // Get title and description from docPr element
+    let title: string | undefined;
+    let description: string | undefined;
+
+    const docPrElements = doc.getElementsByTagName("wp:docPr");
+    if (docPrElements.length > 0) {
+      const docPrElement = docPrElements[0];
+      if (docPrElement) {
+        title = docPrElement.getAttribute("name") || undefined;
+        description = docPrElement.getAttribute("descr") || undefined;
+      }
+    }
+
+    // Resolve file path from relationship
+    const imageRelationship = imageRelationships.get(relationshipId);
+    const filePath = imageRelationship?.target;
+
+    debug.log(`Parsed image: ${relationshipId} -> ${filePath} (${width}x${height})`);
+
+    return {
+      relationshipId,
+      width,
+      height,
+      title,
+      description,
+      filePath,
+    };
+  });
+
+/**
+ * Convert EMUs (English Metric Units) to pixels for display
+ * 1 EMU = 1/914400 inch, assuming 96 DPI
+ */
+export const emusToPixels = (emus: number): number => {
+  return Math.round((emus / 914400) * 96);
+};
+
+/**
+ * Extract image binary data from ZIP archive
+ */
+export const extractImageFromZip = (
+  unzipped: Record<string, Uint8Array>,
+  imagePath: string
+): Effect.Effect<string, DocxParseError> =>
+  Effect.gen(function* () {
+    // Try different possible paths for the image
+    const possiblePaths = [
+      `word/${imagePath}`,
+      imagePath,
+      `word/media/${imagePath.replace(/^media\//, '')}`,
+    ];
+
+    for (const path of possiblePaths) {
+      const imageData = unzipped[path];
+      if (imageData) {
+        debug.log(`Found image at path: ${path}, size: ${imageData.length} bytes`);
+        
+        // Convert Uint8Array to base64
+        const base64Data = yield* Effect.tryPromise({
+          try: async () => {
+            // Use btoa in browser, Buffer in Node.js
+            if (typeof btoa !== 'undefined') {
+              // Browser environment
+              let binary = '';
+              for (let i = 0; i < imageData.length; i++) {
+                binary += String.fromCharCode(imageData[i]!);
+              }
+              return btoa(binary);
+            } else {
+              // Node.js environment
+              return Buffer.from(imageData).toString('base64');
+            }
+          },
+          catch: (error) => ({
+            _tag: "DocxParseError" as const,
+            message: `Failed to convert image to base64: ${error}`,
+          }),
+        });
+
+        return base64Data;
+      }
+    }
+
+    debug.log(`Image not found at any of these paths: ${possiblePaths.join(', ')}`);
+    return yield* Effect.fail({
+      _tag: "DocxParseError" as const,
+      message: `Image not found: ${imagePath}`,
+    });
+  });
+
+/**
+ * Format image as markdown with proper dimensions
+ */
+export const formatImageAsMarkdown = (image: DocxImage): string => {
+  const title = image.title || "Image";
+  const description = image.description || title;
+  
+  if (image.base64Data) {
+    // Use base64 data URL
+    const mimeType = image.filePath?.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    return `![${description}](data:${mimeType};base64,${image.base64Data})`;
+  } else if (image.filePath) {
+    // Use file path reference
+    return `![${description}](${image.filePath})`;
+  } else {
+    // Fallback placeholder
+    return `![${description}](placeholder-image)`;
+  }
+};
