@@ -79,6 +79,7 @@ export interface DocxRunProperties {
   lang?: string;
   bidi?: boolean; // Bidirectional text (w:bidi attribute on w:lang)
   rtl?: boolean; // Right-to-left text direction (w:rtl)
+  border?: DocxBorder; // Text border (w:bdr)
 }
 
 export interface DocxStylesheet {

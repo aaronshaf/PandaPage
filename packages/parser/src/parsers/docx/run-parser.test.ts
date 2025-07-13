@@ -622,4 +622,83 @@ describe("Font family parsing with multiple scripts", () => {
     expect(run?.fontFamilyHAnsi).toBe("Gill Sans MT");
     expect(run?.fontFamilyEastAsia).toBe("Gill Sans MT");
   });
+
+  it("should resolve theme font attributes", () => {
+    const mockTheme = {
+      colors: new Map([
+        ["dk1", "#000000"],
+        ["lt1", "#FFFFFF"]
+      ]),
+      fonts: {
+        major: new Map([["latin", "Ubuntu"]]),
+        minor: new Map([["latin", "Ubuntu"], ["ea", "SimSun"], ["cs", "Arial Unicode MS"]])
+      }
+    };
+
+    const parser = new DOMParser();
+    const xmlString = `
+      <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:rPr>
+          <w:rFonts w:asciiTheme="minorHAnsi" w:eastAsiaTheme="minorEastAsia" w:hAnsiTheme="minorHAnsi" w:cstheme="minorBidi"/>
+        </w:rPr>
+        <w:t>Theme font text</w:t>
+      </w:r>
+    `;
+    const doc = parser.parseFromString(xmlString, "text/xml");
+    const runElement = doc.documentElement;
+    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main", undefined, undefined, mockTheme);
+    
+    expect(run).not.toBeNull();
+    expect(run?.fontFamily).toBe("SimSun"); // EastAsia gets priority
+    expect(run?.fontFamilyAscii).toBe("Ubuntu"); // Resolved from minorHAnsi
+    expect(run?.fontFamilyHAnsi).toBe("Ubuntu"); // Resolved from minorHAnsi
+    expect(run?.fontFamilyEastAsia).toBe("SimSun"); // Resolved from minorEastAsia
+    expect(run?.fontFamilyCs).toBe("Arial Unicode MS"); // Resolved from minorBidi
+  });
+
+  it("should prefer explicit font over theme font", () => {
+    const mockTheme = {
+      colors: new Map(),
+      fonts: {
+        major: new Map([["latin", "Ubuntu"]]),
+        minor: new Map([["latin", "Ubuntu"]])
+      }
+    };
+
+    const parser = new DOMParser();
+    const xmlString = `
+      <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:rPr>
+          <w:rFonts w:ascii="Times New Roman" w:asciiTheme="minorHAnsi"/>
+        </w:rPr>
+        <w:t>Mixed font specification</w:t>
+      </w:r>
+    `;
+    const doc = parser.parseFromString(xmlString, "text/xml");
+    const runElement = doc.documentElement;
+    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main", undefined, undefined, mockTheme);
+    
+    expect(run).not.toBeNull();
+    expect(run?.fontFamily).toBe("Times New Roman"); // Explicit font takes precedence
+    expect(run?.fontFamilyAscii).toBe("Times New Roman");
+  });
+
+  it("should handle theme font when no theme is available", () => {
+    const parser = new DOMParser();
+    const xmlString = `
+      <w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:rPr>
+          <w:rFonts w:asciiTheme="minorHAnsi"/>
+        </w:rPr>
+        <w:t>No theme available</w:t>
+      </w:r>
+    `;
+    const doc = parser.parseFromString(xmlString, "text/xml");
+    const runElement = doc.documentElement;
+    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
+    
+    expect(run).not.toBeNull();
+    expect(run?.fontFamily).toBeUndefined();
+    expect(run?.fontFamilyAscii).toBeUndefined();
+  });
 });

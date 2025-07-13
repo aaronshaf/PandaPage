@@ -12,7 +12,8 @@ import {
 } from "./xml-utils";
 import { applyStyleCascade, type DocxStylesheet } from "./style-parser";
 import type { DocxTheme } from "./theme-parser";
-import { resolveThemeColor, resolveThemeFont } from "./theme-parser";
+import { resolveThemeColor, resolveThemeFont, resolveThemeFontAttribute } from "./theme-parser";
+import { parseBorder } from "./border-parser";
 import { ST_Em } from "@browser-document-viewer/ooxml-types";
 
 /**
@@ -298,6 +299,7 @@ export function parseRun(
   let lang: string | undefined;
   let bidi = false;
   let rtl = false;
+  let border: import("./types").DocxBorder | undefined;
 
   if (runProps) {
     // Bold - check both b and bCs, OR logic (either can make text bold)
@@ -353,32 +355,52 @@ export function parseRun(
     // Font family - handle multiple font attributes for complex scripts
     const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
     if (fontElement) {
-      // Store all font variants
+      // Store all font variants - both direct and theme references
       const fontAscii = fontElement.getAttribute("w:ascii");
       const fontEastAsia = fontElement.getAttribute("w:eastAsia");
       const fontHAnsi = fontElement.getAttribute("w:hAnsi");
       const fontCs = fontElement.getAttribute("w:cs");
 
-      // Resolve theme fonts if needed
+      // Theme font attributes
+      const asciiTheme = fontElement.getAttribute("w:asciiTheme");
+      const eastAsiaTheme = fontElement.getAttribute("w:eastAsiaTheme");
+      const hAnsiTheme = fontElement.getAttribute("w:hAnsiTheme");
+      const csTheme = fontElement.getAttribute("w:cstheme");
+
+      // Resolve ASCII font
       if (fontAscii) {
         fontFamilyAscii = fontAscii.startsWith("+") && theme 
           ? resolveThemeFont(fontAscii, theme) || fontAscii
           : fontAscii;
+      } else if (asciiTheme && theme) {
+        fontFamilyAscii = resolveThemeFontAttribute(asciiTheme, theme);
       }
+
+      // Resolve East Asian font
       if (fontEastAsia) {
         fontFamilyEastAsia = fontEastAsia.startsWith("+") && theme 
           ? resolveThemeFont(fontEastAsia, theme) || fontEastAsia
           : fontEastAsia;
+      } else if (eastAsiaTheme && theme) {
+        fontFamilyEastAsia = resolveThemeFontAttribute(eastAsiaTheme, theme);
       }
+
+      // Resolve High ANSI font
       if (fontHAnsi) {
         fontFamilyHAnsi = fontHAnsi.startsWith("+") && theme 
           ? resolveThemeFont(fontHAnsi, theme) || fontHAnsi
           : fontHAnsi;
+      } else if (hAnsiTheme && theme) {
+        fontFamilyHAnsi = resolveThemeFontAttribute(hAnsiTheme, theme);
       }
+
+      // Resolve Complex Script font
       if (fontCs) {
         fontFamilyCs = fontCs.startsWith("+") && theme 
           ? resolveThemeFont(fontCs, theme) || fontCs
           : fontCs;
+      } else if (csTheme && theme) {
+        fontFamilyCs = resolveThemeFontAttribute(csTheme, theme);
       }
 
       // Select the most appropriate font based on content
@@ -550,6 +572,12 @@ export function parseRun(
     } else {
       lang = langValue || undefined;
     }
+
+    // Border (w:bdr)
+    const borderElement = getElementByTagNameNSFallback(runProps, ns, "bdr");
+    if (borderElement) {
+      border = parseBorder(borderElement);
+    }
   }
 
   // Apply style cascade if stylesheet is available
@@ -587,6 +615,7 @@ export function parseRun(
       lang,
       bidi,
       rtl,
+      border,
     };
 
     // Apply style cascade (no paragraph style ID here, just run properties)
@@ -633,6 +662,7 @@ export function parseRun(
       lang: resolvedRunProps.lang,
       bidi: resolvedRunProps.bidi ?? false,
       rtl: resolvedRunProps.rtl ?? false,
+      border: resolvedRunProps.border,
     };
   }
 
@@ -671,5 +701,6 @@ export function parseRun(
     lang,
     bidi,
     rtl,
+    border,
   };
 }
