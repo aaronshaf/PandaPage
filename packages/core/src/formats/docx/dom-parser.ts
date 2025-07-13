@@ -18,7 +18,7 @@ import {
 import type { DocxParagraph, DocxRun, DocxParseError } from "./docx-reader";
 
 // Get XMLSerializer for both browser and Node.js environments
-function getXMLSerializer(): XMLSerializer {
+function getXMLSerializer(): XMLSerializer | null {
   // Browser environment
   if (typeof window !== "undefined" && window.XMLSerializer) {
     return new window.XMLSerializer();
@@ -30,9 +30,9 @@ function getXMLSerializer(): XMLSerializer {
     const window = new Window();
     return new window.XMLSerializer();
   } catch (error) {
-    throw new Error(
-      "XMLSerializer not available. Please install happy-dom for Node.js environments.",
-    );
+    // Return null to allow graceful degradation
+    console.warn("XMLSerializer not available. Image parsing will be limited.");
+    return null;
   }
 }
 
@@ -75,13 +75,16 @@ function extractRunData(runElement: Element, imageRelationships: Map<string, Ima
     if (drawingElements.length > 0) {
       const drawingElement = drawingElements[0];
       if (drawingElement) {
-        const drawingXml = getXMLSerializer().serializeToString(drawingElement);
-        const parsedImage = yield* parseDrawingElement(drawingXml, imageRelationships);
-        if (parsedImage) {
-          image = parsedImage;
-          // For image runs, we typically don't have text content
-          if (!runText.trim()) {
-            runText = ""; // Ensure clean text for image-only runs
+        const serializer = getXMLSerializer();
+        if (serializer) {
+          const drawingXml = serializer.serializeToString(drawingElement);
+          const parsedImage = yield* parseDrawingElement(drawingXml, imageRelationships);
+          if (parsedImage) {
+            image = parsedImage;
+            // For image runs, we typically don't have text content
+            if (!runText.trim()) {
+              runText = ""; // Ensure clean text for image-only runs
+            }
           }
         }
       }
@@ -190,12 +193,15 @@ export const parseDocumentXmlWithDom = (
     // Process each paragraph
     for (const pElement of finalParagraphs) {
       // Check if paragraph contains fields (use full paragraph XML for this)
-      const paragraphXml = getXMLSerializer().serializeToString(pElement);
       let fields: DocxField[] | undefined;
-      if (paragraphContainsFields(paragraphXml)) {
-        const fieldsResult = yield* parseFieldsFromParagraph(paragraphXml);
-        if (fieldsResult.length > 0) {
-          fields = fieldsResult;
+      const serializer = getXMLSerializer();
+      if (serializer) {
+        const paragraphXml = serializer.serializeToString(pElement);
+        if (paragraphContainsFields(paragraphXml)) {
+          const fieldsResult = yield* parseFieldsFromParagraph(paragraphXml);
+          if (fieldsResult.length > 0) {
+            fields = fieldsResult;
+          }
         }
       }
 
