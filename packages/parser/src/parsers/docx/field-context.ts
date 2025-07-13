@@ -10,6 +10,7 @@ export interface FieldParsingContext {
   sequences: Map<string, number>;
   metadata?: ParsedDocument["metadata"];
   currentDate: Date;
+  tableValues?: number[]; // Values from table cells for formula calculations
 }
 
 /**

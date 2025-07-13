@@ -54,6 +54,11 @@ export interface DocxRunProperties {
   fontSize?: string; // half-points (w:sz)
   fontSizeCs?: string; // complex script font size in half-points (w:szCs)
   fontFamily?: string;
+  // Extended font properties for complex scripts
+  fontFamilyAscii?: string; // ASCII font (w:ascii)
+  fontFamilyEastAsia?: string; // East Asian font (w:eastAsia)
+  fontFamilyHAnsi?: string; // High ANSI font (w:hAnsi)
+  fontFamilyCs?: string; // Complex script font (w:cs)
   color?: string;
   backgroundColor?: string;
   // Advanced text formatting
