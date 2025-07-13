@@ -16,6 +16,8 @@ import type {
   DocxParagraph,
 } from "./types";
 import { DocxParseError } from "./types";
+import { ST_Jc } from "@browser-document-viewer/ooxml-types";
+import type { ST_VerticalJc } from "@browser-document-viewer/ooxml-types";
 
 /**
  * Parse a table element from DOCX XML
@@ -133,8 +135,8 @@ export const parseTableProperties = (
     const jc = tblPr.querySelector("jc, w\\:jc");
     if (jc) {
       const val = jc.getAttribute("val");
-      if (val === "left" || val === "center" || val === "right") {
-        properties.alignment = val;
+      if (val === "left" || val === ST_Jc.Center || val === "right") {
+        properties.alignment = val as "left" | "center" | "right";
       }
     }
 
@@ -205,8 +207,8 @@ export const parseTableCellProperties = (
     // Parse cell width
     const tcW = tcPr.querySelector("tcW, w\\:tcW");
     if (tcW) {
-      const w = tcW.getAttribute("w");
-      const type = tcW.getAttribute("type");
+      const w = tcW.getAttribute("w:w") || tcW.getAttribute("w");
+      const type = tcW.getAttribute("w:type") || tcW.getAttribute("type");
       if (w && type) {
         properties.width = type === "pct" ? `${w}%` : `${w}px`;
       }
@@ -215,7 +217,7 @@ export const parseTableCellProperties = (
     // Parse vertical alignment
     const vAlign = tcPr.querySelector("vAlign, w\\:vAlign");
     if (vAlign) {
-      const val = vAlign.getAttribute("val");
+      const val = (vAlign.getAttribute("w:val") || vAlign.getAttribute("val")) as ST_VerticalJc;
       if (val === "top" || val === "center" || val === "bottom") {
         properties.alignment = val;
       }
@@ -230,7 +232,7 @@ export const parseTableCellProperties = (
     // Parse background color
     const shd = tcPr.querySelector("shd, w\\:shd");
     if (shd) {
-      const fill = shd.getAttribute("fill");
+      const fill = shd.getAttribute("w:fill") || shd.getAttribute("fill");
       if (fill && fill !== "auto") {
         properties.backgroundColor = `#${fill}`;
       }
@@ -239,7 +241,7 @@ export const parseTableCellProperties = (
     // Parse cell merging (colspan)
     const gridSpan = tcPr.querySelector("gridSpan, w\\:gridSpan");
     if (gridSpan) {
-      const val = gridSpan.getAttribute("val");
+      const val = gridSpan.getAttribute("w:val") || gridSpan.getAttribute("val");
       if (val) {
         const colspan = parseInt(val, 10);
         if (colspan > 1) {
@@ -251,7 +253,7 @@ export const parseTableCellProperties = (
     // Parse vertical merging (rowspan)
     const vMerge = tcPr.querySelector("vMerge, w\\:vMerge");
     if (vMerge) {
-      const val = vMerge.getAttribute("val");
+      const val = vMerge.getAttribute("w:val") || vMerge.getAttribute("val");
       if (val === "restart") {
         // This is the start of a vertically merged cell
         properties.vMergeStart = true;
@@ -264,7 +266,7 @@ export const parseTableCellProperties = (
     // Parse text direction
     const textDirection = tcPr.querySelector("textDirection, w\\:textDirection");
     if (textDirection) {
-      const val = textDirection.getAttribute("val");
+      const val = textDirection.getAttribute("w:val") || textDirection.getAttribute("val");
       if (val) {
         properties.textDirection = val;
       }

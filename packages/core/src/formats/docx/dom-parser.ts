@@ -7,29 +7,35 @@ import {
   type DocxField,
 } from "./form-field-parser";
 import type { DocxParagraph, DocxRun, DocxParseError } from "./docx-reader";
+import { 
+  ST_Underline, 
+  ST_HighlightColor 
+} from "@browser-document-viewer/ooxml-types";
+import { ST_Jc } from "@browser-document-viewer/ooxml-types";
 
-// Helper function to convert named highlight colors to hex values
+// Helper function to convert OOXML highlight colors to hex values
 function convertHighlightColorToHex(colorName: string): string {
-  const highlightColors: Record<string, string> = {
-    yellow: "#FFFF00",
-    brightGreen: "#00FF00",
-    cyan: "#00FFFF",
-    magenta: "#FF00FF",
-    blue: "#0000FF",
-    red: "#FF0000",
-    darkBlue: "#000080",
-    darkCyan: "#008080",
-    darkGreen: "#008000",
-    darkMagenta: "#800080",
-    darkRed: "#800000",
-    darkYellow: "#808000",
-    darkGray: "#808080",
-    lightGray: "#C0C0C0",
-    black: "#000000",
-    white: "#FFFFFF",
+  const highlightColors: Record<ST_HighlightColor, string> = {
+    [ST_HighlightColor.Yellow]: "#FFFF00",
+    [ST_HighlightColor.Green]: "#00FF00", // Note: brightGreen maps to Green
+    [ST_HighlightColor.Cyan]: "#00FFFF",
+    [ST_HighlightColor.Magenta]: "#FF00FF",
+    [ST_HighlightColor.Blue]: "#0000FF",
+    [ST_HighlightColor.Red]: "#FF0000",
+    [ST_HighlightColor.DarkBlue]: "#000080",
+    [ST_HighlightColor.DarkCyan]: "#008080",
+    [ST_HighlightColor.DarkGreen]: "#008000",
+    [ST_HighlightColor.DarkMagenta]: "#800080",
+    [ST_HighlightColor.DarkRed]: "#800000",
+    [ST_HighlightColor.DarkYellow]: "#808000",
+    [ST_HighlightColor.DarkGray]: "#808080",
+    [ST_HighlightColor.LightGray]: "#C0C0C0",
+    [ST_HighlightColor.Black]: "#000000",
+    [ST_HighlightColor.White]: "#FFFFFF",
+    [ST_HighlightColor.None]: "", // No highlight
   };
   
-  return highlightColors[colorName] || colorName;
+  return highlightColors[colorName as ST_HighlightColor] || colorName;
 }
 
 // Get XMLSerializer for both browser and Node.js environments
@@ -238,8 +244,11 @@ export const parseDocumentXmlWithDom = (
 
                   if (val) {
                     // If w:val is present, only apply underline if it's not "none" or "0"
-                    if (val !== "none" && val !== "0") {
-                      underline = val === "single" ? true : val; // Use boolean for single, string for others
+                    if (val !== ST_Underline.None && val !== "0") {
+                      underline = val === ST_Underline.Single ? true : val; // Use boolean for single, string for others
+                    } else {
+                      // Explicitly set to false for "none" or "0" values
+                      underline = false;
                     }
                   } else if (!colorAttr) {
                     // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
@@ -256,7 +265,12 @@ export const parseDocumentXmlWithDom = (
                 if (colorElement) {
                   const colorVal = colorElement.getAttribute("w:val");
                   if (colorVal && colorVal !== "auto" && colorVal !== "000000") {
-                    color = colorVal.startsWith("#") ? colorVal : `#${colorVal}`;
+                    // Validate hex color format before processing
+                    if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
+                      color = `#${colorVal}`;
+                    } else if (/^#[0-9A-Fa-f]{6}$/.test(colorVal)) {
+                      color = colorVal;
+                    }
                   }
                 }
               }
@@ -267,7 +281,7 @@ export const parseDocumentXmlWithDom = (
                 const highlightElement = highlightElements[0];
                 if (highlightElement) {
                   const highlightVal = highlightElement.getAttribute("w:val");
-                  if (highlightVal && highlightVal !== "none") {
+                  if (highlightVal && highlightVal !== ST_HighlightColor.None) {
                     // Convert named colors to hex if needed
                     highlightColor = convertHighlightColorToHex(highlightVal);
                   }
@@ -285,7 +299,11 @@ export const parseDocumentXmlWithDom = (
                   const szVal = szElement.getAttribute("w:val");
                   if (szVal) {
                     // w:sz is in half-points, so divide by 2 to get points
-                    fontSize = parseInt(szVal, 10) / 2;
+                    // Use parseFloat to handle non-integer results properly
+                    const halfPoints = parseFloat(szVal);
+                    if (!isNaN(halfPoints) && halfPoints > 0) {
+                      fontSize = halfPoints / 2;
+                    }
                   }
                 }
               }
@@ -311,7 +329,7 @@ export const parseDocumentXmlWithDom = (
             text: runText,
             ...(bold && { bold }),
             ...(italic && { italic }),
-            ...(underline && { underline }),
+            ...(underline !== undefined && { underline }),
             ...(color && { color }),
             ...(highlightColor && { highlightColor }),
             ...(strikethrough && { strikethrough }),

@@ -14,10 +14,18 @@ function createMockElement(properties: Record<string, any>): any {
   Object.entries(properties).forEach(([key, value]) => {
     elements[key] = {
       getAttribute: (attr: string) => {
-        if (typeof value === "object" && value[attr]) {
-          return value[attr];
+        if (typeof value === "object") {
+          // Handle both namespaced (w:val) and non-namespaced (val) attributes
+          if (value[attr]) {
+            return value[attr];
+          }
+          // Try without namespace prefix
+          const nonNamespaced = attr.replace(/^w:/, "");
+          if (value[nonNamespaced]) {
+            return value[nonNamespaced];
+          }
         }
-        return value;
+        return null;
       },
     };
   });
