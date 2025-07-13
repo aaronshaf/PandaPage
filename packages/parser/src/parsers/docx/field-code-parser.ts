@@ -1,5 +1,6 @@
 // Advanced field code parsing for DOCX
 import type { DocxRun } from "./types";
+import { safeEvaluateArithmetic } from "../../utils/safe-evaluator";
 
 /**
  * Field code types supported by the parser
@@ -431,14 +432,17 @@ function evaluateFormula(
     return (context?.tableValues?.length || 0).toString();
   }
 
-  // Simple arithmetic expressions like =A1+B1 (not implemented - would need cell references)
-  if (cleanFormula.match(/^=\d+[+\-*/]\d+$/)) {
-    try {
-      // Basic arithmetic evaluation (be careful with eval!)
-      const expression = cleanFormula.substring(1); // Remove =
-      const result = Function(`"use strict"; return (${expression})`)();
-      return result.toString();
-    } catch {
+  // Simple arithmetic expressions like =2+3*4
+  if (cleanFormula.match(/^=[\d+\-*/.()]+$/)) {
+    // Use safe evaluator instead of Function constructor
+    const expression = cleanFormula.substring(1); // Remove =
+    const evalResult = safeEvaluateArithmetic(expression);
+    
+    if (evalResult.success) {
+      return evalResult.result.toString();
+    } else {
+      // Log error for debugging but don't expose it to prevent information leakage
+      console.warn('Formula evaluation failed:', evalResult.error);
       return formula; // Return original if evaluation fails
     }
   }

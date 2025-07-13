@@ -7,6 +7,7 @@ import {
   calculatePageIndicatorTop,
 } from "./page-tracking-utils";
 import { renderPrintPages } from "./page-render-utils";
+import { sanitizeHTML } from "@browser-document-viewer/parser/utils/html-sanitizer";
 import type { EnhancedDocxDocument, ParsedDocument } from "@browser-document-viewer/core";
 
 interface DocumentViewerProps {
@@ -232,7 +233,17 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             <div
               data-testid="markdown-content"
               className="rendered-markdown prose prose-gray prose-lg max-w-none"
-              dangerouslySetInnerHTML={{ __html: marked(removeFrontmatter(result)) }}
+              dangerouslySetInnerHTML={{ 
+                __html: sanitizeHTML(marked.parse(removeFrontmatter(result)) as string, {
+                  allowFormatting: true,
+                  allowStructural: true,
+                  allowLists: true,
+                  allowHeadings: true,
+                  allowTables: true,
+                  allowSafeStyles: true,
+                  allowDataAttributes: false
+                }).sanitized 
+              }}
             />
           </div>
         </div>

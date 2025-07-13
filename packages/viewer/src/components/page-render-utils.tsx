@@ -1,6 +1,7 @@
 import React from "react";
 import { DocxRenderer } from "./DocxRenderer";
 import { renderToHtml } from "@browser-document-viewer/dom-renderer";
+import { sanitizeHTML } from "@browser-document-viewer/parser/utils/html-sanitizer";
 import { marked } from "marked";
 import type { EnhancedDocxDocument, ParsedDocument } from "@browser-document-viewer/core";
 
@@ -85,7 +86,17 @@ Renderer: DOM (parsed document)`}
               </div>
             </div>
           )}
-          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          <div dangerouslySetInnerHTML={{ 
+            __html: sanitizeHTML(htmlContent, {
+              allowFormatting: true,
+              allowStructural: true,
+              allowLists: true,
+              allowHeadings: true,
+              allowTables: true,
+              allowSafeStyles: true,
+              allowDataAttributes: true
+            }).sanitized 
+          }} />
         </article>
       );
       
@@ -105,7 +116,17 @@ Renderer: DOM (parsed document)`}
         id={`page-${index + 1}`}
         aria-label={`Page ${index + 1} of ${pageElements.length}`}
         role="document"
-        dangerouslySetInnerHTML={{ __html: pageElement.innerHTML }}
+        dangerouslySetInnerHTML={{ 
+          __html: sanitizeHTML(pageElement.innerHTML, {
+            allowFormatting: true,
+            allowStructural: true,
+            allowLists: true,
+            allowHeadings: true,
+            allowTables: true,
+            allowSafeStyles: true,
+            allowDataAttributes: true
+          }).sanitized 
+        }}
       />
     ));
     
@@ -176,7 +197,17 @@ Renderer: DOM (parsed document)`}
       <section
         className="page-content"
         data-testid={`markdown-page-${index + 1}`}
-        dangerouslySetInnerHTML={{ __html: pageContent }}
+        dangerouslySetInnerHTML={{ 
+          __html: sanitizeHTML(pageContent, {
+            allowFormatting: true,
+            allowStructural: true,
+            allowLists: true,
+            allowHeadings: true,
+            allowTables: true,
+            allowSafeStyles: true,
+            allowDataAttributes: false
+          }).sanitized 
+        }}
       />
       {/* Page number - only show in screen view */}
       <footer

@@ -61,6 +61,7 @@
 4. Ensure tests are deterministic and fast
 5. Focus on testing public APIs and critical paths
 6. Add integration tests for complex workflows
+7. **Keep unit tests standalone** - Unit tests should create their own test data using synthetic XML, mock DOM elements, and type-safe document structures. Avoid dependencies on external files. Only integration tests should read actual document files when testing end-to-end functionality.
 
 ## OOXML Types Usage Policy
 
