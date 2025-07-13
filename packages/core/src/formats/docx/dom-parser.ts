@@ -139,6 +139,7 @@ export const parseDocumentXmlWithDom = (
           let bold = false;
           let italic = false;
           let underline = false;
+          let color: string | undefined;
 
           if (rPrElements.length > 0) {
             const rPr = rPrElements[0];
@@ -152,16 +153,31 @@ export const parseDocumentXmlWithDom = (
                 const underlineElement = underlineElements[0];
                 if (underlineElement) {
                   const val = underlineElement.getAttribute("w:val");
-                  const color = underlineElement.getAttribute("w:color");
+                  const colorAttr = underlineElement.getAttribute("w:color");
 
                   if (val) {
                     // If w:val is present, only apply underline if it's not "none" or "0"
                     underline = val !== "none" && val !== "0";
-                  } else if (!color) {
+                  } else if (!colorAttr) {
                     // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
                     underline = true;
                   }
                   // If w:color but no w:val, it's likely for color styling only, not underline
+                }
+              }
+
+              // Check for text color
+              const colorElements = rPr.getElementsByTagName("w:color");
+              if (colorElements.length > 0) {
+                const colorElement = colorElements[0];
+                if (colorElement) {
+                  const colorVal = colorElement.getAttribute("w:val");
+                  if (colorVal && colorVal !== "auto") {
+                    // Basic hex color validation and conversion
+                    if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
+                      color = `#${colorVal}`;
+                    }
+                  }
                 }
               }
             }
@@ -172,6 +188,7 @@ export const parseDocumentXmlWithDom = (
             ...(bold && { bold }),
             ...(italic && { italic }),
             ...(underline && { underline }),
+            ...(color && { color }),
           });
         }
       }

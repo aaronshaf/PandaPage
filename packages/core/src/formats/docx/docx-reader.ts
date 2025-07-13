@@ -30,6 +30,7 @@ export interface DocxRun {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  color?: string; // Text color in hex format
   hyperlink?: string;
 }
 
