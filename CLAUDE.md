@@ -1,5 +1,18 @@
 # Project Guidelines for Claude
 
+## Testing Policy
+
+**IMPORTANT: Unit tests must use synthetic data**
+
+- All unit tests should use in-memory synthetic data instead of reading real files from disk
+- Never extract or read actual DOCX/PPTX files in tests (e.g., avoid reading from `documents/005.docx`)
+- This ensures tests are:
+  - Deterministic and reproducible
+  - Fast and don't depend on external files
+  - Don't create temporary extraction directories (like `temp-005/`)
+- Use mock data structures that simulate the expected format
+- For integration tests that need real files, explicitly mark them as integration tests
+
 ## Styling Policy
 
 **IMPORTANT: Document Rendering Must Use Inline Styles**
