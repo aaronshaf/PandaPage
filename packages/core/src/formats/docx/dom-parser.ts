@@ -10,6 +10,11 @@ import {
   loadHyperlinkRelationships,
 } from "./hyperlink-integration";
 import type { HyperlinkRelationship } from "./hyperlink-parser";
+import {
+  parseImageRelationships,
+  parseDrawingElement,
+  type ImageRelationship,
+} from "./image-parser";
 import type { DocxParagraph, DocxRun, DocxParseError } from "./docx-reader";
 
 // Get XMLSerializer for both browser and Node.js environments
@@ -34,91 +39,112 @@ function getXMLSerializer(): XMLSerializer {
 /**
  * Extract run data (text and formatting) from a run element
  */
-function extractRunData(runElement: Element): DocxRun {
-  // Parse the run content to extract text and special elements in order
-  let runText = "";
+function extractRunData(runElement: Element, imageRelationships: Map<string, ImageRelationship>): Effect.Effect<DocxRun, DocxParseError> {
+  return Effect.gen(function* () {
+    // Parse the run content to extract text and special elements in order
+    let runText = "";
+    let image: any;
 
-  // Process text elements
-  const textElements = runElement.getElementsByTagName("w:t");
-  for (const textElement of textElements) {
-    runText += textElement.textContent || "";
-  }
-
-  // Process tab elements
-  const tabElements = runElement.getElementsByTagName("w:tab");
-  for (const tabElement of tabElements) {
-    runText += "\t";
-  }
-
-  // Process break elements
-  const breakElements = runElement.getElementsByTagName("w:br");
-  for (const breakElement of breakElements) {
-    const type = breakElement.getAttribute("w:type");
-    if (type === "page") {
-      // Page break
-      runText += "\u000C"; // Form feed character (page break)
-    } else {
-      // Regular line break
-      runText += "\n";
+    // Process text elements
+    const textElements = runElement.getElementsByTagName("w:t");
+    for (const textElement of textElements) {
+      runText += textElement.textContent || "";
     }
-  }
 
-  // Check for formatting in run properties using getElementsByTagName
-  const rPrElements = runElement.getElementsByTagName("w:rPr");
-  let bold = false;
-  let italic = false;
-  let underline = false;
-  let color: string | undefined;
+    // Process tab elements
+    const tabElements = runElement.getElementsByTagName("w:tab");
+    for (const tabElement of tabElements) {
+      runText += "\t";
+    }
 
-  if (rPrElements.length > 0) {
-    const rPr = rPrElements[0];
-    if (rPr) {
-      bold = rPr.getElementsByTagName("w:b").length > 0;
-      italic = rPr.getElementsByTagName("w:i").length > 0;
+    // Process break elements
+    const breakElements = runElement.getElementsByTagName("w:br");
+    for (const breakElement of breakElements) {
+      const type = breakElement.getAttribute("w:type");
+      if (type === "page") {
+        // Page break
+        runText += "\u000C"; // Form feed character (page break)
+      } else {
+        // Regular line break
+        runText += "\n";
+      }
+    }
 
-      // Check for underline - need to verify the w:val attribute
-      const underlineElements = rPr.getElementsByTagName("w:u");
-      if (underlineElements.length > 0) {
-        const underlineElement = underlineElements[0];
-        if (underlineElement) {
-          const val = underlineElement.getAttribute("w:val");
-          const colorAttr = underlineElement.getAttribute("w:color");
-
-          if (val) {
-            // If w:val is present, only apply underline if it's not "none" or "0"
-            underline = val !== "none" && val !== "0";
-          } else if (!colorAttr) {
-            // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
-            underline = true;
+    // Process drawing elements (images)
+    const drawingElements = runElement.getElementsByTagName("w:drawing");
+    if (drawingElements.length > 0) {
+      const drawingElement = drawingElements[0];
+      if (drawingElement) {
+        const drawingXml = getXMLSerializer().serializeToString(drawingElement);
+        const parsedImage = yield* parseDrawingElement(drawingXml, imageRelationships);
+        if (parsedImage) {
+          image = parsedImage;
+          // For image runs, we typically don't have text content
+          if (!runText.trim()) {
+            runText = ""; // Ensure clean text for image-only runs
           }
-          // If w:color but no w:val, it's likely for color styling only, not underline
         }
       }
+    }
 
-      // Check for text color
-      const colorElements = rPr.getElementsByTagName("w:color");
-      if (colorElements.length > 0) {
-        const colorElement = colorElements[0];
-        if (colorElement) {
-          const colorVal = colorElement.getAttribute("w:val");
-          if (colorVal && colorVal !== "auto") {
-            // Basic hex color validation and conversion
-            if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
-              color = `#${colorVal}`;
+    // Check for formatting in run properties using getElementsByTagName
+    const rPrElements = runElement.getElementsByTagName("w:rPr");
+    let bold = false;
+    let italic = false;
+    let underline = false;
+    let color: string | undefined;
+
+    if (rPrElements.length > 0) {
+      const rPr = rPrElements[0];
+      if (rPr) {
+        bold = rPr.getElementsByTagName("w:b").length > 0;
+        italic = rPr.getElementsByTagName("w:i").length > 0;
+
+        // Check for underline - need to verify the w:val attribute
+        const underlineElements = rPr.getElementsByTagName("w:u");
+        if (underlineElements.length > 0) {
+          const underlineElement = underlineElements[0];
+          if (underlineElement) {
+            const val = underlineElement.getAttribute("w:val");
+            const colorAttr = underlineElement.getAttribute("w:color");
+
+            if (val) {
+              // If w:val is present, only apply underline if it's not "none" or "0"
+              underline = val !== "none" && val !== "0";
+            } else if (!colorAttr) {
+              // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
+              underline = true;
+            }
+            // If w:color but no w:val, it's likely for color styling only, not underline
+          }
+        }
+
+        // Check for text color
+        const colorElements = rPr.getElementsByTagName("w:color");
+        if (colorElements.length > 0) {
+          const colorElement = colorElements[0];
+          if (colorElement) {
+            const colorVal = colorElement.getAttribute("w:val");
+            if (colorVal && colorVal !== "auto") {
+              // Basic hex color validation and conversion
+              if (/^[0-9A-Fa-f]{6}$/.test(colorVal)) {
+                color = `#${colorVal}`;
+              }
             }
           }
         }
       }
     }
-  }
 
-  return {
-    text: runText,
-    ...(bold && { bold }),
-    ...(italic && { italic }),
-    ...(underline && { underline }),
-    ...(color && { color }),
-  };
+    return {
+      text: runText,
+      ...(bold && { bold }),
+      ...(italic && { italic }),
+      ...(underline && { underline }),
+      ...(color && { color }),
+      ...(image && { image }),
+    };
+  });
 }
 
 /**
@@ -135,6 +161,11 @@ export const parseDocumentXmlWithDom = (
 
     // Load hyperlink relationships if provided
     const relationships = yield* loadHyperlinkRelationships(relationshipsXml);
+
+    // Load image relationships if provided
+    const imageRelationships = relationshipsXml 
+      ? yield* parseImageRelationships(relationshipsXml)
+      : new Map<string, ImageRelationship>();
 
     // Parse XML with proper DOM parser using existing utilities
     const doc = yield* parseXmlString(xmlContent).pipe(
@@ -218,8 +249,8 @@ export const parseDocumentXmlWithDom = (
           // Get runs within the hyperlink
           const hyperlinkRunElements = child.getElementsByTagName("w:r");
           for (const runElement of hyperlinkRunElements) {
-            const runData = extractRunData(runElement);
-            if (runData.text) {
+            const runData = yield* extractRunData(runElement, imageRelationships);
+            if (runData.text || runData.image) {
               runs.push({
                 ...runData,
                 ...(hyperlinkUrl && { hyperlink: hyperlinkUrl }),
@@ -228,8 +259,8 @@ export const parseDocumentXmlWithDom = (
           }
         } else if (child.tagName === "w:r") {
           // Process regular run element
-          const runData = extractRunData(child);
-          if (runData.text) {
+          const runData = yield* extractRunData(child, imageRelationships);
+          if (runData.text || runData.image) {
             runs.push(runData);
           }
         }

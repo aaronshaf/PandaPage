@@ -9,6 +9,7 @@ import {
   readDocx,
 } from "./docx-reader";
 import { fieldToMarkdown } from "./form-field-parser";
+import { formatImageAsMarkdown } from "./image-parser";
 import {
   type EnhancedDocxDocument,
   type DocxMetadata,
@@ -423,6 +424,11 @@ const formatListItemWithFormat = (
 
 // Format a single run with inline formatting
 const formatRun = (run: DocxRun): string => {
+  // Handle images first
+  if (run.image) {
+    return formatImageAsMarkdown(run.image);
+  }
+
   let text = run.text;
 
   // Convert tabs to spaces (4 spaces per tab for better markdown readability)

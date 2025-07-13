@@ -6,6 +6,8 @@ import {
   type DocxField,
 } from "./form-field-parser";
 import { parseDocumentXmlWithDom, parseNumberingXmlWithDom } from "./dom-parser";
+import type { DocxImage } from "./image-parser";
+import { extractImageFromZip } from "./image-parser";
 
 // Error types
 export class DocxParseError {
@@ -32,6 +34,7 @@ export interface DocxRun {
   underline?: boolean;
   color?: string; // Text color in hex format
   hyperlink?: string;
+  image?: DocxImage; // Image data for drawing elements
 }
 
 export interface DocxDocument {
@@ -115,10 +118,60 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       // Parse the XML to extract text using DOM parser instead of regex
       const paragraphs = yield* parseDocumentXmlWithDom(xmlContent, relationshipsContent);
 
-      return { paragraphs, numbering };
+      // Extract binary data for images
+      const processedParagraphs = yield* extractImageData(paragraphs, unzipped);
+
+      return { paragraphs: processedParagraphs, numbering };
     } catch (error) {
       return yield* Effect.fail(new DocxParseError(`Failed to read DOCX: ${error}`));
     }
+  });
+
+/**
+ * Extract binary data for images in the document
+ */
+const extractImageData = (
+  paragraphs: DocxParagraph[],
+  unzipped: Record<string, Uint8Array>
+): Effect.Effect<DocxParagraph[], DocxParseError> =>
+  Effect.gen(function* () {
+    const processedParagraphs: DocxParagraph[] = [];
+
+    for (const paragraph of paragraphs) {
+      const processedRuns: DocxRun[] = [];
+
+      for (const run of paragraph.runs) {
+        if (run.image && run.image.filePath) {
+          // Extract binary data for this image
+          try {
+            const base64Data = yield* extractImageFromZip(unzipped, run.image.filePath);
+            const updatedImage: DocxImage = {
+              ...run.image,
+              base64Data,
+            };
+            
+            processedRuns.push({
+              ...run,
+              image: updatedImage,
+            });
+          } catch (error) {
+            debug.log(`Failed to extract image ${run.image.filePath}:`, error);
+            // Keep the run but without binary data
+            processedRuns.push(run);
+          }
+        } else {
+          // No image or no file path, keep as-is
+          processedRuns.push(run);
+        }
+      }
+
+      processedParagraphs.push({
+        ...paragraph,
+        runs: processedRuns,
+      });
+    }
+
+    return processedParagraphs;
   });
 
 // Parse document.xml content using DOM-based parsing
