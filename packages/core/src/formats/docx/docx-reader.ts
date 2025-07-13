@@ -7,6 +7,11 @@ import {
 } from "./form-field-parser";
 import { parseDocumentXmlWithDom, parseNumberingXmlWithDom } from "./dom-parser";
 import { parseXmlString } from "../../common/xml-parser";
+import { 
+  validateImage, 
+  getMimeTypeFromExtension, 
+  ImageValidationTracker 
+} from "../../utils/image-validation";
 
 // Error types
 export class DocxParseError {
@@ -128,12 +133,20 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
       const paragraphs = yield* parseDocumentXmlWithDom(xmlContent);
 
       // Extract image data for runs with images
+      const imageTracker = new ImageValidationTracker();
+      
       for (const paragraph of paragraphs) {
         for (const run of paragraph.runs) {
           if (run.image && run.image.relationshipId) {
             const relationship = relationships.get(run.image.relationshipId);
             if (relationship && relationship.target) {
               try {
+                // Check document-level image limits
+                if (!imageTracker.canAddImage()) {
+                  debug.log(`Document has reached maximum image limit (${imageTracker.getImageCount()}). Skipping ${run.image.relationshipId}`);
+                  continue;
+                }
+
                 // Get image file from ZIP
                 const imagePath = relationship.target.startsWith("media/") 
                   ? relationship.target 
@@ -141,25 +154,31 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
                 const imageFile = unzipped[`word/${imagePath}`] || unzipped[imagePath];
                 
                 if (imageFile) {
-                  run.image.data = imageFile.buffer.slice(imageFile.byteOffset, imageFile.byteOffset + imageFile.byteLength) as ArrayBuffer;
-                  run.image.imagePath = imagePath;
+                  const imageData = imageFile.buffer.slice(imageFile.byteOffset, imageFile.byteOffset + imageFile.byteLength) as ArrayBuffer;
                   
-                  // Determine MIME type from extension
-                  const extension = imagePath.split(".").pop()?.toLowerCase();
-                  const mimeTypes: Record<string, string> = {
-                    png: "image/png",
-                    jpg: "image/jpeg",
-                    jpeg: "image/jpeg",
-                    gif: "image/gif",
-                    bmp: "image/bmp",
-                    tiff: "image/tiff",
-                    tif: "image/tiff",
-                    svg: "image/svg+xml",
-                    webp: "image/webp",
-                    wmf: "image/wmf",
-                    emf: "image/emf"
-                  };
-                  run.image.mimeType = mimeTypes[extension || ""] || "image/png";
+                  // Validate image before processing
+                  const validation = validateImage(imagePath, imageData);
+                  if (!validation.isValid) {
+                    debug.log(`Invalid image ${imagePath}: ${validation.error}`);
+                    continue;
+                  }
+
+                  // Log warnings if any
+                  if (validation.warnings) {
+                    validation.warnings.forEach(warning => 
+                      debug.log(`Image warning for ${imagePath}: ${warning}`)
+                    );
+                  }
+
+                  // Set validated image data
+                  run.image.data = imageData;
+                  run.image.imagePath = imagePath;
+                  run.image.mimeType = validation.detectedMimeType || getMimeTypeFromExtension(imagePath);
+                  
+                  // Track this image
+                  imageTracker.addImage();
+                  
+                  debug.log(`Successfully extracted and validated image: ${imagePath} (${imageData.byteLength} bytes, ${run.image.mimeType})`);
                 }
               } catch (error) {
                 debug.log(`Failed to extract image data for ${run.image.relationshipId}: ${error}`);
