@@ -8,6 +8,7 @@ import type {
   TableShading,
   TableCellBorders,
   TableBorder,
+  TableConditionalFormatting,
 } from "../../types/document";
 import { parseParagraph } from "./paragraph-parser";
 import {
@@ -16,20 +17,15 @@ import {
   type DocxTableBorders,
   type DocxTableCellBorders,
   type DocxShading,
+  type DocxConditionalFormatting,
 } from "./types";
 import type { DocxTheme } from "./theme-parser";
 import type { DocxStylesheet } from "./style-parser";
 import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from "./xml-utils";
 import { mapBorderStyle, mapShadingPattern } from "./ooxml-mappers";
+import { parseCnfStyle } from "./conditional-formatting";
 
-/**
- * Parse a table element
- * @param tableElement - The table element to parse
- * @param relationships - Map of relationship IDs to URLs
- * @param theme - Document theme for color and font resolution
- * @param stylesheet - Document stylesheet for style resolution
- * @returns Parsed table or null
- */
+
 /**
  * Parse a table border element
  */
@@ -298,6 +294,23 @@ function convertToTableShading(docxShading: DocxShading): TableShading {
 }
 
 /**
+ * Convert DOCX conditional formatting to document conditional formatting
+ */
+function convertToTableConditionalFormatting(
+  docxCnfStyle: DocxConditionalFormatting
+): TableConditionalFormatting {
+  return {
+    val: docxCnfStyle.val,
+    firstRow: docxCnfStyle.firstRow,
+    lastRow: docxCnfStyle.lastRow,
+    firstCol: docxCnfStyle.firstCol,
+    lastCol: docxCnfStyle.lastCol,
+    bandedRows: docxCnfStyle.bandedRows,
+    bandedCols: docxCnfStyle.bandedCols,
+  };
+}
+
+/**
  * Parse a table element
  *
  * Border Conflict Resolution Rules (per OOXML spec):
@@ -402,6 +415,13 @@ export function parseTable(
     if (!rowElement) continue;
     const cells: TableCell[] = [];
 
+    // Parse row properties for cnfStyle
+    let rowCnfStyle: DocxConditionalFormatting | undefined;
+    const trPr = getElementByTagNameNSFallback(rowElement, ns, "trPr");
+    if (trPr) {
+      rowCnfStyle = parseCnfStyle(trPr, ns);
+    }
+
     // Get all table cells in this row
     const cellElements = getElementsByTagNameNSFallback(rowElement, ns, "tc");
 
@@ -471,6 +491,7 @@ export function parseTable(
       let cellShading: TableShading | undefined;
       let cellMargin: TableCell["margin"] | undefined;
       let cellWidth: number | undefined;
+      let cellCnfStyle: DocxConditionalFormatting | undefined;
 
       if (tcPr) {
         const gridSpan = getElementByTagNameNSFallback(tcPr, ns, "gridSpan");
@@ -586,6 +607,9 @@ export function parseTable(
             if (w) cellMargin.right = parseInt(w, 10);
           }
         }
+
+        // Parse conditional formatting (cnfStyle)
+        cellCnfStyle = parseCnfStyle(tcPr, ns);
       }
 
       const cell: TableCell = {
@@ -598,6 +622,7 @@ export function parseTable(
         ...(cellBorders && { borders: cellBorders }),
         ...(cellShading && { shading: cellShading }),
         ...(cellMargin && { margin: cellMargin }),
+        ...(cellCnfStyle && { cnfStyle: convertToTableConditionalFormatting(cellCnfStyle) }),
       };
 
       cells.push(cell);

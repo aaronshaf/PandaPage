@@ -40,6 +40,10 @@ pdf.js
 tmp
 *.tmp.*
 
+# Temporary extraction directories
+temp-*
+tmp-*
+
 # Playwright test results
 **/test-results/
 **/playwright-report/
