@@ -119,14 +119,14 @@ describe("Numbering Parser", () => {
       const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <w:numbering xmlns:w="${WORD_NAMESPACE}">
           <w:abstractNum w:abstractNumId="0">
-            <w:numStyleLink w:val="ListNumber"/>
+            <w:styleLink w:val="ListNumber"/>
             <w:lvl w:ilvl="0">
               <w:numFmt w:val="decimal"/>
               <w:lvlText w:val="%1."/>
             </w:lvl>
           </w:abstractNum>
           <w:abstractNum w:abstractNumId="1">
-            <w:numStyleLink w:val="ListNumber"/>
+            <w:styleLink w:val="ListNumber"/>
           </w:abstractNum>
           <w:num w:numId="1">
             <w:abstractNumId w:val="1"/>

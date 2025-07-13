@@ -102,6 +102,7 @@ export interface DocxParagraph {
   verticalAlignment?: "top" | "center" | "bottom" | "auto";
   borders?: DocxParagraphBorders;
   shading?: DocxShading;
+  cnfStyle?: DocxConditionalFormatting;
 }
 
 export class DocxParseError {
@@ -152,6 +153,10 @@ export interface DocxTableProperties {
   };
 }
 
+export interface DocxTableRowProperties {
+  cnfStyle?: DocxConditionalFormatting;
+}
+
 export interface DocxTableCellProperties {
   borders?: DocxTableCellBorders;
   shading?: DocxShading;
@@ -164,6 +169,28 @@ export interface DocxTableCellProperties {
   vMerge?: "restart" | "continue";
   vAlign?: "top" | "center" | "bottom";
   textDirection?: "ltr" | "rtl" | "lrV" | "tbV" | "lrTbV" | "tbLrV";
+  cnfStyle?: DocxConditionalFormatting;
+}
+
+/**
+ * Conditional formatting (cnfStyle) for table elements
+ * Represents a 12-digit binary pattern indicating which conditional formats apply
+ */
+export interface DocxConditionalFormatting {
+  /** First row (header row) */
+  firstRow?: boolean;
+  /** Last row */
+  lastRow?: boolean;
+  /** First column */
+  firstCol?: boolean;
+  /** Last column */
+  lastCol?: boolean;
+  /** Banded rows (even/odd row formatting) */
+  bandedRows?: boolean;
+  /** Banded columns (even/odd column formatting) */
+  bandedCols?: boolean;
+  /** The original 12-digit binary string for reference */
+  val: string;
 }
 
 // Namespace constants

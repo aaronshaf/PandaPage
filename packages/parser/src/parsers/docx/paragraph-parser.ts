@@ -1,5 +1,5 @@
 // Paragraph parsing functions
-import type { DocxParagraph, DocxRun } from "./types";
+import type { DocxParagraph, DocxRun, DocxConditionalFormatting } from "./types";
 import { WORD_NAMESPACE } from "./types";
 import { parseFieldRun } from "./field-parser";
 import type { FieldParsingContext } from "./field-context";
@@ -15,9 +15,11 @@ import {
   parseRun,
 } from "./run-parser";
 import { parseParagraphBorders, parseShading } from "./border-parser";
+import { parseCnfStyle } from "./conditional-formatting";
 
 // Re-export parseRun for other modules
 export { parseRun };
+
 
 /**
  * Parse a paragraph element
@@ -56,6 +58,7 @@ export function parseParagraph(
   let verticalAlignment: DocxParagraph["verticalAlignment"];
   let borders: DocxParagraph["borders"] | undefined;
   let shading: DocxParagraph["shading"] | undefined;
+  let cnfStyle: DocxParagraph["cnfStyle"] | undefined;
 
   if (pPrElement) {
     const styleElement = getElementByTagNameNSFallback(pPrElement, ns, "pStyle");
@@ -173,6 +176,9 @@ export function parseParagraph(
     if (shdElement) {
       shading = parseShading(shdElement);
     }
+
+    // Get conditional formatting (cnfStyle)
+    cnfStyle = parseCnfStyle(pPrElement, ns);
   }
 
   // Parse runs - both direct runs and runs inside hyperlinks
@@ -302,6 +308,7 @@ export function parseParagraph(
     ...(verticalAlignment && { verticalAlignment }),
     ...(resolvedBorders && { borders: resolvedBorders }),
     ...(resolvedShading && { shading: resolvedShading }),
+    ...(cnfStyle && { cnfStyle }),
     ...(images.length > 0 && { images }),
   };
 }

@@ -151,6 +151,23 @@ export interface TableCellBorders {
   tr2bl?: TableBorder; // Top-right to bottom-left diagonal
 }
 
+export interface TableConditionalFormatting {
+  /** First row (header row) */
+  firstRow?: boolean;
+  /** Last row */
+  lastRow?: boolean;
+  /** First column */
+  firstCol?: boolean;
+  /** Last column */
+  lastCol?: boolean;
+  /** Banded rows (even/odd row formatting) */
+  bandedRows?: boolean;
+  /** Banded columns (even/odd column formatting) */
+  bandedCols?: boolean;
+  /** The original binary pattern for reference */
+  val: string;
+}
+
 export interface TableCell {
   paragraphs: Paragraph[];
   colspan?: number;
@@ -166,6 +183,7 @@ export interface TableCell {
     left?: number; // Twips
     right?: number; // Twips
   };
+  cnfStyle?: TableConditionalFormatting;
 }
 
 export interface Image {
