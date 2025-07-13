@@ -18,6 +18,19 @@ export interface DocxParagraph {
   type: "paragraph";
   style?: string;
   runs: DocxRun[];
+  // Paragraph properties
+  alignment?: string;
+  indentation?: {
+    left?: number;
+    right?: number;
+    firstLine?: number;
+    hanging?: number;
+  };
+  spacing?: {
+    before?: number;
+    after?: number;
+    line?: number;
+  };
   // List properties
   numId?: string;
   ilvl?: number;
@@ -29,8 +42,13 @@ export interface DocxRun {
   text: string;
   bold?: boolean;
   italic?: boolean;
-  underline?: boolean;
+  underline?: boolean | string; // Can be boolean or underline type (single, double, thick, etc.)
+  color?: string; // Text color in hex format (#rrggbb)
+  highlightColor?: string; // Highlight/background color
+  strikethrough?: boolean;
   hyperlink?: string;
+  fontSize?: number; // Font size in points
+  fontFamily?: string; // Font family name
 }
 
 export interface DocxDocument {

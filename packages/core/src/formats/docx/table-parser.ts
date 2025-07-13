@@ -236,6 +236,40 @@ export const parseTableCellProperties = (
       }
     }
 
+    // Parse cell merging (colspan)
+    const gridSpan = tcPr.querySelector("gridSpan, w\\:gridSpan");
+    if (gridSpan) {
+      const val = gridSpan.getAttribute("val");
+      if (val) {
+        const colspan = parseInt(val, 10);
+        if (colspan > 1) {
+          properties.colspan = colspan;
+        }
+      }
+    }
+
+    // Parse vertical merging (rowspan)
+    const vMerge = tcPr.querySelector("vMerge, w\\:vMerge");
+    if (vMerge) {
+      const val = vMerge.getAttribute("val");
+      if (val === "restart") {
+        // This is the start of a vertically merged cell
+        properties.vMergeStart = true;
+      } else if (!val || val === "continue") {
+        // This cell continues a vertical merge
+        properties.vMergeContinue = true;
+      }
+    }
+
+    // Parse text direction
+    const textDirection = tcPr.querySelector("textDirection, w\\:textDirection");
+    if (textDirection) {
+      const val = textDirection.getAttribute("val");
+      if (val) {
+        properties.textDirection = val;
+      }
+    }
+
     return properties;
   });
 

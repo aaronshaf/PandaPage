@@ -49,6 +49,10 @@ export interface DocxTableCellProperties {
   alignment?: "left" | "center" | "right" | "top" | "bottom";
   borders?: DocxTableBorders;
   backgroundColor?: string;
+  colspan?: number; // Grid span (horizontal merging)
+  vMergeStart?: boolean; // Start of vertical merge
+  vMergeContinue?: boolean; // Continuation of vertical merge
+  textDirection?: string; // Text direction (tbRl, lrTb, etc.)
 }
 
 export interface DocxTableBorders {

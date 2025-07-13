@@ -55,6 +55,11 @@ function safeBase64Encode(data: ArrayBuffer | any): string {
 function renderTextRun(run: TextRun): string {
   let text = run.text || "";
 
+  // Handle footnote references first (before other formatting)
+  if ((run as any)._footnoteRef) {
+    return `<sup>[^${(run as any)._footnoteRef}]</sup>`;
+  }
+
   // Apply formatting
   if (run.bold) text = `**${text}**`;
   if (run.italic) text = `*${text}*`;
@@ -247,8 +252,8 @@ function renderElement(element: DocumentElement, options: MarkdownRenderOptions)
       return "\n---\n";
 
     case "footnote":
-      // Simple footnote rendering
-      return `<sup>${element.id || "1"}</sup>`;
+      // Footnotes are collected and rendered at the end, return empty here
+      return "";
 
     default:
       return null;
@@ -306,8 +311,21 @@ export function renderToMarkdownImproved(
   // Track state for better formatting
   let lastElementType: string | null = null;
   let inList = false;
+  const footnotes: string[] = [];
 
   for (const element of document.elements) {
+    // Collect footnotes separately
+    if (element.type === "footnote") {
+      const footnoteContent = element.elements
+        ?.map((el) => renderElement(el, defaultOptions))
+        .filter(Boolean)
+        .join(" ");
+      if (footnoteContent) {
+        footnotes.push(`[^${element.id}]: ${footnoteContent}`);
+      }
+      continue;
+    }
+
     const rendered = renderElement(element, defaultOptions);
 
     if (!rendered) {
@@ -351,6 +369,16 @@ export function renderToMarkdownImproved(
     }
 
     lastElementType = element.type;
+  }
+
+  // Add footnotes at the end if any exist
+  if (footnotes.length > 0) {
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+    footnotes.forEach((footnote) => {
+      lines.push(footnote);
+    });
   }
 
   // Clean up trailing empty lines

@@ -8,6 +8,30 @@ import {
 } from "./form-field-parser";
 import type { DocxParagraph, DocxRun, DocxParseError } from "./docx-reader";
 
+// Helper function to convert named highlight colors to hex values
+function convertHighlightColorToHex(colorName: string): string {
+  const highlightColors: Record<string, string> = {
+    yellow: "#FFFF00",
+    brightGreen: "#00FF00",
+    cyan: "#00FFFF",
+    magenta: "#FF00FF",
+    blue: "#0000FF",
+    red: "#FF0000",
+    darkBlue: "#000080",
+    darkCyan: "#008080",
+    darkGreen: "#008000",
+    darkMagenta: "#800080",
+    darkRed: "#800000",
+    darkYellow: "#808000",
+    darkGray: "#808080",
+    lightGray: "#C0C0C0",
+    black: "#000000",
+    white: "#FFFFFF",
+  };
+  
+  return highlightColors[colorName] || colorName;
+}
+
 // Get XMLSerializer for both browser and Node.js environments
 function getXMLSerializer(): XMLSerializer {
   // Browser environment
@@ -70,13 +94,66 @@ export const parseDocumentXmlWithDom = (
         }
       }
 
-      // Extract paragraph style using getElementsByTagName
+      // Extract paragraph style and properties using getElementsByTagName
       const pPrElements = pElement.getElementsByTagName("w:pPr");
       let style: string | undefined;
+      let alignment: string | undefined;
+      let indentation: { left?: number; right?: number; firstLine?: number; hanging?: number } | undefined;
+      let spacing: { before?: number; after?: number; line?: number } | undefined;
+      
       if (pPrElements.length > 0) {
-        const pStyleElements = pPrElements[0]?.getElementsByTagName("w:pStyle");
+        const pPr = pPrElements[0];
+        
+        // Extract paragraph style
+        const pStyleElements = pPr?.getElementsByTagName("w:pStyle");
         if (pStyleElements && pStyleElements.length > 0) {
           style = pStyleElements[0]?.getAttribute("w:val") || undefined;
+        }
+
+        // Extract alignment
+        const jcElements = pPr?.getElementsByTagName("w:jc");
+        if (jcElements && jcElements.length > 0) {
+          alignment = jcElements[0]?.getAttribute("w:val") || undefined;
+        }
+
+        // Extract indentation
+        const indElements = pPr?.getElementsByTagName("w:ind");
+        if (indElements && indElements.length > 0) {
+          const indElement = indElements[0];
+          if (indElement) {
+            const left = indElement.getAttribute("w:left");
+            const right = indElement.getAttribute("w:right");
+            const firstLine = indElement.getAttribute("w:firstLine");
+            const hanging = indElement.getAttribute("w:hanging");
+            
+            if (left || right || firstLine || hanging) {
+              indentation = {
+                ...(left && { left: parseInt(left, 10) }),
+                ...(right && { right: parseInt(right, 10) }),
+                ...(firstLine && { firstLine: parseInt(firstLine, 10) }),
+                ...(hanging && { hanging: parseInt(hanging, 10) }),
+              };
+            }
+          }
+        }
+
+        // Extract spacing
+        const spacingElements = pPr?.getElementsByTagName("w:spacing");
+        if (spacingElements && spacingElements.length > 0) {
+          const spacingElement = spacingElements[0];
+          if (spacingElement) {
+            const before = spacingElement.getAttribute("w:before");
+            const after = spacingElement.getAttribute("w:after");
+            const line = spacingElement.getAttribute("w:line");
+            
+            if (before || after || line) {
+              spacing = {
+                ...(before && { before: parseInt(before, 10) }),
+                ...(after && { after: parseInt(after, 10) }),
+                ...(line && { line: parseInt(line, 10) }),
+              };
+            }
+          }
         }
       }
 
@@ -138,7 +215,12 @@ export const parseDocumentXmlWithDom = (
           const rPrElements = runElement.getElementsByTagName("w:rPr");
           let bold = false;
           let italic = false;
-          let underline = false;
+          let underline: boolean | string = false;
+          let color: string | undefined;
+          let highlightColor: string | undefined;
+          let strikethrough = false;
+          let fontSize: number | undefined;
+          let fontFamily: string | undefined;
 
           if (rPrElements.length > 0) {
             const rPr = rPrElements[0];
@@ -152,16 +234,74 @@ export const parseDocumentXmlWithDom = (
                 const underlineElement = underlineElements[0];
                 if (underlineElement) {
                   const val = underlineElement.getAttribute("w:val");
-                  const color = underlineElement.getAttribute("w:color");
+                  const colorAttr = underlineElement.getAttribute("w:color");
 
                   if (val) {
                     // If w:val is present, only apply underline if it's not "none" or "0"
-                    underline = val !== "none" && val !== "0";
-                  } else if (!color) {
+                    if (val !== "none" && val !== "0") {
+                      underline = val === "single" ? true : val; // Use boolean for single, string for others
+                    }
+                  } else if (!colorAttr) {
                     // If no w:val and no w:color, it's a simple <w:u/> which defaults to single underline
                     underline = true;
                   }
                   // If w:color but no w:val, it's likely for color styling only, not underline
+                }
+              }
+
+              // Check for text color
+              const colorElements = rPr.getElementsByTagName("w:color");
+              if (colorElements.length > 0) {
+                const colorElement = colorElements[0];
+                if (colorElement) {
+                  const colorVal = colorElement.getAttribute("w:val");
+                  if (colorVal && colorVal !== "auto" && colorVal !== "000000") {
+                    color = colorVal.startsWith("#") ? colorVal : `#${colorVal}`;
+                  }
+                }
+              }
+
+              // Check for highlight/background color
+              const highlightElements = rPr.getElementsByTagName("w:highlight");
+              if (highlightElements.length > 0) {
+                const highlightElement = highlightElements[0];
+                if (highlightElement) {
+                  const highlightVal = highlightElement.getAttribute("w:val");
+                  if (highlightVal && highlightVal !== "none") {
+                    // Convert named colors to hex if needed
+                    highlightColor = convertHighlightColorToHex(highlightVal);
+                  }
+                }
+              }
+
+              // Check for strikethrough
+              strikethrough = rPr.getElementsByTagName("w:strike").length > 0;
+
+              // Check for font size
+              const szElements = rPr.getElementsByTagName("w:sz");
+              if (szElements.length > 0) {
+                const szElement = szElements[0];
+                if (szElement) {
+                  const szVal = szElement.getAttribute("w:val");
+                  if (szVal) {
+                    // w:sz is in half-points, so divide by 2 to get points
+                    fontSize = parseInt(szVal, 10) / 2;
+                  }
+                }
+              }
+
+              // Check for font family
+              const rFontsElements = rPr.getElementsByTagName("w:rFonts");
+              if (rFontsElements.length > 0) {
+                const rFontsElement = rFontsElements[0];
+                if (rFontsElement) {
+                  // Try ascii, hAnsi, cs, eastAsia in that order
+                  fontFamily = 
+                    rFontsElement.getAttribute("w:ascii") ||
+                    rFontsElement.getAttribute("w:hAnsi") ||
+                    rFontsElement.getAttribute("w:cs") ||
+                    rFontsElement.getAttribute("w:eastAsia") ||
+                    undefined;
                 }
               }
             }
@@ -172,6 +312,11 @@ export const parseDocumentXmlWithDom = (
             ...(bold && { bold }),
             ...(italic && { italic }),
             ...(underline && { underline }),
+            ...(color && { color }),
+            ...(highlightColor && { highlightColor }),
+            ...(strikethrough && { strikethrough }),
+            ...(fontSize && { fontSize }),
+            ...(fontFamily && { fontFamily }),
           });
         }
       }
@@ -181,6 +326,9 @@ export const parseDocumentXmlWithDom = (
           type: "paragraph",
           style,
           runs,
+          ...(alignment && { alignment }),
+          ...(indentation && { indentation }),
+          ...(spacing && { spacing }),
           ...(numId && { numId }),
           ...(ilvl !== undefined && { ilvl }),
           ...(fields && { fields }),
