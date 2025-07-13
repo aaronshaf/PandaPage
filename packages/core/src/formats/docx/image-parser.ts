@@ -2,12 +2,13 @@ import { Effect } from "effect";
 import { debug } from "../../common/debug";
 import { parseXmlString } from "../../common/xml-parser";
 import type { DocxParseError } from "./docx-reader";
+import type { ST_RelationshipId } from "@browser-document-viewer/ooxml-types";
 
 /**
  * Image relationship data from document.xml.rels
  */
 export interface ImageRelationship {
-  id: string;
+  id: ST_RelationshipId;
   target: string; // Path to image file like "media/image1.png"
   targetMode?: string;
 }
@@ -16,7 +17,7 @@ export interface ImageRelationship {
  * Parsed image information from drawing element
  */
 export interface DocxImage {
-  relationshipId: string;
+  relationshipId: ST_RelationshipId;
   width?: number; // in EMUs (English Metric Units)
   height?: number; // in EMUs  
   title?: string;
@@ -149,8 +150,18 @@ export const parseDrawingElement = (
       if (extentElement) {
         const cxAttr = extentElement.getAttribute("cx");
         const cyAttr = extentElement.getAttribute("cy");
-        if (cxAttr) width = parseInt(cxAttr, 10);
-        if (cyAttr) height = parseInt(cyAttr, 10);
+        if (cxAttr) {
+          const parsedWidth = parseInt(cxAttr, 10);
+          if (!isNaN(parsedWidth) && parsedWidth > 0) {
+            width = parsedWidth;
+          }
+        }
+        if (cyAttr) {
+          const parsedHeight = parseInt(cyAttr, 10);
+          if (!isNaN(parsedHeight) && parsedHeight > 0) {
+            height = parsedHeight;
+          }
+        }
       }
     }
 
@@ -192,6 +203,44 @@ export const emusToPixels = (emus: number): number => {
 };
 
 /**
+ * Supported image formats and their magic bytes
+ */
+const IMAGE_FORMATS = {
+  png: { mimeType: 'image/png', magic: [0x89, 0x50, 0x4E, 0x47] },
+  jpeg: { mimeType: 'image/jpeg', magic: [0xFF, 0xD8, 0xFF] },
+  gif: { mimeType: 'image/gif', magic: [0x47, 0x49, 0x46] },
+  bmp: { mimeType: 'image/bmp', magic: [0x42, 0x4D] },
+  webp: { mimeType: 'image/webp', magic: [0x52, 0x49, 0x46, 0x46] },
+} as const;
+
+/**
+ * Maximum allowed image size (10MB)
+ */
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+
+/**
+ * Detect image format from binary data
+ */
+const detectImageFormat = (data: Uint8Array): string | null => {
+  for (const [format, info] of Object.entries(IMAGE_FORMATS)) {
+    const { magic } = info;
+    if (data.length >= magic.length) {
+      let matches = true;
+      for (let i = 0; i < magic.length; i++) {
+        if (data[i] !== magic[i]) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) {
+        return format;
+      }
+    }
+  }
+  return null;
+};
+
+/**
  * Extract image binary data from ZIP archive
  */
 export const extractImageFromZip = (
@@ -210,6 +259,22 @@ export const extractImageFromZip = (
       const imageData = unzipped[path];
       if (imageData) {
         debug.log(`Found image at path: ${path}, size: ${imageData.length} bytes`);
+        
+        // Validate image size
+        if (imageData.length > MAX_IMAGE_SIZE) {
+          debug.log(`Image too large: ${imageData.length} bytes (max: ${MAX_IMAGE_SIZE})`);
+          return yield* Effect.fail({
+            _tag: "DocxParseError" as const,
+            message: `Image too large: ${(imageData.length / 1024 / 1024).toFixed(2)}MB (max: ${MAX_IMAGE_SIZE / 1024 / 1024}MB)`,
+          });
+        }
+        
+        // Validate image format
+        const format = detectImageFormat(imageData);
+        if (!format) {
+          debug.log(`Unknown image format for: ${path}`);
+          // Continue with the image anyway - Word may support formats we don't validate
+        }
         
         // Convert Uint8Array to base64
         const base64Data = yield* Effect.tryPromise({
@@ -246,6 +311,12 @@ export const extractImageFromZip = (
 
 /**
  * Format image as markdown with proper dimensions
+ * 
+ * NOTE: For memory efficiency, consider these approaches in production:
+ * 1. Stream large images instead of loading into memory
+ * 2. Use object URLs with cleanup (URL.revokeObjectURL)
+ * 3. Implement lazy loading for images above a certain size
+ * 4. Clear base64Data after rendering to free memory
  */
 export const formatImageAsMarkdown = (image: DocxImage): string => {
   const title = image.title || "Image";
