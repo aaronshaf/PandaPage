@@ -11,8 +11,8 @@
  * 5. Display what elements were found
  * 
  * Usage:
- *   bun run test-003-parsing.js    (recommended - uses Bun runtime)
- *   node test-003-parsing.js       (requires workspace dependencies to be built)
+ *   bun run tmp/test-003-parsing.js    (recommended - uses Bun runtime)
+ *   node tmp/test-003-parsing.js       (requires workspace dependencies to be built)
  * 
  * Note: This project uses Bun as the preferred package manager and runtime.
  *       If using Node.js, ensure all workspace packages are built first.
@@ -28,7 +28,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Import the parsing functions from the core package
-import { parseDocxDocument } from './packages/core/src/index.ts';
+import { parseDocxDocument } from '../packages/core/src/index.ts';
 
 async function main() {
   console.log('🔍 Testing DOCX parsing with 003.docx');
@@ -40,13 +40,13 @@ async function main() {
   
   if (runtime === 'Node.js') {
     console.log('⚠️  Note: This project is optimized for Bun. If you encounter module resolution issues,');
-    console.log('   please use: bun run test-003-parsing.js');
+    console.log('   please use: bun run tmp/test-003-parsing.js');
   }
   console.log();
 
   try {
     // Read the 003.docx file
-    const docxPath = join(__dirname, 'documents', '003.docx');
+    const docxPath = join(__dirname, '..', 'documents', '003.docx');
     console.log(`📁 Reading file: ${docxPath}`);
     
     const fileBuffer = readFileSync(docxPath);
@@ -245,7 +245,7 @@ async function main() {
       console.error('\n💡 Troubleshooting:');
       console.error('   This error usually occurs when using Node.js with workspace dependencies.');
       console.error('   Please try one of these solutions:');
-      console.error('   1. Use Bun instead: bun run test-003-parsing.js');
+      console.error('   1. Use Bun instead: bun run tmp/test-003-parsing.js');
       console.error('   2. Build the workspace packages first');
       console.error('   3. Run from the project root directory');
     } else if (error.message.includes('ENOENT') && error.path?.includes('003.docx')) {

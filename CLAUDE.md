@@ -114,6 +114,22 @@ highlightColor: "yellow"
 
 Git hooks exist to maintain code quality, run tests, and enforce standards. Bypassing them can introduce bugs, security vulnerabilities, and inconsistent code formatting into the repository.
 
+## Temporary Files Policy
+
+**IMPORTANT: All temporary files and test scripts must be placed in the tmp/ directory**
+
+- Any temporary test scripts, analysis files, or debugging utilities should be created in `tmp/`
+- Never create temporary files in the project root directory
+- This prevents cluttering the main codebase with temporary artifacts
+- The `tmp/` directory should be used for:
+  - Test scripts (like `tmp/test-003-parsing.js`)
+  - Debugging utilities
+  - Analysis output files
+  - Temporary data extraction
+  - Any files that are not part of the permanent codebase
+- Always clean up temporary files when they are no longer needed
+- Consider adding `tmp/` to `.gitignore` for files that shouldn't be committed
+
 ## Commit and PR Guidelines
 
 When creating commits and pull requests:
