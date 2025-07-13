@@ -1,5 +1,6 @@
 export * from "./types/document";
 export { parseDocx, parseDocxDocument, DocxParseError } from "./parsers/docx";
+export { sanitizeHTML } from "./utils/html-sanitizer";
 
 // Main parser function that auto-detects format
 export async function parseDocument(

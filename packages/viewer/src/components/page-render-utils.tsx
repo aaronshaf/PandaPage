@@ -1,7 +1,7 @@
 import React from "react";
 import { DocxRenderer } from "./DocxRenderer";
 import { renderToHtml } from "@browser-document-viewer/dom-renderer";
-import { sanitizeHTML } from "@browser-document-viewer/parser/utils/html-sanitizer";
+import { sanitizeHTML } from "@browser-document-viewer/parser";
 import { marked } from "marked";
 import type { EnhancedDocxDocument, ParsedDocument } from "@browser-document-viewer/core";
 

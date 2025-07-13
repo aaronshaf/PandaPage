@@ -7,7 +7,7 @@ import {
   calculatePageIndicatorTop,
 } from "./page-tracking-utils";
 import { renderPrintPages } from "./page-render-utils";
-import { sanitizeHTML } from "@browser-document-viewer/parser/utils/html-sanitizer";
+import { sanitizeHTML } from "@browser-document-viewer/parser";
 import type { EnhancedDocxDocument, ParsedDocument } from "@browser-document-viewer/core";
 
 interface DocumentViewerProps {
