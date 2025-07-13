@@ -484,7 +484,8 @@ describe("Font family parsing with multiple scripts", () => {
     const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
     
     expect(run).not.toBeNull();
-    expect(run?.fontFamily).toBe("Times New Roman");
+    expect(run?.fontFamily).toBe("SimSun"); // Main font chosen by priority
+    expect(run?.fontFamilyAscii).toBe("Times New Roman");
     expect(run?.fontFamilyCs).toBe("Arial Unicode MS");
     expect(run?.fontFamilyHAnsi).toBe("Calibri");
     expect(run?.fontFamilyEastAsia).toBe("SimSun");
@@ -506,6 +507,7 @@ describe("Font family parsing with multiple scripts", () => {
     
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("Arial");
+    expect(run?.fontFamilyAscii).toBe("Arial");
     expect(run?.fontFamilyCs).toBeUndefined();
     expect(run?.fontFamilyHAnsi).toBeUndefined();
     expect(run?.fontFamilyEastAsia).toBeUndefined();
@@ -528,7 +530,8 @@ describe("Font family parsing with multiple scripts", () => {
     const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
     
     expect(run).not.toBeNull();
-    expect(run?.fontFamily).toBe("Times New Roman");
+    expect(run?.fontFamily).toBe("Times New Roman"); // Fallback since no eastAsia font
+    expect(run?.fontFamilyAscii).toBe("Times New Roman");
     expect(run?.fontFamilyCs).toBe("Traditional Arabic");
     expect(run?.rtl).toBe(true);
     expect(run?.bidi).toBe(true);
@@ -550,7 +553,8 @@ describe("Font family parsing with multiple scripts", () => {
     const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
     
     expect(run).not.toBeNull();
-    expect(run?.fontFamily).toBe("Arial");
+    expect(run?.fontFamily).toBe("MS Mincho"); // EastAsia font gets priority
+    expect(run?.fontFamilyAscii).toBe("Arial");
     expect(run?.fontFamilyEastAsia).toBe("MS Mincho");
     expect(run?.lang).toBe("ja-JP");
   });
@@ -571,6 +575,7 @@ describe("Font family parsing with multiple scripts", () => {
     
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBeUndefined();
+    expect(run?.fontFamilyAscii).toBeUndefined();
     expect(run?.fontFamilyCs).toBeUndefined();
     expect(run?.fontFamilyHAnsi).toBeUndefined();
     expect(run?.fontFamilyEastAsia).toBeUndefined();
@@ -591,7 +596,8 @@ describe("Font family parsing with multiple scripts", () => {
     const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
     
     expect(run).not.toBeNull();
-    expect(run?.fontFamily).toBe("Courier New");
+    expect(run?.fontFamily).toBe("Courier New"); // ASCII font takes priority when no eastAsia
+    expect(run?.fontFamilyAscii).toBe("Courier New");
     expect(run?.fontFamilyHAnsi).toBe("Consolas");
   });
 
@@ -610,7 +616,8 @@ describe("Font family parsing with multiple scripts", () => {
     const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
     
     expect(run).not.toBeNull();
-    expect(run?.fontFamily).toBe("Gill Sans MT");
+    expect(run?.fontFamily).toBe("Gill Sans MT"); // EastAsia gets priority
+    expect(run?.fontFamilyAscii).toBe("Gill Sans MT");
     expect(run?.fontFamilyCs).toBe("Gill Sans MT");
     expect(run?.fontFamilyHAnsi).toBe("Gill Sans MT");
     expect(run?.fontFamilyEastAsia).toBe("Gill Sans MT");

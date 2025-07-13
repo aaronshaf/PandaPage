@@ -274,9 +274,10 @@ export function parseRun(
   let fontSize: string | undefined;
   let fontSizeCs: string | undefined;
   let fontFamily: string | undefined;
-  let fontFamilyCs: string | undefined;
-  let fontFamilyHAnsi: string | undefined;
+  let fontFamilyAscii: string | undefined;
   let fontFamilyEastAsia: string | undefined;
+  let fontFamilyHAnsi: string | undefined;
+  let fontFamilyCs: string | undefined;
   let color: string | undefined;
   let backgroundColor: string | undefined;
 
@@ -349,55 +350,41 @@ export function parseRun(
     const szCsElement = getElementByTagNameNSFallback(runProps, ns, "szCs");
     fontSizeCs = szCsElement?.getAttribute("w:val") || undefined;
 
-    // Font family
+    // Font family - handle multiple font attributes for complex scripts
     const fontElement = getElementByTagNameNSFallback(runProps, ns, "rFonts");
     if (fontElement) {
-      // ASCII font (w:ascii)
+      // Store all font variants
       const fontAscii = fontElement.getAttribute("w:ascii");
-      if (fontAscii) {
-        // Check if it's a theme font reference (starts with +)
-        if (fontAscii.startsWith("+") && theme) {
-          const resolvedFont = resolveThemeFont(fontAscii, theme);
-          fontFamily = resolvedFont || fontAscii;
-        } else {
-          fontFamily = fontAscii;
-        }
-      }
-      
-      // Complex script font (w:cs)
-      const fontCs = fontElement.getAttribute("w:cs");
-      if (fontCs) {
-        if (fontCs.startsWith("+") && theme) {
-          const resolvedFont = resolveThemeFont(fontCs, theme);
-          fontFamilyCs = resolvedFont || fontCs;
-        } else {
-          fontFamilyCs = fontCs;
-        }
-      }
-      
-      // High ANSI font (w:hAnsi)
-      const fontHAnsi = fontElement.getAttribute("w:hAnsi");
-      if (fontHAnsi) {
-        if (fontHAnsi.startsWith("+") && theme) {
-          const resolvedFont = resolveThemeFont(fontHAnsi, theme);
-          fontFamilyHAnsi = resolvedFont || fontHAnsi;
-        } else {
-          fontFamilyHAnsi = fontHAnsi;
-        }
-      }
-      
-      // East Asian font (w:eastAsia)
       const fontEastAsia = fontElement.getAttribute("w:eastAsia");
-      if (fontEastAsia) {
-        if (fontEastAsia.startsWith("+") && theme) {
-          const resolvedFont = resolveThemeFont(fontEastAsia, theme);
-          fontFamilyEastAsia = resolvedFont || fontEastAsia;
-        } else {
-          fontFamilyEastAsia = fontEastAsia;
-        }
-      }
-    }
+      const fontHAnsi = fontElement.getAttribute("w:hAnsi");
+      const fontCs = fontElement.getAttribute("w:cs");
 
+      // Resolve theme fonts if needed
+      if (fontAscii) {
+        fontFamilyAscii = fontAscii.startsWith("+") && theme 
+          ? resolveThemeFont(fontAscii, theme) || fontAscii
+          : fontAscii;
+      }
+      if (fontEastAsia) {
+        fontFamilyEastAsia = fontEastAsia.startsWith("+") && theme 
+          ? resolveThemeFont(fontEastAsia, theme) || fontEastAsia
+          : fontEastAsia;
+      }
+      if (fontHAnsi) {
+        fontFamilyHAnsi = fontHAnsi.startsWith("+") && theme 
+          ? resolveThemeFont(fontHAnsi, theme) || fontHAnsi
+          : fontHAnsi;
+      }
+      if (fontCs) {
+        fontFamilyCs = fontCs.startsWith("+") && theme 
+          ? resolveThemeFont(fontCs, theme) || fontCs
+          : fontCs;
+      }
+
+      // Select the most appropriate font based on content
+      // For now, prioritize eastAsia for better CJK support, then ascii
+      fontFamily = fontFamilyEastAsia || fontFamilyAscii || fontFamilyHAnsi || fontFamilyCs;
+    }
     // Color
     const colorElement = getElementByTagNameNSFallback(runProps, ns, "color");
     const colorVal = colorElement?.getAttribute("w:val");
@@ -578,9 +565,10 @@ export function parseRun(
       fontSize,
       fontSizeCs,
       fontFamily,
-      fontFamilyCs,
-      fontFamilyHAnsi,
+      fontFamilyAscii,
       fontFamilyEastAsia,
+      fontFamilyHAnsi,
+      fontFamilyCs,
       color,
       backgroundColor,
       characterSpacing,
@@ -622,9 +610,10 @@ export function parseRun(
       fontSize: resolvedRunProps.fontSize,
       fontSizeCs: resolvedRunProps.fontSizeCs,
       fontFamily: resolvedRunProps.fontFamily,
-      fontFamilyCs: resolvedRunProps.fontFamilyCs,
-      fontFamilyHAnsi: resolvedRunProps.fontFamilyHAnsi,
+      fontFamilyAscii: resolvedRunProps.fontFamilyAscii,
       fontFamilyEastAsia: resolvedRunProps.fontFamilyEastAsia,
+      fontFamilyHAnsi: resolvedRunProps.fontFamilyHAnsi,
+      fontFamilyCs: resolvedRunProps.fontFamilyCs,
       color: resolvedRunProps.color,
       backgroundColor: resolvedRunProps.backgroundColor,
       link: linkUrl,
@@ -659,9 +648,10 @@ export function parseRun(
     fontSize,
     fontSizeCs,
     fontFamily,
-    fontFamilyCs,
-    fontFamilyHAnsi,
+    fontFamilyAscii,
     fontFamilyEastAsia,
+    fontFamilyHAnsi,
+    fontFamilyCs,
     color,
     backgroundColor,
     link: linkUrl,

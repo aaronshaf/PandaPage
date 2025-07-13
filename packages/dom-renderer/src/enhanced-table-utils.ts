@@ -139,6 +139,60 @@ export function convertShadingToCSS(shading: TableShading): string {
     case "reverseDiagStripe":
       return `background: repeating-linear-gradient(-45deg, ${backgroundColor} 0px, ${backgroundColor} 4px, ${foregroundColor} 4px, ${foregroundColor} 8px)`;
       
+    // Additional percentage patterns
+    case "pct12":
+      return `background: linear-gradient(45deg, ${backgroundColor} 88%, ${foregroundColor} 12%)`;
+    case "pct15":
+      return `background: linear-gradient(45deg, ${backgroundColor} 85%, ${foregroundColor} 15%)`;
+    case "pct20":
+      return `background: linear-gradient(45deg, ${backgroundColor} 80%, ${foregroundColor} 20%)`;
+    case "pct30":
+      return `background: linear-gradient(45deg, ${backgroundColor} 70%, ${foregroundColor} 30%)`;
+    case "pct35":
+      return `background: linear-gradient(45deg, ${backgroundColor} 65%, ${foregroundColor} 35%)`;
+    case "pct37":
+      return `background: linear-gradient(45deg, ${backgroundColor} 63%, ${foregroundColor} 37%)`;
+    case "pct40":
+      return `background: linear-gradient(45deg, ${backgroundColor} 60%, ${foregroundColor} 40%)`;
+    case "pct45":
+      return `background: linear-gradient(45deg, ${backgroundColor} 55%, ${foregroundColor} 45%)`;
+    case "pct55":
+      return `background: linear-gradient(45deg, ${backgroundColor} 45%, ${foregroundColor} 55%)`;
+    case "pct60":
+      return `background: linear-gradient(45deg, ${backgroundColor} 40%, ${foregroundColor} 60%)`;
+    case "pct62":
+      return `background: linear-gradient(45deg, ${backgroundColor} 38%, ${foregroundColor} 62%)`;
+    case "pct65":
+      return `background: linear-gradient(45deg, ${backgroundColor} 35%, ${foregroundColor} 65%)`;
+    case "pct70":
+      return `background: linear-gradient(45deg, ${backgroundColor} 30%, ${foregroundColor} 70%)`;
+    case "pct80":
+      return `background: linear-gradient(45deg, ${backgroundColor} 20%, ${foregroundColor} 80%)`;
+    case "pct85":
+      return `background: linear-gradient(45deg, ${backgroundColor} 15%, ${foregroundColor} 85%)`;
+    case "pct87":
+      return `background: linear-gradient(45deg, ${backgroundColor} 13%, ${foregroundColor} 87%)`;
+    case "pct90":
+      return `background: linear-gradient(45deg, ${backgroundColor} 10%, ${foregroundColor} 90%)`;
+    case "pct95":
+      return `background: linear-gradient(45deg, ${backgroundColor} 5%, ${foregroundColor} 95%)`;
+
+    // Cross and grid patterns using CSS background images
+    case "horzCross":
+      return `background: 
+        repeating-linear-gradient(0deg, ${foregroundColor} 0px, ${foregroundColor} 1px, ${backgroundColor} 1px, ${backgroundColor} 8px),
+        repeating-linear-gradient(90deg, ${foregroundColor} 0px, ${foregroundColor} 1px, ${backgroundColor} 1px, ${backgroundColor} 8px)`;
+    case "diagCross":
+      return `background: 
+        repeating-linear-gradient(45deg, ${foregroundColor} 0px, ${foregroundColor} 1px, ${backgroundColor} 1px, ${backgroundColor} 8px),
+        repeating-linear-gradient(-45deg, ${foregroundColor} 0px, ${foregroundColor} 1px, ${backgroundColor} 1px, ${backgroundColor} 8px)`;
+
+    // Dot patterns using radial gradients
+    case "dotGrid" as any:
+      return `background: 
+        radial-gradient(circle at 2px 2px, ${foregroundColor} 1px, ${backgroundColor} 1px);
+        background-size: 8px 8px`;
+
     default:
       // Fallback to solid background for complex patterns
       return `background-color: ${backgroundColor}`;
@@ -162,204 +216,9 @@ export function generateBorderCSS(border: TableBorder): string {
   return `${width} ${style} ${color}`;
 }
 
-/**
- * Enhanced table rendering with comprehensive visual support
- */
-export function renderEnhancedTable(table: Table): string {
-  const tableId = `table-${Math.random().toString(36).substring(2, 11)}`;
-  
-  // Generate table-level styles
-  const tableStyles: string[] = [
-    "border-collapse: separate", // Use separate for better border control
-    "border-spacing: 0",
-    "width: 100%",
-  ];
-
-  // Apply table borders
-  if (table.borders) {
-    if (table.borders.top) {
-      tableStyles.push(`border-top: ${generateBorderCSS(table.borders.top)}`);
-    }
-    if (table.borders.bottom) {
-      tableStyles.push(`border-bottom: ${generateBorderCSS(table.borders.bottom)}`);
-    }
-    if (table.borders.left) {
-      tableStyles.push(`border-left: ${generateBorderCSS(table.borders.left)}`);
-    }
-    if (table.borders.right) {
-      tableStyles.push(`border-right: ${generateBorderCSS(table.borders.right)}`);
-    }
-  }
-
-  // Apply table shading
-  if (table.shading) {
-    const shadingCSS = convertShadingToCSS(table.shading);
-    if (shadingCSS) {
-      tableStyles.push(shadingCSS);
-    }
-  }
-
-  // Apply table width
-  if (table.width) {
-    tableStyles.push(`width: ${table.width}px`);
-  }
-
-  let html = `<table id="${tableId}" style="${tableStyles.join("; ")}">`;
-
-  // Generate CSS for inside borders if present
-  let insideBorderCSS = "";
-  if (table.borders?.insideH || table.borders?.insideV) {
-    insideBorderCSS = `<style>`;
-    
-    if (table.borders.insideH) {
-      const hBorder = generateBorderCSS(table.borders.insideH);
-      insideBorderCSS += `
-        #${tableId} tr:not(:last-child) td {
-          border-bottom: ${hBorder};
-        }
-      `;
-    }
-    
-    if (table.borders.insideV) {
-      const vBorder = generateBorderCSS(table.borders.insideV);
-      insideBorderCSS += `
-        #${tableId} td:not(:last-child) {
-          border-right: ${vBorder};
-        }
-      `;
-    }
-    
-    insideBorderCSS += `</style>`;
-  }
-
-  // Render table rows
-  for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
-    const row = table.rows[rowIndex];
-    if (!row) continue;
-    html += `<tr>`;
-
-    for (const cell of row.cells) {
-      // Skip cells marked as merged
-      if ((cell as ProcessingTableCell)._merged) continue;
-      html += renderEnhancedTableCell(cell, rowIndex === 0);
-    }
-
-    html += `</tr>`;
-  }
-
-  html += `</table>`;
-
-  return insideBorderCSS + html;
-}
-
-/**
- * Enhanced table cell rendering with comprehensive formatting support
- */
-export function renderEnhancedTableCell(cell: TableCell, isHeaderRow: boolean = false): string {
-  const tagName = isHeaderRow ? "th" : "td";
-  const cellStyles: string[] = [
-    "padding: 8px",
-    "vertical-align: top", // Default alignment
-  ];
-
-  // Apply cell spanning
-  let spanAttributes = "";
-  let hasMerging = false;
-  if (cell.colspan && cell.colspan > 1) {
-    spanAttributes += ` colspan="${cell.colspan}"`;
-    hasMerging = true;
-  }
-  if (cell.rowspan && cell.rowspan > 1) {
-    spanAttributes += ` rowspan="${cell.rowspan}"`;
-    hasMerging = true;
-  }
-  
-  // Add cell-merged class for compatibility with existing tests
-  if (hasMerging) {
-    spanAttributes += ` class="cell-merged"`;
-  }
-
-  // Apply vertical alignment
-  if (cell.verticalAlignment) {
-    const alignMap = {
-      top: "top",
-      center: "middle", 
-      bottom: "bottom",
-    };
-    cellStyles.push(`vertical-align: ${alignMap[cell.verticalAlignment] || "top"}`);
-  }
-
-  // Apply cell borders
-  if (cell.borders) {
-    const borderNames = ["top", "bottom", "left", "right"] as const;
-    for (const borderName of borderNames) {
-      const border = cell.borders[borderName];
-      if (border) {
-        cellStyles.push(`border-${borderName}: ${generateBorderCSS(border)}`);
-      }
-    }
-
-    // Apply diagonal borders if present (using CSS transforms)
-    if (cell.borders.tl2br) {
-      // Top-left to bottom-right diagonal border
-      cellStyles.push(`position: relative`);
-      cellStyles.push(`background-image: linear-gradient(45deg, transparent 49%, ${cell.borders.tl2br.color || "#000000"} 49%, ${cell.borders.tl2br.color || "#000000"} 51%, transparent 51%)`);
-    }
-    if (cell.borders.tr2bl) {
-      // Top-right to bottom-left diagonal border  
-      cellStyles.push(`position: relative`);
-      cellStyles.push(`background-image: linear-gradient(-45deg, transparent 49%, ${cell.borders.tr2bl.color || "#000000"} 49%, ${cell.borders.tr2bl.color || "#000000"} 51%, transparent 51%)`);
-    }
-  }
-
-  // Apply cell shading
-  if (cell.shading) {
-    const shadingCSS = convertShadingToCSS(cell.shading);
-    if (shadingCSS) {
-      cellStyles.push(shadingCSS);
-    }
-  }
-
-  // Apply cell width
-  if (cell.width) {
-    const validatedWidth = validateCSSValue(cell.width);
-    if (validatedWidth) {
-      cellStyles.push(`width: ${validatedWidth}`);
-    }
-  }
-
-  // Apply text direction
-  if (cell.textDirection) {
-    const directionMap = {
-      ltr: "ltr",
-      rtl: "rtl", 
-      lrV: "ltr", // Vertical text fallback to horizontal
-      tbV: "ltr",
-      lrTbV: "ltr",
-      tbLrV: "ltr",
-    };
-    cellStyles.push(`direction: ${directionMap[cell.textDirection] || "ltr"}`);
-  }
-
-  let html = `<${tagName}${spanAttributes} style="${cellStyles.join("; ")}">`;
-
-  // Render cell content (paragraphs)
-  for (const paragraph of cell.paragraphs) {
-    html += `<p style="margin: 0; padding: 0;">`;
-    
-    // Render paragraph content (simplified for now)
-    if (paragraph.runs) {
-      for (const run of paragraph.runs) {
-        if (run.text) {
-          html += run.text;
-        }
-      }
-    }
-    
-    html += `</p>`;
-  }
-
-  html += `</${tagName}>`;
-
-  return html;
-}
+// Note: The HTML string concatenation functions have been removed.
+// Use the DOM-based functions from enhanced-table-dom-utils.ts instead:
+// - renderEnhancedTableDOM
+// - applyTableStyles
+// - applyCellStyles
+// These provide proper DOM construction without HTML string concatenation.
