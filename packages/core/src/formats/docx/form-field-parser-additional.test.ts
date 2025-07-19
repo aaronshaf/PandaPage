@@ -8,7 +8,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         type: FieldCode.NUMPAGES,
         instruction: "NUMPAGES",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("[Total Pages]");
     });
@@ -18,7 +18,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         type: FieldCode.TIME,
         instruction: "TIME",
       };
-      
+
       const result = fieldToMarkdown(field);
       // Check it returns a time string (format may vary)
       expect(result).toMatch(/\d{1,2}:\d{2}/);
@@ -29,7 +29,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         type: FieldCode.FILENAME,
         instruction: "FILENAME",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("[Filename]");
     });
@@ -39,7 +39,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         type: FieldCode.AUTHOR,
         instruction: "AUTHOR",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("[Author]");
     });
@@ -49,7 +49,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         type: FieldCode.TITLE,
         instruction: "TITLE",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("[Title]");
     });
@@ -60,7 +60,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         instruction: 'HYPERLINK "https://example.com"',
         properties: { url: "https://example.com" },
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("https://example.com");
     });
@@ -71,7 +71,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         instruction: "HYPERLINK",
         properties: {},
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("[Link]");
     });
@@ -81,7 +81,7 @@ describe("Form Field Parser - Additional Coverage", () => {
         type: FieldCode.REF,
         instruction: "REF bookmark1",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("[Reference: REF bookmark1]");
     });
@@ -89,9 +89,9 @@ describe("Form Field Parser - Additional Coverage", () => {
     test("should handle TOC field", () => {
       const field: DocxField = {
         type: FieldCode.TOC,
-        instruction: "TOC \\o \"1-3\"",
+        instruction: 'TOC \\o "1-3"',
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toBe("");
     });

@@ -7,10 +7,7 @@ import type {
   FootnoteReference,
 } from "@browser-document-viewer/parser";
 import { createLazyImage } from "./image-utils";
-import {
-  createFootnoteReference,
-  createFootnoteSection,
-} from "./footnote-utils";
+import { createFootnoteReference, createFootnoteSection } from "./footnote-utils";
 import { addEnhancedStyles } from "./enhanced-styles";
 import { renderEnhancedTextRun, renderEnhancedParagraph } from "./text-utils";
 import { getHeadingStyles } from "./style-utils";
@@ -127,7 +124,7 @@ export class EnhancedDOMRenderer {
         const headingLevel = element.level ?? 1;
         const level = Math.min(6, Math.max(1, headingLevel));
         const h = this.doc.createElement(`h${level}`);
-        
+
         // Apply inline styles from heading properties
         const headingStyles = getHeadingStyles(element);
         if (headingStyles) {

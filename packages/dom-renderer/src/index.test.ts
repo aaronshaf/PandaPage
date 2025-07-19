@@ -10,9 +10,9 @@ test("renderToHtml handles empty document", () => {
 
   const result = renderToHtml(doc);
   expect(result).toContain('<div class="document-container">');
-  expect(result).toContain('</div>');
+  expect(result).toContain("</div>");
   // Enhanced DOM renderer doesn't use page structure
-  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain("data-page-number");
 });
 
 test("renderToHtml renders headings", () => {

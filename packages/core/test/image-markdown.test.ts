@@ -38,7 +38,7 @@ describe("Image to Markdown Conversion", () => {
     const markdown = convertDocxToMarkdown(document);
 
     expect(markdown).toBe(
-      "Here is an image: ![A test image](data:image/png;base64,iVBORw0KGgo=) and some text after."
+      "Here is an image: ![A test image](data:image/png;base64,iVBORw0KGgo=) and some text after.",
     );
   });
 
@@ -82,7 +82,7 @@ describe("Image to Markdown Conversion", () => {
     const markdown = convertDocxToMarkdown(document);
 
     expect(markdown).toBe(
-      "Text before image.\n![Standalone Image](media/diagram.jpg)\nText after image."
+      "Text before image.\n![Standalone Image](media/diagram.jpg)\nText after image.",
     );
   });
 
@@ -122,9 +122,7 @@ describe("Image to Markdown Conversion", () => {
 
     const markdown = convertDocxToMarkdown(document);
 
-    expect(markdown).toBe(
-      "![First Image](media/image1.png) and ![Second Image](media/image2.jpg)"
-    );
+    expect(markdown).toBe("![First Image](media/image1.png) and ![Second Image](media/image2.jpg)");
   });
 
   test("should handle images without file paths", () => {

@@ -90,7 +90,9 @@ describe("EnhancedDOMRenderer", () => {
 
     expect(html).toContain("float: left");
     expect(html).toContain("font-size: 3em");
-    expect(html).toContain('<span style="float: left; font-size: 3em; line-height: 0.8; margin: 0px 0.1em 0px 0px; font-weight: bold;">D</span>');
+    expect(html).toContain(
+      '<span style="float: left; font-size: 3em; line-height: 0.8; margin: 0px 0.1em 0px 0px; font-weight: bold;">D</span>',
+    );
   });
 
   it("should render enhanced tables with proper styling", () => {
@@ -210,10 +212,10 @@ describe("EnhancedDOMRenderer", () => {
       },
       elements: [
         // Heading with styling
-        { 
+        {
           type: "heading",
           level: 1,
-          runs: [{ text: "Main Title", bold: true, color: "#1a73e8" }]
+          runs: [{ text: "Main Title", bold: true, color: "#1a73e8" }],
         },
         // Complex table
         {
@@ -221,40 +223,40 @@ describe("EnhancedDOMRenderer", () => {
           rows: [
             {
               cells: [
-                { 
+                {
                   paragraphs: [{ runs: [{ text: "Header 1", bold: true }] }],
                   backgroundColor: "#f0f0f0",
                   borders: {
                     top: { style: "single", width: 2, color: "#000000" },
-                    bottom: { style: "single", width: 2, color: "#000000" }
-                  }
+                    bottom: { style: "single", width: 2, color: "#000000" },
+                  },
                 },
-                { 
+                {
                   paragraphs: [{ runs: [{ text: "Header 2", bold: true }] }],
-                  backgroundColor: "#f0f0f0"
-                }
-              ]
-            },
-            {
-              cells: [
-                { 
-                  paragraphs: [{ runs: [{ text: "Cell 1", color: "#ff0000" }] }],
-                  rowspan: 2
+                  backgroundColor: "#f0f0f0",
                 },
-                { 
-                  paragraphs: [{ runs: [{ text: "Cell 2" }] }]
-                }
-              ]
+              ],
             },
             {
               cells: [
-                { 
+                {
+                  paragraphs: [{ runs: [{ text: "Cell 1", color: "#ff0000" }] }],
+                  rowspan: 2,
+                },
+                {
+                  paragraphs: [{ runs: [{ text: "Cell 2" }] }],
+                },
+              ],
+            },
+            {
+              cells: [
+                {
                   paragraphs: [{ runs: [{ text: "Cell 3" }] }],
-                  colspan: 1
-                }
-              ]
-            }
-          ]
+                  colspan: 1,
+                },
+              ],
+            },
+          ],
         },
         // Paragraph with multiple formatting
         {
@@ -265,8 +267,8 @@ describe("EnhancedDOMRenderer", () => {
             { text: " and ", color: "#000000" },
             { text: "italic", italic: true, color: "#008000" },
             { text: " text with ", color: "#000000" },
-            { text: "highlight", highlightColor: "yellow" }
-          ]
+            { text: "highlight", highlightColor: "yellow" },
+          ],
         },
         // List items
         {
@@ -274,8 +276,8 @@ describe("EnhancedDOMRenderer", () => {
           listType: "bullet",
           items: [
             { runs: [{ text: "First item" }] },
-            { runs: [{ text: "Second item with ", bold: true }, { text: "formatting" }] }
-          ]
+            { runs: [{ text: "Second item with ", bold: true }, { text: "formatting" }] },
+          ],
         },
         // Image
         {
@@ -283,9 +285,9 @@ describe("EnhancedDOMRenderer", () => {
           src: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
           alt: "Test Image",
           width: 300,
-          height: 200
-        }
-      ]
+          height: 200,
+        },
+      ],
     };
 
     const html = renderer.renderToHTML(syntheticDoc as any);

@@ -13,15 +13,15 @@ test("parseFieldInstruction handles table formulas", () => {
 test("parseFieldInstruction handles various table formulas", () => {
   const formulas = [
     "=sum(left)",
-    "=sum(below)", 
+    "=sum(below)",
     "=sum(right)",
     "=average(above)",
     "=count(above)",
     "=5+3",
-    "=10*2"
+    "=10*2",
   ];
 
-  formulas.forEach(formula => {
+  formulas.forEach((formula) => {
     const parsed = parseFieldInstruction(formula);
     expect(parsed.type).toBe("FORMULA");
     expect(parsed.formula).toBe(formula);
@@ -34,14 +34,14 @@ test("createFieldPlaceholder evaluates sum(above) formula", () => {
     instruction: "=sum(above)",
     switches: new Map(),
     arguments: [],
-    formula: "=sum(above)"
+    formula: "=sum(above)",
   };
 
   const context = {
     bookmarks: new Map(),
     sequences: new Map(),
     currentDate: new Date(),
-    tableValues: [10, 20, 30]
+    tableValues: [10, 20, 30],
   };
 
   const result = createFieldPlaceholder(fieldCode, context);
@@ -54,14 +54,14 @@ test("createFieldPlaceholder evaluates average(above) formula", () => {
     instruction: "=average(above)",
     switches: new Map(),
     arguments: [],
-    formula: "=average(above)"
+    formula: "=average(above)",
   };
 
   const context = {
     bookmarks: new Map(),
     sequences: new Map(),
     currentDate: new Date(),
-    tableValues: [10, 20, 30]
+    tableValues: [10, 20, 30],
   };
 
   const result = createFieldPlaceholder(fieldCode, context);
@@ -74,14 +74,14 @@ test("createFieldPlaceholder evaluates count(above) formula", () => {
     instruction: "=count(above)",
     switches: new Map(),
     arguments: [],
-    formula: "=count(above)"
+    formula: "=count(above)",
   };
 
   const context = {
     bookmarks: new Map(),
     sequences: new Map(),
     currentDate: new Date(),
-    tableValues: [10, 20, 30, 40, 50]
+    tableValues: [10, 20, 30, 40, 50],
   };
 
   const result = createFieldPlaceholder(fieldCode, context);
@@ -94,7 +94,7 @@ test("createFieldPlaceholder handles simple arithmetic", () => {
     instruction: "=5+3",
     switches: new Map(),
     arguments: [],
-    formula: "=5+3"
+    formula: "=5+3",
   };
 
   const result = createFieldPlaceholder(fieldCode);
@@ -107,7 +107,7 @@ test("createFieldPlaceholder handles multiplication", () => {
     instruction: "=10*2",
     switches: new Map(),
     arguments: [],
-    formula: "=10*2"
+    formula: "=10*2",
   };
 
   const result = createFieldPlaceholder(fieldCode);
@@ -120,14 +120,14 @@ test("createFieldPlaceholder returns default for empty table values", () => {
     instruction: "=sum(above)",
     switches: new Map(),
     arguments: [],
-    formula: "=sum(above)"
+    formula: "=sum(above)",
   };
 
   const context = {
     bookmarks: new Map(),
     sequences: new Map(),
     currentDate: new Date(),
-    tableValues: []
+    tableValues: [],
   };
 
   const result = createFieldPlaceholder(fieldCode, context);
@@ -140,7 +140,7 @@ test("createFieldPlaceholder returns formula for unknown expressions", () => {
     instruction: "=COMPLEX_FUNCTION(A1:B5)",
     switches: new Map(),
     arguments: [],
-    formula: "=COMPLEX_FUNCTION(A1:B5)"
+    formula: "=COMPLEX_FUNCTION(A1:B5)",
   };
 
   const result = createFieldPlaceholder(fieldCode);

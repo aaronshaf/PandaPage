@@ -47,7 +47,7 @@ async function analyzeDocx(filePath: string) {
         if (el.type === "paragraph" && el.listInfo) {
           listCount++;
         }
-        
+
         if (el.type === "footnote") {
           footnoteCount++;
         }
@@ -196,7 +196,7 @@ if (!existsSync(filePath)) {
   process.exit(1);
 }
 
-if (!filePath.toLowerCase().endsWith('.docx')) {
+if (!filePath.toLowerCase().endsWith(".docx")) {
   console.error("Error: File must be a .docx file");
   process.exit(1);
 }

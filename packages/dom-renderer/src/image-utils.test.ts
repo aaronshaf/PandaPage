@@ -20,7 +20,7 @@ describe("Image Utils", () => {
 
       expect(figure.tagName).toBe("FIGURE");
       expect(figure.className).toContain("image-figure");
-      
+
       const img = figure.querySelector("img");
       expect(img).toBeDefined();
       expect(img?.alt).toBe("Test image");
@@ -36,7 +36,7 @@ describe("Image Utils", () => {
 
       const figure = createLazyImage(image, doc);
       const caption = figure.querySelector("figcaption");
-      
+
       // Caption should not be created automatically from alt text
       expect(caption).toBeNull();
     });
@@ -50,7 +50,7 @@ describe("Image Utils", () => {
 
       const figure = createLazyImage(image, doc);
       const img = figure.querySelector("img");
-      
+
       // When no alt is provided, createLazyImage sets a default
       expect(img?.alt).toBe("Document image");
     });
@@ -66,7 +66,7 @@ describe("Image Utils", () => {
 
       const figure = createLazyImage(image, doc);
       const img = figure.querySelector("img") as HTMLImageElement;
-      
+
       expect(img.width).toBe(300);
       expect(img.height).toBe(200);
     });
@@ -80,7 +80,7 @@ describe("Image Utils", () => {
 
       const figure = createLazyImage(image, doc);
       const img = figure.querySelector("img") as HTMLImageElement;
-      
+
       expect(img.loading).toBe("lazy");
       expect(img.className).toContain("lazy-image");
       expect(img.getAttribute("data-src")).toContain("data:image/png;base64,");

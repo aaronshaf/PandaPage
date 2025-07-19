@@ -664,14 +664,14 @@ test("renderToMarkdown handles footnotes section placement", () => {
   };
 
   const result = renderToMarkdown(doc);
-  const lines = result.split('\n');
-  
+  const lines = result.split("\n");
+
   // Check that footnotes come after main content
   expect(result).toContain("First paragraph.");
   expect(result).toContain("Second paragraph.");
   expect(result).toContain("---");
   expect(result).toContain("[^fn1]: Footnote at the end.");
-  
+
   // Check that footnotes are at the end
   const footnoteSection = result.split("---")[1];
   expect(footnoteSection).toContain("[^fn1]:");

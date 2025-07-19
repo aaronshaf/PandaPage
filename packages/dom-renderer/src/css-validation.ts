@@ -14,18 +14,18 @@ export function validateNumeric(
   value: number | string | undefined,
   min: number,
   max: number,
-  defaultValue: number
+  defaultValue: number,
 ): number {
   if (value === undefined || value === null) {
     return defaultValue;
   }
-  
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  
+
+  const num = typeof value === "string" ? parseFloat(value) : value;
+
   if (isNaN(num) || !Number.isFinite(num)) {
     return defaultValue;
   }
-  
+
   return Math.max(min, Math.min(max, num));
 }
 
@@ -35,27 +35,50 @@ export function validateNumeric(
  * @returns Validated color string or empty string if invalid
  */
 export function validateColor(color: string | undefined): string {
-  if (!color) return '';
-  
+  if (!color) return "";
+
   // Remove any potentially dangerous characters
-  const sanitized = color.trim().replace(/[^a-zA-Z0-9#(),.\s-]/g, '');
-  
+  const sanitized = color.trim().replace(/[^a-zA-Z0-9#(),.\s-]/g, "");
+
   // Check for common color formats
   const hexPattern = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/;
-  const rgbPattern = /^rgb\(\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*\)$/;
-  const rgbaPattern = /^rgba\(\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*[0-9.]+\s*\)$/;
-  const namedColors = ['black', 'white', 'red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 
-    'gray', 'grey', 'silver', 'maroon', 'olive', 'lime', 'aqua', 'teal', 'navy', 
-    'fuchsia', 'purple', 'transparent'];
-  
-  if (hexPattern.test(sanitized) || 
-      rgbPattern.test(sanitized) || 
-      rgbaPattern.test(sanitized) ||
-      namedColors.includes(sanitized.toLowerCase())) {
+  const rgbPattern =
+    /^rgb\(\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*\)$/;
+  const rgbaPattern =
+    /^rgba\(\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*([01]?\d\d?|2[0-4]\d|25[0-5])\s*,\s*[0-9.]+\s*\)$/;
+  const namedColors = [
+    "black",
+    "white",
+    "red",
+    "green",
+    "blue",
+    "yellow",
+    "cyan",
+    "magenta",
+    "gray",
+    "grey",
+    "silver",
+    "maroon",
+    "olive",
+    "lime",
+    "aqua",
+    "teal",
+    "navy",
+    "fuchsia",
+    "purple",
+    "transparent",
+  ];
+
+  if (
+    hexPattern.test(sanitized) ||
+    rgbPattern.test(sanitized) ||
+    rgbaPattern.test(sanitized) ||
+    namedColors.includes(sanitized.toLowerCase())
+  ) {
     return sanitized;
   }
-  
-  return '';
+
+  return "";
 }
 
 /**
@@ -66,42 +89,42 @@ export function validateColor(color: string | undefined): string {
  */
 export function validateCSSValue(
   value: string | number | undefined,
-  allowedUnits: string[] = ['px', 'pt', 'em', 'rem', '%', 'vw', 'vh']
+  allowedUnits: string[] = ["px", "pt", "em", "rem", "%", "vw", "vh"],
 ): string {
-  if (value === undefined || value === null) return '';
-  
+  if (value === undefined || value === null) return "";
+
   // Handle numeric values - assume pixels
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     const validated = validateNumeric(value, 0, 10000, 0);
-    return validated > 0 ? `${validated}px` : '';
+    return validated > 0 ? `${validated}px` : "";
   }
-  
+
   const stringValue = String(value).trim();
-  
+
   // Check for unit at the end
   const match = stringValue.match(/^(-?\d*\.?\d+)\s*([a-zA-Z%]+)?$/);
-  if (!match) return '';
-  
-  const [, numPart, unit = 'px'] = match;
+  if (!match) return "";
+
+  const [, numPart, unit = "px"] = match;
   const num = parseFloat(numPart!);
-  
-  if (isNaN(num) || !Number.isFinite(num)) return '';
-  
+
+  if (isNaN(num) || !Number.isFinite(num)) return "";
+
   // Validate the unit
-  if (!allowedUnits.includes(unit.toLowerCase())) return '';
-  
+  if (!allowedUnits.includes(unit.toLowerCase())) return "";
+
   // Apply reasonable bounds based on unit
   let min = 0;
   let max = 10000;
-  
-  if (unit === '%') {
+
+  if (unit === "%") {
     max = 100;
-  } else if (unit === 'vw' || unit === 'vh') {
+  } else if (unit === "vw" || unit === "vh") {
     max = 100;
   }
-  
+
   const validated = validateNumeric(num, min, max, 0);
-  return validated > 0 ? `${validated}${unit}` : '';
+  return validated > 0 ? `${validated}${unit}` : "";
 }
 
 /**
@@ -111,14 +134,22 @@ export function validateCSSValue(
  */
 export function validateBorderStyle(style: string | undefined): string {
   const validStyles = [
-    'none', 'hidden', 'dotted', 'dashed', 'solid', 'double',
-    'groove', 'ridge', 'inset', 'outset'
+    "none",
+    "hidden",
+    "dotted",
+    "dashed",
+    "solid",
+    "double",
+    "groove",
+    "ridge",
+    "inset",
+    "outset",
   ];
-  
-  if (!style) return 'solid';
-  
+
+  if (!style) return "solid";
+
   const normalized = style.toLowerCase().trim();
-  return validStyles.includes(normalized) ? normalized : 'solid';
+  return validStyles.includes(normalized) ? normalized : "solid";
 }
 
 /**
@@ -128,10 +159,10 @@ export function validateBorderStyle(style: string | undefined): string {
  */
 export function escapeCSSString(value: string): string {
   return value
-    .replace(/\\/g, '\\\\')
+    .replace(/\\/g, "\\\\")
     .replace(/"/g, '\\"')
     .replace(/'/g, "\\'")
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t');
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
 }

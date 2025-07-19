@@ -24,12 +24,12 @@ describe("Improved Markdown Renderer", () => {
         // Another empty paragraph
         { type: "paragraph", runs: [] },
         // Paragraph with formatting
-        { 
-          type: "paragraph", 
+        {
+          type: "paragraph",
           runs: [
             { text: "Bold text", bold: true },
-            { text: " and italic", italic: true }
-          ]
+            { text: " and italic", italic: true },
+          ],
         },
         // Add bookmarks
         { type: "bookmark", id: "1", name: "bookmark1", text: "Visible bookmark" },
@@ -40,27 +40,31 @@ describe("Improved Markdown Renderer", () => {
         { type: "paragraph", runs: [] },
         { type: "paragraph", runs: [{ text: "" }] },
         // Add paragraphs with image runs (images are runs, not top-level elements)
-        { 
+        {
           type: "paragraph",
-          runs: [{
-            type: "image",
-            data: new ArrayBuffer(100), // Mock image data
-            src: "image1.png",
-            alt: "Test Image 1",
-            width: 100,
-            height: 100
-          }]
+          runs: [
+            {
+              type: "image",
+              data: new ArrayBuffer(100), // Mock image data
+              src: "image1.png",
+              alt: "Test Image 1",
+              width: 100,
+              height: 100,
+            },
+          ],
         },
-        { 
+        {
           type: "paragraph",
-          runs: [{
-            type: "image",
-            data: new ArrayBuffer(100), // Mock image data
-            src: "image2.png",
-            alt: "Test Image 2",
-            width: 200,
-            height: 200
-          }]
+          runs: [
+            {
+              type: "image",
+              data: new ArrayBuffer(100), // Mock image data
+              src: "image2.png",
+              alt: "Test Image 2",
+              width: 200,
+              height: 200,
+            },
+          ],
         },
         // More content
         { type: "paragraph", runs: [{ text: "Final paragraph" }] },

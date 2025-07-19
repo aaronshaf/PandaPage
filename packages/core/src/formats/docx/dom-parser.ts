@@ -6,9 +6,7 @@ import {
   paragraphContainsFields,
   type DocxField,
 } from "./form-field-parser";
-import {
-  loadHyperlinkRelationships,
-} from "./hyperlink-integration";
+import { loadHyperlinkRelationships } from "./hyperlink-integration";
 import type { HyperlinkRelationship } from "./hyperlink-parser";
 import {
   parseImageRelationships,
@@ -39,7 +37,10 @@ function getXMLSerializer(): XMLSerializer | null {
 /**
  * Extract run data (text and formatting) from a run element
  */
-function extractRunData(runElement: Element, imageRelationships: Map<string, ImageRelationship>): Effect.Effect<DocxRun, DocxParseError> {
+function extractRunData(
+  runElement: Element,
+  imageRelationships: Map<string, ImageRelationship>,
+): Effect.Effect<DocxRun, DocxParseError> {
   return Effect.gen(function* () {
     // Parse the run content to extract text and special elements in order
     let runText = "";
@@ -166,7 +167,7 @@ export const parseDocumentXmlWithDom = (
     const relationships = yield* loadHyperlinkRelationships(relationshipsXml);
 
     // Load image relationships if provided
-    const imageRelationships = relationshipsXml 
+    const imageRelationships = relationshipsXml
       ? yield* parseImageRelationships(relationshipsXml)
       : new Map<string, ImageRelationship>();
 
@@ -237,21 +238,21 @@ export const parseDocumentXmlWithDom = (
 
       // Extract runs within the paragraph in document order
       const runs: DocxRun[] = [];
-      
+
       // Process all child elements in order to maintain document structure
       for (const child of pElement.children) {
         if (child.tagName === "w:hyperlink") {
           // Process hyperlink element
           const rId = child.getAttribute("r:id");
           const anchor = child.getAttribute("w:anchor");
-          
+
           let hyperlinkUrl: string | undefined;
           if (rId && relationships.has(rId)) {
             hyperlinkUrl = relationships.get(rId)?.target;
           } else if (anchor) {
             hyperlinkUrl = `#${anchor}`;
           }
-          
+
           // Get runs within the hyperlink
           const hyperlinkRunElements = child.getElementsByTagName("w:r");
           for (const runElement of hyperlinkRunElements) {

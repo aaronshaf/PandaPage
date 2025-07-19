@@ -1,0 +1,25 @@
+# AST-grep configuration
+rules:
+  - id: no-as-type-assertion
+    message: Type assertions using 'as' are not allowed. Use type guards or proper typing instead.
+    severity: error
+    language: typescript
+    rule:
+      kind: as_expression
+      not:
+        any:
+          - pattern: $$ as const
+          - pattern: $$ as unknown
+    fix: |
+      // TODO: Replace type assertion with proper typing or type guard
+      $EXPRESSION
+
+# Configuration for ast-grep CLI
+sgconfig:
+  test_configs:
+    - test_dir: packages/
+  exclude:
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/coverage/**"
+    - "**/*.d.ts"

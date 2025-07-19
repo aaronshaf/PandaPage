@@ -17,7 +17,7 @@ test("renderToHtml handles bookmarks as invisible anchors", () => {
 
   const result = renderToHtml(doc);
   // Enhanced renderer doesn't use page structure
-  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain("data-page-number");
   // Enhanced renderer creates <a> elements for bookmarks
   expect(result).toContain('<a id="Chapter1">Introduction</a>');
 });
@@ -36,7 +36,7 @@ test("renderToHtml handles bookmarks with special characters", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain("data-page-number");
   expect(result).toContain('<a id="Section_2.1">Analysis &amp; Results</a>');
 });
 
@@ -53,7 +53,7 @@ test("renderToHtml handles bookmarks without text content", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain("data-page-number");
   // Bookmarks without text render as empty anchors
   expect(result).toContain('<a id="EmptyBookmark"></a>');
 });

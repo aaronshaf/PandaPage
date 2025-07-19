@@ -6,7 +6,12 @@
 import type { Table, TableCell, TableBorder, TableShading } from "@browser-document-viewer/parser";
 import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import type { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
-import { validateColor, validateCSSValue, validateNumeric, validateBorderStyle } from "./css-validation";
+import {
+  validateColor,
+  validateCSSValue,
+  validateNumeric,
+  validateBorderStyle,
+} from "./css-validation";
 
 /**
  * Convert OOXML border style to CSS border style
@@ -15,7 +20,7 @@ export function convertBorderStyleToCSS(borderStyle: ST_Border): string {
   const styleMap: Record<ST_Border, string> = {
     // Basic border styles
     nil: "none",
-    none: "none", 
+    none: "none",
     single: "solid",
     thick: "solid",
     double: "double",
@@ -24,10 +29,10 @@ export function convertBorderStyleToCSS(borderStyle: ST_Border): string {
     dotDash: "dashed",
     dotDotDash: "dashed",
     triple: "solid", // Fallback to solid for complex styles
-    
+
     // Complex border styles - fallback to simpler CSS equivalents
     thinThickSmallGap: "solid",
-    thickThinSmallGap: "solid", 
+    thickThinSmallGap: "solid",
     thinThickThinSmallGap: "solid",
     thinThickMediumGap: "solid",
     thickThinMediumGap: "solid",
@@ -39,13 +44,13 @@ export function convertBorderStyleToCSS(borderStyle: ST_Border): string {
     doubleWave: "solid",
     dashSmallGap: "dashed",
     dashDotStroked: "dashed",
-    
+
     // 3D effects - fallback to basic styles
     threeDEmboss: "ridge",
-    threeDEngrave: "groove", 
+    threeDEngrave: "groove",
     outset: "outset",
     inset: "inset",
-    
+
     // Decorative borders - fallback to solid
     apples: "solid",
     archedScallops: "solid",
@@ -118,7 +123,7 @@ export function convertShadingToCSS(shading: TableShading): string {
     case "clear":
     case "solid":
       return `background-color: ${backgroundColor}`;
-      
+
     case "pct5":
       return `background: linear-gradient(45deg, ${backgroundColor} 95%, ${foregroundColor} 5%)`;
     case "pct10":
@@ -129,7 +134,7 @@ export function convertShadingToCSS(shading: TableShading): string {
       return `background: linear-gradient(45deg, ${backgroundColor} 50%, ${foregroundColor} 50%)`;
     case "pct75":
       return `background: linear-gradient(45deg, ${backgroundColor} 25%, ${foregroundColor} 75%)`;
-      
+
     case "horzStripe":
       return `background: repeating-linear-gradient(0deg, ${backgroundColor} 0px, ${backgroundColor} 4px, ${foregroundColor} 4px, ${foregroundColor} 8px)`;
     case "vertStripe":
@@ -138,7 +143,7 @@ export function convertShadingToCSS(shading: TableShading): string {
       return `background: repeating-linear-gradient(45deg, ${backgroundColor} 0px, ${backgroundColor} 4px, ${foregroundColor} 4px, ${foregroundColor} 8px)`;
     case "reverseDiagStripe":
       return `background: repeating-linear-gradient(-45deg, ${backgroundColor} 0px, ${backgroundColor} 4px, ${foregroundColor} 4px, ${foregroundColor} 8px)`;
-      
+
     // Additional percentage patterns
     case "pct12":
       return `background: linear-gradient(45deg, ${backgroundColor} 88%, ${foregroundColor} 12%)`;

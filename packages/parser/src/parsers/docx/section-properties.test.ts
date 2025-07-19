@@ -15,51 +15,63 @@ describe("Section Properties", () => {
     // Setup mock headers
     headerMap.set("rId1", {
       type: "header",
-      elements: [{
-        type: "paragraph",
-        runs: [{ text: "Default Header" }],
-      }]
+      elements: [
+        {
+          type: "paragraph",
+          runs: [{ text: "Default Header" }],
+        },
+      ],
     });
 
     headerMap.set("rId2", {
       type: "header",
-      elements: [{
-        type: "paragraph",
-        runs: [{ text: "First Page Header" }],
-      }]
+      elements: [
+        {
+          type: "paragraph",
+          runs: [{ text: "First Page Header" }],
+        },
+      ],
     });
 
     headerMap.set("rId3", {
       type: "header",
-      elements: [{
-        type: "paragraph",
-        runs: [{ text: "Even Page Header" }],
-      }]
+      elements: [
+        {
+          type: "paragraph",
+          runs: [{ text: "Even Page Header" }],
+        },
+      ],
     });
 
     // Setup mock footers
     footerMap.set("rId4", {
       type: "footer",
-      elements: [{
-        type: "paragraph",
-        runs: [{ text: "Default Footer" }],
-      }]
+      elements: [
+        {
+          type: "paragraph",
+          runs: [{ text: "Default Footer" }],
+        },
+      ],
     });
 
     footerMap.set("rId5", {
       type: "footer",
-      elements: [{
-        type: "paragraph",
-        runs: [{ text: "First Page Footer" }],
-      }]
+      elements: [
+        {
+          type: "paragraph",
+          runs: [{ text: "First Page Footer" }],
+        },
+      ],
     });
 
     footerMap.set("rId6", {
       type: "footer",
-      elements: [{
-        type: "paragraph",
-        runs: [{ text: "Even Page Footer" }],
-      }]
+      elements: [
+        {
+          type: "paragraph",
+          runs: [{ text: "Even Page Footer" }],
+        },
+      ],
     });
   });
 

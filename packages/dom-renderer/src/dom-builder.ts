@@ -135,7 +135,7 @@ function renderParagraph(paragraph: Paragraph, doc: Document): HTMLElement {
 
 function renderHeading(heading: Heading, doc: Document): HTMLElement {
   const element = doc.createElement(`h${heading.level}`);
-  
+
   // Apply inline styles from heading properties
   const styles = getHeadingStyles(heading);
   if (styles) {
@@ -217,7 +217,8 @@ function renderHeader(header: DocumentElement, doc: Document): HTMLElement | nul
   if (header.type !== "header") return null;
 
   const element = doc.createElement("header");
-  element.style.cssText = "margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #d1d5db";
+  element.style.cssText =
+    "margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #d1d5db";
 
   header.elements.forEach((el: any) => {
     let childElement: HTMLElement | null = null;

@@ -277,10 +277,10 @@ describe("Validation Functions", () => {
       });
 
       const defaults = { safe: "default" };
-      
+
       // This should trigger the catch block
       await expect(Effect.runPromise(parseWithDefaults(problematicData, defaults))).rejects.toThrow(
-        "Validation failed"
+        "Validation failed",
       );
     });
   });

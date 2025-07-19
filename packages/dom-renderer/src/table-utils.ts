@@ -15,7 +15,7 @@ export function renderComplexTable(
   if (table.borders || table.shading || hasComplexCellFormatting(table)) {
     return renderEnhancedTableDOM(table, doc, renderParagraph);
   }
-  
+
   // Fallback to simple table rendering
   return renderEnhancedTable(table, doc, renderParagraph);
 }
@@ -110,10 +110,8 @@ export function renderEnhancedTable(
  * Check if table has complex cell formatting that requires enhanced rendering
  */
 function hasComplexCellFormatting(table: Table): boolean {
-  return table.rows.some(row => 
-    row.cells.some(cell => 
-      cell.borders || cell.shading || cell.colspan || cell.rowspan
-    )
+  return table.rows.some((row) =>
+    row.cells.some((cell) => cell.borders || cell.shading || cell.colspan || cell.rowspan),
   );
 }
 
@@ -122,7 +120,7 @@ function hasComplexCellFormatting(table: Table): boolean {
  */
 function getCellIndices(flatIndex: number, table: Table): { rowIndex: number; cellIndex: number } {
   let currentIndex = 0;
-  
+
   for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
     const row = table.rows[rowIndex];
     if (!row) continue;
@@ -133,6 +131,6 @@ function getCellIndices(flatIndex: number, table: Table): { rowIndex: number; ce
       currentIndex++;
     }
   }
-  
+
   return { rowIndex: 0, cellIndex: 0 };
 }

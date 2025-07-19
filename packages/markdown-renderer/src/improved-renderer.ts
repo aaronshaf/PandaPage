@@ -54,7 +54,7 @@ function safeBase64Encode(data: ArrayBuffer | any): string {
 
 function renderTextRun(run: TextRun): string {
   let text = run.text || "";
-  
+
   // Handle footnote/endnote references
   if (run._footnoteRef) {
     return `[^${run._footnoteRef}]`;
@@ -102,36 +102,43 @@ export function renderParagraph(paragraph: Paragraph, options: MarkdownRenderOpt
   }
 
   let content: string;
-  
+
   // Check for drop cap support
-  if ("framePr" in paragraph && paragraph.framePr?.dropCap && paragraph.framePr.dropCap !== "none") {
+  if (
+    "framePr" in paragraph &&
+    paragraph.framePr?.dropCap &&
+    paragraph.framePr.dropCap !== "none"
+  ) {
     // Handle drop cap in markdown (limited support)
     if (paragraph.runs.length > 0 && paragraph.runs[0]?.text) {
       const firstRun = paragraph.runs[0];
       const firstChar = firstRun.text.charAt(0);
       const restOfFirstRun = firstRun.text.slice(1);
-      
+
       // Create a simple HTML representation for drop cap
       // Note: Pure markdown doesn't support drop caps, so we use HTML
       const lines = paragraph.framePr.lines || 3;
       let dropCapHtml = `<span style="float: left; font-size: ${lines}em; line-height: ${lines - 1}; font-weight: bold; margin-right: 0.1em;">`;
-      
+
       if (firstRun.fontFamily) {
-        dropCapHtml = dropCapHtml.replace('bold;">', `bold; font-family: ${firstRun.fontFamily};">`);
+        dropCapHtml = dropCapHtml.replace(
+          'bold;">',
+          `bold; font-family: ${firstRun.fontFamily};">`,
+        );
       }
       if (firstRun.color) {
         dropCapHtml = dropCapHtml.replace(';">', `; color: ${firstRun.color};">`);
       }
-      
+
       dropCapHtml += `${firstChar}</span>`;
-      
+
       // Render rest of content
       const restRuns = [
         ...(restOfFirstRun ? [{ ...firstRun, text: restOfFirstRun }] : []),
-        ...paragraph.runs.slice(1)
+        ...paragraph.runs.slice(1),
       ];
       const restContent = restRuns.map(renderTextRun).join("");
-      
+
       content = dropCapHtml + restContent;
     } else {
       // Fallback to normal rendering
@@ -296,15 +303,15 @@ function renderElement(element: DocumentElement, options: MarkdownRenderOptions)
     case "footnote":
       // Render footnote content
       const footnoteContent = element.elements
-        .map(el => renderElement(el, options))
+        .map((el) => renderElement(el, options))
         .join("\n")
         .trim();
       return `[^${element.id}]: ${footnoteContent}`;
-    
+
     case "endnote":
       // Render endnote content
       const endnoteContent = element.elements
-        .map(el => renderElement(el, options))
+        .map((el) => renderElement(el, options))
         .join("\n")
         .trim();
       return `[^endnote${element.id}]: ${endnoteContent}`;
@@ -365,11 +372,13 @@ export function renderToMarkdownImproved(
   // Track state for better formatting
   let lastElementType: string | null = null;
   let inList = false;
-  
+
   // Separate footnotes and endnotes from main content
-  const mainElements = document.elements.filter(el => el.type !== 'footnote' && el.type !== 'endnote');
-  const footnoteElements = document.elements.filter(el => el.type === 'footnote');
-  const endnoteElements = document.elements.filter(el => el.type === 'endnote');
+  const mainElements = document.elements.filter(
+    (el) => el.type !== "footnote" && el.type !== "endnote",
+  );
+  const footnoteElements = document.elements.filter((el) => el.type === "footnote");
+  const endnoteElements = document.elements.filter((el) => el.type === "endnote");
 
   // Render main content
   for (const element of mainElements) {
@@ -425,7 +434,7 @@ export function renderToMarkdownImproved(
     lines.push("");
     lines.push("## Footnotes");
     lines.push("");
-    
+
     for (const footnote of footnoteElements) {
       const rendered = renderElement(footnote, defaultOptions);
       if (rendered) {
@@ -434,7 +443,7 @@ export function renderToMarkdownImproved(
       }
     }
   }
-  
+
   // Add endnotes if any
   if (endnoteElements.length > 0) {
     lines.push("");
@@ -442,7 +451,7 @@ export function renderToMarkdownImproved(
     lines.push("");
     lines.push("## Endnotes");
     lines.push("");
-    
+
     for (const endnote of endnoteElements) {
       const rendered = renderElement(endnote, defaultOptions);
       if (rendered) {

@@ -14,26 +14,26 @@ export const removeFrontmatter = (markdown: string): string => {
   if (!markdown.startsWith("---\n") && !markdown.startsWith("---\r\n")) {
     return markdown;
   }
-  
+
   // Find the closing --- (must be on its own line)
   const lines = markdown.split(/\r?\n/);
-  
+
   // Start from line 1 (skip the opening ---)
   for (let i = 1; i < lines.length; i++) {
     if (lines[i] === "---") {
       // Found closing marker, return content after it
       // Get remaining lines after the closing ---
       const remainingLines = lines.slice(i + 1);
-      
+
       // Skip one empty line if present (common after frontmatter)
       if (remainingLines.length > 0 && remainingLines[0] === "") {
         return remainingLines.slice(1).join("\n");
       }
-      
+
       return remainingLines.join("\n");
     }
   }
-  
+
   // No closing marker found, return original
   return markdown;
 };

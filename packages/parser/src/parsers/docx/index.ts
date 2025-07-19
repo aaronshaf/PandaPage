@@ -297,14 +297,21 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       // Add footnotes and endnotes at the end and return
       elements.push(...footnotes);
       elements.push(...endnotes);
-      
+
       // Create maps for footnotes and endnotes
       const footnotesMap = new Map<string, Footnote>();
-      footnotes.forEach(fn => footnotesMap.set(fn.id, fn));
+      footnotes.forEach((fn) => footnotesMap.set(fn.id, fn));
       const endnotesMap = new Map<string, Endnote>();
-      endnotes.forEach(en => endnotesMap.set(en.id, en));
-      
-      return { metadata, elements, headers: headerInfo, footers: footerInfo, footnotes: footnotesMap, endnotes: endnotesMap };
+      endnotes.forEach((en) => endnotesMap.set(en.id, en));
+
+      return {
+        metadata,
+        elements,
+        headers: headerInfo,
+        footers: footerInfo,
+        footnotes: footnotesMap,
+        endnotes: endnotesMap,
+      };
     }
 
     const body = bodyNodeList[0];
@@ -312,14 +319,21 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       // Add footnotes and endnotes at the end and return
       elements.push(...footnotes);
       elements.push(...endnotes);
-      
+
       // Create maps for footnotes and endnotes
       const footnotesMap = new Map<string, Footnote>();
-      footnotes.forEach(fn => footnotesMap.set(fn.id, fn));
+      footnotes.forEach((fn) => footnotesMap.set(fn.id, fn));
       const endnotesMap = new Map<string, Endnote>();
-      endnotes.forEach(en => endnotesMap.set(en.id, en));
-      
-      return { metadata, elements, headers: headerInfo, footers: footerInfo, footnotes: footnotesMap, endnotes: endnotesMap };
+      endnotes.forEach((en) => endnotesMap.set(en.id, en));
+
+      return {
+        metadata,
+        elements,
+        headers: headerInfo,
+        footers: footerInfo,
+        footnotes: footnotesMap,
+        endnotes: endnotesMap,
+      };
     }
 
     // Parse bookmarks from the entire document body first
@@ -417,12 +431,12 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
     // Add footnotes and endnotes at the end
     elements.push(...footnotes);
     elements.push(...endnotes);
-    
+
     // Create maps for footnotes and endnotes
     const footnotesMap = new Map<string, Footnote>();
-    footnotes.forEach(fn => footnotesMap.set(fn.id, fn));
+    footnotes.forEach((fn) => footnotesMap.set(fn.id, fn));
     const endnotesMap = new Map<string, Endnote>();
-    endnotes.forEach(en => endnotesMap.set(en.id, en));
+    endnotes.forEach((en) => endnotesMap.set(en.id, en));
 
     return {
       metadata,

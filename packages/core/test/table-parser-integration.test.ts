@@ -153,14 +153,10 @@ describe("Table Parser Integration Tests", () => {
               querySelector: (borderSelector: string) => {
                 // Extract the side from selectors like "top, w\:top"
                 const side = borderSelector.split(",")[0]?.trim() ?? "";
-                if (side === "top")
-                  return mockBorderElement("top", "single", "4", "000000");
-                if (side === "right")
-                  return mockBorderElement("right", "dashed", "8", "FF0000");
-                if (side === "bottom")
-                  return mockBorderElement("bottom", "dotted", "16", "00FF00");
-                if (side === "left")
-                  return mockBorderElement("left", "double", "24", "0000FF");
+                if (side === "top") return mockBorderElement("top", "single", "4", "000000");
+                if (side === "right") return mockBorderElement("right", "dashed", "8", "FF0000");
+                if (side === "bottom") return mockBorderElement("bottom", "dotted", "16", "00FF00");
+                if (side === "left") return mockBorderElement("left", "double", "24", "0000FF");
                 return null;
               },
             };

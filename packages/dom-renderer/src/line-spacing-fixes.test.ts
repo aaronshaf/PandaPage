@@ -42,9 +42,9 @@ describe("Line Spacing Fixes", () => {
     it("should not apply default margin to empty paragraphs", () => {
       const emptyParagraph: Paragraph = {
         type: "paragraph",
-        runs: []
+        runs: [],
       };
-      
+
       const result = getParagraphStyles(emptyParagraph);
       expect(result).toBe(""); // No styles applied
     });
@@ -55,10 +55,10 @@ describe("Line Spacing Fixes", () => {
         runs: [],
         spacing: {
           line: 276,
-          lineRule: "auto"
-        }
+          lineRule: "auto",
+        },
       };
-      
+
       const result = getParagraphStyles(emptyParagraphWithSpacing);
       expect(result).toBe(""); // No line-height applied
     });
@@ -66,9 +66,9 @@ describe("Line Spacing Fixes", () => {
     it("should apply margin to paragraphs with content", () => {
       const paragraphWithContent: Paragraph = {
         type: "paragraph",
-        runs: [{ text: "Hello world" }]
+        runs: [{ text: "Hello world" }],
       };
-      
+
       const result = getParagraphStyles(paragraphWithContent);
       expect(result).toBe("margin-bottom: 12px");
     });
@@ -79,10 +79,10 @@ describe("Line Spacing Fixes", () => {
         runs: [{ text: "Hello world" }],
         spacing: {
           line: 276,
-          lineRule: "auto"
-        }
+          lineRule: "auto",
+        },
       };
-      
+
       const result = getParagraphStyles(paragraphWithContentAndSpacing);
       expect(result).toBe("line-height: 1.15");
     });
@@ -95,10 +95,10 @@ describe("Line Spacing Fixes", () => {
         runs: [{ text: "D" }], // Single letter like in 005.docx
         spacing: {
           line: 951, // Actual value from 005.docx
-          lineRule: "exact"
-        }
+          lineRule: "exact",
+        },
       };
-      
+
       const result = getParagraphStyles(paragraphWithDocumentSpacing);
       expect(result).toBe("line-height: 47.55pt"); // Faithful rendering: 951 twips = 47.55pt
       expect(consoleSpy).not.toHaveBeenCalled(); // No validation warnings
@@ -110,10 +110,10 @@ describe("Line Spacing Fixes", () => {
         runs: [{ text: "Hello world" }],
         spacing: {
           line: 1440, // Very large value (72pt)
-          lineRule: "exact"
-        }
+          lineRule: "exact",
+        },
       };
-      
+
       const result = getParagraphStyles(paragraphWithLargeSpacing);
       expect(result).toBe("line-height: 72pt"); // 1440 twips = 72pt
       expect(consoleSpy).not.toHaveBeenCalled();
@@ -128,10 +128,10 @@ describe("Line Spacing Fixes", () => {
         runs: [{ text: "Heading" }],
         spacing: {
           line: 951, // Any spacing value should be rendered faithfully
-          lineRule: "exact"
-        }
+          lineRule: "exact",
+        },
       };
-      
+
       const result = getHeadingStyles(headingWithDocumentSpacing);
       expect(result).toContain("line-height: 47.55pt"); // Faithful: 951 twips = 47.55pt
       expect(consoleSpy).not.toHaveBeenCalled(); // No validation warnings

@@ -27,20 +27,12 @@ test("renderToHtml handles tables", () => {
   };
 
   const result = renderToHtml(doc);
-  expect(result).toContain('<table');
+  expect(result).toContain("<table");
   expect(result).toContain("<tr>");
-  expect(result).toContain(
-    '<th><p style="margin-bottom: 12px;"><span>Header 1</span></p></th>',
-  );
-  expect(result).toContain(
-    '<th><p style="margin-bottom: 12px;"><span>Header 2</span></p></th>',
-  );
-  expect(result).toContain(
-    '<td><p style="margin-bottom: 12px;"><span>Cell 1</span></p></td>',
-  );
-  expect(result).toContain(
-    '<td><p style="margin-bottom: 12px;"><span>Cell 2</span></p></td>',
-  );
+  expect(result).toContain('<th><p style="margin-bottom: 12px;"><span>Header 1</span></p></th>');
+  expect(result).toContain('<th><p style="margin-bottom: 12px;"><span>Header 2</span></p></th>');
+  expect(result).toContain('<td><p style="margin-bottom: 12px;"><span>Cell 1</span></p></td>');
+  expect(result).toContain('<td><p style="margin-bottom: 12px;"><span>Cell 2</span></p></td>');
   expect(result).toContain("</tr>");
   expect(result).toContain("</table>");
 });
@@ -65,10 +57,8 @@ test("renderToHtml handles empty table cells", () => {
 
   const result = renderToHtml(doc);
   // Enhanced renderer doesn't add nbsp to empty cells
-  expect(result).toContain('<th></th>');
-  expect(result).toContain(
-    '<th><p style="margin-bottom: 12px;"><span>Content</span></p></th>',
-  );
+  expect(result).toContain("<th></th>");
+  expect(result).toContain('<th><p style="margin-bottom: 12px;"><span>Content</span></p></th>');
 });
 
 test("renderToHtml handles table cell spans", () => {

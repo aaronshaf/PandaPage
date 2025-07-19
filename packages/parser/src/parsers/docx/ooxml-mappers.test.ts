@@ -1,10 +1,10 @@
 import { describe, it, expect } from "bun:test";
 import "../../test-setup";
-import { 
-  mapBorderStyle, 
-  mapShadingPattern, 
-  mapParagraphAlignment, 
-  mapEmphasisMark 
+import {
+  mapBorderStyle,
+  mapShadingPattern,
+  mapParagraphAlignment,
+  mapEmphasisMark,
 } from "./ooxml-mappers";
 import { ST_Border, ST_Shd, ST_Jc, ST_Em } from "@browser-document-viewer/ooxml-types";
 

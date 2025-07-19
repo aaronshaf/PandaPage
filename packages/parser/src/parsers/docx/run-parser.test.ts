@@ -104,8 +104,11 @@ describe("w14:textFill parsing", () => {
 
   it("should parse w14:textFill with srgbClr", () => {
     const runElement = createRunWithTextFill("818181");
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.color).toBe("#818181");
     expect(run?.text).toBe("Test text");
@@ -113,8 +116,11 @@ describe("w14:textFill parsing", () => {
 
   it("should parse w14:textFill with # prefix", () => {
     const runElement = createRunWithTextFill("#FF0000");
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.color).toBe("#FF0000");
   });
@@ -137,16 +143,22 @@ describe("w14:textFill parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.color).toBe("FF0000"); // Should use regular color, not textFill
   });
 
   it("should parse regular color without w14:textFill", () => {
     const runElement = createRunWithRegularColor("0000FF");
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.color).toBe("0000FF");
   });
@@ -164,8 +176,11 @@ describe("w14:textFill parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.color).toBeUndefined();
   });
@@ -198,8 +213,11 @@ describe("Footnote reference parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.superscript).toBe(true);
     expect(run?.text).toBe("1");
@@ -219,8 +237,11 @@ describe("Underline color parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.underline).toBe(true);
     expect(run?.underlineColor).toBe("#818181");
@@ -239,8 +260,11 @@ describe("Underline color parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.underline).toBe(true);
     expect(run?.underlineColor).toBe("#FF0000");
@@ -258,8 +282,11 @@ describe("Underline color parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.underline).toBe(true);
     expect(run?.underlineColor).toBeUndefined(); // auto color is not stored
@@ -277,8 +304,11 @@ describe("Underline color parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.underline).toBe(false);
     expect(run?.underlineColor).toBeUndefined();
@@ -298,8 +328,11 @@ describe("Bidirectional text parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.lang).toBe("ar-SA");
     expect(run?.bidi).toBe(true);
@@ -318,8 +351,11 @@ describe("Bidirectional text parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.lang).toBe("en-US");
     expect(run?.bidi).toBe(false);
@@ -337,8 +373,11 @@ describe("Bidirectional text parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.lang).toBeUndefined(); // Punctuation doesn't get lang
     expect(run?.bidi).toBe(true); // But bidi is still parsed
@@ -358,8 +397,11 @@ describe("RTL text direction parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.rtl).toBe(true);
     expect(run?.text).toBe("مرحبا");
@@ -377,8 +419,11 @@ describe("RTL text direction parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.rtl).toBe(false);
     expect(run?.text).toBe("Hello");
@@ -396,8 +441,11 @@ describe("RTL text direction parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.rtl).toBe(true);
   });
@@ -414,8 +462,11 @@ describe("RTL text direction parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.rtl).toBe(false);
   });
@@ -436,8 +487,11 @@ describe("RTL text direction parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.rtl).toBe(true);
     expect(run?.bold).toBe(true);
@@ -459,8 +513,11 @@ describe("RTL text direction parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.rtl).toBe(true);
     expect(run?.bidi).toBe(true);
@@ -481,8 +538,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("SimSun"); // Main font chosen by priority
     expect(run?.fontFamilyAscii).toBe("Times New Roman");
@@ -503,8 +563,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("Arial");
     expect(run?.fontFamilyAscii).toBe("Arial");
@@ -527,8 +590,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("Times New Roman"); // Fallback since no eastAsia font
     expect(run?.fontFamilyAscii).toBe("Times New Roman");
@@ -550,8 +616,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("MS Mincho"); // EastAsia font gets priority
     expect(run?.fontFamilyAscii).toBe("Arial");
@@ -571,8 +640,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBeUndefined();
     expect(run?.fontFamilyAscii).toBeUndefined();
@@ -593,8 +665,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("Courier New"); // ASCII font takes priority when no eastAsia
     expect(run?.fontFamilyAscii).toBe("Courier New");
@@ -613,8 +688,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("Gill Sans MT"); // EastAsia gets priority
     expect(run?.fontFamilyAscii).toBe("Gill Sans MT");
@@ -627,12 +705,16 @@ describe("Font family parsing with multiple scripts", () => {
     const mockTheme = {
       colors: new Map([
         ["dk1", "#000000"],
-        ["lt1", "#FFFFFF"]
+        ["lt1", "#FFFFFF"],
       ]),
       fonts: {
         major: new Map([["latin", "Ubuntu"]]),
-        minor: new Map([["latin", "Ubuntu"], ["ea", "SimSun"], ["cs", "Arial Unicode MS"]])
-      }
+        minor: new Map([
+          ["latin", "Ubuntu"],
+          ["ea", "SimSun"],
+          ["cs", "Arial Unicode MS"],
+        ]),
+      },
     };
 
     const parser = new DOMParser();
@@ -646,8 +728,14 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main", undefined, undefined, mockTheme);
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+      undefined,
+      undefined,
+      mockTheme,
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("SimSun"); // EastAsia gets priority
     expect(run?.fontFamilyAscii).toBe("Ubuntu"); // Resolved from minorHAnsi
@@ -661,8 +749,8 @@ describe("Font family parsing with multiple scripts", () => {
       colors: new Map(),
       fonts: {
         major: new Map([["latin", "Ubuntu"]]),
-        minor: new Map([["latin", "Ubuntu"]])
-      }
+        minor: new Map([["latin", "Ubuntu"]]),
+      },
     };
 
     const parser = new DOMParser();
@@ -676,8 +764,14 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main", undefined, undefined, mockTheme);
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+      undefined,
+      undefined,
+      mockTheme,
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBe("Times New Roman"); // Explicit font takes precedence
     expect(run?.fontFamilyAscii).toBe("Times New Roman");
@@ -695,8 +789,11 @@ describe("Font family parsing with multiple scripts", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.fontFamily).toBeUndefined();
     expect(run?.fontFamilyAscii).toBeUndefined();

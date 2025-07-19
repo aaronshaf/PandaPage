@@ -19,13 +19,13 @@ test("renderToHtml applies character spacing", () => {
   };
 
   const result = renderToHtml(doc);
-  
+
   // Check that letter-spacing is applied (40 twips = 2.67px at 96 DPI)
-  expect(result).toContain('letter-spacing: 3px');
-  
+  expect(result).toContain("letter-spacing: 3px");
+
   // Check that negative spacing is applied (-20 twips = -1.33px at 96 DPI)
-  expect(result).toContain('letter-spacing: -1px');
-  
+  expect(result).toContain("letter-spacing: -1px");
+
   // Verify text content
   expect(result).toContain("Normal text");
   expect(result).toContain("with spacing");
@@ -54,7 +54,7 @@ test("renderToHtml combines character spacing with other formatting", () => {
   };
 
   const result = renderToHtml(doc);
-  
+
   // Check all styles are applied
   expect(result).toContain("font-weight: bold");
   expect(result).toContain("font-style: italic");

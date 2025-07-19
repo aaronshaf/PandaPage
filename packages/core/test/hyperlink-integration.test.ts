@@ -30,7 +30,7 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
@@ -59,7 +59,7 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://first.com", type: "hyperlink" }],
         ["rId2", { id: "rId2", target: "https://second.com", type: "hyperlink" }],
@@ -80,7 +80,7 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
@@ -99,7 +99,7 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map();
 
       const result = await Effect.runPromise(parseHyperlinksInParagraph(xml, relationships));
@@ -120,7 +120,9 @@ describe("Hyperlink Integration", () => {
       const xml = `<w:p><w:hyperlink`;
       const relationships = new Map();
 
-      await expect(Effect.runPromise(parseHyperlinksInParagraph(xml, relationships))).rejects.toThrow();
+      await expect(
+        Effect.runPromise(parseHyperlinksInParagraph(xml, relationships)),
+      ).rejects.toThrow();
     });
 
     test("should handle hyperlink with multiple runs", async () => {
@@ -144,7 +146,7 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
@@ -180,15 +182,15 @@ describe("Hyperlink Integration", () => {
             <w:t> After</w:t>
           </w:r>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       expect(result.runs).toHaveLength(3);
       expect(result.runs[0]?.text).toBe("Before ");
       expect(result.runs[0]?.hyperlink).toBeUndefined();
@@ -210,13 +212,13 @@ describe("Hyperlink Integration", () => {
             <w:t>No hyperlinks here</w:t>
           </w:r>
         </w:p>`;
-      
+
       const relationships = new Map();
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       expect(result).toBe(paragraph);
     });
 
@@ -240,15 +242,15 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       expect(result.runs).toHaveLength(2);
       expect(result.runs[0]?.text).toBe("Heading with ");
       expect(result.runs[1]?.text).toBe("link");
@@ -279,15 +281,15 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       expect(result.runs).toHaveLength(2);
       expect(result.runs[0]?.text).toBe("Bold Italic");
       expect(result.runs[0]?.bold).toBe(true);
@@ -311,15 +313,15 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       expect(result.runs).toHaveLength(1);
       expect(result.runs[0]?.hyperlink).toBe("https://example.com");
     });
@@ -334,7 +336,7 @@ describe("Hyperlink Integration", () => {
       const relationships = new Map();
 
       await expect(
-        Effect.runPromise(mergeHyperlinksIntoParagraph(paragraph, xml, relationships))
+        Effect.runPromise(mergeHyperlinksIntoParagraph(paragraph, xml, relationships)),
       ).rejects.toThrow();
     });
   });
@@ -414,13 +416,13 @@ describe("Hyperlink Integration", () => {
             <w:t>Not formatted</w:t>
           </w:r>
         </w:p>`;
-      
+
       const relationships = new Map();
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       // The paragraph has no hyperlinks, so it returns the original paragraph
       expect(result).toBe(paragraph);
     });
@@ -440,13 +442,13 @@ describe("Hyperlink Integration", () => {
             <w:t>Non-empty</w:t>
           </w:r>
         </w:p>`;
-      
+
       const relationships = new Map();
 
       const result = await Effect.runPromise(
-        mergeHyperlinksIntoParagraph(paragraph, xml, relationships)
+        mergeHyperlinksIntoParagraph(paragraph, xml, relationships),
       );
-      
+
       // The paragraph has no hyperlinks, so it returns the original paragraph
       expect(result).toBe(paragraph);
     });
@@ -460,7 +462,7 @@ describe("Hyperlink Integration", () => {
             </w:r>
           </w:hyperlink>
         </w:p>`;
-      
+
       const relationships = new Map([
         ["rId1", { id: "rId1", target: "https://example.com", type: "hyperlink" }],
       ]);

@@ -7,7 +7,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
   describe("parseConditionalFormatting", () => {
     it("should parse header row pattern (100000000000)", () => {
       const result = parseConditionalFormatting("100000000000");
-      
+
       expect(result.val).toBe("100000000000");
       expect(result.firstRow).toBe(true);
       expect(result.lastRow).toBe(false);
@@ -19,7 +19,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
 
     it("should parse first column pattern (001000000000)", () => {
       const result = parseConditionalFormatting("001000000000");
-      
+
       expect(result.val).toBe("001000000000");
       expect(result.firstRow).toBe(false);
       expect(result.lastRow).toBe(false);
@@ -31,7 +31,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
 
     it("should parse banded rows pattern (000000100000)", () => {
       const result = parseConditionalFormatting("000000100000");
-      
+
       expect(result.val).toBe("000000100000");
       expect(result.firstRow).toBe(false);
       expect(result.lastRow).toBe(false);
@@ -43,7 +43,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
 
     it("should parse combined first column and additional formatting (001000000100)", () => {
       const result = parseConditionalFormatting("001000000100");
-      
+
       expect(result.val).toBe("001000000100");
       expect(result.firstRow).toBe(false);
       expect(result.lastRow).toBe(false);
@@ -55,7 +55,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
 
     it("should parse no conditional formatting (000000000000)", () => {
       const result = parseConditionalFormatting("000000000000");
-      
+
       expect(result.val).toBe("000000000000");
       expect(result.firstRow).toBe(false);
       expect(result.lastRow).toBe(false);
@@ -67,7 +67,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
 
     it("should handle short patterns by padding with zeros", () => {
       const result = parseConditionalFormatting("1");
-      
+
       expect(result.val).toBe("1");
       expect(result.firstRow).toBe(false);
       expect(result.lastRow).toBe(false);
@@ -79,7 +79,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
 
     it("should parse all conditional formatting types", () => {
       const result = parseConditionalFormatting("111111110000");
-      
+
       expect(result.val).toBe("111111110000");
       expect(result.firstRow).toBe(true);
       expect(result.lastRow).toBe(true);
@@ -117,7 +117,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
     it("should parse cnfStyle from table cell properties", () => {
       const element = createElementWithCnfStyle("100000000000");
       const result = parseCnfStyle(element, WORD_NAMESPACE);
-      
+
       expect(result).toBeDefined();
       expect(result?.val).toBe("100000000000");
       expect(result?.firstRow).toBe(true);
@@ -126,7 +126,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
     it("should parse cnfStyle with first column formatting", () => {
       const element = createElementWithCnfStyle("001000000000");
       const result = parseCnfStyle(element, WORD_NAMESPACE);
-      
+
       expect(result).toBeDefined();
       expect(result?.val).toBe("001000000000");
       expect(result?.firstCol).toBe(true);
@@ -136,7 +136,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
     it("should parse cnfStyle with banded rows", () => {
       const element = createElementWithCnfStyle("000000100000");
       const result = parseCnfStyle(element, WORD_NAMESPACE);
-      
+
       expect(result).toBeDefined();
       expect(result?.val).toBe("000000100000");
       expect(result?.bandedRows).toBe(true);
@@ -145,7 +145,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
     it("should return undefined when no cnfStyle element exists", () => {
       const element = createElementWithoutCnfStyle();
       const result = parseCnfStyle(element, WORD_NAMESPACE);
-      
+
       expect(result).toBeUndefined();
     });
 
@@ -158,7 +158,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
       `;
       const doc = parser.parseFromString(xmlString, "text/xml");
       const element = doc.documentElement;
-      
+
       const result = parseCnfStyle(element, WORD_NAMESPACE);
       expect(result).toBeUndefined();
     });
@@ -166,7 +166,7 @@ describe("Conditional formatting (cnfStyle) parsing", () => {
     it("should parse complex combined conditional formatting", () => {
       const element = createElementWithCnfStyle("001000000100");
       const result = parseCnfStyle(element, WORD_NAMESPACE);
-      
+
       expect(result).toBeDefined();
       expect(result?.val).toBe("001000000100");
       expect(result?.firstCol).toBe(true);

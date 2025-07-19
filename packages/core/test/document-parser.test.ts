@@ -79,14 +79,14 @@ describe("Document Parser", () => {
       `;
       const doc = await Effect.runPromise(parseXmlString(xml));
       const root = doc.documentElement;
-      
+
       // Mock querySelector to return null to force the namespace path
       const originalQuerySelector = root.querySelector;
       root.querySelector = () => null;
-      
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
-      
+
       // Restore original
       root.querySelector = originalQuerySelector;
     });
@@ -106,21 +106,22 @@ describe("Document Parser", () => {
       `;
       const doc = await Effect.runPromise(parseXmlString(xml));
       const root = doc.documentElement;
-      
+
       // Mock to test the edge case where bodies[0] might be falsy
       const originalQuerySelector = root.querySelector;
       const originalGetElementsByTagNameNS = root.getElementsByTagNameNS;
-      
+
       root.querySelector = () => null;
-      root.getElementsByTagNameNS = () => ({
-        length: 1,
-        0: null, // Falsy first element
-        item: () => null
-      } as any);
-      
+      root.getElementsByTagNameNS = () =>
+        ({
+          length: 1,
+          0: null, // Falsy first element
+          item: () => null,
+        }) as any;
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
-      
+
       // Restore originals
       root.querySelector = originalQuerySelector;
       root.getElementsByTagNameNS = originalGetElementsByTagNameNS;
@@ -141,19 +142,19 @@ describe("Document Parser", () => {
       `;
       const doc = await Effect.runPromise(parseXmlString(xml));
       const root = doc.documentElement;
-      
+
       // Mock querySelector and getElementsByTagNameNS to simulate them failing
       // but keep getElementsByTagName working so the localName fallback works
       const originalQuerySelector = root.querySelector;
       const originalGetElementsByTagNameNS = root.getElementsByTagNameNS;
-      
+
       root.querySelector = () => null;
-      root.getElementsByTagNameNS = () => ({ length: 0 } as any);
-      
+      root.getElementsByTagNameNS = () => ({ length: 0 }) as any;
+
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(1);
       expect(result[0]?.type).toBe("paragraph");
-      
+
       // Restore originals
       root.querySelector = originalQuerySelector;
       root.getElementsByTagNameNS = originalGetElementsByTagNameNS;

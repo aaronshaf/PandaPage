@@ -132,7 +132,7 @@ export const readDocx = (buffer: ArrayBuffer): Effect.Effect<DocxDocument, DocxP
  */
 const extractImageData = (
   paragraphs: DocxParagraph[],
-  unzipped: Record<string, Uint8Array>
+  unzipped: Record<string, Uint8Array>,
 ): Effect.Effect<DocxParagraph[], DocxParseError> =>
   Effect.gen(function* () {
     const processedParagraphs: DocxParagraph[] = [];
@@ -149,7 +149,7 @@ const extractImageData = (
               ...run.image,
               base64Data,
             };
-            
+
             processedRuns.push({
               ...run,
               image: updatedImage,

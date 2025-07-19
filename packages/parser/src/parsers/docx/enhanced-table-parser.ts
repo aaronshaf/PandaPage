@@ -36,24 +36,24 @@ import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from ".
  * This processes the table after parsing to properly set rowspan values
  */
 export function calculateRowSpans(table: Table): void {
-  const numCols = Math.max(...table.rows.map(row => row.cells.length));
-  
+  const numCols = Math.max(...table.rows.map((row) => row.cells.length));
+
   // Track which cells are part of a vertical merge
   const mergedCells = new Set<string>();
-  
+
   // Process each column
   for (let colIndex = 0; colIndex < numCols; colIndex++) {
     let rowspanStart = -1;
     let rowspanCount = 0;
-    
+
     // Process each row in the column
     for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
       const row = table.rows[rowIndex];
       if (!row || !row.cells[colIndex]) continue;
-      
+
       const cell = row.cells[colIndex] as ProcessingTableCell;
       const vMerge = cell._vMerge;
-      
+
       if (vMerge === "restart") {
         // Start of a new merged region
         rowspanStart = rowIndex;
@@ -78,7 +78,7 @@ export function calculateRowSpans(table: Table): void {
         rowspanCount = 0;
       }
     }
-    
+
     // Handle case where merge extends to the last row
     if (rowspanStart !== -1 && rowspanCount > 1) {
       const startCell = table.rows[rowspanStart]?.cells[colIndex];
@@ -87,7 +87,7 @@ export function calculateRowSpans(table: Table): void {
       }
     }
   }
-  
+
   // Clean up temporary vMerge properties but keep _merged for rendering
   for (const row of table.rows) {
     for (const cell of row.cells) {
@@ -161,7 +161,9 @@ function parseEnhancedTableBorders(tblBordersElement: Element | null): TableBord
 /**
  * Parse enhanced table cell borders
  */
-function parseEnhancedTableCellBorders(tcBordersElement: Element | null): TableCellBorders | undefined {
+function parseEnhancedTableCellBorders(
+  tcBordersElement: Element | null,
+): TableCellBorders | undefined {
   if (!tcBordersElement) return undefined;
 
   const borders: TableCellBorders = {};
@@ -234,12 +236,19 @@ export function parseEnhancedTableCell(
   // Parse paragraphs in the cell
   const paragraphElements = getElementsByTagNameNSFallback(cellElement, "w", "p");
   for (const pElement of paragraphElements) {
-    const paragraph = parseParagraph(pElement, relationships, undefined, undefined, stylesheet, theme);
+    const paragraph = parseParagraph(
+      pElement,
+      relationships,
+      undefined,
+      undefined,
+      stylesheet,
+      theme,
+    );
     if (paragraph) {
       // Convert DocxParagraph to Paragraph type
       const convertedParagraph: Paragraph = {
         type: "paragraph",
-        runs: paragraph.runs.map(run => ({
+        runs: paragraph.runs.map((run) => ({
           text: run.text,
           bold: run.bold,
           italic: run.italic,

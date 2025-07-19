@@ -25,7 +25,6 @@ import { getElementByTagNameNSFallback, getElementsByTagNameNSFallback } from ".
 import { mapBorderStyle, mapShadingPattern } from "./ooxml-mappers";
 import { parseCnfStyle } from "./conditional-formatting";
 
-
 /**
  * Parse a table border element
  */
@@ -297,7 +296,7 @@ function convertToTableShading(docxShading: DocxShading): TableShading {
  * Convert DOCX conditional formatting to document conditional formatting
  */
 function convertToTableConditionalFormatting(
-  docxCnfStyle: DocxConditionalFormatting
+  docxCnfStyle: DocxConditionalFormatting,
 ): TableConditionalFormatting {
   return {
     val: docxCnfStyle.val,

@@ -121,21 +121,26 @@ export function renderParagraph(
   }
 
   // Check for drop cap
-  if ("framePr" in paragraph && paragraph.framePr?.dropCap && paragraph.framePr.dropCap !== "none") {
+  if (
+    "framePr" in paragraph &&
+    paragraph.framePr?.dropCap &&
+    paragraph.framePr.dropCap !== "none"
+  ) {
     // Apply drop cap styling
-    const hasDropCap = paragraph.framePr.dropCap === "drop" || paragraph.framePr.dropCap === "margin";
-    
+    const hasDropCap =
+      paragraph.framePr.dropCap === "drop" || paragraph.framePr.dropCap === "margin";
+
     if (hasDropCap && paragraph.runs.length > 0 && paragraph.runs[0]?.text) {
       // Get the first character for drop cap
       const firstRun = paragraph.runs[0];
       const firstChar = firstRun.text.charAt(0);
       const restOfFirstRun = firstRun.text.slice(1);
-      
+
       // Create drop cap span
       const dropCapSpan = doc.createElement("span");
       dropCapSpan.className = "drop-cap";
       dropCapSpan.textContent = firstChar;
-      
+
       // Apply drop cap styles
       const lines = paragraph.framePr.lines || 3;
       dropCapSpan.style.cssText = `
@@ -146,11 +151,11 @@ export function renderParagraph(
         margin-right: 0.1em;
         margin-top: -0.1em;
       `;
-      
+
       if (paragraph.framePr.dropCap === "margin") {
         dropCapSpan.style.marginLeft = "-0.5em";
       }
-      
+
       // Apply font styling from the run
       if (firstRun.fontFamily) {
         dropCapSpan.style.fontFamily = firstRun.fontFamily;
@@ -158,16 +163,16 @@ export function renderParagraph(
       if (firstRun.color) {
         dropCapSpan.style.color = firstRun.color;
       }
-      
+
       p.appendChild(dropCapSpan);
-      
+
       // Render the rest of the first run
       if (restOfFirstRun) {
         const restRun = { ...firstRun, text: restOfFirstRun };
         const span = renderTextRun(restRun, doc, currentPageNumber, totalPages);
         p.appendChild(span);
       }
-      
+
       // Render remaining runs
       paragraph.runs.slice(1).forEach((run) => {
         const span = renderTextRun(run, doc, currentPageNumber, totalPages);

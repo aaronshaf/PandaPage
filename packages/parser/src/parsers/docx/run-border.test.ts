@@ -16,8 +16,11 @@ describe("Run border parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.border).toBeDefined();
     expect(run?.border?.style).toBe(ST_Border.Single);
@@ -39,8 +42,11 @@ describe("Run border parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.border).toBeDefined();
     expect(run?.border?.style).toBe(ST_Border.Double);
@@ -62,8 +68,11 @@ describe("Run border parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.border).toBeUndefined();
     expect(run?.bold).toBe(true);
@@ -86,8 +95,11 @@ describe("Run border parsing", () => {
     `;
     const doc = parser.parseFromString(xmlString, "text/xml");
     const runElement = doc.documentElement;
-    const run = parseRun(runElement, "http://schemas.openxmlformats.org/wordprocessingml/2006/main");
-    
+    const run = parseRun(
+      runElement,
+      "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    );
+
     expect(run).not.toBeNull();
     expect(run?.border).toBeDefined();
     expect(run?.border?.style).toBe(ST_Border.Dotted);

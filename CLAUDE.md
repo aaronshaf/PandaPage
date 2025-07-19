@@ -132,3 +132,55 @@ When creating commits and pull requests:
 - Don't include implementation plans in PR descriptions
 - Focus on what changed and why, not how
 - Make messages easy to read and understand
+
+## Code Quality Standards
+
+### Security Requirements
+- **No sensitive data in commits**: Ensure API keys, passwords, tokens, and other sensitive data are never committed
+- All sensitive configuration should use environment variables
+- `.env` files must be in `.gitignore`
+
+### Quality Gates (Enforced in Pre-commit and Pre-push Hooks)
+1. **Linting**: All code must pass Biome linting rules
+2. **Type Checking**: All TypeScript code must pass type checking with no errors
+3. **Unit Tests**: All unit tests must pass
+4. **Code Coverage**: Coverage thresholds must be met (see Test Coverage Policy above)
+5. **File Size Check**: Large files are automatically flagged
+6. **Type Assertions**: Avoid using `as` type assertions except for `as const` and `as unknown`
+
+### TypeScript Configuration
+- **Strict Mode**: Always enabled (`strict: true`)
+- **No Implicit Any**: Explicitly set (`noImplicitAny: true`)
+- All strict type checking flags are enabled via `strict: true`
+- Note: `isolatedDeclarations` is not enabled due to bundler mode compatibility
+
+### Code Formatting
+- **Formatter**: Biome is configured for consistent code formatting
+- Run `bun run format` to format all code
+- Formatting is automatically checked in pre-commit hooks
+- Configuration:
+  - 2 spaces for indentation
+  - 100 character line width
+  - Double quotes for strings
+  - Semicolons required
+  - Trailing commas
+
+### Pre-commit Hooks
+The following checks run automatically before each commit:
+1. File size validation
+2. Linting (Biome)
+3. TypeScript type checking across all packages
+4. Unit test coverage enforcement
+5. Type assertion checks (warning for non-allowed `as` usage)
+
+### Pre-push Hooks
+The following checks run before pushing to remote:
+1. Linting
+2. TypeScript type checking
+3. Test coverage enforcement
+
+### Playwright E2E Tests
+- Located in `packages/viewer/e2e/`
+- Run with `cd packages/viewer && bun run test:e2e`
+- Ensure dev server is running before running E2E tests
+- Tests cover critical user workflows and UI interactions

@@ -23,10 +23,12 @@ describe("Drop Cap Rendering in Markdown", () => {
     const result = renderParagraph(paragraph, { skipEmptyParagraphs: false });
 
     // Check that HTML span for drop cap is included
-    expect(result).toContain('<span style="float: left; font-size: 3em; line-height: 2; font-weight: bold; margin-right: 0.1em; color: #333333;">L</span>');
-    
+    expect(result).toContain(
+      '<span style="float: left; font-size: 3em; line-height: 2; font-weight: bold; margin-right: 0.1em; color: #333333;">L</span>',
+    );
+
     // Check that the rest of the text is bold with color
-    expect(result).toContain('**orem ipsum dolor sit amet, consectetur adipiscing elit.**');
+    expect(result).toContain("**orem ipsum dolor sit amet, consectetur adipiscing elit.**");
   });
 
   test("should render paragraph with margin drop cap", () => {
@@ -45,7 +47,9 @@ describe("Drop Cap Rendering in Markdown", () => {
 
     const result = renderParagraph(paragraph, { skipEmptyParagraphs: false });
 
-    expect(result).toContain('<span style="float: left; font-size: 5em; line-height: 4; font-weight: bold; margin-right: 0.1em;">A</span>');
+    expect(result).toContain(
+      '<span style="float: left; font-size: 5em; line-height: 4; font-weight: bold; margin-right: 0.1em;">A</span>',
+    );
     expect(result).toContain("nother paragraph with margin drop cap.");
   });
 
@@ -128,7 +132,9 @@ describe("Drop Cap Rendering in Markdown", () => {
 
     const result = renderParagraph(paragraph, { skipEmptyParagraphs: false });
 
-    expect(result).toContain('<span style="float: left; font-size: 2em; line-height: 1; font-weight: bold; margin-right: 0.1em;">F</span>');
+    expect(result).toContain(
+      '<span style="float: left; font-size: 2em; line-height: 1; font-weight: bold; margin-right: 0.1em;">F</span>',
+    );
     expect(result).toContain("*irst run *");
     expect(result).toContain("**second run **");
     expect(result).toContain("third run.");
@@ -149,7 +155,9 @@ describe("Drop Cap Rendering in Markdown", () => {
 
     const result = renderParagraph(paragraph, { skipEmptyParagraphs: false });
 
-    expect(result).toContain('<span style="float: left; font-size: 3em; line-height: 2; font-weight: bold; margin-right: 0.1em;">D</span>');
+    expect(result).toContain(
+      '<span style="float: left; font-size: 3em; line-height: 2; font-weight: bold; margin-right: 0.1em;">D</span>',
+    );
   });
 
   test("should skip empty paragraphs when option is enabled", () => {
@@ -187,6 +195,8 @@ describe("Drop Cap Rendering in Markdown", () => {
 
     const result = renderParagraph(paragraph, { skipEmptyParagraphs: false });
 
-    expect(result).toContain('<span style="float: left; font-size: 4em; line-height: 3; font-weight: bold; margin-right: 0.1em; color: #FF0000;">C</span>');
+    expect(result).toContain(
+      '<span style="float: left; font-size: 4em; line-height: 3; font-weight: bold; margin-right: 0.1em; color: #FF0000;">C</span>',
+    );
   });
 });

@@ -105,14 +105,14 @@ test("parseRun handles theme fonts with eastAsia", () => {
     fonts: {
       major: new Map([
         ["latin", "Calibri Light"],
-        ["ea", "Yu Gothic Light"]
+        ["ea", "Yu Gothic Light"],
       ]),
       minor: new Map([
         ["latin", "Calibri"],
-        ["ea", "Yu Gothic"] // ea = east asia
-      ])
+        ["ea", "Yu Gothic"], // ea = east asia
+      ]),
     },
-    colors: new Map() // Required by DocxTheme interface
+    colors: new Map(), // Required by DocxTheme interface
   };
 
   const run = parseRun(runElement! as unknown as Element, ns, undefined, undefined, theme);
