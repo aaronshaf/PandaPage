@@ -11,7 +11,7 @@ import {
 
 describe("Table Parser Additional Tests", () => {
   describe("parseTableEnhanced", () => {
-    test.skip("should parse table with rows", async () => {
+    test("should parse table with rows", async () => {
       const mockRow = {
         cells: [{
           content: [{
@@ -90,7 +90,7 @@ describe("Table Parser Additional Tests", () => {
       expect(result.rows).toHaveLength(1);
     });
 
-    test.skip("should handle table with properties", async () => {
+    test("should handle table with properties", async () => {
       const mockElement = {
         querySelectorAll: () => [],
         querySelector: (selector: string) => {
@@ -126,7 +126,7 @@ describe("Table Parser Additional Tests", () => {
   });
 
   describe("parseTableRowEnhanced", () => {
-    test.skip("should parse row with header", async () => {
+    test("should parse row with header", async () => {
       const mockElement = {
         querySelectorAll: () => [],
         querySelector: (selector: string) => {
@@ -150,7 +150,7 @@ describe("Table Parser Additional Tests", () => {
   });
 
   describe("parseTableCellEnhanced", () => {
-    test.skip("should parse cell with paragraphs", async () => {
+    test("should parse cell with paragraphs", async () => {
       // Mock parseParagraph to succeed
       const mockParagraphElements = [
         {
@@ -331,7 +331,7 @@ describe("Table Parser Additional Tests", () => {
   });
 
   describe("Border parsing edge cases", () => {
-    test.skip("should handle dotted border style", async () => {
+    test("should handle dotted border style", async () => {
       const mockBordersElement = {
         querySelector: (side: string) => {
           if (side === "top") {
@@ -361,7 +361,7 @@ describe("Table Parser Additional Tests", () => {
       expect(properties.borders?.top).toBe("1.5px dotted #00FF00");
     });
 
-    test.skip("should handle very small border width", async () => {
+    test("should handle very small border width", async () => {
       const mockBordersElement = {
         querySelector: (side: string) => {
           if (side === "top") {
