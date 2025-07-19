@@ -63,6 +63,102 @@ describe("Document Parser", () => {
       expect(result).toHaveLength(1);
     });
 
+    test("should find body element using getElementsByTagNameNS", async () => {
+      // Create a document where querySelector won't find the body
+      // but getElementsByTagNameNS will
+      const xml = `
+        <document xmlns:custom="http://example.com">
+          <custom:body>
+            <p>
+              <r>
+                <t>Test with namespace</t>
+              </r>
+            </p>
+          </custom:body>
+        </document>
+      `;
+      const doc = await Effect.runPromise(parseXmlString(xml));
+      const root = doc.documentElement;
+      
+      // Mock querySelector to return null to force the namespace path
+      const originalQuerySelector = root.querySelector;
+      root.querySelector = () => null;
+      
+      const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      expect(result).toHaveLength(1);
+      
+      // Restore original
+      root.querySelector = originalQuerySelector;
+    });
+
+    test("should handle getElementsByTagNameNS returning empty-like element", async () => {
+      // Test edge case where getElementsByTagNameNS returns a collection with falsy first element
+      const xml = `
+        <document>
+          <body>
+            <p>
+              <r>
+                <t>Test content</t>
+              </r>
+            </p>
+          </body>
+        </document>
+      `;
+      const doc = await Effect.runPromise(parseXmlString(xml));
+      const root = doc.documentElement;
+      
+      // Mock to test the edge case where bodies[0] might be falsy
+      const originalQuerySelector = root.querySelector;
+      const originalGetElementsByTagNameNS = root.getElementsByTagNameNS;
+      
+      root.querySelector = () => null;
+      root.getElementsByTagNameNS = () => ({
+        length: 1,
+        0: null, // Falsy first element
+        item: () => null
+      } as any);
+      
+      const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      expect(result).toHaveLength(1);
+      
+      // Restore originals
+      root.querySelector = originalQuerySelector;
+      root.getElementsByTagNameNS = originalGetElementsByTagNameNS;
+    });
+
+    test("should find body element by localName when other methods fail", async () => {
+      // Create a document where body element needs to be found by localName
+      const xml = `
+        <document>
+          <body>
+            <p>
+              <r>
+                <t>Content found by localName</t>
+              </r>
+            </p>
+          </body>
+        </document>
+      `;
+      const doc = await Effect.runPromise(parseXmlString(xml));
+      const root = doc.documentElement;
+      
+      // Mock querySelector and getElementsByTagNameNS to simulate them failing
+      // but keep getElementsByTagName working so the localName fallback works
+      const originalQuerySelector = root.querySelector;
+      const originalGetElementsByTagNameNS = root.getElementsByTagNameNS;
+      
+      root.querySelector = () => null;
+      root.getElementsByTagNameNS = () => ({ length: 0 } as any);
+      
+      const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      expect(result).toHaveLength(1);
+      expect(result[0]?.type).toBe("paragraph");
+      
+      // Restore originals
+      root.querySelector = originalQuerySelector;
+      root.getElementsByTagNameNS = originalGetElementsByTagNameNS;
+    });
+
     test("should handle missing body element", async () => {
       const xml = `<document></document>`;
       const root = await createMockElement(xml);
@@ -140,6 +236,86 @@ describe("Document Parser", () => {
       const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
       expect(result).toHaveLength(2);
       expect(result.every((el) => el.type === "paragraph")).toBe(true);
+    });
+
+    test("should handle parse errors in elements gracefully", async () => {
+      const xml = `
+        <document>
+          <body>
+            <p>
+              <r>
+                <t>Valid paragraph</t>
+              </r>
+            </p>
+            <p>
+              <!-- This paragraph has invalid structure that might cause parse errors -->
+              <invalidTag>
+                <nestedInvalid>
+                  <t>Invalid structure</t>
+                </nestedInvalid>
+              </invalidTag>
+            </p>
+            <p>
+              <r>
+                <t>Another valid paragraph</t>
+              </r>
+            </p>
+          </body>
+        </document>
+      `;
+      const root = await createMockElement(xml);
+
+      const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      // Should still parse the valid paragraphs even if one fails
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    test("should handle table with namespace prefix", async () => {
+      const xml = `
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:body>
+            <w:tbl>
+              <w:tr>
+                <w:tc>
+                  <w:p>
+                    <w:r>
+                      <w:t>Table cell</w:t>
+                    </w:r>
+                  </w:p>
+                </w:tc>
+              </w:tr>
+            </w:tbl>
+          </w:body>
+        </w:document>
+      `;
+      const root = await createMockElement(xml);
+
+      const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("type", "table");
+    });
+
+    test("should skip namespaced section properties", async () => {
+      const xml = `
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:body>
+            <w:p>
+              <w:r>
+                <w:t>Content</w:t>
+              </w:r>
+            </w:p>
+            <w:sectPr>
+              <w:pgSz w:w="12240" w:h="15840"/>
+              <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/>
+            </w:sectPr>
+          </w:body>
+        </w:document>
+      `;
+      const root = await createMockElement(xml);
+
+      const result = await Effect.runPromise(parseDocumentXmlEnhanced(root));
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("type", "paragraph");
     });
   });
 
