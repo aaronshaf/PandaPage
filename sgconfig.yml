@@ -1,0 +1,12 @@
+ruleDirs:
+  - rules
+
+testConfigs:
+  - testDir: test-cases
+
+exclude:
+  - "**/node_modules"
+  - "**/dist"
+  - "**/.next"
+  - "**/coverage"
+  - "**/*.d.ts"

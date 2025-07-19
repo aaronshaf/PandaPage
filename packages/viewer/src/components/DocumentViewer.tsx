@@ -133,7 +133,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         removeFrontmatter,
         splitIntoPages,
       });
-      
+
       setRenderedPages(renderResult.pages);
       setTotalPages(renderResult.totalPages);
     }

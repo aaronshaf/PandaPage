@@ -1,0 +1,14 @@
+id: no-as-type-assertion
+message: Type assertions using 'as' are not allowed. Use type guards or proper typing instead. Exceptions are 'as const' and 'as unknown'.
+severity: error
+language: typescript
+rule:
+  kind: as_expression
+  not:
+    any:
+      - has:
+          kind: predefined_type
+          pattern: const
+      - has:
+          kind: predefined_type
+          pattern: unknown

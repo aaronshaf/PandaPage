@@ -81,7 +81,9 @@ const App: React.FC = () => {
       return `${getBasePath()}/${docId}`;
     }
     // Use first sample document as default
-    return sampleDocuments.length > 0 && sampleDocuments[0] ? `${getBasePath()}/${sampleDocuments[0].id}` : "";
+    return sampleDocuments.length > 0 && sampleDocuments[0]
+      ? `${getBasePath()}/${sampleDocuments[0].id}`
+      : "";
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
@@ -332,7 +334,9 @@ const App: React.FC = () => {
     if (docId && sampleDocuments.some((doc) => doc.id === docId)) {
       return `${getBasePath()}/${docId}`;
     }
-    return sampleDocuments.length > 0 && sampleDocuments[0] ? `${getBasePath()}/${sampleDocuments[0].id}` : "";
+    return sampleDocuments.length > 0 && sampleDocuments[0]
+      ? `${getBasePath()}/${sampleDocuments[0].id}`
+      : "";
   };
 
   // Update URL hash with current document and view mode

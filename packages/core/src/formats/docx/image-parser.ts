@@ -19,7 +19,7 @@ export interface ImageRelationship {
 export interface DocxImage {
   relationshipId: ST_RelationshipId;
   width?: number; // in EMUs (English Metric Units)
-  height?: number; // in EMUs  
+  height?: number; // in EMUs
   title?: string;
   description?: string;
   filePath?: string; // Resolved file path from relationship
@@ -39,12 +39,10 @@ export const parseImageRelationships = (
 
     // Parse XML with DOM parser
     const doc = yield* parseXmlString(relsXml).pipe(
-      Effect.mapError(
-        (error) => ({
-          _tag: "DocxParseError" as const,
-          message: `Failed to parse relationships XML: ${error.message}`,
-        }),
-      ),
+      Effect.mapError((error) => ({
+        _tag: "DocxParseError" as const,
+        message: `Failed to parse relationships XML: ${error.message}`,
+      })),
     );
 
     // Get all Relationship elements
@@ -54,9 +52,7 @@ export const parseImageRelationships = (
       const type = element.getAttribute("Type");
 
       // Check if it's an image relationship
-      if (
-        type === "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
-      ) {
+      if (type === "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image") {
         const id = element.getAttribute("Id");
         const target = element.getAttribute("Target");
         const targetMode = element.getAttribute("TargetMode");
@@ -94,12 +90,10 @@ export const parseDrawingElement = (
 
     // Parse XML with DOM parser
     const doc = yield* parseXmlString(xmlContent).pipe(
-      Effect.mapError(
-        (error) => ({
-          _tag: "DocxParseError" as const,
-          message: `Failed to parse drawing XML: ${error.message}`,
-        }),
-      ),
+      Effect.mapError((error) => ({
+        _tag: "DocxParseError" as const,
+        message: `Failed to parse drawing XML: ${error.message}`,
+      })),
     );
 
     // Look for picture elements within the drawing
@@ -206,15 +200,15 @@ export const emusToPixels = (emus: number): number => {
  * Supported image formats and their magic bytes
  */
 const IMAGE_FORMATS = {
-  png: { mimeType: 'image/png', magic: [0x89, 0x50, 0x4E, 0x47] },
-  jpeg: { mimeType: 'image/jpeg', magic: [0xFF, 0xD8, 0xFF] },
-  gif: { mimeType: 'image/gif', magic: [0x47, 0x49, 0x46] },
-  bmp: { mimeType: 'image/bmp', magic: [0x42, 0x4D] },
-  webp: { 
-    mimeType: 'image/webp', 
+  png: { mimeType: "image/png", magic: [0x89, 0x50, 0x4e, 0x47] },
+  jpeg: { mimeType: "image/jpeg", magic: [0xff, 0xd8, 0xff] },
+  gif: { mimeType: "image/gif", magic: [0x47, 0x49, 0x46] },
+  bmp: { mimeType: "image/bmp", magic: [0x42, 0x4d] },
+  webp: {
+    mimeType: "image/webp",
     magic: [0x52, 0x49, 0x46, 0x46], // RIFF
     secondaryMagic: [0x57, 0x45, 0x42, 0x50], // WEBP at offset 8
-    secondaryOffset: 8 
+    secondaryOffset: 8,
   },
 } as const;
 
@@ -237,9 +231,9 @@ const detectImageFormat = (data: Uint8Array): string | null => {
           break;
         }
       }
-      
+
       // Check secondary magic bytes if present (e.g., for WebP)
-      if (matches && 'secondaryMagic' in info && info.secondaryMagic && info.secondaryOffset) {
+      if (matches && "secondaryMagic" in info && info.secondaryMagic && info.secondaryOffset) {
         const secondaryMagic = info.secondaryMagic;
         const offset = info.secondaryOffset;
         if (data.length >= offset + secondaryMagic.length) {
@@ -253,7 +247,7 @@ const detectImageFormat = (data: Uint8Array): string | null => {
           matches = false;
         }
       }
-      
+
       if (matches) {
         return format;
       }
@@ -267,21 +261,21 @@ const detectImageFormat = (data: Uint8Array): string | null => {
  */
 export const extractImageFromZip = (
   unzipped: Record<string, Uint8Array>,
-  imagePath: string
+  imagePath: string,
 ): Effect.Effect<string, DocxParseError> =>
   Effect.gen(function* () {
     // Try different possible paths for the image
     const possiblePaths = [
       `word/${imagePath}`,
       imagePath,
-      `word/media/${imagePath.replace(/^media\//, '')}`,
+      `word/media/${imagePath.replace(/^media\//, "")}`,
     ];
 
     for (const path of possiblePaths) {
       const imageData = unzipped[path];
       if (imageData) {
         debug.log(`Found image at path: ${path}, size: ${imageData.length} bytes`);
-        
+
         // Validate image size
         if (imageData.length > MAX_IMAGE_SIZE) {
           debug.log(`Image too large: ${imageData.length} bytes (max: ${MAX_IMAGE_SIZE})`);
@@ -290,30 +284,30 @@ export const extractImageFromZip = (
             message: `Image exceeds size limit: ${(imageData.length / 1024 / 1024).toFixed(1)}MB (maximum: ${MAX_IMAGE_SIZE / 1024 / 1024}MB)`,
           });
         }
-        
+
         // Validate image format
         const format = detectImageFormat(imageData);
         if (!format) {
           debug.log(`Unknown image format for: ${path}`);
           // Continue with the image anyway - Word may support formats we don't validate
         }
-        
+
         // Convert Uint8Array to base64
         const base64Data = yield* Effect.tryPromise({
           try: async () => {
             // Use btoa in browser, Buffer in Node.js
-            if (typeof btoa !== 'undefined') {
+            if (typeof btoa !== "undefined") {
               // Browser environment
-              // TODO: For large images, consider using FileReader.readAsDataURL() 
+              // TODO: For large images, consider using FileReader.readAsDataURL()
               // or streaming approaches to avoid loading entire image into memory
-              let binary = '';
+              let binary = "";
               for (let i = 0; i < imageData.length; i++) {
                 binary += String.fromCharCode(imageData[i]!);
               }
               return btoa(binary);
             } else {
               // Node.js environment
-              return Buffer.from(imageData).toString('base64');
+              return Buffer.from(imageData).toString("base64");
             }
           },
           catch: (error) => ({
@@ -326,7 +320,7 @@ export const extractImageFromZip = (
       }
     }
 
-    debug.log(`Image not found at any of these paths: ${possiblePaths.join(', ')}`);
+    debug.log(`Image not found at any of these paths: ${possiblePaths.join(", ")}`);
     return yield* Effect.fail({
       _tag: "DocxParseError" as const,
       message: `Image not found: ${imagePath}`,
@@ -335,7 +329,7 @@ export const extractImageFromZip = (
 
 /**
  * Format image as markdown with proper dimensions
- * 
+ *
  * NOTE: For memory efficiency, consider these approaches in production:
  * 1. Stream large images instead of loading into memory
  * 2. Use object URLs with cleanup (URL.revokeObjectURL)
@@ -345,10 +339,10 @@ export const extractImageFromZip = (
 export const formatImageAsMarkdown = (image: DocxImage): string => {
   const title = image.title || "Image";
   const description = image.description || title;
-  
+
   if (image.base64Data) {
     // Use base64 data URL
-    const mimeType = image.filePath?.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    const mimeType = image.filePath?.endsWith(".png") ? "image/png" : "image/jpeg";
     return `![${description}](data:${mimeType};base64,${image.base64Data})`;
   } else if (image.filePath) {
     // Use file path reference

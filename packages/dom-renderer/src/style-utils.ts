@@ -8,7 +8,10 @@ const WEB_DPI = 96;
 const LIST_INDENT_PER_LEVEL = 40;
 
 // Helper function to apply line spacing if present and content exists
-function applyLineSpacing(spacing: { line?: number; lineRule?: "auto" | "exact" | "atLeast" } | undefined, hasContent: boolean): string | null {
+function applyLineSpacing(
+  spacing: { line?: number; lineRule?: "auto" | "exact" | "atLeast" } | undefined,
+  hasContent: boolean,
+): string | null {
   if (spacing?.line && hasContent) {
     const lineHeight = convertLineSpacing(spacing.line, spacing.lineRule);
     return `line-height: ${lineHeight}`;
@@ -41,7 +44,7 @@ export function getTextRunStyles(run: TextRun): string {
   // Basic text formatting
   if (run.bold) styles.push("font-weight: bold");
   if (run.italic) styles.push("font-style: italic");
-  
+
   // Handle underline with defensive type checking
   if (run.underline) {
     if (typeof run.underline === "boolean") {
@@ -59,25 +62,31 @@ export function getTextRunStyles(run: TextRun): string {
       }
     }
   }
-  
+
   // Strike-through formatting
   if (run.strikethrough) styles.push("text-decoration-line: line-through");
   if (run.doubleStrikethrough) {
     styles.push("text-decoration-line: line-through", "text-decoration-style: double");
   }
-  
+
   // Font properties - build font stack for complex scripts
   if (run.fontSize) styles.push(`font-size: ${run.fontSize}pt`);
-  
+
   // Build font family stack prioritizing the most appropriate fonts
-  if (run.fontFamily || run.fontFamilyEastAsia || run.fontFamilyAscii || run.fontFamilyHAnsi || run.fontFamilyCs) {
+  if (
+    run.fontFamily ||
+    run.fontFamilyEastAsia ||
+    run.fontFamilyAscii ||
+    run.fontFamilyHAnsi ||
+    run.fontFamilyCs
+  ) {
     const fontStack: string[] = [];
-    
+
     // Add the selected primary font
     if (run.fontFamily) {
       fontStack.push(`"${run.fontFamily}"`);
     }
-    
+
     // Add fallbacks for different script types
     if (run.fontFamilyEastAsia && run.fontFamilyEastAsia !== run.fontFamily) {
       fontStack.push(`"${run.fontFamilyEastAsia}"`);
@@ -91,20 +100,20 @@ export function getTextRunStyles(run: TextRun): string {
     if (run.fontFamilyCs && run.fontFamilyCs !== run.fontFamily) {
       fontStack.push(`"${run.fontFamilyCs}"`);
     }
-    
+
     // Add generic fallbacks
     fontStack.push("sans-serif");
-    
+
     styles.push(`font-family: ${fontStack.join(", ")}`);
   }
-  
+
   // Colors
   const color = formatColor(run.color);
   if (color) styles.push(`color: ${color}`);
-  
+
   const backgroundColor = formatColor(run.backgroundColor);
   if (backgroundColor) styles.push(`background-color: ${backgroundColor}`);
-  
+
   // Advanced text formatting
   if (run.characterSpacing) styles.push(`letter-spacing: ${twipsToPixels(run.characterSpacing)}px`);
   if (run.position) styles.push(`vertical-align: ${twipsToPixels(run.position)}px`);
@@ -113,7 +122,7 @@ export function getTextRunStyles(run: TextRun): string {
   if (run.hidden) styles.push("display: none");
   if (run.textScale) styles.push(`transform: scaleX(${run.textScale / 100})`);
   if (run.shadow) styles.push("text-shadow: 1px 1px 2px rgba(0,0,0,0.5)");
-  
+
   if (run.outline) {
     styles.push("color: transparent");
     styles.push("-webkit-text-stroke: 1px currentColor");
@@ -137,7 +146,7 @@ type HeadingLevel = keyof typeof HEADING_FONT_SIZES;
 // Type-safe underline styles mapping
 const UNDERLINE_STYLES = {
   single: "text-decoration: underline",
-  double: "text-decoration: underline double", 
+  double: "text-decoration: underline double",
   thick: "text-decoration: underline; text-decoration-thickness: 2px",
   dotted: "text-decoration: underline dotted",
   dash: "text-decoration: underline dashed",
@@ -149,15 +158,17 @@ type UnderlineStyle = keyof typeof UNDERLINE_STYLES;
 // Get heading styles based on level and document properties
 export function getHeadingStyles(heading: Heading): string {
   const styles: string[] = [];
-  
+
   const fontSize = HEADING_FONT_SIZES[heading.level as HeadingLevel] ?? HEADING_FONT_SIZES[1];
   styles.push(`font-size: ${fontSize}px`);
   styles.push("font-weight: bold");
-  
+
   // Apply spacing if defined
   if (heading.spacing) {
-    if (heading.spacing.before) styles.push(`margin-top: ${twipsToPixels(heading.spacing.before)}px`);
-    if (heading.spacing.after) styles.push(`margin-bottom: ${twipsToPixels(heading.spacing.after)}px`);
+    if (heading.spacing.before)
+      styles.push(`margin-top: ${twipsToPixels(heading.spacing.before)}px`);
+    if (heading.spacing.after)
+      styles.push(`margin-bottom: ${twipsToPixels(heading.spacing.after)}px`);
     const lineSpacingStyle = applyLineSpacing(heading.spacing, true);
     if (lineSpacingStyle) styles.push(lineSpacingStyle);
   } else {
@@ -183,9 +194,12 @@ export function getHeadingStyles(heading: Heading): string {
 
   // Apply indentation
   if (heading.indentation) {
-    if (heading.indentation.left) styles.push(`margin-left: ${twipsToPixels(heading.indentation.left)}px`);
-    if (heading.indentation.right) styles.push(`margin-right: ${twipsToPixels(heading.indentation.right)}px`);
-    if (heading.indentation.firstLine) styles.push(`text-indent: ${twipsToPixels(heading.indentation.firstLine)}px`);
+    if (heading.indentation.left)
+      styles.push(`margin-left: ${twipsToPixels(heading.indentation.left)}px`);
+    if (heading.indentation.right)
+      styles.push(`margin-right: ${twipsToPixels(heading.indentation.right)}px`);
+    if (heading.indentation.firstLine)
+      styles.push(`text-indent: ${twipsToPixels(heading.indentation.firstLine)}px`);
     if (heading.indentation.hanging) {
       styles.push(`padding-left: ${twipsToPixels(heading.indentation.hanging)}px`);
       styles.push(`text-indent: -${twipsToPixels(heading.indentation.hanging)}px`);
@@ -200,14 +214,18 @@ export function getParagraphStyles(paragraph: Paragraph): string {
   const styles: string[] = [];
 
   // Check if paragraph has content (non-empty runs)
-  const hasContent = paragraph.runs && paragraph.runs.length > 0 && 
-    paragraph.runs.some(run => run.text && run.text.trim().length > 0);
+  const hasContent =
+    paragraph.runs &&
+    paragraph.runs.length > 0 &&
+    paragraph.runs.some((run) => run.text && run.text.trim().length > 0);
 
   // Apply spacing if defined
   if (paragraph.spacing) {
-    if (paragraph.spacing.before) styles.push(`margin-top: ${twipsToPixels(paragraph.spacing.before)}px`);
-    if (paragraph.spacing.after) styles.push(`margin-bottom: ${twipsToPixels(paragraph.spacing.after)}px`);
-    
+    if (paragraph.spacing.before)
+      styles.push(`margin-top: ${twipsToPixels(paragraph.spacing.before)}px`);
+    if (paragraph.spacing.after)
+      styles.push(`margin-bottom: ${twipsToPixels(paragraph.spacing.after)}px`);
+
     // Only apply line spacing for paragraphs with content
     const lineSpacingStyle = applyLineSpacing(paragraph.spacing, hasContent);
     if (lineSpacingStyle) styles.push(lineSpacingStyle);
@@ -234,9 +252,12 @@ export function getParagraphStyles(paragraph: Paragraph): string {
 
   // Apply indentation
   if (paragraph.indentation) {
-    if (paragraph.indentation.left) styles.push(`margin-left: ${twipsToPixels(paragraph.indentation.left)}px`);
-    if (paragraph.indentation.right) styles.push(`margin-right: ${twipsToPixels(paragraph.indentation.right)}px`);
-    if (paragraph.indentation.firstLine) styles.push(`text-indent: ${twipsToPixels(paragraph.indentation.firstLine)}px`);
+    if (paragraph.indentation.left)
+      styles.push(`margin-left: ${twipsToPixels(paragraph.indentation.left)}px`);
+    if (paragraph.indentation.right)
+      styles.push(`margin-right: ${twipsToPixels(paragraph.indentation.right)}px`);
+    if (paragraph.indentation.firstLine)
+      styles.push(`text-indent: ${twipsToPixels(paragraph.indentation.firstLine)}px`);
     if (paragraph.indentation.hanging) {
       styles.push(`padding-left: ${twipsToPixels(paragraph.indentation.hanging)}px`);
       styles.push(`text-indent: -${twipsToPixels(paragraph.indentation.hanging)}px`);
@@ -312,15 +333,12 @@ export function getTableStyles(): string {
 
 // Get table cell styles
 export function getTableCellStyles(isHeader: boolean): string {
-  const styles: string[] = [
-    "border: 1px solid #d1d5db",
-    "padding: 8px 16px",
-  ];
-  
+  const styles: string[] = ["border: 1px solid #d1d5db", "padding: 8px 16px"];
+
   if (isHeader) {
     styles.push("font-weight: 600");
     styles.push("background-color: #f9fafb");
   }
-  
+
   return styles.join("; ");
 }

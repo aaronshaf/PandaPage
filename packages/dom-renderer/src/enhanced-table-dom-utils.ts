@@ -6,17 +6,22 @@
 import type { Table, TableCell, TableBorder, TableShading } from "@browser-document-viewer/parser";
 import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import type { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
-import { validateColor, validateCSSValue, validateNumeric, validateBorderStyle } from "./css-validation";
-import { convertBorderStyleToCSS, convertShadingToCSS, generateBorderCSS } from "./enhanced-table-utils";
+import {
+  validateColor,
+  validateCSSValue,
+  validateNumeric,
+  validateBorderStyle,
+} from "./css-validation";
+import {
+  convertBorderStyleToCSS,
+  convertShadingToCSS,
+  generateBorderCSS,
+} from "./enhanced-table-utils";
 
 /**
  * Apply table-level styles to a table element
  */
-export function applyTableStyles(
-  tableEl: HTMLTableElement,
-  table: Table,
-  doc: Document
-): void {
+export function applyTableStyles(tableEl: HTMLTableElement, table: Table, doc: Document): void {
   // No CSS classes - all styling via inline styles from document properties
 
   // Apply base styles
@@ -38,7 +43,7 @@ export function applyTableStyles(
     const marginBottom = table.cellMargin.bottom ? table.cellMargin.bottom / 20 : 0;
     const marginLeft = table.cellMargin.left ? table.cellMargin.left / 20 : 0;
     const marginRight = table.cellMargin.right ? table.cellMargin.right / 20 : 0;
-    
+
     if (marginTop > 0 || marginLeft > 0) {
       const validatedSpacingV = validateNumeric(marginTop, 0, 20, 0);
       const validatedSpacingH = validateNumeric(marginLeft, 0, 20, 0);
@@ -81,7 +86,7 @@ export function applyTableStyles(
     const styleEl = doc.createElement("style");
     const tableId = `table-${Math.random().toString(36).substring(2, 11)}`;
     tableEl.id = tableId;
-    
+
     let css = "";
     if (table.borders.insideH) {
       const hBorder = generateBorderCSS(table.borders.insideH);
@@ -91,7 +96,7 @@ export function applyTableStyles(
         }
       `;
     }
-    
+
     if (table.borders.insideV) {
       const vBorder = generateBorderCSS(table.borders.insideV);
       css += `
@@ -100,7 +105,7 @@ export function applyTableStyles(
         }
       `;
     }
-    
+
     styleEl.textContent = css;
     tableEl.appendChild(styleEl);
   }
@@ -112,7 +117,7 @@ export function applyTableStyles(
 export function applyCellStyles(
   cellEl: HTMLTableCellElement,
   cell: TableCell,
-  isHeaderRow: boolean = false
+  isHeaderRow: boolean = false,
 ): void {
   // Base styles
   cellEl.style.verticalAlign = "top";
@@ -151,7 +156,7 @@ export function applyCellStyles(
   if (cell.verticalAlignment) {
     const alignMap = {
       top: "top",
-      center: "middle", 
+      center: "middle",
       bottom: "bottom",
     };
     cellEl.style.verticalAlign = alignMap[cell.verticalAlignment] || "top";
@@ -164,14 +169,15 @@ export function applyCellStyles(
       const border = cell.borders[borderName];
       if (border) {
         const borderCSS = generateBorderCSS(border);
-        (cellEl.style as any)[`border${borderName.charAt(0).toUpperCase() + borderName.slice(1)}`] = borderCSS;
+        (cellEl.style as any)[`border${borderName.charAt(0).toUpperCase() + borderName.slice(1)}`] =
+          borderCSS;
       }
     }
 
     // Apply diagonal borders using pseudo-elements
     if (cell.borders.tl2br || cell.borders.tr2bl) {
       cellEl.style.position = "relative";
-      
+
       // Create diagonal border overlays
       if (cell.borders.tl2br) {
         const diagonalEl = cellEl.ownerDocument.createElement("div");
@@ -204,7 +210,7 @@ export function applyCellStyles(
   // Apply cell width
   if (cell.width) {
     let width = cell.width;
-    if (typeof width === 'number') {
+    if (typeof width === "number") {
       width = width / 20; // Convert twips to points
       const validatedWidth = validateNumeric(width, 10, 1000, 100);
       cellEl.style.width = `${validatedWidth}pt`;
@@ -272,68 +278,68 @@ export function createTableWrapper(doc: Document): HTMLDivElement {
 export function renderEnhancedTableDOM(
   table: Table,
   doc: Document,
-  renderParagraph: (paragraph: any) => HTMLElement
+  renderParagraph: (paragraph: any) => HTMLElement,
 ): HTMLElement {
   // Create wrapper for responsive behavior
   const wrapper = createTableWrapper(doc);
-  
+
   // Create table element
   const tableEl = doc.createElement("table");
   applyTableStyles(tableEl, table, doc);
-  
+
   // Create table body
   const tbody = doc.createElement("tbody");
-  
+
   // Track merged cells
   const mergedCells = new Set<string>();
-  
+
   // Render rows
   for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
     const row = table.rows[rowIndex];
     if (!row) continue;
-    
+
     const tr = doc.createElement("tr");
-    
+
     let cellIndex = 0;
     for (const cell of row.cells) {
       // Skip cells marked as merged
       if ((cell as ProcessingTableCell)._merged) continue;
-      
+
       const cellKey = `${rowIndex}-${cellIndex}`;
       if (mergedCells.has(cellKey)) {
         cellIndex++;
         continue;
       }
-      
+
       // Create cell element
       const isHeader = rowIndex === 0;
       const cellEl = doc.createElement(isHeader ? "th" : "td");
-      
+
       // Apply cell styles
       applyCellStyles(cellEl, cell, isHeader);
-      
+
       // Track merged cells for rowspan
       if (cell.rowspan && cell.rowspan > 1) {
         for (let i = 1; i < cell.rowspan; i++) {
           mergedCells.add(`${rowIndex + i}-${cellIndex}`);
         }
       }
-      
+
       // Render cell content
       for (const paragraph of cell.paragraphs) {
         const p = renderParagraph(paragraph);
         cellEl.appendChild(p);
       }
-      
+
       tr.appendChild(cellEl);
       cellIndex++;
     }
-    
+
     tbody.appendChild(tr);
   }
-  
+
   tableEl.appendChild(tbody);
   wrapper.appendChild(tableEl);
-  
+
   return wrapper;
 }

@@ -220,7 +220,7 @@ test("renderToHtml handles multiple style combinations", () => {
 
   const result = renderToHtml(doc);
   // Enhanced renderer renders superscript as <sup> and uses classes for colors
-  expect(result).toContain('<sup>complex</sup>');
+  expect(result).toContain("<sup>complex</sup>");
 });
 
 test("renderToHtml escapes HTML entities", () => {

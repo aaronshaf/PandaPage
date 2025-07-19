@@ -65,11 +65,11 @@ describe("DocxInspector", () => {
         return acc;
       }, {} as any),
       // Add forEach method that JSZip uses
-      forEach: function(callback: (relativePath: string, file: any) => void) {
+      forEach: function (callback: (relativePath: string, file: any) => void) {
         Object.entries(this.files).forEach(([path, file]) => {
           callback(path, file);
         });
-      }
+      },
     };
 
     // Override JSZip loadAsync temporarily

@@ -32,21 +32,21 @@ test("parseParagraph extracts drawing elements", () => {
   const doc = parser.parseFromString(xml, "text/xml");
   const paragraphElement = doc.documentElement;
 
-  const imageRelationships = new Map([
-    ["rId1", { target: "media/image1.png" }]
-  ]);
+  const imageRelationships = new Map([["rId1", { target: "media/image1.png" }]]);
 
   const paragraph = parseParagraph(
-    paragraphElement! as unknown as Element, 
-    undefined, 
+    paragraphElement! as unknown as Element,
+    undefined,
     imageRelationships,
-    { /* mock zip */ }
+    {
+      /* mock zip */
+    },
   );
 
   expect(paragraph).not.toBeNull();
   expect(paragraph?.images).toBeDefined();
   expect(paragraph?.images?.length).toBeGreaterThan(0);
-  
+
   const image = paragraph?.images?.[0];
   expect(image?.type).toBe("image");
   expect(image?.width).toBe(576); // 5486400 EMUs / 9525
@@ -102,22 +102,24 @@ test("parseParagraph handles multiple drawings", () => {
 
   const imageRelationships = new Map([
     ["rId1", { target: "media/image1.png" }],
-    ["rId2", { target: "media/image2.png" }]
+    ["rId2", { target: "media/image2.png" }],
   ]);
 
   const paragraph = parseParagraph(
-    paragraphElement! as unknown as Element, 
-    undefined, 
+    paragraphElement! as unknown as Element,
+    undefined,
     imageRelationships,
-    { /* mock zip */ }
+    {
+      /* mock zip */
+    },
   );
 
   expect(paragraph).not.toBeNull();
   expect(paragraph?.images?.length).toBe(2);
-  
+
   expect(paragraph?.images?.[0]?.width).toBe(200); // 1905000 / 9525
   expect(paragraph?.images?.[0]?.alt).toBe("Image 1");
-  
+
   expect(paragraph?.images?.[1]?.width).toBe(300); // 2857500 / 9525
   expect(paragraph?.images?.[1]?.alt).toBe("Image 2");
 });

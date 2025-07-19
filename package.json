@@ -18,7 +18,8 @@
     "format": "biome format --write .",
     "lint": "biome lint .",
     "check": "biome check .",
-    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun run test:coverage",
+    "precommit": "node scripts/check-file-sizes.cjs && bun run lint && bun run typecheck && bun run test:coverage && node scripts/ast-grep-check.js",
+    "ast-grep": "node scripts/ast-grep-check.js",
     "check-file-sizes": "node scripts/check-file-sizes.cjs",
     "prepare": "simple-git-hooks",
     "sync-docs": "bun scripts/sync-documents.js",
@@ -29,6 +30,7 @@
     "pre-push": "bun run lint && bun run typecheck && bun run test:coverage"
   },
   "devDependencies": {
+    "@ast-grep/napi": "^0.38.7",
     "@biomejs/biome": "^2.0.6",
     "@tailwindcss/vite": "^4.1.11",
     "@types/bun": "latest",

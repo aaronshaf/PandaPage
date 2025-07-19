@@ -1,13 +1,13 @@
 import { describe, it, expect } from "bun:test";
 import { Effect } from "effect";
 import "../../test-setup";
-import { 
-  parseTheme, 
-  resolveThemeColor, 
-  resolveThemeFont, 
+import {
+  parseTheme,
+  resolveThemeColor,
+  resolveThemeFont,
   resolveThemeFontAttribute,
   DRAWINGML_NAMESPACE,
-  type DocxTheme 
+  type DocxTheme,
 } from "./theme-parser";
 
 describe("Theme Parser", () => {
@@ -345,7 +345,7 @@ describe("Theme Parser", () => {
         ]),
         minor: new Map([
           ["latin", "Calibri"],
-          ["ea", "SimHei"], 
+          ["ea", "SimHei"],
           ["cs", "Tahoma"],
         ]),
       },

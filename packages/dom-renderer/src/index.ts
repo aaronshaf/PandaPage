@@ -7,7 +7,11 @@ export { DOMRenderer, type DOMRenderOptions } from "./dom-renderer";
 export { EnhancedDOMRenderer, type EnhancedDOMRenderOptions } from "./improved-dom-renderer";
 
 // Export table utilities
-export { renderEnhancedTableDOM, applyTableStyles, applyCellStyles } from "./enhanced-table-dom-utils";
+export {
+  renderEnhancedTableDOM,
+  applyTableStyles,
+  applyCellStyles,
+} from "./enhanced-table-dom-utils";
 
 export interface HtmlRenderOptions {
   includeStyles?: boolean;

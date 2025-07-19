@@ -34,9 +34,13 @@ export function parseSectionProperties(
         // Try different attribute patterns for type and rId
         const type = ref.getAttribute("w:type") || ref.getAttribute("type");
         // Try r:id first (namespaced), then id attribute
-        const rId = ref.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id") ||
-                   ref.getAttribute("r:id") || 
-                   ref.getAttribute("id");
+        const rId =
+          ref.getAttributeNS(
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+            "id",
+          ) ||
+          ref.getAttribute("r:id") ||
+          ref.getAttribute("id");
 
         if (rId && headerMap.has(rId)) {
           const header = headerMap.get(rId)!;
@@ -63,9 +67,13 @@ export function parseSectionProperties(
         // Try different attribute patterns for type and rId
         const type = ref.getAttribute("w:type") || ref.getAttribute("type");
         // Try r:id first (namespaced), then id attribute
-        const rId = ref.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id") ||
-                   ref.getAttribute("r:id") || 
-                   ref.getAttribute("id");
+        const rId =
+          ref.getAttributeNS(
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+            "id",
+          ) ||
+          ref.getAttribute("r:id") ||
+          ref.getAttribute("id");
 
         if (rId && footerMap.has(rId)) {
           const footer = footerMap.get(rId)!;

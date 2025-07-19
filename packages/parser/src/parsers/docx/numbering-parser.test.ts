@@ -1,12 +1,12 @@
 import { describe, it, expect } from "bun:test";
 import { Effect } from "effect";
 import "../../test-setup";
-import { 
-  parseNumberingXml, 
-  getListType, 
-  getListText, 
+import {
+  parseNumberingXml,
+  getListType,
+  getListText,
   getNumberingFormat,
-  type NumberingDefinition 
+  type NumberingDefinition,
 } from "./numbering-parser";
 import { WORD_NAMESPACE } from "./types";
 
@@ -203,11 +203,14 @@ describe("Numbering Parser", () => {
 
   describe("getListType", () => {
     const mockNumberingDef: NumberingDefinition = {
-      instances: new Map([["1", "0"], ["2", "1"]]),
+      instances: new Map([
+        ["1", "0"],
+        ["2", "1"],
+      ]),
       abstractFormats: new Map([
         ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }],
-        ["1", { levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]) }]
-      ])
+        ["1", { levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]) }],
+      ]),
     };
 
     it("should return bullet for bullet format", () => {
@@ -235,11 +238,14 @@ describe("Numbering Parser", () => {
 
   describe("getListText", () => {
     const mockNumberingDef: NumberingDefinition = {
-      instances: new Map([["1", "0"], ["2", "1"]]),
+      instances: new Map([
+        ["1", "0"],
+        ["2", "1"],
+      ]),
       abstractFormats: new Map([
         ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }],
-        ["1", { levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]) }]
-      ])
+        ["1", { levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]) }],
+      ]),
     };
 
     it("should return correct list text for bullet", () => {
@@ -263,11 +269,14 @@ describe("Numbering Parser", () => {
 
   describe("getNumberingFormat", () => {
     const mockNumberingDef: NumberingDefinition = {
-      instances: new Map([["1", "0"], ["2", "1"]]),
+      instances: new Map([
+        ["1", "0"],
+        ["2", "1"],
+      ]),
       abstractFormats: new Map([
         ["0", { levels: new Map([[0, { numFmt: "bullet", lvlText: "•" }]]) }],
-        ["1", { levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]) }]
-      ])
+        ["1", { levels: new Map([[0, { numFmt: "decimal", lvlText: "%1." }]]) }],
+      ]),
     };
 
     it("should return correct numbering format for bullet", () => {

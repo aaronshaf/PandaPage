@@ -12,7 +12,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
     test("should handle slide with title placeholder", async () => {
       // Create a minimal PPTX ZIP structure with a slide containing title
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" 
        xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
@@ -42,14 +42,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.title).toBe("Sample Title");
       expect(result.slides[0]?.content).toHaveLength(1);
@@ -58,7 +63,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle slide with bullet points", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" 
        xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
@@ -90,14 +95,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.content).toHaveLength(2);
       expect(result.slides[0]?.content[0]?.type).toBe("bullet");
@@ -108,7 +118,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle slide with no bullets (buNone)", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" 
        xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
@@ -132,14 +142,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.content).toHaveLength(1);
       expect(result.slides[0]?.content[0]?.type).toBe("text");
@@ -148,7 +163,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle slide with center title placeholder", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" 
        xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
@@ -174,14 +189,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.title).toBe("Center Title");
       expect(result.slides[0]?.content[0]?.type).toBe("title");
@@ -189,7 +209,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle slide with multiple text runs in paragraph", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" 
        xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
@@ -216,14 +236,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.content).toHaveLength(1);
       expect(result.slides[0]?.content[0]?.text).toBe("Hello beautiful world!");
@@ -231,7 +256,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle slide with empty text elements", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" 
        xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
@@ -255,21 +280,26 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.content).toHaveLength(0); // Empty text should be filtered out
     });
 
     test("should handle malformed XML gracefully", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const malformedXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
   <p:cSld>
@@ -283,14 +313,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(malformedXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.content).toHaveLength(0); // Should handle gracefully
     });
@@ -299,7 +334,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
   describe("parsePresentationProps DOM paths", () => {
     test("should parse metadata with title and author", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const appPropsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
   <Application>Microsoft PowerPoint</Application>
@@ -315,14 +350,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
         "docProps/app.xml": strToU8(appPropsXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.metadata?.title).toBe("My Presentation");
       expect(result.metadata?.author).toBe("John Doe");
       expect(result.metadata?.slideCount).toBe(1);
@@ -330,7 +370,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle empty metadata elements", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const appPropsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
   <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"></dc:title>
@@ -345,21 +385,26 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
         "docProps/app.xml": strToU8(appPropsXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.metadata?.title).toBe("");
       expect(result.metadata?.author).toBe("");
     });
 
     test("should handle missing metadata elements", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const appPropsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
   <Application>Microsoft PowerPoint</Application>
@@ -373,14 +418,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
         "docProps/app.xml": strToU8(appPropsXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.metadata?.title).toBeUndefined();
       expect(result.metadata?.author).toBeUndefined();
       expect(result.metadata?.slideCount).toBe(1);
@@ -388,7 +438,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
     test("should handle metadata parsing errors", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const malformedAppPropsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Properties>
   <unclosed-tag>
@@ -404,12 +454,17 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
         "docProps/app.xml": strToU8(malformedAppPropsXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       // Should fail due to malformed metadata XML
       const result = await Effect.runPromiseExit(readPptx(arrayBuffer));
       expect(result._tag).toBe("Failure");
@@ -419,7 +474,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
   describe("readPptx with missing files", () => {
     test("should handle PPTX without metadata", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const slideXml = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
   <p:cSld><p:spTree></p:spTree></p:cSld>
@@ -427,30 +482,40 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXml),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.metadata).toEqual({}); // Empty metadata object
     });
 
     test("should handle PPTX with no slides", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       const files = {
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(0);
     });
   });
@@ -458,7 +523,7 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
   describe("XML namespace handling", () => {
     test("should add missing namespaces to slide XML", async () => {
       const { zipSync, strToU8 } = await import("fflate");
-      
+
       // XML without proper namespaces
       const slideXmlWithoutNs = `<?xml version="1.0" encoding="UTF-8"?>
 <p:sld>
@@ -479,14 +544,19 @@ describe("PPTX Reader - DOM Parsing Coverage", () => {
 
       const files = {
         "ppt/slides/slide1.xml": strToU8(slideXmlWithoutNs),
-        "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`),
+        "[Content_Types].xml": strToU8(
+          `<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+        ),
       };
-      
+
       const zipBuffer = zipSync(files);
-      const arrayBuffer = zipBuffer.buffer.slice(zipBuffer.byteOffset, zipBuffer.byteOffset + zipBuffer.byteLength) as ArrayBuffer;
-      
+      const arrayBuffer = zipBuffer.buffer.slice(
+        zipBuffer.byteOffset,
+        zipBuffer.byteOffset + zipBuffer.byteLength,
+      ) as ArrayBuffer;
+
       const result = await Effect.runPromise(readPptx(arrayBuffer));
-      
+
       expect(result.slides).toHaveLength(1);
       expect(result.slides[0]?.content).toHaveLength(1);
       expect(result.slides[0]?.content[0]?.text).toBe("Test text");

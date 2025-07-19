@@ -23,7 +23,7 @@ test("renderToHtml handles page breaks", () => {
   const result = renderToHtml(doc);
   // Page breaks now split content into separate page divs
   // Enhanced renderer doesn't split into pages
-  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain("data-page-number");
   expect(result).toContain("Page 1");
   expect(result).toContain("Page 2");
 });
@@ -64,7 +64,7 @@ test("renderToHtml handles full document with all metadata", () => {
   const result = renderToHtml(doc, { includeStyles: true });
   // Enhanced renderer creates a document container without page structure
   expect(result).toContain('class="document-container"');
-  expect(result).not.toContain('data-page-number');
+  expect(result).not.toContain("data-page-number");
   expect(result).not.toContain('class="page"');
 });
 

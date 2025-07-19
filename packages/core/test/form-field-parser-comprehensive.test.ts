@@ -25,7 +25,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should parse FORMTEXT field with default text", () => {
       const instruction = 'FORMTEXT "Default Value"';
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("FORMTEXT");
       expect(result.instruction).toBe(instruction);
       expect(result.properties?.defaultText).toBe("Default Value");
@@ -34,7 +34,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should parse FORMTEXT field without default text", () => {
       const instruction = "FORMTEXT";
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("FORMTEXT");
       expect(result.properties?.defaultText).toBeUndefined();
     });
@@ -42,7 +42,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should parse HYPERLINK field with URL", () => {
       const instruction = 'HYPERLINK "https://example.com"';
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("HYPERLINK");
       expect(result.properties?.url).toBe("https://example.com");
     });
@@ -50,16 +50,16 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should parse field with switches", () => {
       const instruction = 'DATE \\@ "MM/dd/yyyy" \\* MERGEFORMAT';
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("DATE");
       expect(result.properties?.["@"]).toBe("MM/dd/yyyy");
       expect(result.properties?.["*"]).toBe("MERGEFORMAT");
     });
 
     test("should parse field with unquoted switch values", () => {
-      const instruction = 'REF bookmark1 \\h \\p';
+      const instruction = "REF bookmark1 \\h \\p";
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("REF");
       expect(result.properties?.h).toBe("true");
       expect(result.properties?.p).toBe("true");
@@ -68,7 +68,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should handle unknown field types", () => {
       const instruction = "UNKNOWNFIELD some parameters";
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("UNKNOWNFIELD");
       expect(result.instruction).toBe(instruction);
     });
@@ -76,7 +76,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should handle empty instruction", () => {
       const instruction = "";
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("UNKNOWN");
       expect(result.instruction).toBe("");
     });
@@ -84,7 +84,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should handle instruction with only whitespace", () => {
       const instruction = "   ";
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("UNKNOWN");
       expect(result.instruction).toBe("");
     });
@@ -92,7 +92,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
     test("should handle complex switch patterns", () => {
       const instruction = 'FILENAME \\p \\# "special#char" \\w';
       const result = parseFieldInstruction(instruction);
-      
+
       expect(result.type).toBe("FILENAME");
       expect(result.properties?.p).toBe("true");
       expect(result.properties?.["#"]).toBe("special#char");
@@ -327,7 +327,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: 'FORMTEXT "Enter Name"',
         properties: { defaultText: "Enter Name" },
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[Enter Name]");
     });
 
@@ -336,7 +336,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.FORMTEXT,
         instruction: "FORMTEXT",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[_____________]");
     });
 
@@ -345,7 +345,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.FORMCHECKBOX,
         instruction: "FORMCHECKBOX",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("☐");
     });
 
@@ -354,7 +354,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.FORMDROPDOWN,
         instruction: "FORMDROPDOWN",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[Select Option ▼]");
     });
 
@@ -364,7 +364,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "PAGE",
         result: "5",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("5");
     });
 
@@ -373,7 +373,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.PAGE,
         instruction: "PAGE",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[Page]");
     });
 
@@ -383,7 +383,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "NUMPAGES",
         result: "100",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("100");
     });
 
@@ -393,7 +393,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "DATE",
         result: "12/25/2023",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("12/25/2023");
     });
 
@@ -402,7 +402,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.DATE,
         instruction: "DATE",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/);
     });
@@ -413,7 +413,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "TIME",
         result: "3:45 PM",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("3:45 PM");
     });
 
@@ -422,7 +422,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.TIME,
         instruction: "TIME",
       };
-      
+
       const result = fieldToMarkdown(field);
       expect(result).toMatch(/\d{1,2}:\d{2}/);
     });
@@ -433,7 +433,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "FILENAME",
         result: "document.docx",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("document.docx");
     });
 
@@ -443,7 +443,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "AUTHOR",
         result: "John Doe",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("John Doe");
     });
 
@@ -453,7 +453,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "TITLE",
         result: "My Document",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("My Document");
     });
 
@@ -464,7 +464,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         result: "Click Here",
         properties: { url: "https://example.com" },
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[Click Here](https://example.com)");
     });
 
@@ -474,7 +474,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: 'HYPERLINK "https://example.com"',
         properties: { url: "https://example.com" },
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("https://example.com");
     });
 
@@ -484,7 +484,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "HYPERLINK",
         result: "Link Text",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("Link Text");
     });
 
@@ -493,7 +493,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.HYPERLINK,
         instruction: "HYPERLINK",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[Link]");
     });
 
@@ -503,7 +503,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "REF bookmark1",
         result: "Referenced Text",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("Referenced Text");
     });
 
@@ -512,7 +512,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.REF,
         instruction: "REF bookmark1",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[Reference: REF bookmark1]");
     });
 
@@ -521,7 +521,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: FieldCode.TOC,
         instruction: "TOC",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("");
     });
 
@@ -531,7 +531,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "CUSTOMFIELD",
         result: "Custom Value",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("Custom Value");
     });
 
@@ -540,7 +540,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         type: "CUSTOMFIELD",
         instruction: "CUSTOMFIELD",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("[CUSTOMFIELD]");
     });
 
@@ -550,7 +550,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "SUBJECT",
         result: "Test Subject",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("Test Subject");
     });
 
@@ -560,7 +560,7 @@ describe("Form Field Parser Comprehensive Tests", () => {
         instruction: "KEYWORDS",
         result: "test, document, sample",
       };
-      
+
       expect(fieldToMarkdown(field)).toBe("test, document, sample");
     });
   });

@@ -87,62 +87,62 @@ export function parseRunElement(
         }
       }
     } else {
-    // Check for field codes
-    const fldCharElements = getElementsByTagNameNSFallback(element, ns, "fldChar");
-    const instrTextElements = getElementsByTagNameNSFallback(element, ns, "instrText");
+      // Check for field codes
+      const fldCharElements = getElementsByTagNameNSFallback(element, ns, "fldChar");
+      const instrTextElements = getElementsByTagNameNSFallback(element, ns, "instrText");
 
-    if (fldCharElements.length > 0) {
-      const fldChar = fldCharElements[0];
-      const fldCharType = fldChar?.getAttribute("w:fldCharType");
+      if (fldCharElements.length > 0) {
+        const fldChar = fldCharElements[0];
+        const fldCharType = fldChar?.getAttribute("w:fldCharType");
 
-      if (fldCharType === "begin") {
-        updateFieldState({
-          inField: true,
-          fieldInstruction: "",
-          skipFieldValue: false,
-          fieldRunProperties:
-            getElementByTagNameNSFallback(element, ns, "rPr")?.cloneNode(true) || null,
-        });
-      } else if (fldCharType === "separate") {
-        // After separator, skip the field value runs until we hit end
-        updateFieldState({ ...fieldState, skipFieldValue: true });
-      } else if (fldCharType === "end" && fieldState.inField) {
-        // Field complete - create a run with the field code
-        if (fieldState.fieldInstruction.trim()) {
-          const fieldRun = parseFieldRun(
-            fieldState.fieldInstruction,
-            fieldState.fieldRunProperties,
-            ns,
-            fieldContext,
-          );
-          if (fieldRun) {
-            runs.push(fieldRun);
+        if (fldCharType === "begin") {
+          updateFieldState({
+            inField: true,
+            fieldInstruction: "",
+            skipFieldValue: false,
+            fieldRunProperties:
+              getElementByTagNameNSFallback(element, ns, "rPr")?.cloneNode(true) || null,
+          });
+        } else if (fldCharType === "separate") {
+          // After separator, skip the field value runs until we hit end
+          updateFieldState({ ...fieldState, skipFieldValue: true });
+        } else if (fldCharType === "end" && fieldState.inField) {
+          // Field complete - create a run with the field code
+          if (fieldState.fieldInstruction.trim()) {
+            const fieldRun = parseFieldRun(
+              fieldState.fieldInstruction,
+              fieldState.fieldRunProperties,
+              ns,
+              fieldContext,
+            );
+            if (fieldRun) {
+              runs.push(fieldRun);
+            }
           }
+          updateFieldState({
+            inField: false,
+            skipFieldValue: false,
+            fieldInstruction: "",
+            fieldRunProperties: null,
+          });
         }
-        updateFieldState({
-          inField: false,
-          skipFieldValue: false,
-          fieldInstruction: "",
-          fieldRunProperties: null,
-        });
-      }
-    } else if (instrTextElements.length > 0 && fieldState.inField && !fieldState.skipFieldValue) {
-      // Collect field instruction text
-      const instrText = instrTextElements[0];
-      if (instrText) {
-        updateFieldState({
-          ...fieldState,
-          fieldInstruction: fieldState.fieldInstruction + (instrText.textContent || ""),
-        });
-      }
-    } else if (!fieldState.inField && !fieldState.skipFieldValue) {
-      // Direct run element (not part of a field)
-      const run = parseRun(element, ns, undefined, stylesheet, theme);
-      if (run && run.text) {
-        runs.push(run);
+      } else if (instrTextElements.length > 0 && fieldState.inField && !fieldState.skipFieldValue) {
+        // Collect field instruction text
+        const instrText = instrTextElements[0];
+        if (instrText) {
+          updateFieldState({
+            ...fieldState,
+            fieldInstruction: fieldState.fieldInstruction + (instrText.textContent || ""),
+          });
+        }
+      } else if (!fieldState.inField && !fieldState.skipFieldValue) {
+        // Direct run element (not part of a field)
+        const run = parseRun(element, ns, undefined, stylesheet, theme);
+        if (run && run.text) {
+          runs.push(run);
+        }
       }
     }
-  }
   }
 
   // Check for drawing elements (images) in the run
@@ -340,12 +340,14 @@ export function parseRun(
         // If no val attribute or val is not "none", it's underlined
         underline = true;
       }
-      
+
       // Check underline color
       const underlineColorAttr = underlineElement.getAttribute("w:color");
       if (underlineColorAttr && underlineColorAttr !== "auto") {
         // Convert to hex format if needed
-        underlineColor = underlineColorAttr.startsWith("#") ? underlineColorAttr : `#${underlineColorAttr}`;
+        underlineColor = underlineColorAttr.startsWith("#")
+          ? underlineColorAttr
+          : `#${underlineColorAttr}`;
       }
     }
 
@@ -386,36 +388,38 @@ export function parseRun(
 
       // Resolve ASCII font
       if (fontAscii) {
-        fontFamilyAscii = fontAscii.startsWith("+") && theme 
-          ? resolveThemeFont(fontAscii, theme) || fontAscii
-          : fontAscii;
+        fontFamilyAscii =
+          fontAscii.startsWith("+") && theme
+            ? resolveThemeFont(fontAscii, theme) || fontAscii
+            : fontAscii;
       } else if (asciiTheme && theme) {
         fontFamilyAscii = resolveThemeFontAttribute(asciiTheme, theme);
       }
 
       // Resolve East Asian font
       if (fontEastAsia) {
-        fontFamilyEastAsia = fontEastAsia.startsWith("+") && theme 
-          ? resolveThemeFont(fontEastAsia, theme) || fontEastAsia
-          : fontEastAsia;
+        fontFamilyEastAsia =
+          fontEastAsia.startsWith("+") && theme
+            ? resolveThemeFont(fontEastAsia, theme) || fontEastAsia
+            : fontEastAsia;
       } else if (eastAsiaTheme && theme) {
         fontFamilyEastAsia = resolveThemeFontAttribute(eastAsiaTheme, theme);
       }
 
       // Resolve High ANSI font
       if (fontHAnsi) {
-        fontFamilyHAnsi = fontHAnsi.startsWith("+") && theme 
-          ? resolveThemeFont(fontHAnsi, theme) || fontHAnsi
-          : fontHAnsi;
+        fontFamilyHAnsi =
+          fontHAnsi.startsWith("+") && theme
+            ? resolveThemeFont(fontHAnsi, theme) || fontHAnsi
+            : fontHAnsi;
       } else if (hAnsiTheme && theme) {
         fontFamilyHAnsi = resolveThemeFontAttribute(hAnsiTheme, theme);
       }
 
       // Resolve Complex Script font
       if (fontCs) {
-        fontFamilyCs = fontCs.startsWith("+") && theme 
-          ? resolveThemeFont(fontCs, theme) || fontCs
-          : fontCs;
+        fontFamilyCs =
+          fontCs.startsWith("+") && theme ? resolveThemeFont(fontCs, theme) || fontCs : fontCs;
       } else if (csTheme && theme) {
         fontFamilyCs = resolveThemeFontAttribute(csTheme, theme);
       }

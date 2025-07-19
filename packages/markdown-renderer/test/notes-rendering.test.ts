@@ -31,7 +31,7 @@ describe("Notes Rendering", () => {
     };
 
     const markdown = renderToMarkdownImproved(document, { includeMetadata: false });
-    
+
     expect(markdown).toContain("This is a paragraph with a footnote[^1] reference.");
     expect(markdown).toContain("\n---\n\n## Footnotes\n\n[^1]: This is the footnote content.");
   });
@@ -64,7 +64,7 @@ describe("Notes Rendering", () => {
     };
 
     const markdown = renderToMarkdownImproved(document, { includeMetadata: false });
-    
+
     expect(markdown).toContain("This is a paragraph with an endnote[^endnote1] reference.");
     expect(markdown).toContain("\n---\n\n## Endnotes\n\n[^endnote1]: This is the endnote content.");
   });
@@ -110,7 +110,7 @@ describe("Notes Rendering", () => {
     };
 
     const markdown = renderToMarkdownImproved(document, { includeMetadata: false });
-    
+
     expect(markdown).toContain("This has a footnote[^1] and an endnote[^endnote1].");
     expect(markdown).toContain("## Footnotes");
     expect(markdown).toContain("[^1]: First footnote.");
@@ -151,7 +151,7 @@ describe("Notes Rendering", () => {
     };
 
     const markdown = renderToMarkdownImproved(document, { includeMetadata: false });
-    
+
     expect(markdown).toContain("Text with footnote[^1].");
     expect(markdown).toContain("[^1]: First paragraph of footnote.\nSecond paragraph of footnote.");
   });
@@ -169,7 +169,7 @@ describe("Notes Rendering", () => {
     };
 
     const markdown = renderToMarkdownImproved(document, { includeMetadata: false });
-    
+
     expect(markdown).toBe("Simple paragraph without notes.");
     expect(markdown).not.toContain("## Footnotes");
     expect(markdown).not.toContain("## Endnotes");

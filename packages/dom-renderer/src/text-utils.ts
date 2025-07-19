@@ -7,7 +7,7 @@ export function renderEnhancedTextRun(
   enableAdvancedFormatting: boolean = true,
 ): HTMLElement {
   const span = doc.createElement("span");
-  
+
   // Apply inline styles from text run properties
   const baseStyles = getTextRunStyles(run);
   if (baseStyles) {
@@ -19,11 +19,19 @@ export function renderEnhancedTextRun(
     if (run.superscript) {
       const sup = doc.createElement("sup");
       sup.textContent = run.text || "";
-      
+
       // Apply any additional styling by wrapping in a span if needed
-      if (run.color || run.backgroundColor || run.bold || run.italic || run.underline || run.strikethrough || run.link) {
+      if (
+        run.color ||
+        run.backgroundColor ||
+        run.bold ||
+        run.italic ||
+        run.underline ||
+        run.strikethrough ||
+        run.link
+      ) {
         const wrapper = doc.createElement("span");
-        
+
         // Apply inline styles
         const color = formatColor(run.color);
         if (color) {
@@ -33,13 +41,13 @@ export function renderEnhancedTextRun(
         if (backgroundColor) {
           wrapper.style.backgroundColor = backgroundColor;
         }
-        
+
         // Apply inline styles
         const textStyles = getTextRunStyles(run);
         if (textStyles) {
           wrapper.style.cssText = textStyles;
         }
-        
+
         // Handle links
         if (run.link) {
           const link = doc.createElement("a");
@@ -50,22 +58,30 @@ export function renderEnhancedTextRun(
           link.appendChild(sup);
           return link;
         }
-        
+
         wrapper.appendChild(sup);
         return wrapper;
       }
-      
+
       return sup;
     }
 
     if (run.subscript) {
       const sub = doc.createElement("sub");
       sub.textContent = run.text || "";
-      
+
       // Apply any additional styling by wrapping in a span if needed
-      if (run.color || run.backgroundColor || run.bold || run.italic || run.underline || run.strikethrough || run.link) {
+      if (
+        run.color ||
+        run.backgroundColor ||
+        run.bold ||
+        run.italic ||
+        run.underline ||
+        run.strikethrough ||
+        run.link
+      ) {
         const wrapper = doc.createElement("span");
-        
+
         // Apply inline styles
         const color = formatColor(run.color);
         if (color) {
@@ -75,13 +91,13 @@ export function renderEnhancedTextRun(
         if (backgroundColor) {
           wrapper.style.backgroundColor = backgroundColor;
         }
-        
+
         // Apply inline styles
         const textStyles = getTextRunStyles(run);
         if (textStyles) {
           wrapper.style.cssText = textStyles;
         }
-        
+
         // Handle links
         if (run.link) {
           const link = doc.createElement("a");
@@ -93,11 +109,11 @@ export function renderEnhancedTextRun(
           link.appendChild(sub);
           return link;
         }
-        
+
         wrapper.appendChild(sub);
         return wrapper;
       }
-      
+
       return sub;
     }
 
@@ -153,7 +169,7 @@ export function renderEnhancedParagraph(
   renderImage: (image: any) => HTMLElement,
 ): HTMLElement {
   const p = doc.createElement("p");
-  
+
   // Apply inline styles from paragraph properties
   const styles = getParagraphStyles(paragraph);
   if (styles) {
@@ -181,7 +197,8 @@ export function renderEnhancedParagraph(
       if (isLikelyDropcap) {
         // Create dropcap
         const dropcap = doc.createElement("span");
-        dropcap.style.cssText = "float: left; font-size: 3em; line-height: 0.8; margin: 0 0.1em 0 0; font-weight: bold;";
+        dropcap.style.cssText =
+          "float: left; font-size: 3em; line-height: 0.8; margin: 0 0.1em 0 0; font-weight: bold;";
         dropcap.textContent = text.charAt(0);
         p.appendChild(dropcap);
 

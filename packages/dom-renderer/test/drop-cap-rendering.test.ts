@@ -29,12 +29,12 @@ describe("Drop Cap Rendering", () => {
     const result = renderParagraph(paragraph, document, 1, 10);
 
     expect(result.tagName).toBe("P");
-    
+
     // Check that drop cap span was created
     const dropCapSpan = result.querySelector(".drop-cap");
     expect(dropCapSpan).toBeDefined();
     expect(dropCapSpan?.textContent).toBe("L");
-    
+
     // Check drop cap styles
     expect(dropCapSpan?.style.float).toBe("left");
     expect(dropCapSpan?.style.fontSize).toBe("3em");
@@ -44,11 +44,11 @@ describe("Drop Cap Rendering", () => {
     expect(dropCapSpan?.style.marginTop).toBe("-0.1em");
     expect(dropCapSpan?.style.fontFamily).toBe("Georgia");
     expect(dropCapSpan?.style.color).toBe("#333333");
-    
+
     // Check remaining text
     const remainingText = Array.from(result.childNodes)
-      .filter(node => node !== dropCapSpan)
-      .map(node => node.textContent)
+      .filter((node) => node !== dropCapSpan)
+      .map((node) => node.textContent)
       .join("");
     expect(remainingText).toBe("orem ipsum dolor sit amet, consectetur adipiscing elit.");
   });
@@ -163,11 +163,11 @@ describe("Drop Cap Rendering", () => {
     expect(dropCapSpan).toBeDefined();
     expect(dropCapSpan?.textContent).toBe("F");
     expect(dropCapSpan?.style.fontSize).toBe("2em");
-    
+
     // Check that the remaining text is properly rendered
     const spans = result.querySelectorAll("span:not(.drop-cap)");
     expect(spans.length).toBeGreaterThan(0);
-    
+
     // First span should have the rest of "irst run "
     const firstSpan = spans[0];
     expect(firstSpan?.textContent).toBe("irst run ");

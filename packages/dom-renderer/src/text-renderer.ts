@@ -75,7 +75,7 @@ export function renderTextRun(
 
     return link;
   }
-  
+
   // Check for endnote reference
   if ((run as any)._endnoteRef) {
     const endnoteId = (run as any)._endnoteRef;

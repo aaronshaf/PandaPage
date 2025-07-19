@@ -253,7 +253,7 @@ export class DocxInspector {
   private extractAttribute(attrs: string, name: string): string | null {
     const regex = new RegExp(`${name}="([^"]*)"`, "i");
     const match = attrs.match(regex);
-    return match ? match[1] ?? null : null;
+    return match ? (match[1] ?? null) : null;
   }
 
   private analyzeDocumentStructure(files: DocxFile[]) {

@@ -1,5 +1,10 @@
 // Paragraph parsing functions
-import type { DocxParagraph, DocxRun, DocxConditionalFormatting, DocxFrameProperties } from "./types";
+import type {
+  DocxParagraph,
+  DocxRun,
+  DocxConditionalFormatting,
+  DocxFrameProperties,
+} from "./types";
 import { WORD_NAMESPACE } from "./types";
 import { parseFieldRun } from "./field-parser";
 import type { FieldParsingContext } from "./field-context";
@@ -19,7 +24,6 @@ import { parseCnfStyle } from "./conditional-formatting";
 
 // Re-export parseRun for other modules
 export { parseRun };
-
 
 /**
  * Parse a paragraph element

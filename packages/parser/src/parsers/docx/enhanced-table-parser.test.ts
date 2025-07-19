@@ -1,5 +1,10 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from "bun:test";
-import { parseEnhancedTable, parseEnhancedTableBorder, calculateRowSpans, parseEnhancedTableCell } from "./enhanced-table-parser";
+import {
+  parseEnhancedTable,
+  parseEnhancedTableBorder,
+  calculateRowSpans,
+  parseEnhancedTableCell,
+} from "./enhanced-table-parser";
 import type { Table, TableBorder, TableShading } from "../../types/document";
 import type { ProcessingTableCell } from "@browser-document-viewer/document-types";
 import { ST_Border, ST_Shd } from "@browser-document-viewer/ooxml-types";
@@ -11,18 +16,24 @@ import { JSDOM } from "jsdom";
  */
 
 // Helper function to create mock XML elements
-function createMockElement(tagName: string, attributes: Record<string, string> = {}, children: Element[] = []): Element {
+function createMockElement(
+  tagName: string,
+  attributes: Record<string, string> = {},
+  children: Element[] = [],
+): Element {
   const element = {
     tagName,
     getAttribute: (name: string) => attributes[name] || null,
     hasAttribute: (name: string) => name in attributes,
     children: children as any,
     childNodes: children as any, // Add childNodes for paragraph parser
-    querySelector: (selector: string) => children.find(child => child.tagName === selector.replace(/^w:/, "")) || null,
-    querySelectorAll: (selector: string) => children.filter(child => child.tagName === selector.replace(/^w:/, "")),
+    querySelector: (selector: string) =>
+      children.find((child) => child.tagName === selector.replace(/^w:/, "")) || null,
+    querySelectorAll: (selector: string) =>
+      children.filter((child) => child.tagName === selector.replace(/^w:/, "")),
     textContent: "", // Add textContent property
   } as unknown as Element;
-  
+
   return element;
 }
 
@@ -36,27 +47,25 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       // Create table with comprehensive border definition from 005.docx style
       const borderElement = createMockElement("top", {
         "w:val": ST_Border.Single,
-        "w:color": "000000", 
-        "w:sz": "8" // 1 point border
+        "w:color": "000000",
+        "w:sz": "8", // 1 point border
       });
 
       const tblBordersElement = createMockElement("tblBorders", {}, [borderElement]);
       const tblPrElement = createMockElement("tblPr", {}, [tblBordersElement]);
-      
+
       const tableElement = createMockElement("tbl", {}, [
         tblPrElement,
         createMockElement("tr", {}, [
           createMockElement("tc", {}, [
             createMockElement("p", {}, [
-              createMockElement("r", {}, [
-                createMockElement("t", {}, [])
-              ])
-            ])
-          ])
-        ])
+              createMockElement("r", {}, [createMockElement("t", {}, [])]),
+            ]),
+          ]),
+        ]),
       ]);
 
-      // Mock XML utils using spies instead of direct assignment  
+      // Mock XML utils using spies instead of direct assignment
       const mockGetElement = (parent: Element, ns: string, name: string) => {
         if (name === "tblPr") return tblPrElement;
         if (name === "tblBorders") return tblBordersElement;
@@ -66,7 +75,7 @@ describe("Enhanced Table Parser with OOXML Types", () => {
         if (name === "p") return tableElement.children[1].children[0].children[0];
         return null;
       };
-      
+
       const mockGetElements = (parent: Element, ns: string, name: string) => {
         if (name === "tr") return [tableElement.children[1]];
         if (name === "tc") return [tableElement.children[1].children[0]];
@@ -78,7 +87,7 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       expect(borderElement.getAttribute("w:val")).toBe(ST_Border.Single);
       expect(borderElement.getAttribute("w:color")).toBe("000000");
       expect(borderElement.getAttribute("w:sz")).toBe("8");
-      
+
       // Test table structure
       expect(tableElement.children).toHaveLength(2); // tblPr + tr
       expect(tblPrElement.children).toHaveLength(1); // tblBorders
@@ -107,7 +116,7 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       const shdElement = createMockElement("shd", {
         "w:val": ST_Shd.Solid,
         "w:fill": "FFFF00", // Yellow background as in 005.docx
-        "w:color": "000000"  // Black foreground
+        "w:color": "000000", // Black foreground
       });
 
       // Test that enum values are strings
@@ -136,22 +145,22 @@ describe("Enhanced Table Parser with OOXML Types", () => {
     it("should parse gridSpan for column spanning", () => {
       // Test cell with gridSpan attribute
       const gridSpanElement = createMockElement("gridSpan", {
-        "w:val": "3" // Cell spans 3 columns
+        "w:val": "3", // Cell spans 3 columns
       });
 
       const tcPrElement = createMockElement("tcPr", {}, [gridSpanElement]);
-      
+
       expect(parseInt(gridSpanElement.getAttribute("w:val")!, 10)).toBe(3);
     });
 
     it("should parse vMerge for row spanning", () => {
       // Test vertical merge scenarios
       const vMergeRestart = createMockElement("vMerge", {
-        "w:val": "restart" // Starts new merged region
+        "w:val": "restart", // Starts new merged region
       });
 
       const vMergeContinue = createMockElement("vMerge", {
-        "w:val": "continue" // Continues merged region
+        "w:val": "continue", // Continues merged region
       });
 
       expect(vMergeRestart.getAttribute("w:val")).toBe("restart");
@@ -162,17 +171,16 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       // Create a table with cells that have vMerge
       const createCellWithVMerge = (vMergeVal?: string) => {
         const vMergeAttrs = vMergeVal ? { "w:val": vMergeVal } : undefined;
-        const vMergeElement = vMergeVal !== undefined ? createMockElement("vMerge", vMergeAttrs) : null;
+        const vMergeElement =
+          vMergeVal !== undefined ? createMockElement("vMerge", vMergeAttrs) : null;
         const tcPrChildren = vMergeElement ? [vMergeElement] : [];
         const tcPrElement = createMockElement("tcPr", {}, tcPrChildren);
-        
+
         return createMockElement("tc", {}, [
           tcPrElement,
           createMockElement("p", {}, [
-            createMockElement("r", {}, [
-              createMockElement("t", {}, [])
-            ])
-          ])
+            createMockElement("r", {}, [createMockElement("t", {}, [])]),
+          ]),
         ]);
       };
 
@@ -197,11 +205,13 @@ describe("Enhanced Table Parser with OOXML Types", () => {
 
       // Mock the getElementsByTagNameNSFallback to return our test elements
       const mockGetElements = (parent: Element, ns: string, name: string) => {
-        if (name === "tr") return Array.from(parent.children).filter(el => el.tagName === "tr");
-        if (name === "tc") return Array.from(parent.children).filter(el => el.tagName === "tc");
-        if (name === "p") return Array.from(parent.children).filter(el => el.tagName === "p");
-        if (name === "tcPr") return parent.querySelector("tcPr") ? [parent.querySelector("tcPr")!] : [];
-        if (name === "vMerge") return parent.querySelector("vMerge") ? [parent.querySelector("vMerge")!] : [];
+        if (name === "tr") return Array.from(parent.children).filter((el) => el.tagName === "tr");
+        if (name === "tc") return Array.from(parent.children).filter((el) => el.tagName === "tc");
+        if (name === "p") return Array.from(parent.children).filter((el) => el.tagName === "p");
+        if (name === "tcPr")
+          return parent.querySelector("tcPr") ? [parent.querySelector("tcPr")!] : [];
+        if (name === "vMerge")
+          return parent.querySelector("vMerge") ? [parent.querySelector("vMerge")!] : [];
         return [];
       };
 
@@ -216,17 +226,17 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       jest.spyOn(xmlUtils, "getElementsByTagNameNSFallback").mockImplementation(mockGetElements);
 
       const table = parseEnhancedTable(tableElement, mockRelationships, mockTheme, mockStylesheet);
-      
+
       expect(table).not.toBeNull();
       expect(table?.rows).toHaveLength(3);
-      
+
       // Check that the cell at 0,1 has rowspan=3
       expect(table?.rows[0].cells[1].rowspan).toBe(3);
-      
+
       // Check that cells at 1,1 and 2,1 are marked as merged
       expect((table?.rows[1].cells[1] as ProcessingTableCell)._merged).toBe(true);
       expect((table?.rows[2].cells[1] as ProcessingTableCell)._merged).toBe(true);
-      
+
       // Restore mocks
       jest.restoreAllMocks();
     });
@@ -237,8 +247,8 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       // Test different width specifications
       const widthConfigs = [
         { w: "5000", type: "dxa", expected: 5000 }, // Twips
-        { w: "100", type: "pct", expected: 100 },   // Percentage
-        { w: "0", type: "auto", expected: 0 },      // Auto width
+        { w: "100", type: "pct", expected: 100 }, // Percentage
+        { w: "0", type: "auto", expected: 0 }, // Auto width
       ];
 
       for (const config of widthConfigs) {
@@ -250,10 +260,10 @@ describe("Enhanced Table Parser with OOXML Types", () => {
     it("should parse cell margins", () => {
       // Test table cell margin parsing
       const marginElements = [
-        createMockElement("top", { "w:w": "108" }),    // Top margin
-        createMockElement("bottom", { "w:w": "108" }), // Bottom margin  
-        createMockElement("left", { "w:w": "108" }),   // Left margin
-        createMockElement("right", { "w:w": "108" }),  // Right margin
+        createMockElement("top", { "w:w": "108" }), // Top margin
+        createMockElement("bottom", { "w:w": "108" }), // Bottom margin
+        createMockElement("left", { "w:w": "108" }), // Left margin
+        createMockElement("right", { "w:w": "108" }), // Right margin
       ];
 
       for (const element of marginElements) {
@@ -265,12 +275,12 @@ describe("Enhanced Table Parser with OOXML Types", () => {
   describe("Vertical Alignment", () => {
     it("should parse cell vertical alignment", () => {
       const alignmentValues = ["top", "center", "bottom"] as const;
-      
+
       for (const alignment of alignmentValues) {
         const vAlignElement = createMockElement("vAlign", {
-          "w:val": alignment
+          "w:val": alignment,
         });
-        
+
         expect(vAlignElement.getAttribute("w:val")).toBe(alignment);
       }
     });
@@ -329,10 +339,11 @@ describe("Enhanced Table Parser with OOXML Types", () => {
 
       // Mock proper namespace handling
       const xmlUtils = require("./xml-utils");
-      
+
       // Create namespace-aware mock functions
       const mockGetElementNS = (parent: Element, ns: string, name: string) => {
-        const fullNS = ns === "w" ? "http://schemas.openxmlformats.org/wordprocessingml/2006/main" : null;
+        const fullNS =
+          ns === "w" ? "http://schemas.openxmlformats.org/wordprocessingml/2006/main" : null;
         if (fullNS) {
           return parent.getElementsByTagNameNS(fullNS, name)[0] || null;
         }
@@ -340,7 +351,8 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       };
 
       const mockGetElementsNS = (parent: Element, ns: string, name: string) => {
-        const fullNS = ns === "w" ? "http://schemas.openxmlformats.org/wordprocessingml/2006/main" : null;
+        const fullNS =
+          ns === "w" ? "http://schemas.openxmlformats.org/wordprocessingml/2006/main" : null;
         if (fullNS) {
           return Array.from(parent.getElementsByTagNameNS(fullNS, name));
         }
@@ -350,21 +362,26 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       jest.spyOn(xmlUtils, "getElementByTagNameNSFallback").mockImplementation(mockGetElementNS);
       jest.spyOn(xmlUtils, "getElementsByTagNameNSFallback").mockImplementation(mockGetElementsNS);
 
-      const table = parseEnhancedTable(tableElement as any, mockRelationships, mockTheme, mockStylesheet);
-      
+      const table = parseEnhancedTable(
+        tableElement as any,
+        mockRelationships,
+        mockTheme,
+        mockStylesheet,
+      );
+
       expect(table).not.toBeNull();
       expect(table?.rows).toHaveLength(2);
-      
+
       // First cell should have rowspan=2
       expect(table?.rows[0].cells[0].rowspan).toBe(2);
-      
+
       // Cell in second row should be marked as merged
       expect((table?.rows[1].cells[0] as ProcessingTableCell)._merged).toBe(true);
-      
+
       // Other cells should not have rowspan
       expect(table?.rows[0].cells[1].rowspan).toBeUndefined();
       expect(table?.rows[1].cells[1].rowspan).toBeUndefined();
-      
+
       // Restore mocks
       jest.restoreAllMocks();
     });
@@ -387,7 +404,7 @@ describe("Enhanced Table Parser with OOXML Types", () => {
   describe("Error Handling and Edge Cases", () => {
     it("should handle missing table properties gracefully", () => {
       const emptyTableElement = createMockElement("tbl", {});
-      
+
       // Should not throw error with empty table
       expect(() => {
         // Mock empty parsing scenario
@@ -400,15 +417,15 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       const borderWithInvalidSize = createMockElement("top", {
         "w:val": ST_Border.Single,
         "w:sz": "invalid", // Invalid size
-        "w:color": "000000"
+        "w:color": "000000",
       });
-      
+
       const borderWithInvalidColor = createMockElement("bottom", {
         "w:val": ST_Border.Double,
         "w:sz": "8",
-        "w:color": "GGGGGG" // Invalid hex color
+        "w:color": "GGGGGG", // Invalid hex color
       });
-      
+
       // These should not throw - validation should handle gracefully
       expect(() => parseEnhancedTableBorder(borderWithInvalidSize)).not.toThrow();
       expect(() => parseEnhancedTableBorder(borderWithInvalidColor)).not.toThrow();
@@ -417,14 +434,14 @@ describe("Enhanced Table Parser with OOXML Types", () => {
     it("should handle malformed cell width values", () => {
       const tcWWithInvalidValue = createMockElement("tcW", {
         "w:w": "abc", // Non-numeric
-        "w:type": "dxa"
+        "w:type": "dxa",
       });
-      
+
       const tcWWithNegativeValue = createMockElement("tcW", {
         "w:w": "-100", // Negative value
-        "w:type": "pct"
+        "w:type": "pct",
       });
-      
+
       // Should handle gracefully without throwing
       expect(() => {
         const w = tcWWithInvalidValue.getAttribute("w:w");
@@ -435,37 +452,41 @@ describe("Enhanced Table Parser with OOXML Types", () => {
 
     it("should handle cells with missing paragraphs", () => {
       // Cell without any content
-      const emptyCellElement = createMockElement("tc", {}, [
-        createMockElement("tcPr", {})
-      ]);
-      
+      const emptyCellElement = createMockElement("tc", {}, [createMockElement("tcPr", {})]);
+
       const mockGetElements = (parent: Element, ns: string, name: string) => {
         if (name === "p") return []; // No paragraphs
-        if (name === "tcPr") return parent.querySelector("tcPr") ? [parent.querySelector("tcPr")!] : [];
+        if (name === "tcPr")
+          return parent.querySelector("tcPr") ? [parent.querySelector("tcPr")!] : [];
         return [];
       };
-      
+
       const mockGetElement = (parent: Element, ns: string, name: string) => {
         if (name === "tcPr") return parent.querySelector("tcPr");
         return null;
       };
-      
+
       const xmlUtils = require("./xml-utils");
       jest.spyOn(xmlUtils, "getElementByTagNameNSFallback").mockImplementation(mockGetElement);
       jest.spyOn(xmlUtils, "getElementsByTagNameNSFallback").mockImplementation(mockGetElements);
-      
-      const cell = parseEnhancedTableCell(emptyCellElement as any, mockRelationships, mockTheme, mockStylesheet);
+
+      const cell = parseEnhancedTableCell(
+        emptyCellElement as any,
+        mockRelationships,
+        mockTheme,
+        mockStylesheet,
+      );
       expect(cell.paragraphs).toHaveLength(0);
-      
+
       // Restore mocks
       jest.restoreAllMocks();
     });
 
     it("should handle vMerge with invalid values", () => {
       const invalidVMerge = createMockElement("vMerge", {
-        "w:val": "invalid" // Not restart or continue
+        "w:val": "invalid", // Not restart or continue
       });
-      
+
       expect(() => {
         const val = invalidVMerge.getAttribute("w:val");
         expect(val).toBe("invalid");
@@ -477,12 +498,14 @@ describe("Enhanced Table Parser with OOXML Types", () => {
       const irregularTable = {
         type: "table" as const,
         rows: [
-          { cells: [{paragraphs: []}, {paragraphs: []}, {paragraphs: []}] }, // 3 cells
-          { cells: [{paragraphs: []}, {paragraphs: []}] }, // 2 cells
-          { cells: [{paragraphs: []}, {paragraphs: []}, {paragraphs: []}, {paragraphs: []}] } // 4 cells
-        ]
+          { cells: [{ paragraphs: [] }, { paragraphs: [] }, { paragraphs: [] }] }, // 3 cells
+          { cells: [{ paragraphs: [] }, { paragraphs: [] }] }, // 2 cells
+          {
+            cells: [{ paragraphs: [] }, { paragraphs: [] }, { paragraphs: [] }, { paragraphs: [] }],
+          }, // 4 cells
+        ],
       };
-      
+
       expect(() => calculateRowSpans(irregularTable)).not.toThrow();
     });
 
@@ -506,18 +529,18 @@ describe("Enhanced Table Parser with OOXML Types", () => {
   describe("Performance and Coverage", () => {
     it("should handle large tables efficiently", () => {
       const startTime = performance.now();
-      
+
       // Simulate processing a large table
       const largeTableSimulation = {
         rows: 50,
         columns: 10,
         totalCells: 50 * 10,
-        features: ["borders", "shading", "spanning", "alignment"]
+        features: ["borders", "shading", "spanning", "alignment"],
       };
-      
+
       const endTime = performance.now();
       const processingTime = endTime - startTime;
-      
+
       expect(largeTableSimulation.totalCells).toBe(500);
       expect(processingTime).toBeLessThan(100); // Should be fast
       expect(largeTableSimulation.features.length).toBe(4);
