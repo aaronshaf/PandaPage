@@ -265,6 +265,24 @@ describe("Validation Functions", () => {
       const result = await Effect.runPromise(parseWithDefaults(data, defaults));
       expect(result).toEqual(data);
     });
+
+    test("should handle error when spreading fails", async () => {
+      // Create an object that will throw when spread operator is used
+      const problematicData = Object.create(null);
+      Object.defineProperty(problematicData, "test", {
+        get() {
+          throw new Error("Property access error");
+        },
+        enumerable: true,
+      });
+
+      const defaults = { safe: "default" };
+      
+      // This should trigger the catch block
+      await expect(Effect.runPromise(parseWithDefaults(problematicData, defaults))).rejects.toThrow(
+        "Validation failed"
+      );
+    });
   });
 
   describe("Error handling", () => {
