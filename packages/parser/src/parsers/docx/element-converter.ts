@@ -92,6 +92,7 @@ export function convertToDocumentElement(
     indentation: paragraph.indentation,
     ...(paragraph.textDirection && { textDirection: paragraph.textDirection }),
     ...(paragraph.verticalAlignment && { verticalAlignment: paragraph.verticalAlignment }),
+    ...(paragraph.framePr && { framePr: paragraph.framePr }),
   };
 
   // Add list info if present

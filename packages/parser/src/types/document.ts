@@ -81,6 +81,12 @@ export interface Paragraph {
     firstLine?: number; // Twips
     hanging?: number; // Twips
   };
+  framePr?: {
+    dropCap?: "none" | "drop" | "margin"; // Drop cap style
+    lines?: number; // Number of lines for drop cap
+    wrap?: "around" | "tight" | "through" | "topAndBottom" | "none";
+    [key: string]: any; // Allow other frame properties
+  };
 }
 
 export interface Heading {

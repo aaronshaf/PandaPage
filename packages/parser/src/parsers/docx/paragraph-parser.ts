@@ -1,5 +1,5 @@
 // Paragraph parsing functions
-import type { DocxParagraph, DocxRun, DocxConditionalFormatting } from "./types";
+import type { DocxParagraph, DocxRun, DocxConditionalFormatting, DocxFrameProperties } from "./types";
 import { WORD_NAMESPACE } from "./types";
 import { parseFieldRun } from "./field-parser";
 import type { FieldParsingContext } from "./field-context";
@@ -59,6 +59,7 @@ export function parseParagraph(
   let borders: DocxParagraph["borders"] | undefined;
   let shading: DocxParagraph["shading"] | undefined;
   let cnfStyle: DocxParagraph["cnfStyle"] | undefined;
+  let framePr: DocxFrameProperties | undefined;
 
   if (pPrElement) {
     const styleElement = getElementByTagNameNSFallback(pPrElement, ns, "pStyle");
@@ -179,6 +180,12 @@ export function parseParagraph(
 
     // Get conditional formatting (cnfStyle)
     cnfStyle = parseCnfStyle(pPrElement, ns);
+
+    // Get frame properties (drop caps)
+    const framePrElement = getElementByTagNameNSFallback(pPrElement, ns, "framePr");
+    if (framePrElement) {
+      framePr = parseFrameProperties(framePrElement);
+    }
   }
 
   // Parse runs - both direct runs and runs inside hyperlinks
@@ -309,6 +316,97 @@ export function parseParagraph(
     ...(resolvedBorders && { borders: resolvedBorders }),
     ...(resolvedShading && { shading: resolvedShading }),
     ...(cnfStyle && { cnfStyle }),
+    ...(framePr && { framePr }),
     ...(images.length > 0 && { images }),
   };
+}
+
+/**
+ * Parse frame properties (used for drop caps and text boxes)
+ * @param framePrElement - The framePr element
+ * @returns Parsed frame properties
+ */
+function parseFrameProperties(framePrElement: Element): DocxFrameProperties {
+  const framePr: DocxFrameProperties = {};
+
+  // Parse drop cap
+  const dropCap = framePrElement.getAttribute("w:dropCap");
+  if (dropCap) {
+    framePr.dropCap = dropCap as "none" | "drop" | "margin";
+  }
+
+  // Parse lines (number of lines for drop cap)
+  const lines = framePrElement.getAttribute("w:lines");
+  if (lines) {
+    framePr.lines = parseInt(lines, 10);
+  }
+
+  // Parse wrap style
+  const wrap = framePrElement.getAttribute("w:wrap");
+  if (wrap) {
+    framePr.wrap = wrap as "around" | "tight" | "through" | "topAndBottom" | "none";
+  }
+
+  // Parse anchors
+  const vAnchor = framePrElement.getAttribute("w:vAnchor");
+  if (vAnchor) {
+    framePr.vAnchor = vAnchor as "text" | "margin" | "page";
+  }
+
+  const hAnchor = framePrElement.getAttribute("w:hAnchor");
+  if (hAnchor) {
+    framePr.hAnchor = hAnchor as "text" | "margin" | "page";
+  }
+
+  // Parse position
+  const x = framePrElement.getAttribute("w:x");
+  if (x) {
+    framePr.x = parseInt(x, 10);
+  }
+
+  const y = framePrElement.getAttribute("w:y");
+  if (y) {
+    framePr.y = parseInt(y, 10);
+  }
+
+  // Parse size
+  const w = framePrElement.getAttribute("w:w");
+  if (w) {
+    framePr.w = parseInt(w, 10);
+  }
+
+  const h = framePrElement.getAttribute("w:h");
+  if (h) {
+    framePr.h = parseInt(h, 10);
+  }
+
+  // Parse height rule
+  const hRule = framePrElement.getAttribute("w:hRule");
+  if (hRule) {
+    framePr.hRule = hRule as "atLeast" | "exact" | "auto";
+  }
+
+  // Parse alignment
+  const xAlign = framePrElement.getAttribute("w:xAlign");
+  if (xAlign) {
+    framePr.xAlign = xAlign as "left" | "right" | "center" | "inside" | "outside";
+  }
+
+  const yAlign = framePrElement.getAttribute("w:yAlign");
+  if (yAlign) {
+    framePr.yAlign = yAlign as "top" | "bottom" | "center" | "inside" | "outside";
+  }
+
+  // Parse spacing
+  const hSpace = framePrElement.getAttribute("w:hSpace");
+  if (hSpace) {
+    framePr.hSpace = parseInt(hSpace, 10);
+  }
+
+  const vSpace = framePrElement.getAttribute("w:vSpace");
+  if (vSpace) {
+    framePr.vSpace = parseInt(vSpace, 10);
+  }
+
+  return framePr;
 }
