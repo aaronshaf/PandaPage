@@ -81,7 +81,7 @@ function renderTextRun(run: TextRun): string {
   return text;
 }
 
-function renderParagraph(paragraph: Paragraph, options: MarkdownRenderOptions): string {
+export function renderParagraph(paragraph: Paragraph, options: MarkdownRenderOptions): string {
   // Skip empty paragraphs if option is set
   if (options.skipEmptyParagraphs) {
     const hasContent =
