@@ -75,6 +75,16 @@
 5. Focus on testing public APIs and critical paths
 6. Add integration tests for complex workflows
 
+## Document Analysis Policy
+
+**IMPORTANT: When analyzing DOCX/PPTX files, use temporary directories**
+
+- When using analyze scripts to extract and examine document contents, always extract to a temporary directory (e.g., `/tmp/` or `temp-*`)
+- Never commit extracted document assets/artifacts to the repository
+- Extracted files should be treated as temporary analysis artifacts
+- Use patterns like `*_extracted/` in `.gitignore` to prevent accidental commits
+- Clean up temporary extraction directories after analysis
+
 ## OOXML Types Usage Policy
 
 **IMPORTANT: Always use OOXML types from @browser-document-viewer/ooxml-types package**

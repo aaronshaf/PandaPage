@@ -43,6 +43,8 @@ tmp
 # Temporary extraction directories
 temp-*
 tmp-*
+*_extracted/
+packages/viewer/public/*_extracted/
 
 # Playwright test results
 **/test-results/
