@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:ve="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml">
+  <w:body>
+    <w:p w:rsidR="00332BA2" w:rsidRDefault="00B63EA6" w:rsidP="00217028">
+      <w:pPr>
+        <w:pStyle w:val="Title"/>
+        <w:outlineLvl w:val="0"/>
+      </w:pPr>
+      <w:bookmarkStart w:id="0" w:name="OLE_LINK1"/>
+      <w:bookmarkStart w:id="1" w:name="OLE_LINK2"/>
+      <w:bookmarkStart w:id="2" w:name="_Toc359077851"/>
+      <w:r>
+        <w:t>Demonstration of DOCX support in calibre</w:t>
+      </w:r>
+      <w:bookmarkEnd w:id="2"/>
+    </w:p>
+    <w:bookmarkEnd w:id="0"/>
+    <w:bookmarkEnd w:id="1"/>
+    <w:p w:rsidR="00B63EA6" w:rsidRDefault="00B63EA6" w:rsidP="00230C50">
+      <w:r>
+        <w:t>This document demonstrates the ability of the calibre DOCX Input plugin to convert the various typographic features in a Microsoft Word (2007 and newer) document. Convert this document to a modern ebook format, such as AZW3 for Kindles or EPUB for other ebook readers, to see it in action.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00A406DC" w:rsidRDefault="00A406DC" w:rsidP="00230C50">
+      <w:r>
+        <w:t xml:space="preserve">There is support for images, tables, lists, footnotes, endnotes, </w:t>
+      </w:r>
+      <w:r w:rsidR="006E0607">
+        <w:t xml:space="preserve">links, dropcaps and </w:t>
+      </w:r>
+      <w:r w:rsidR="00517777">
+        <w:t>various</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> types of text and paragraph level formatting.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00565820" w:rsidRPr="00565820" w:rsidRDefault="00565820" w:rsidP="00230C50">
+      <w:r>
+        <w:t xml:space="preserve">To see the DOCX conversion in action, simply add this file to calibre using the </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:b/>
+        </w:rPr>
+        <w:t xml:space="preserve">“Add Books” </w:t>
+      </w:r>
+      <w:r>
+        <w:t>button and then click “</w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:b/>
+        </w:rPr>
+        <w:t xml:space="preserve">Convert”. </w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> Set the output format in the top right corner of the conversion dialog to EPUB or AZW3 and click </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:b/>
+        </w:rPr>
+        <w:t>“OK”</w:t>
+      </w:r>
+      <w:r>
+        <w:t>.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00386659" w:rsidRDefault="00386659" w:rsidP="00230C50"/>
+    <w:p w:rsidR="00386659" w:rsidRDefault="00386659" w:rsidP="00386659">
+      <w:pPr>
+        <w:pStyle w:val="Heading1"/>
+      </w:pPr>
+      <w:bookmarkStart w:id="3" w:name="_Toc359077852"/>
+      <w:r>
+        <w:t>Text Formatting</w:t>
+      </w:r>
+      <w:bookmarkEnd w:id="3"/>
+    </w:p>
+    <w:p w:rsidR="00386659" w:rsidRDefault="00753CF0" w:rsidP="00753CF0">
+      <w:pPr>
+        <w:pStyle w:val="Heading2"/>
+      </w:pPr>
+      <w:bookmarkStart w:id="4" w:name="_Toc359077853"/>
+      <w:r>
+        <w:t>Inline formatting</w:t>
+      </w:r>
+      <w:bookmarkEnd w:id="4"/>
+    </w:p>
+    <w:p w:rsidR="00386659" w:rsidRDefault="00386659" w:rsidP="00386659">
+      <w:r>
+        <w:t>Here, we demonstrate various types of inline text formatting and the use of embedded fonts.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00A65B8B" w:rsidRDefault="00386659" w:rsidP="00386659">
+      <w:r>
+        <w:t xml:space="preserve">Here is some </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:b/>
+        </w:rPr>
+        <w:t xml:space="preserve">bold, </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:i/>
+        </w:rPr>
+        <w:t xml:space="preserve">italic, </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:b/>
+          <w:i/>
+        </w:rPr>
+        <w:t xml:space="preserve">bold-italic, </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:u w:val="single"/>
+        </w:rPr>
+        <w:t xml:space="preserve">underlined </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00386659">
+        <w:t xml:space="preserve">and </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:strike/>
+        </w:rPr>
+        <w:t xml:space="preserve">struck out </w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> text. Then, we have a super</w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:vertAlign w:val="superscript"/>
+        </w:rPr>
+        <w:t>script</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> and a sub</w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:vertAlign w:val="subscript"/>
+        </w:rPr>
+        <w:t>script</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve">. Now we see some </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:color w:val="FF0000"/>
+        </w:rPr>
+        <w:t>red</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve">, </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:color w:val="92D050"/>
+        </w:rPr>
+        <w:t>green</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> and </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:color w:val="0070C0"/>
+        </w:rPr>
+        <w:t>blue</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> text. Some text with a </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00386659">
+        <w:rPr>
+          <w:highlight w:val="yellow"/>
+        </w:rPr>
+        <w:t>yellow highlight</w:t>
+      </w:r>
+      <w:r>
+        <w:t>. Some text in a</w:t>
+      </w:r>
+      <w:r w:rsidR="00A52AAF">
+        <w:t xml:space="preserve"> </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00386659">
+        <w:rPr>
+          <w:bdr w:val="single" w:sz="4" w:space="0" w:color="auto"/>
+        </w:rPr>
+        <w:t>box</w:t>
+      </w:r>
+      <w:r w:rsidR="00145654">
+        <w:t>. Some text</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> in </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00386659">
+        <w:rPr>
+          <w:color w:val="FFFFFF" w:themeColor="background1"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="000000" w:themeFill="text1"/>
+        </w:rPr>
+        <w:t>inverse video</w:t>
+      </w:r>
+      <w:r>
+        <w:t>.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00A65B8B" w:rsidRDefault="00A65B8B" w:rsidP="00A65B8B">
+      <w:r>
+        <w:t xml:space="preserve">A paragraph with styled text: </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00A65B8B">
+        <w:rPr>
+          <w:rStyle w:val="SubtleEmphasis"/>
+        </w:rPr>
+        <w:t>subtle emphasis</w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rStyle w:val="SubtleEmphasis"/>
+        </w:rPr>
+        <w:t xml:space="preserve">  </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00A65B8B">
+        <w:t>f</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve">ollowed by </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rStyle w:val="Strong"/>
+        </w:rPr>
+        <w:t xml:space="preserve">strong text </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00A65B8B">
+        <w:t>a</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve">nd </w:t>
+      </w:r>
+      <w:r>
+        <w:rPr>
+          <w:rStyle w:val="IntenseEmphasis"/>
+        </w:rPr>
+        <w:t>intense emphasis</w:t>
+      </w:r>
+      <w:r w:rsidRPr="00A65B8B">
+        <w:t>.</w:t>
+      </w:r>
+      <w:r>
+        <w:t xml:space="preserve"> This paragraph uses document wide styles for styling rather than inline text properties as demonstrated in the previous paragraph</w:t>
+      </w:r>
+      <w:r w:rsidR="007752F6">
+        <w:t xml:space="preserve"> — </w:t>
+      </w:r>
+      <w:r>
+        <w:t>calibre can handle both with equal ease.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00025E62" w:rsidRDefault="00025E62" w:rsidP="00025E62">
+      <w:pPr>
+        <w:pStyle w:val="Heading2"/>
+      </w:pPr>
+      <w:bookmarkStart w:id="5" w:name="_Toc359077854"/>
+      <w:r>
+        <w:t>Fun with fonts</w:t>
+      </w:r>
+      <w:bookmarkEnd w:id="5"/>
+    </w:p>
+    <w:p w:rsidR="00F53871" w:rsidRDefault="00F53871" w:rsidP="00A65B8B">
+      <w:r>
+        <w:t xml:space="preserve">This document has embedded the Ubuntu font family. The body text is in the Ubuntu typeface, here is </w:t>
+      </w:r>
+      <w:r w:rsidRPr="00F53871">
+        <w:rPr>
+          <w:rFonts w:ascii="Ubuntu Mono" w:hAnsi="Ubuntu Mono"/>
+        </w:rPr>
+        <w:t>some text in the Ubuntu Mono typeface</w:t>
+      </w:r>
+      <w:r w:rsidR="003304EF">
+        <w:rPr>
+          <w:rFonts w:ascii="Ubuntu Mono" w:hAnsi="Ubuntu Mono"/>
+        </w:rPr>
+        <w:t>, notice how every letter has the same width, even i and m</w:t>
+      </w:r>
+      <w:r>
+        <w:t>. Every embedded font will automatically be embedded in the output ebook during conversion.</w:t>
+      </w:r>
+      <w:r w:rsidR="00BA7C2B">
+        <w:t xml:space="preserve"> </w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="001D582F" w:rsidRDefault="001D582F" w:rsidP="001D582F">
+      <w:pPr>
+        <w:pStyle w:val="Heading2"/>
+        <w:rPr>
+          <w:rStyle w:val="IntenseEmphasis"/>
+          <w:b/>
+          <w:bCs/>
+          <w:i w:val="0"/>
+          <w:iCs w:val="0"/>
+        </w:rPr>
+      </w:pPr>
+      <w:bookmarkStart w:id="6" w:name="_Paragraph_level_formatting"/>
+      <w:bookmarkStart w:id="7" w:name="_Toc359077855"/>
+      <w:bookmarkEnd w:id="6"/>
+      <w:r>
+        <w:rPr>
+          <w:rStyle w:val="IntenseEmphasis"/>
+          <w:b/>
+          <w:bCs/>
+          <w:i w:val="0"/>
+          <w:iCs w:val="0"/>
+        </w:rPr>
+        <w:t>Paragraph level formatting</w:t>
+      </w:r>
+      <w:bookmarkEnd w:id="7"/>
+    </w:p>
+    <w:p w:rsidR="001D582F" w:rsidRDefault="001D582F" w:rsidP="001D582F">
+      <w:pPr>
+        <w:pBdr>
+          <w:right w:val="single" w:sz="4" w:space="4" w:color="auto"/>
+        </w:pBdr>
+        <w:shd w:val="clear" w:color="auto" w:fill="DDDDDD"/>
+        <w:jc w:val="right"/>
+      </w:pPr>
+      <w:r>
+        <w:t>You can do crazy things with paragraphs, if the urge strikes you. For instance this paragraph is right aligned and has a right border. It has also been given a light gray background.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00A46055" w:rsidRDefault="00A46055" w:rsidP="00A46055">
+      <w:pPr>
+        <w:spacing w:before="600"/>
+        <w:ind w:left="720" w:hanging="720"/>
+      </w:pPr>
+      <w:r>
+        <w:t>For the lovers of poetry amongst you, paragraphs with hanging indents, like this often come in handy. You can use hanging indents to ensure that a line of poetry retains its individual identity as a line even when the screen is  too narrow to display it as a single line. Not only does this paragraph have a hanging indent, it is also has an extra top margin, setting it apart from the preceding paragraph.</w:t>
+      </w:r>
+    </w:p>
+    <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00297ABF">
+      <w:pPr>
+        <w:pStyle w:val="Heading1"/>
+      </w:pPr>
+      <w:bookmarkStart w:id="8" w:name="_Toc359077856"/>
+      <w:r>
+        <w:t>Tables</w:t>
+      </w:r>
+      <w:bookmarkEnd w:id="8"/>
+    </w:p>
+    <w:tbl>
+      <w:tblPr>
+        <w:tblStyle w:val="LightList-Accent3"/>
+        <w:tblpPr w:rightFromText="187" w:bottomFromText="72" w:vertAnchor="text" w:tblpY="1"/>
+        <w:tblOverlap w:val="never"/>
+        <w:tblW w:w="0" w:type="auto"/>
+        <w:tblLook w:val="0620"/>
+      </w:tblPr>
+      <w:tblGrid>
+        <w:gridCol w:w="1818"/>
+        <w:gridCol w:w="1620"/>
+      </w:tblGrid>
+      <w:tr w:rsidR="00297ABF" w:rsidTr="00B86920">
+        <w:trPr>
+          <w:cnfStyle w:val="100000000000"/>
+        </w:trPr>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1818" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>ITEM</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1620" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>NEEDED</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr w:rsidR="00297ABF" w:rsidTr="00B86920">
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1818" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>Books</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1620" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>1</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr w:rsidR="00297ABF" w:rsidTr="00B86920">
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1818" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>Pens</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1620" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>3</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr w:rsidR="00297ABF" w:rsidTr="00B86920">
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1818" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>Pencils</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1620" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>2</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr w:rsidR="00297ABF" w:rsidTr="00B86920">
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1818" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>Highlighter</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1620" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>2 colors</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+      </w:tr>
+      <w:tr w:rsidR="00297ABF" w:rsidTr="00B86920">
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1818" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">
+            <w:r>
+              <w:t>Scissors</w:t>
+            </w:r>
+          </w:p>
+        </w:tc>
+        <w:tc>
+          <w:tcPr>
+            <w:tcW w:w="1620" w:type="dxa"/>
+          </w:tcPr>
+          <w:p w:rsidR="00297ABF" w:rsidRDefault="00297ABF" w:rsidP="00B86920">

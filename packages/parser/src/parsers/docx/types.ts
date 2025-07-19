@@ -32,6 +32,7 @@ export interface DocxRun {
   highlightColor?: ST_HighlightColor; // Text highlighting
   link?: string;
   _footnoteRef?: string;
+  _endnoteRef?: string;
   _fieldCode?: string; // For PAGE, NUMPAGES, etc. fields
   _fieldInstruction?: string; // Full field instruction
   _internalLink?: boolean; // Indicates link is to internal bookmark
@@ -209,6 +210,23 @@ export interface DocxConditionalFormatting {
   bandedCols?: boolean;
   /** The original 12-digit binary string for reference */
   val: string;
+}
+
+export interface DocxFootnote {
+  id: string;
+  type?: "separator" | "continuationSeparator" | "normal";
+  paragraphs: DocxParagraph[];
+}
+
+export interface DocxEndnote {
+  id: string;
+  type?: "separator" | "continuationSeparator" | "normal";
+  paragraphs: DocxParagraph[];
+}
+
+export interface DocxNotesData {
+  footnotes: Map<string, DocxFootnote>;
+  endnotes: Map<string, DocxEndnote>;
 }
 
 // Namespace constants

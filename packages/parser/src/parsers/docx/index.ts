@@ -5,6 +5,7 @@ import type {
   DocumentElement,
   Image,
   Footnote,
+  Endnote,
   Header,
   Footer,
 } from "../../types/document";
@@ -18,7 +19,7 @@ import { parseParagraph } from "./paragraph-parser";
 import { parseTable } from "./table-parser";
 import { parseEnhancedTable } from "./enhanced-table-parser";
 import { parseHeaderFooter } from "./header-footer-parser";
-import { parseFootnotes } from "./footnote-parser";
+import { parseFootnotes, parseEndnotes } from "./footnote-parser";
 import { parseBookmarks } from "./bookmark-parser";
 import { createFieldContext } from "./field-context";
 import { convertToDocumentElement } from "./element-converter";
@@ -259,6 +260,21 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
 
+    // Parse endnotes
+    const endnotes: Endnote[] = [];
+    const endnotesFile = zip.file("word/endnotes.xml");
+    if (endnotesFile) {
+      const endnotesXml = yield* Effect.tryPromise({
+        try: () => endnotesFile.async("text"),
+        catch: () => "",
+      }).pipe(Effect.orElse(() => Effect.succeed("")));
+
+      if (endnotesXml) {
+        const parsedEndnotes = parseEndnotes(endnotesXml, relationshipsMap, stylesheet, theme);
+        endnotes.push(...parsedEndnotes);
+      }
+    }
+
     // Parse all document body elements in order
     const elements: DocumentElement[] = [];
 
@@ -278,16 +294,32 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       bodyNodeList = doc.getElementsByTagName("w:body");
     }
     if (bodyNodeList.length === 0) {
-      // Add footnotes at the end and return
+      // Add footnotes and endnotes at the end and return
       elements.push(...footnotes);
-      return { metadata, elements, headers: headerInfo, footers: footerInfo };
+      elements.push(...endnotes);
+      
+      // Create maps for footnotes and endnotes
+      const footnotesMap = new Map<string, Footnote>();
+      footnotes.forEach(fn => footnotesMap.set(fn.id, fn));
+      const endnotesMap = new Map<string, Endnote>();
+      endnotes.forEach(en => endnotesMap.set(en.id, en));
+      
+      return { metadata, elements, headers: headerInfo, footers: footerInfo, footnotes: footnotesMap, endnotes: endnotesMap };
     }
 
     const body = bodyNodeList[0];
     if (!body) {
-      // Add footnotes at the end and return
+      // Add footnotes and endnotes at the end and return
       elements.push(...footnotes);
-      return { metadata, elements, headers: headerInfo, footers: footerInfo };
+      elements.push(...endnotes);
+      
+      // Create maps for footnotes and endnotes
+      const footnotesMap = new Map<string, Footnote>();
+      footnotes.forEach(fn => footnotesMap.set(fn.id, fn));
+      const endnotesMap = new Map<string, Endnote>();
+      endnotes.forEach(en => endnotesMap.set(en.id, en));
+      
+      return { metadata, elements, headers: headerInfo, footers: footerInfo, footnotes: footnotesMap, endnotes: endnotesMap };
     }
 
     // Parse bookmarks from the entire document body first
@@ -382,14 +414,23 @@ export const parseDocx = (buffer: ArrayBuffer): Effect.Effect<ParsedDocument, Do
       }
     }
 
-    // Add footnotes at the end
+    // Add footnotes and endnotes at the end
     elements.push(...footnotes);
+    elements.push(...endnotes);
+    
+    // Create maps for footnotes and endnotes
+    const footnotesMap = new Map<string, Footnote>();
+    footnotes.forEach(fn => footnotesMap.set(fn.id, fn));
+    const endnotesMap = new Map<string, Endnote>();
+    endnotes.forEach(en => endnotesMap.set(en.id, en));
 
     return {
       metadata,
       elements,
       headers: headerInfo,
       footers: footerInfo,
+      footnotes: footnotesMap,
+      endnotes: endnotesMap,
     };
   });
 
