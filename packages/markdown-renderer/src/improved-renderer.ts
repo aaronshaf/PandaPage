@@ -54,6 +54,14 @@ function safeBase64Encode(data: ArrayBuffer | any): string {
 
 function renderTextRun(run: TextRun): string {
   let text = run.text || "";
+  
+  // Handle footnote/endnote references
+  if (run._footnoteRef) {
+    return `[^${run._footnoteRef}]`;
+  }
+  if (run._endnoteRef) {
+    return `[^endnote${run._endnoteRef}]`;
+  }
 
   // Apply formatting
   if (run.bold) text = `**${text}**`;
@@ -286,8 +294,20 @@ function renderElement(element: DocumentElement, options: MarkdownRenderOptions)
       return "\n---\n";
 
     case "footnote":
-      // Simple footnote rendering
-      return `<sup>${element.id || "1"}</sup>`;
+      // Render footnote content
+      const footnoteContent = element.elements
+        .map(el => renderElement(el, options))
+        .join("\n")
+        .trim();
+      return `[^${element.id}]: ${footnoteContent}`;
+    
+    case "endnote":
+      // Render endnote content
+      const endnoteContent = element.elements
+        .map(el => renderElement(el, options))
+        .join("\n")
+        .trim();
+      return `[^endnote${element.id}]: ${endnoteContent}`;
 
     default:
       return null;
@@ -345,8 +365,14 @@ export function renderToMarkdownImproved(
   // Track state for better formatting
   let lastElementType: string | null = null;
   let inList = false;
+  
+  // Separate footnotes and endnotes from main content
+  const mainElements = document.elements.filter(el => el.type !== 'footnote' && el.type !== 'endnote');
+  const footnoteElements = document.elements.filter(el => el.type === 'footnote');
+  const endnoteElements = document.elements.filter(el => el.type === 'endnote');
 
-  for (const element of document.elements) {
+  // Render main content
+  for (const element of mainElements) {
     const rendered = renderElement(element, defaultOptions);
 
     if (!rendered) {
@@ -390,6 +416,40 @@ export function renderToMarkdownImproved(
     }
 
     lastElementType = element.type;
+  }
+
+  // Add footnotes if any
+  if (footnoteElements.length > 0) {
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+    lines.push("## Footnotes");
+    lines.push("");
+    
+    for (const footnote of footnoteElements) {
+      const rendered = renderElement(footnote, defaultOptions);
+      if (rendered) {
+        lines.push(rendered);
+        lines.push("");
+      }
+    }
+  }
+  
+  // Add endnotes if any
+  if (endnoteElements.length > 0) {
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+    lines.push("## Endnotes");
+    lines.push("");
+    
+    for (const endnote of endnoteElements) {
+      const rendered = renderElement(endnote, defaultOptions);
+      if (rendered) {
+        lines.push(rendered);
+        lines.push("");
+      }
+    }
   }
 
   // Clean up trailing empty lines

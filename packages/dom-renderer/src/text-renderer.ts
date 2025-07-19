@@ -75,6 +75,21 @@ export function renderTextRun(
 
     return link;
   }
+  
+  // Check for endnote reference
+  if ((run as any)._endnoteRef) {
+    const endnoteId = (run as any)._endnoteRef;
+    const link = doc.createElement("a");
+    link.href = `#endnote-${endnoteId}`;
+    link.className = "endnote-reference";
+    link.setAttribute("data-endnote-id", endnoteId);
+
+    const sup = doc.createElement("sup");
+    sup.textContent = run.text;
+    link.appendChild(sup);
+
+    return link;
+  }
 
   let element: HTMLElement;
 

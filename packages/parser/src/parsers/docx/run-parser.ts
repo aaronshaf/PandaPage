@@ -71,6 +71,22 @@ export function parseRunElement(
       }
     }
   } else {
+    // Check for endnote references
+    const endnoteRefElements = getElementsByTagNameNSFallback(element, ns, "endnoteReference");
+    if (endnoteRefElements.length > 0) {
+      const endnoteRef = endnoteRefElements[0];
+      if (endnoteRef) {
+        const endnoteId = endnoteRef.getAttribute("w:id");
+        if (endnoteId) {
+          // Add a superscript run for the endnote reference
+          runs.push({
+            text: endnoteId, // Use the endnote ID as the reference text
+            superscript: true,
+            _endnoteRef: endnoteId, // Mark this as an endnote reference
+          });
+        }
+      }
+    } else {
     // Check for field codes
     const fldCharElements = getElementsByTagNameNSFallback(element, ns, "fldChar");
     const instrTextElements = getElementsByTagNameNSFallback(element, ns, "instrText");
@@ -126,6 +142,7 @@ export function parseRunElement(
         runs.push(run);
       }
     }
+  }
   }
 
   // Check for drawing elements (images) in the run

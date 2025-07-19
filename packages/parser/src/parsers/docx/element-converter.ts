@@ -40,6 +40,7 @@ export function convertToDocumentElement(
     backgroundColor: run.backgroundColor,
     link: run.link,
     _footnoteRef: run._footnoteRef,
+    _endnoteRef: run._endnoteRef,
     _fieldCode: run._fieldCode,
     // Advanced text formatting
     characterSpacing: run.characterSpacing,
