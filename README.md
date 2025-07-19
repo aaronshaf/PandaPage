@@ -92,3 +92,4 @@ All output files are saved to the `tmp` directory which is ignored by git.
 
 * [mammoth.js](https://github.com/mwilliamson/mammoth.js)
 * [docxjs](https://github.com/VolodymyrBaydalka/docxjs)
+* [SheetJS](https://git.sheetjs.com/sheetjs/sheetjs)
