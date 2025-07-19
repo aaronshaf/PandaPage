@@ -103,6 +103,24 @@ export interface DocxParagraph {
   borders?: DocxParagraphBorders;
   shading?: DocxShading;
   cnfStyle?: DocxConditionalFormatting;
+  framePr?: DocxFrameProperties; // Drop caps and text frames
+}
+
+export interface DocxFrameProperties {
+  dropCap?: "none" | "drop" | "margin"; // Drop cap style
+  lines?: number; // Number of lines for drop cap (default: 3)
+  wrap?: "around" | "tight" | "through" | "topAndBottom" | "none";
+  vAnchor?: "text" | "margin" | "page";
+  hAnchor?: "text" | "margin" | "page";
+  x?: number; // X position in twips
+  y?: number; // Y position in twips
+  w?: number; // Width in twips
+  h?: number; // Height in twips
+  hRule?: "atLeast" | "exact" | "auto";
+  xAlign?: "left" | "right" | "center" | "inside" | "outside";
+  yAlign?: "top" | "bottom" | "center" | "inside" | "outside";
+  hSpace?: number; // Horizontal space from text in twips
+  vSpace?: number; // Vertical space from text in twips
 }
 
 export class DocxParseError {

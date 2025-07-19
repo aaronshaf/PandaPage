@@ -255,6 +255,7 @@ export function parseEnhancedTableCell(
         })),
         style: paragraph.style,
         alignment: paragraph.alignment,
+        ...(paragraph.framePr && { framePr: paragraph.framePr }),
       };
       cell.paragraphs.push(convertedParagraph);
     }

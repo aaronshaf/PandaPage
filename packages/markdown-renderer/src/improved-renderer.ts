@@ -81,7 +81,7 @@ function renderTextRun(run: TextRun): string {
   return text;
 }
 
-function renderParagraph(paragraph: Paragraph, options: MarkdownRenderOptions): string {
+export function renderParagraph(paragraph: Paragraph, options: MarkdownRenderOptions): string {
   // Skip empty paragraphs if option is set
   if (options.skipEmptyParagraphs) {
     const hasContent =
@@ -93,7 +93,46 @@ function renderParagraph(paragraph: Paragraph, options: MarkdownRenderOptions): 
     }
   }
 
-  let content = paragraph.runs.map(renderTextRun).join("");
+  let content: string;
+  
+  // Check for drop cap support
+  if ("framePr" in paragraph && paragraph.framePr?.dropCap && paragraph.framePr.dropCap !== "none") {
+    // Handle drop cap in markdown (limited support)
+    if (paragraph.runs.length > 0 && paragraph.runs[0]?.text) {
+      const firstRun = paragraph.runs[0];
+      const firstChar = firstRun.text.charAt(0);
+      const restOfFirstRun = firstRun.text.slice(1);
+      
+      // Create a simple HTML representation for drop cap
+      // Note: Pure markdown doesn't support drop caps, so we use HTML
+      const lines = paragraph.framePr.lines || 3;
+      let dropCapHtml = `<span style="float: left; font-size: ${lines}em; line-height: ${lines - 1}; font-weight: bold; margin-right: 0.1em;">`;
+      
+      if (firstRun.fontFamily) {
+        dropCapHtml = dropCapHtml.replace('bold;">', `bold; font-family: ${firstRun.fontFamily};">`);
+      }
+      if (firstRun.color) {
+        dropCapHtml = dropCapHtml.replace(';">', `; color: ${firstRun.color};">`);
+      }
+      
+      dropCapHtml += `${firstChar}</span>`;
+      
+      // Render rest of content
+      const restRuns = [
+        ...(restOfFirstRun ? [{ ...firstRun, text: restOfFirstRun }] : []),
+        ...paragraph.runs.slice(1)
+      ];
+      const restContent = restRuns.map(renderTextRun).join("");
+      
+      content = dropCapHtml + restContent;
+    } else {
+      // Fallback to normal rendering
+      content = paragraph.runs.map(renderTextRun).join("");
+    }
+  } else {
+    // Normal rendering
+    content = paragraph.runs.map(renderTextRun).join("");
+  }
 
   // Add images if present
   if (paragraph.images && paragraph.images.length > 0) {
